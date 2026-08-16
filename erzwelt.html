@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b3648">
+<title>Erzwelt — Rohstoffe &amp; Lieferketten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   ERZWELT — Rohstoffe & Lieferketten
+   Aufbau: 1 CSS · 2 DATEN · 3 MOTOR · 4 KARTE · 5 ANZEIGE
+   ========================================================== */
+:root{
+  --meer1:#14587a; --meer2:#0a2f42; --land:#e6d6ae; --landlinie:#b49f73;
+  --papier:#fffaf0; --papier2:#f4ead6; --tinte:#2b2118; --grau:#7d6f5e;
+  --gold:#f5b73d; --gruen:#2fbe7e; --alarm:#e0504a; --warn:#f08c2e;
+  --dunkel:#0e2b3c; --linie:#e0d3b8;
+  --sh:0 4px 0 rgba(0,0,0,.14), 0 8px 20px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:Nunito,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-weight:600; color:var(--tinte); background:var(--meer2);
+  font-size:15px; line-height:1.35; overscroll-behavior:none;
+  user-select:none; -webkit-user-select:none;
+}
+h1,h2,h3,.disp{font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;line-height:1.15}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* ---------- Bühne ---------- */
+#spiel{position:fixed;inset:0;display:flex;flex-direction:column}
+
+/* ---------- HUD ---------- */
+#hud{
+  position:absolute;top:0;left:0;right:0;z-index:30;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px 8px;
+  display:flex;gap:7px;align-items:center;
+  background:linear-gradient(#0a2f42f0,#0a2f4200);pointer-events:none
+}
+.pille{
+  display:flex;align-items:center;gap:6px;pointer-events:auto;
+  background:#0b3648e8;border:2px solid #ffffff26;border-radius:99px;
+  padding:5px 11px 5px 7px;color:#fff;box-shadow:0 3px 0 #00000030
+}
+.pille i{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-style:normal;font-size:13px;flex:none}
+.pille b{font-family:"Baloo 2",sans-serif;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pille small{font-size:10px;opacity:.65;display:block;line-height:1;margin-bottom:1px;letter-spacing:.04em}
+.pille.kasse i{background:var(--gold);color:#5a3c00}
+.pille.crew i{background:#6fb8e0;color:#0a3a55}
+.pille.tag{margin-left:auto;padding:5px 7px}
+.tempo{display:flex;gap:3px;pointer-events:auto}
+.tempo button{
+  width:34px;height:34px;border-radius:12px;background:#0b3648e8;border:2px solid #ffffff26;
+  color:#fff;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:13px;
+  display:grid;place-items:center;box-shadow:0 3px 0 #00000030
+}
+.tempo button[aria-pressed="true"]{background:var(--gold);color:#4a3000;border-color:#fff6}
+
+/* ---------- Karte ---------- */
+#sicht{position:absolute;inset:0;overflow:hidden;background:
+  radial-gradient(120% 80% at 50% 10%, var(--meer1) 0%, var(--meer2) 70%);
+  touch-action:none;cursor:grab}
+#sicht.zieht{cursor:grabbing}
+#welt{position:absolute;top:0;left:0;width:1000px;height:560px;transform-origin:0 0}
+#welt svg{display:block;width:1000px;height:560px}
+.land{fill:var(--land);stroke:var(--landlinie);stroke-width:1.5;stroke-linejoin:round}
+.gitter{stroke:#ffffff14;stroke-width:1;fill:none}
+
+/* ---------- Pins ---------- */
+.pin{
+  position:absolute;transform-origin:50% 100%;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))
+}
+.knopf{
+  width:38px;height:38px;border-radius:50% 50% 50% 50%/55% 55% 45% 45%;
+  display:grid;place-items:center;position:relative;
+  background:#f7f1e2;border:3px solid #fff;font-size:15px;font-weight:800;
+  font-family:"Baloo 2",sans-serif;color:#3a2d1c
+}
+.knopf::after{content:"";position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top:8px solid #fff}
+.pin.zu .knopf{background:#fbf7ee;border-color:#8b7a5e;color:#7a6a50;border-width:2.5px}
+.pin.zu .knopf::after{border-top-color:#8b7a5e}
+.pin .bez{
+  font-size:9.5px;font-weight:800;color:#fff;background:#0b3648e6;
+  padding:1px 6px;border-radius:99px;white-space:nowrap;margin-top:7px;
+  font-family:"Baloo 2",sans-serif;pointer-events:none;position:relative;z-index:1
+}
+.pin .knopf{position:relative;z-index:2}
+.pin .crew{
+  position:absolute;top:-6px;right:-8px;background:#6fb8e0;color:#06263a;
+  border:2px solid #fff;border-radius:99px;font-size:10px;font-weight:800;
+  padding:0 5px;min-width:19px;text-align:center;font-family:"Baloo 2",sans-serif
+}
+.pin.werk .knopf{border-radius:12px}
+.pin.werk .knopf::after{border-top-color:#fff}
+.pin.alarm .knopf{border-color:var(--alarm);animation:puls 1s infinite}
+.pin.alarm .bez{background:var(--alarm)}
+@keyframes puls{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+#welt.weit .pin .bez{display:none}
+.pin:active{filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+
+/* ---------- Ebenen-Chips ---------- */
+#ebenen{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:20;display:flex;gap:6px}
+#ebenen button{
+  background:#0b3648d9;color:#fff;border:2px solid #ffffff26;border-radius:99px;
+  padding:5px 11px;font-size:12px;font-weight:800;font-family:"Baloo 2",sans-serif
+}
+#ebenen button{display:flex;align-items:center;gap:5px}
+#ebenen button i{width:9px;height:9px;border-radius:3px;display:block}
+#ebenen button[aria-pressed="false"]{opacity:.4}
+#zoom{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:20;display:flex;flex-direction:column;gap:6px}
+#zoom button{width:38px;height:38px;border-radius:13px;background:#0b3648d9;color:#fff;
+  border:2px solid #ffffff26;font-size:19px;font-family:"Baloo 2",sans-serif;font-weight:800}
+
+/* ---------- Wegweiser ---------- */
+#quest{
+  position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 52px);z-index:27;
+  width:min(46%,255px);background:var(--papier);border-radius:16px;
+  border-top:4px solid var(--gold);box-shadow:var(--sh);padding:8px 11px 10px
+}
+#quest[hidden]{display:none}
+#quest.unten{top:auto;bottom:calc(env(safe-area-inset-bottom) + 70px);left:10px;right:10px;width:auto;z-index:44}
+#quest .kopf{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--grau)}
+#quest .kopf span:first-child{font-size:14px}
+#quest b{display:block;font-family:"Baloo 2",sans-serif;font-size:13.5px;line-height:1.18;margin:3px 0 2px}
+#quest small{display:block;color:var(--grau);font-size:11px;font-weight:600;line-height:1.28}
+#quest .fortschritt{display:flex;gap:3px;margin-top:7px}
+#quest .fortschritt i{height:4px;flex:1;border-radius:99px;background:#e3d7bd}
+#quest .fortschritt i.ok{background:var(--gruen)}
+#quest .fortschritt i.jetzt{background:var(--gold)}
+
+/* Hinweis-Animation: zeigt, wo getippt werden soll */
+.pin.wink{z-index:5}
+.pin.wink .knopf{border-color:var(--gold);box-shadow:0 0 0 5px #f5b73d66;animation:wink 1.15s ease-in-out infinite}
+@keyframes wink{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+.pin.blass{opacity:.45}
+#dock button{position:relative}
+#dock button.wink{color:var(--gold);background:#f5b73d1f}
+#dock button.wink::after{content:"";position:absolute;top:3px;right:calc(50% - 20px);
+  width:9px;height:9px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 0 0 #f5b73daa;animation:ping 1.3s ease-out infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 #f5b73daa}70%{box-shadow:0 0 0 9px #f5b73d00}100%{box-shadow:0 0 0 0 #f5b73d00}}
+
+/* ---------- Dock ---------- */
+#dock{
+  position:absolute;left:0;right:0;bottom:0;z-index:39;display:flex;
+  background:#0b3648;padding:6px 4px calc(env(safe-area-inset-bottom) + 6px);
+  border-top:2px solid #ffffff1a
+}
+#dock button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:5px 2px;color:#7fa3b8;font-size:10.5px;font-weight:800;font-family:"Baloo 2",sans-serif;border-radius:12px}
+#dock button em{font-style:normal;font-size:19px;line-height:1}
+#dock button[aria-selected="true"]{color:var(--gold);background:#ffffff10}
+
+/* ---------- Blatt (Bottom Sheet) & Seiten ---------- */
+#blatt{
+  position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 58px);z-index:40;
+  max-height:74%;background:var(--papier);border-radius:22px 22px 0 0;
+  box-shadow:0 -6px 30px rgba(0,0,0,.4);
+  transform:translateY(calc(100% + 60px));transition:transform .26s cubic-bezier(.22,1,.3,1);
+  display:flex;flex-direction:column;padding-bottom:10px
+}
+#blattschleier{position:absolute;left:0;right:0;top:0;bottom:calc(env(safe-area-inset-bottom) + 58px);z-index:38;background:#06202e66;opacity:0;
+  transition:opacity .26s;pointer-events:none}
+#blattschleier.auf{opacity:1;pointer-events:auto}
+#zu{position:absolute;top:8px;right:12px;width:32px;height:32px;border-radius:50%;
+  background:var(--papier2);font-size:17px;font-weight:800;display:grid;place-items:center;color:var(--grau)}
+#blatt.auf{transform:translateY(0)}
+#blatt.auf ~ #dock{box-shadow:0 -2px 14px #0006}
+.griff{width:42px;height:5px;border-radius:99px;background:#00000022;margin:9px auto 4px;flex:none}
+.blattinhalt{overflow-y:auto;padding:6px 16px 12px;-webkit-overflow-scrolling:touch}
+#seite{
+  position:absolute;inset:0;bottom:calc(env(safe-area-inset-bottom) + 62px);z-index:35;
+  background:var(--papier);overflow-y:auto;padding:calc(env(safe-area-inset-top) + 14px) 14px 20px;
+  -webkit-overflow-scrolling:touch
+}
+#seite[hidden]{display:none}
+#seite h1{font-size:23px;margin-bottom:2px}
+#seite .unter{color:var(--grau);font-size:13px;margin-bottom:14px}
+
+/* ---------- Bausteine ---------- */
+.titelzeile{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.titelzeile .flagge{font-size:26px}
+.titelzeile h2{font-size:21px}
+.titelzeile .ort{color:var(--grau);font-size:12.5px;font-weight:700}
+.erzband{display:inline-flex;align-items:center;gap:7px;border-radius:99px;padding:5px 12px 5px 6px;
+  color:#fff;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:13.5px;margin:8px 0}
+.erzband span{width:22px;height:22px;border-radius:50%;background:#ffffff33;display:grid;place-items:center;font-size:11px}
+.werte{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.wert{background:var(--papier2);border-radius:13px;padding:8px 10px}
+.wert small{display:block;color:var(--grau);font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.wert b{font-family:"Baloo 2",sans-serif;font-size:16px;font-variant-numeric:tabular-nums}
+.notiz{background:#fff3d6;border-radius:13px;padding:10px 12px;font-size:12.5px;font-weight:600;line-height:1.4;margin:10px 0}
+.notiz.rot{background:#ffe2e0}
+.notiz.gruen{background:#dcf5e8}
+.cta{
+  display:block;width:100%;padding:15px;border-radius:17px;text-align:center;
+  font-family:"Baloo 2",sans-serif;font-weight:800;font-size:16.5px;margin-top:10px;
+  background:var(--gold);color:#4a3000;box-shadow:0 4px 0 #c48d1c
+}
+.cta:active{transform:translateY(3px);box-shadow:0 1px 0 #c48d1c}
+.cta.gruen{background:var(--gruen);color:#04331f;box-shadow:0 4px 0 #1d8d5c}
+.cta.gruen:active{box-shadow:0 1px 0 #1d8d5c}
+.cta.still{background:var(--papier2);color:var(--grau);box-shadow:0 4px 0 #e0d3b8}
+.cta:disabled{background:#e8ddc6;color:#a1937d;box-shadow:0 4px 0 #d6c9b0;cursor:not-allowed}
+.crewzeile{display:flex;align-items:center;gap:8px;justify-content:center;margin:12px 0 6px}
+.crewzeile button{
+  width:48px;height:48px;border-radius:16px;background:var(--papier2);
+  font-family:"Baloo 2",sans-serif;font-weight:800;font-size:15px;box-shadow:0 3px 0 #e0d3b8
+}
+.crewzeile button:active{transform:translateY(2px);box-shadow:0 1px 0 #e0d3b8}
+.crewzeile button:disabled{opacity:.35}
+.crewzeile .zahl{min-width:74px;text-align:center}
+.crewzeile .zahl b{display:block;font-family:"Baloo 2",sans-serif;font-size:27px;line-height:1}
+.crewzeile .zahl small{color:var(--grau);font-size:10.5px;font-weight:700}
+.segment{display:flex;gap:5px;background:var(--papier2);padding:4px;border-radius:15px;margin:8px 0}
+.segment button{flex:1;padding:9px 4px;border-radius:11px;font-weight:800;font-size:12.5px;color:var(--grau);font-family:"Baloo 2",sans-serif}
+.segment button[aria-pressed="true"]{background:#fff;color:var(--tinte);box-shadow:0 2px 5px #0000001a}
+.leiste{height:11px;border-radius:99px;background:#e6dcc6;overflow:hidden;margin:5px 0}
+.leiste i{display:block;height:100%;border-radius:99px;transition:width .35s ease}
+.zeile{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--linie);font-size:13.5px}
+.zeile:last-child{border:none}
+.zeile b{font-variant-numeric:tabular-nums;font-family:"Baloo 2",sans-serif;font-size:15px}
+.karte{background:#fff;border-radius:17px;padding:13px;margin-bottom:11px;box-shadow:0 2px 8px #0000000f}
+.karte h3{font-size:16.5px;margin-bottom:2px}
+.karte .ort{color:var(--grau);font-size:12px;font-weight:700;margin-bottom:6px}
+.stueck{display:flex;flex-wrap:wrap;gap:4px;margin:7px 0}
+.stueck span{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;color:#fff}
+.stueck span.fehlt{opacity:.35;text-decoration:line-through}
+.wahlgruppe{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.wahlgruppe button{background:var(--papier2);border-radius:13px;padding:10px 6px;font-weight:800;font-size:12.5px;box-shadow:0 3px 0 #e0d3b8}
+.wahlgruppe button:disabled{opacity:.4}
+.handel{display:flex;gap:5px}
+.handel button{background:var(--papier2);border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:800;box-shadow:0 2px 0 #e0d3b8}
+.handel button:disabled{opacity:.35}
+.punkt{width:12px;height:12px;border-radius:4px;flex:none;display:inline-block}
+
+/* ---------- Ereignis ---------- */
+#schleier{position:fixed;inset:0;z-index:60;background:#06202ecc;backdrop-filter:blur(4px);
+  display:grid;place-items:center;padding:18px}
+#schleier[hidden]{display:none}
+.dialog{background:var(--papier);border-radius:24px;width:100%;max-width:430px;
+  padding:20px;box-shadow:0 20px 50px #0009;max-height:86vh;overflow-y:auto}
+.dialog .art{display:inline-block;background:var(--alarm);color:#fff;border-radius:99px;
+  padding:3px 12px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.dialog h2{font-size:24px;margin:9px 0 8px}
+.dialog p{font-size:14px;font-weight:600;line-height:1.45;margin-bottom:15px}
+.wahl{display:block;width:100%;text-align:left;background:#fff;border-radius:16px;
+  padding:13px 15px;margin-bottom:9px;box-shadow:0 3px 0 #e0d3b8}
+.wahl:active{transform:translateY(2px);box-shadow:0 1px 0 #e0d3b8}
+.wahl b{display:block;font-family:"Baloo 2",sans-serif;font-size:15px}
+.wahl small{color:var(--grau);font-size:12px;font-weight:600}
+
+/* ---------- Meldungen ---------- */
+#toasts{position:absolute;top:calc(env(safe-area-inset-top) + 52px);left:10px;width:min(48%,300px);z-index:42;
+  display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:#fffaf0f2;border-radius:14px;padding:8px 12px;font-size:12.5px;font-weight:700;
+  box-shadow:var(--sh);animation:rein .3s cubic-bezier(.22,1,.3,1)}
+.toast.gut{border-left:5px solid var(--gruen)}
+.toast.warn{border-left:5px solid var(--warn)}
+.toast.alarm{border-left:5px solid var(--alarm)}
+.toast.geld{border-left:5px solid var(--gold)}
+@keyframes rein{from{opacity:0;transform:translateY(-10px)}}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--linie)}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--grau)}
+td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+code{background:var(--papier2);padding:1px 6px;border-radius:6px;font-size:12.5px}
+#seite p{font-size:14px;font-weight:600;line-height:1.5;margin-bottom:10px}
+#seite h2{font-size:18px;margin:18px 0 7px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (min-width:820px){
+  #hud{padding-left:18px;padding-right:18px}
+  #blatt{left:50%;transform:translate(-50%,calc(100% + 60px));width:440px}
+  #blatt.auf{transform:translate(-50%,0)}
+  #seite{left:50%;transform:translateX(-50%);width:560px;border-radius:20px 20px 0 0;top:64px}
+}
+</style>
+</head>
+<body>
+<div id="spiel">
+  <div id="sicht">
+    <div id="welt"></div>
+  </div>
+
+  <div id="hud">
+    <div class="pille kasse"><i>◆</i><div><small>Kasse</small><b id="h-kasse">–</b></div></div>
+    <div class="pille crew"><i>☻</i><div><small>Frei</small><b id="h-crew">–</b></div></div>
+    <div class="pille tag"><div><small>Tag</small><b id="h-tag">1</b></div></div>
+    <div class="tempo" role="group" aria-label="Tempo">
+      <button data-tempo="0" aria-pressed="false" aria-label="Pause">❚❚</button>
+      <button data-tempo="1" aria-pressed="true">1×</button>
+      <button data-tempo="4" aria-pressed="false">4×</button>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <div id="ebenen" role="group" aria-label="Kartenebenen">
+    <button data-ebene="mine" aria-pressed="true"><i style="background:#e8b923"></i>Minen</button>
+    <button data-ebene="raff" aria-pressed="true"><i style="background:#5b8f7a"></i>Werke</button>
+    <button data-ebene="fab" aria-pressed="true"><i style="background:#b5703c"></i>Fabriken</button>
+  </div>
+  <div id="zoom">
+    <button data-zoom="1" aria-label="Näher">+</button>
+    <button data-zoom="-1" aria-label="Weiter weg">−</button>
+  </div>
+
+  <div id="quest" hidden>
+    <div class="kopf"><span id="q-emoji">⛏️</span><span id="q-art">Aufgabe</span></div>
+    <b id="q-titel"></b><small id="q-text"></small>
+    <div class="fortschritt" id="q-punkte"></div>
+  </div>
+
+  <div id="seite" hidden></div>
+
+  <nav id="dock" role="tablist">
+    <button role="tab" data-seite="karte" aria-selected="true"><em>🗺</em>Karte</button>
+    <button role="tab" data-seite="markt" aria-selected="false"><em>📈</em>Markt</button>
+    <button role="tab" data-seite="team" aria-selected="false"><em>👥</em>Team</button>
+    <button role="tab" data-seite="ziel" aria-selected="false"><em>🎯</em>Ziel</button>
+    <button role="tab" data-seite="wissen" aria-selected="false"><em>📖</em>Wissen</button>
+  </nav>
+
+  <div id="blattschleier"></div>
+
+  <div id="blatt" aria-live="polite">
+    <div class="griff"></div>
+    <button id="zu" aria-label="Schliessen">✕</button>
+    <div class="blattinhalt" id="blattinhalt"></div>
+  </div>
+</div>
+
+<div id="schleier" hidden>
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="d-titel">
+    <span class="art" id="d-art">Ereignis</span>
+    <h2 id="d-titel"></h2>
+    <p id="d-text"></p>
+    <div id="d-wahlen"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   2. DATEN
+   ============================================================ */
+
+/* Materialien: Preis = CHF pro Einheit im Weltmarkt-Grundzustand.
+   ausbeute = wie viel Material aus 1 Einheit Roherz entsteht.
+   Je tiefer die Ausbeute, desto mehr Gestein muss bewegt werden. */
+const MATERIAL = {
+  kupfer:  {name:"Kupfer",        sym:"Cu", farbe:"#cc7a45", preis:  9, ausbeute:.35, wofuer:"Leiterbahnen, Kabel, Spulen"},
+  alu:     {name:"Aluminium",     sym:"Al", farbe:"#9fb0c4", preis:  7, ausbeute:.50, wofuer:"Gehäuse, Kühlkörper"},
+  silizium:{name:"Silizium",      sym:"Si", farbe:"#5fc9dd", preis: 15, ausbeute:.70, wofuer:"Chips, Prozessoren, Speicher"},
+  zinn:    {name:"Zinn",          sym:"Sn", farbe:"#93a3b5", preis: 30, ausbeute:.40, wofuer:"Lötzinn – hält jede Platine zusammen"},
+  nickel:  {name:"Nickel",        sym:"Ni", farbe:"#8fbf7a", preis: 18, ausbeute:.40, wofuer:"Akku-Kathode, Kontakte"},
+  lithium: {name:"Lithium",       sym:"Li", farbe:"#a97ef0", preis: 28, ausbeute:.45, wofuer:"Akku – speichert die Ladung"},
+  kobalt:  {name:"Kobalt",        sym:"Co", farbe:"#4a6cf7", preis: 34, ausbeute:.40, wofuer:"Akku-Kathode, macht sie stabil"},
+  silber:  {name:"Silber",        sym:"Ag", farbe:"#c3ccd8", preis: 58, ausbeute:.15, wofuer:"Bester Leiter: Kontakte, Lötpaste"},
+  seltene: {name:"Seltene Erden", sym:"SE", farbe:"#e0568f", preis: 72, ausbeute:.25, wofuer:"Magnete: Lautsprecher, Vibration, Motoren"},
+  tantal:  {name:"Tantal",        sym:"Ta", farbe:"#8a6ae8", preis: 88, ausbeute:.20, wofuer:"Kondensatoren – winzig, aber unersetzlich"},
+  indium:  {name:"Indium",        sym:"In", farbe:"#3fd3a0", preis:118, ausbeute:.10, wofuer:"Touchscreen & Display (ITO-Schicht)"},
+  gold:    {name:"Gold",          sym:"Au", farbe:"#e8b923", preis:150, ausbeute:.08, wofuer:"Kontakte, die nicht rosten dürfen"}
+};
+
+/* Länder: monatslohn = Lohnkosten pro Arbeiter bei Lohnstufe "üblich".
+   Die Unterschiede sind der Kern der Lektion. */
+const LAND = {
+  kongo:     {name:"DR Kongo",    flagge:"🇨🇩", lohn: 130, risiko:1.6},
+  ruanda:    {name:"Ruanda",      flagge:"🇷🇼", lohn: 160, risiko:1.3},
+  guinea:    {name:"Guinea",      flagge:"🇬🇳", lohn: 170, risiko:1.3},
+  ghana:     {name:"Ghana",       flagge:"🇬🇭", lohn: 260, risiko:1.1},
+  indonesien:{name:"Indonesien",  flagge:"🇮🇩", lohn: 320, risiko:1.1},
+  peru:      {name:"Peru",        flagge:"🇵🇪", lohn: 470, risiko:1.0},
+  mexiko:    {name:"Mexiko",      flagge:"🇲🇽", lohn: 540, risiko:1.0},
+  bolivien:  {name:"Bolivien",    flagge:"🇧🇴", lohn: 420, risiko:1.2},
+  china:     {name:"China",       flagge:"🇨🇳", lohn: 950, risiko:0.8},
+  chile:     {name:"Chile",       flagge:"🇨🇱", lohn:1150, risiko:0.9},
+  vietnam:   {name:"Vietnam",     flagge:"🇻🇳", lohn: 400, risiko:0.9},
+  malaysia:  {name:"Malaysia",    flagge:"🇲🇾", lohn: 700, risiko:0.8},
+  usa:       {name:"USA",         flagge:"🇺🇸", lohn:5000, risiko:0.4},
+  kanada:    {name:"Kanada",      flagge:"🇨🇦", lohn:4800, risiko:0.4},
+  australien:{name:"Australien",  flagge:"🇦🇺", lohn:5600, risiko:0.4},
+  deutschland:{name:"Deutschland",flagge:"🇩🇪", lohn:4600, risiko:0.4}
+};
+
+/* Minen: erschliessung = einmalige Kosten. ergiebigkeit = Roherz pro Arbeiter und Tag. */
+const MINEN = [
+  {id:"kolwezi",   ort:"Kolwezi",          land:"kongo",      mat:"kobalt",   erschliessung: 90000, ergiebigkeit:4.0, plaetze:60,
+   info:"Rund 70 % des weltweiten Kobalts kommt aus der DR Kongo. Ein Teil davon aus Kleinstminen, in denen von Hand gegraben wird."},
+  {id:"katanga",   ort:"Katanga",          land:"kongo",      mat:"kupfer",   erschliessung: 70000, ergiebigkeit:7.37, plaetze:70,
+   info:"Der kongolesische Kupfergürtel gehört zu den reichsten der Welt – Kobalt fällt oft als Nebenprodukt an."},
+  {id:"rubaya",    ort:"Rubaya",           land:"kongo",      mat:"tantal",   erschliessung:120000, ergiebigkeit:2.39, plaetze:45,
+   info:"Coltan-Erz liefert Tantal. Es zählt zu den vier «Konfliktmineralien», weil bewaffnete Gruppen am Abbau mitverdienen."},
+  {id:"kigali",    ort:"Gatumba",          land:"ruanda",     mat:"tantal",   erschliessung:105000, ergiebigkeit:2.65, plaetze:35,
+   info:"Ruanda exportiert viel Tantal – ein Teil stammt nachweislich aus dem Nachbarland Kongo."},
+  {id:"bayanobo",  ort:"Bayan Obo",        land:"china",      mat:"seltene",  erschliessung:260000, ergiebigkeit:2.96, plaetze:70,
+   info:"Die grösste Lagerstätte Seltener Erden der Welt, in der Inneren Mongolei. China fördert rund 60 % – und verarbeitet fast 90 %."},
+  {id:"jiangxi",   ort:"Jiangxi",          land:"china",      mat:"silizium", erschliessung:150000, ergiebigkeit:4.65, plaetze:70,
+   info:"China stellt etwa 70 % des Rohsiliziums her. Der Prozess braucht enorm viel Strom."},
+  {id:"liuzhou",   ort:"Liuzhou",          land:"china",      mat:"indium",   erschliessung:230000, ergiebigkeit:9.07, plaetze:50,
+   info:"Indium wird fast nur als Nebenprodukt der Zinkgewinnung gewonnen. Ohne Indium kein Touchscreen."},
+  {id:"sprucepine",ort:"Spruce Pine",      land:"usa",        mat:"silizium", erschliessung:340000, ergiebigkeit:23.02, plaetze:30,
+   info:"Hochreiner Quarz für Chip-Schmelztiegel kommt fast ausschliesslich aus diesem einen Tal in North Carolina."},
+  {id:"mountainpass",ort:"Mountain Pass",  land:"usa",        mat:"seltene",  erschliessung:380000, ergiebigkeit:13.59, plaetze:30,
+   info:"Die einzige grosse Mine für Seltene Erden in den USA. Ihr Erz wurde jahrelang zur Verarbeitung nach China verschifft."},
+  {id:"greenbushes",ort:"Greenbushes",     land:"australien", mat:"lithium",  erschliessung:300000, ergiebigkeit:21.11, plaetze:32,
+   info:"Australien fördert etwa die Hälfte des Weltlithiums – aus hartem Gestein, nicht aus Salzseen."},
+  {id:"kalgoorlie",ort:"Kalgoorlie",       land:"australien", mat:"gold",     erschliessung:330000, ergiebigkeit:23.29, plaetze:30,
+   info:"Für 1 Gramm Gold werden oft über 1 Tonne Gestein bewegt. Deshalb ist die Ausbeute im Spiel so tief."},
+  {id:"atacama",   ort:"Salar de Atacama", land:"chile",      mat:"lithium",  erschliessung:210000, ergiebigkeit:4.44, plaetze:40,
+   info:"Im «Lithiumdreieck» wird Salzlake verdunstet. Das braucht sehr viel Wasser in einer der trockensten Wüsten der Erde."},
+  {id:"escondida", ort:"Escondida",        land:"chile",      mat:"kupfer",   erschliessung:190000, ergiebigkeit:21.93, plaetze:45,
+   info:"Die grösste Kupfermine der Welt. Chile liefert rund einen Viertel des Weltkupfers."},
+  {id:"fresnillo", ort:"Fresnillo",        land:"mexiko",     mat:"silber",   erschliessung:150000, ergiebigkeit:3.27, plaetze:50,
+   info:"Mexiko ist seit Jahrhunderten grösster Silberproduzent der Welt."},
+  {id:"sanrafael", ort:"San Rafael",       land:"peru",       mat:"zinn",     erschliessung:140000, ergiebigkeit:6.16, plaetze:45,
+   info:"Zinn wirkt unspektakulär – aber ohne Lötzinn hält keine einzige Platine zusammen."},
+  {id:"bangka",    ort:"Bangka",           land:"indonesien", mat:"zinn",     erschliessung:110000, ergiebigkeit:5.08, plaetze:55,
+   info:"Auf Bangka wird Zinn teils von Tauchern aus dem Meeresboden gesaugt – gefährlich und ökologisch heikel."},
+  {id:"sulawesi",  ort:"Sulawesi",         land:"indonesien", mat:"nickel",   erschliessung:130000, ergiebigkeit:2.75, plaetze:60,
+   info:"Indonesien ist mit Abstand grösster Nickelproduzent – dafür wird Regenwald gerodet."},
+  {id:"obuasi",    ort:"Obuasi",           land:"ghana",      mat:"gold",     erschliessung:120000, ergiebigkeit:3.35, plaetze:55,
+   info:"Neben der Grossmine gibt es viele illegale Kleinminen («Galamsey»), oft mit Quecksilber und Kinderarbeit."},
+  {id:"boke",      ort:"Boké",             land:"guinea",     mat:"alu",      erschliessung: 85000, ergiebigkeit:8.8, plaetze:60,
+   info:"Guinea hat die grössten Bauxitvorkommen der Welt. Aus Bauxit wird Aluminium."},
+  {id:"potosi",    ort:"Potosí",           land:"bolivien",   mat:"silber",   erschliessung:100000, ergiebigkeit:2.88, plaetze:45,
+   info:"Der Cerro Rico wird seit 1545 abgebaut. Er gilt als der Berg, der die halbe Welt mit Silber versorgte."}
+];
+
+/* Raffinerie-Standorte: Erz wird zu Material. */
+const RAFF_ORTE = [
+  {id:"r_china",  land:"china",       ort:"Guangdong", bau:180000, kapazitaet:2400, plaetze:20,
+   info:"China verarbeitet fast 90 % der Seltenen Erden. Nicht der Abbau ist der Engpass, sondern die Raffination."},
+  {id:"r_malay",  land:"malaysia",    ort:"Kuantan",   bau:220000, kapazitaet:1700, plaetze:16,
+   info:"Malaysia ist zweitgrösster Standort für Seltene-Erden-Raffination – mit Streit um radioaktive Rückstände."},
+  {id:"r_chile",  land:"chile",       ort:"Antofagasta",bau:250000, kapazitaet:1500, plaetze:16,
+   info:"Nahe an den Minen zu raffinieren spart Transport, kostet aber mehr Lohn."},
+  {id:"r_de",     land:"deutschland", ort:"Freiberg",  bau:420000, kapazitaet:1400, plaetze:14,
+   info:"Europa baut Raffinerien auf, um weniger abhängig zu sein. Teuer, aber politisch gewollt."},
+  {id:"r_usa",    land:"usa",         ort:"Texas",     bau:440000, kapazitaet:1500, plaetze:14,
+   info:"Die USA fördern eigene Raffinerien mit Subventionen – Stichwort Rohstoffsicherheit."}
+];
+
+/* Produkte: rezept = Materialeinheiten pro Stück. */
+const PRODUKT = {
+  phone: {name:"Velocity Phone", preis:1690, nachfrage:26, proArbeiter:1.1, bauzeit:20, plaetze:14, kosten:120000,
+    rezept:{silizium:4, kupfer:6, kobalt:3, lithium:3, gold:1, zinn:2, tantal:1, seltene:2, indium:1, alu:4},
+    info:"In einem Smartphone stecken über 60 verschiedene Elemente. Fast keines davon wird recycelt."},
+  board: {name:"Mainboard V1",   preis:1100, nachfrage:34, proArbeiter:1.6, bauzeit:14, plaetze:10, kosten: 85000,
+    rezept:{silizium:6, kupfer:8, gold:1, zinn:4, tantal:1, silber:1},
+    info:"Eine Platine ist im Grunde Kupfer auf Glasfaser – zusammengehalten von Zinn, kontaktiert mit Gold."},
+  konsole:{name:"Konsole Vortex",preis:1570, nachfrage:18, proArbeiter:0.9, bauzeit:26, plaetze:16, kosten:160000,
+    rezept:{silizium:8, kupfer:10, gold:1, zinn:5, seltene:3, alu:6, silber:1},
+    info:"Der Lüftermotor braucht Magnete aus Seltenen Erden – dieselben Elemente wie im Kopfhörer."},
+  tv:    {name:"Smart-TV 55\"",  preis:1710, nachfrage:14, proArbeiter:0.8, bauzeit:24, plaetze:15, kosten:150000,
+    rezept:{indium:3, silizium:5, kupfer:9, zinn:4, seltene:2, alu:10, silber:1},
+    info:"Jeder Touchscreen und jedes LCD hat eine hauchdünne, durchsichtige Indium-Zinn-Oxid-Schicht."},
+  akku:  {name:"E-Bike-Akku",    preis:1260, nachfrage:11, proArbeiter:0.9, bauzeit:18, plaetze:12, kosten:130000,
+    rezept:{lithium:8, kobalt:6, nickel:9, kupfer:5, alu:4},
+    info:"Ein E-Bike-Akku enthält ungefähr so viel Kobalt wie 30 Smartphones."}
+};
+
+const FAB_ORTE = ["china","vietnam","mexiko","deutschland","usa"];
+
+/* Lohnstufen: Faktor auf den Landeslohn, Zielwert der Zufriedenheit, Risikofaktor. */
+const LOHNSTUFE = [
+  {label:"knapp",  faktor:0.7, ziel:22, name:"unter üblichem Lohn"},
+  {label:"üblich", faktor:1.0, ziel:56, name:"landesüblicher Lohn"},
+  {label:"fair",   faktor:1.45,ziel:86, name:"deutlich über üblich, mit Schutzausrüstung"}
+];
+
+/* ============================================================
+   3. MOTOR
+   ============================================================ */
+
+const ZIEL_GEWINN = 5000000;   // Rundenziel in CHF
+const ZIEL_RUF    = 60;
+const ZIEL_TAGE   = 720;       // 2 Spieljahre
+const STARTKAPITAL= 1250000;
+
+let S;            // der gesamte Spielzustand
+let takt = null;  // Intervall-Handle
+let tempo = 1;
+let modalOffen = false;
+
+/* ---------- Speichern (mit Rückfallebene, falls localStorage blockiert ist) ---------- */
+const SPEICHER = (() => {
+  let mem = null;
+  try { localStorage.setItem("_t","1"); localStorage.removeItem("_t");
+        return {lies:k=>localStorage.getItem(k), schreib:(k,v)=>localStorage.setItem(k,v), loesch:k=>localStorage.removeItem(k)};
+  } catch(e){ return {lies:()=>mem, schreib:(k,v)=>{mem=v}, loesch:()=>{mem=null}}; }
+})();
+
+function neuerZustand(){
+  return {
+    tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0,
+    arbeiterGesamt:10, tutorial:0, gekauft:false,
+    minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis}
+    raff:{},         // id -> {arbeiter}
+    fabriken:[],     // {produkt, land, arbeiter, restbau}
+    erz:{}, mat:{}, ware:{},
+    preisMod:{}, nachfrageMod:{},   // material/produkt -> {faktor, bis}
+    globalMod:[],                   // {art, wert, bis, text}
+    log:[], erledigt:{}, ende:null
+  };
+}
+
+/* ---------- kleine Helfer ---------- */
+const chf = n => (n<0?"−":"") + "CHF " + Math.abs(Math.round(n)).toLocaleString("de-CH");
+const kurz = n => Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+" Mio" : Math.abs(n)>=1000 ? Math.round(n/1000)+"k" : Math.round(n);
+const zufall = (a,b) => a + Math.random()*(b-a);
+const klemm = (v,a,b) => Math.max(a, Math.min(b, v));
+const monat = () => Math.floor((S.tag-1)/30) + 1;
+
+function notiz(text, art){
+  S.log.unshift({tag:S.tag, text, art:art||""});
+  if (S.log.length > 60) S.log.pop();
+}
+
+/* Wie viele Arbeiter sind bereits eingeteilt? */
+function belegteArbeiter(){
+  let n = 0;
+  for (const id in S.minen) n += S.minen[id].arbeiter;
+  for (const id in S.raff)  n += S.raff[id].arbeiter;
+  for (const f of S.fabriken) n += f.arbeiter;
+  return n;
+}
+const freieArbeiter = () => S.arbeiterGesamt - belegteArbeiter();
+
+/* Monatliche Lohnsumme */
+function lohnsumme(){
+  let summe = 0;
+  for (const id in S.minen){
+    const m = S.minen[id], def = MINEN.find(x=>x.id===id);
+    summe += m.arbeiter * LAND[def.land].lohn * LOHNSTUFE[m.stufe].faktor;
+  }
+  for (const id in S.raff){
+    const def = RAFF_ORTE.find(x=>x.id===id);
+    summe += S.raff[id].arbeiter * LAND[def.land].lohn;
+  }
+  for (const f of S.fabriken) summe += f.arbeiter * LAND[f.land].lohn;
+  // Arbeiter ohne Einteilung kosten trotzdem eine Grundpauschale
+  summe += freieArbeiter() * 200;
+  return summe;
+}
+
+/* Aktueller Marktpreis eines Materials */
+function matPreis(k){
+  const mod = S.preisMod[k];
+  const f = (mod && mod.bis > S.tag) ? mod.faktor : 1;
+  return MATERIAL[k].preis * f * dollarFaktor();
+}
+function dollarFaktor(){
+  const g = S.globalMod.find(m => m.art === "dollar" && m.bis > S.tag);
+  return g ? g.wert : 1;
+}
+function globalWert(art){
+  const g = S.globalMod.find(m => m.art === art && m.bis > S.tag);
+  return g ? g.wert : 1;
+}
+
+/* Nachfrage pro Tag: Grundwert × Saison × Ereignis × Ruf */
+function nachfrage(p){
+  const def = PRODUKT[p];
+  const m = ((monat()-1) % 12) + 1;
+  let saison = 1;
+  if (p==="konsole" || p==="tv") saison = (m===11||m===12) ? 1.8 : (m===1||m===2 ? .75 : 1);
+  if (p==="phone") saison = (m===9||m===10) ? 1.35 : 1;
+  if (p==="akku")  saison = (m>=3 && m<=7) ? 1.4 : .8;
+  const mod = S.nachfrageMod[p];
+  const ev = (mod && mod.bis > S.tag) ? mod.faktor : 1;
+  const rufF = 0.65 + (S.ruf/100) * 0.7;     // schlechter Ruf → weniger Käufer
+  return def.nachfrage * saison * ev * rufF;
+}
+
+/* Verkaufspreis sinkt, wenn das Lager überquillt (Angebot > Nachfrage) */
+function warenPreis(p){
+  const lager = S.ware[p] || 0;
+  const n = Math.max(1, nachfrage(p));
+  const ueber = klemm(lager / (n*12), 0, 1);
+  return PRODUKT[p].preis * (1 - 0.35*ueber) * dollarFaktor();
+}
+
+/* Handel: kaufen kostet Aufschlag, verkaufen bringt Abschlag.
+   Genau deshalb lohnt es sich, selber abzubauen. */
+const kaufPreis = k => matPreis(k) * 1.60;
+const verkaufPreis = k => matPreis(k) * 0.75;
+const HANDELSMENGE = 100;
+
+/* ============================================================
+   Der Tagesschritt – hier passiert alles.
+   Reihenfolge: Zufriedenheit → Abbau → Raffination → Bau →
+                Produktion → Verkauf → Monatsende → Ereignis
+   ============================================================ */
+function tagVor(){
+  if (S.ende || modalOffen) return;
+  S.tag++;
+
+  // 1) Zufriedenheit bewegt sich langsam auf den Zielwert der Lohnstufe zu
+  for (const id in S.minen){
+    const m = S.minen[id], def = MINEN.find(x=>x.id===id);
+    const ziel = LOHNSTUFE[m.stufe].ziel - (LAND[def.land].risiko - 1) * 8;
+    m.zufriedenheit += (ziel - m.zufriedenheit) * 0.04;
+    m.zufriedenheit = klemm(m.zufriedenheit, 0, 100);
+  }
+
+  // 2) Abbau: Roherz entsteht
+  for (const id in S.minen){
+    const m = S.minen[id], def = MINEN.find(x=>x.id===id);
+    if (m.stillBis > S.tag) continue;
+    let f = 1;
+    if (m.malusBis > S.tag) f *= m.malus;
+    f *= 0.55 + (m.zufriedenheit/100) * 0.6;          // müde, unzufriedene Leute fördern weniger
+    const menge = m.arbeiter * def.ergiebigkeit * f;
+    S.erz[def.mat] = (S.erz[def.mat] || 0) + menge;
+  }
+
+  // 3) Raffination: Roherz → Material
+  const hafen = globalWert("hafen");
+  for (const id in S.raff){
+    const r = S.raff[id], def = RAFF_ORTE.find(x=>x.id===id);
+    if (r.arbeiter === 0) continue;
+    const rest = def.kapazitaet * (r.arbeiter / def.plaetze) * hafen;
+    // Die Kapazitaet wird anteilig auf alle vorhandenen Erze verteilt,
+    // damit nicht immer nur das erste Material in der Liste verarbeitet wird.
+    const vorrat = Object.keys(MATERIAL).filter(k => (S.erz[k]||0) > 0.5);
+    const total = vorrat.reduce((a,k) => a + S.erz[k], 0);
+    if (total <= 0) continue;
+    for (const k of vorrat){
+      const anteil = S.erz[k] / total;
+      const nimm = Math.min(S.erz[k], rest * anteil);
+      S.erz[k] -= nimm;
+      S.mat[k] = (S.mat[k] || 0) + nimm * MATERIAL[k].ausbeute;
+    }
+  }
+
+  // 4) Fabrikbau + Produktion
+  for (const f of S.fabriken){
+    if (f.restbau > 0){ f.restbau--; if (f.restbau === 0) notiz(`Fabrik <b>${PRODUKT[f.produkt].name}</b> in ${LAND[f.land].name} nimmt die Produktion auf.`, "gut"); continue; }
+    if (f.arbeiter === 0) continue;
+    const def = PRODUKT[f.produkt];
+    let stueck = Math.floor(f.arbeiter * def.proArbeiter);
+    for (const k in def.rezept) stueck = Math.min(stueck, Math.floor((S.mat[k]||0) / def.rezept[k]));
+    if (stueck <= 0) continue;
+    for (const k in def.rezept) S.mat[k] -= stueck * def.rezept[k];
+    S.ware[f.produkt] = (S.ware[f.produkt] || 0) + stueck;
+  }
+
+  // 5) Verkauf: pro Tag wird höchstens die Nachfrage abgesetzt
+  for (const p in PRODUKT){
+    const lager = S.ware[p] || 0;
+    if (lager <= 0) continue;
+    const verkauft = Math.min(lager, Math.round(nachfrage(p)));
+    if (verkauft <= 0) continue;
+    const erloes = verkauft * warenPreis(p);
+    S.ware[p] = lager - verkauft;
+    S.kasse += erloes; S.eingenommen += erloes;
+  }
+
+  // 6) Monatsende: Löhne, Betriebskosten, Ruf
+  if ((S.tag - 1) % 30 === 0){
+    const lohn = lohnsumme();
+    const betrieb = Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000;
+    S.kasse -= lohn + betrieb; S.ausgegeben += lohn + betrieb;
+    notiz(`🧾 Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`, "geld");
+    rufAnpassen();
+    if (S.kasse < 0) notiz("🔻 Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.", "alarm");
+  }
+
+  // 7) Marktbewegung: Preise wandern zufällig
+  if (S.tag % 5 === 0) marktBewegen();
+
+  // 8) Ereignisse
+  ereignisPruefen();
+
+  // 9) Ende der Runde?
+  if (S.tag > ZIEL_TAGE || S.kasse < -800000) rundeBeenden();
+  speichern();
+}
+
+function rufAnpassen(){
+  let summe = 0, n = 0;
+  for (const id in S.minen){ summe += LOHNSTUFE[S.minen[id].stufe].faktor; n++; }
+  if (n === 0) return;
+  const schnitt = summe / n;
+  const ziel = schnitt < 0.85 ? 25 : schnitt < 1.15 ? 58 : 88;
+  S.ruf += (ziel - S.ruf) * 0.18;
+  S.ruf = klemm(S.ruf, 0, 100);
+}
+
+function marktBewegen(){
+  const k = Object.keys(MATERIAL)[Math.floor(Math.random()*12)];
+  const alt = S.preisMod[k] && S.preisMod[k].bis > S.tag ? S.preisMod[k].faktor : 1;
+  const neu = klemm(alt * zufall(0.88, 1.14), 0.55, 2.2);
+  S.preisMod[k] = {faktor:neu, bis:S.tag + 60};
+}
+
+function rundeBeenden(){
+  const gewinn = S.eingenommen - S.ausgegeben;
+  const geschafft = gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
+  S.ende = {gewinn, ruf:Math.round(S.ruf), geschafft};
+  tempoSetzen(0);
+  dialogZeigen({
+    art: geschafft ? "Runde beendet" : "Runde beendet",
+    titel: geschafft ? "Ziel erreicht" : "Ziel verfehlt",
+    text: `Gewinn: ${chf(gewinn)} (Ziel ${chf(ZIEL_GEWINN)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br><br>`
+        + (geschafft
+            ? "Du hast Geld verdient <b>und</b> den Ruf gehalten. Notiere dir: welche Entscheidung hat am meisten dazu beigetragen?"
+            : (gewinn >= ZIEL_GEWINN
+               ? "Der Gewinn stimmt, aber der Ruf nicht. Billige Löhne haben sich kurzfristig gelohnt und langfristig gerächt."
+               : "Der Gewinn reicht nicht. Wo ist die Lieferkette gerissen – zu wenig Erz, zu wenig Raffination oder zu wenig Nachfrage?")),
+    wahlen:[{text:"Neue Runde starten", klein:"Alles auf Anfang", tun:()=>{ zuruecksetzen(); }}]
+  });
+}
+
+/* ============================================================
+   Ereignisse
+   ============================================================ */
+const EREIGNISSE = [
+  {
+    id:"protest", gewicht:0, wiederholbar:true,
+    passt(){ return offeneMinen().some(id => S.minen[id].zufriedenheit < 32 && S.minen[id].stillBis <= S.tag); },
+    bau(){
+      const id = offeneMinen().filter(i => S.minen[i].zufriedenheit < 32)[0];
+      const def = MINEN.find(x=>x.id===id);
+      S.minen[id].stillBis = S.tag + 999;   // steht still, bis entschieden ist
+      return {
+        art:"Protest", titel:`Streik in ${def.ort}, ${LAND[def.land].name}`,
+        text:`Die Arbeiterinnen und Arbeiter deiner ${MATERIAL[def.mat].name}-Mine legen die Arbeit nieder. Sie sagen: die Löhne reichen nicht zum Leben, und die Ausrüstung ist zu gefährlich. Die Förderung steht still. <b>Du musst entscheiden.</b>`,
+        wahlen:[
+          {text:"Löhne um 20 % erhöhen", klein:"Kostet dauerhaft mehr, Zufriedenheit steigt sofort",
+           tun(){ S.minen[id].stufe = Math.min(2, S.minen[id].stufe+1); S.minen[id].zufriedenheit = 62; S.minen[id].stillBis = S.tag+2; S.ruf += 6;
+                  notiz(`💵 Löhne in ${def.ort} erhöht. Die Arbeit läuft wieder.`, "gut"); }},
+          {text:"Verhandeln und Sicherheitsausrüstung stellen", klein:"Einmalig CHF 60'000, Ruf steigt",
+           tun(){ S.kasse -= 60000; S.ausgegeben += 60000; S.minen[id].zufriedenheit = 55; S.minen[id].stillBis = S.tag+5; S.ruf += 10;
+                  notiz(`🤝 Verhandlung in ${def.ort}: Ausrüstung bezahlt, Streik nach 5 Tagen beendet.`, "gut"); }},
+          {text:"Aussitzen und Streikende ersetzen", klein:"Kostet nichts, Mine steht 20 Tage, Ruf fällt stark",
+           tun(){ S.minen[id].stillBis = S.tag+20; S.minen[id].zufriedenheit = 12; S.ruf -= 18;
+                  notiz(`🪧 Streik in ${def.ort} ausgesessen. 20 Tage kein Erz, Medien berichten.`, "alarm"); }}
+        ]
+      };
+    }
+  },
+  {
+    id:"kinderarbeit", gewicht:0, einmalig:true,
+    passt(){ return offeneMinen().some(id => S.minen[id].stufe === 0 && LAND[MINEN.find(x=>x.id===id).land].risiko >= 1.3) && S.tag > 90; },
+    bau(){
+      const id = offeneMinen().find(i => S.minen[i].stufe === 0);
+      const def = MINEN.find(x=>x.id===id);
+      return {
+        art:"Recherche", titel:"Reportage über deine Lieferkette",
+        text:`Ein Recherche-Team veröffentlicht Bilder aus ${def.ort}: Jugendliche schleppen Säcke, ohne Helm, ohne Vertrag. Dein Name steht im Artikel. Kunden fragen nach.`,
+        wahlen:[
+          {text:"Unabhängiges Audit bezahlen und Löhne anheben", klein:"CHF 90'000, Ruf steigt deutlich",
+           tun(){ S.kasse -= 90000; S.ausgegeben += 90000; S.minen[id].stufe = 2; S.ruf += 14; notiz("🔍 Audit beauftragt, Löhne angehoben.", "gut"); }},
+          {text:"Erklären, das sei ein Zulieferer gewesen", klein:"Kostet nichts, Ruf fällt, Nachfrage sinkt 60 Tage",
+           tun(){ S.ruf -= 22; S.nachfrageMod.phone = {faktor:.7, bis:S.tag+60}; notiz("📰 Dementi veröffentlicht. Die Nachfrage nach dem Phone bricht ein.", "alarm"); }}
+        ]
+      };
+    }
+  },
+  {
+    id:"unglueck", gewicht:0, wiederholbar:true,
+    passt(){ return offeneMinen().some(id => S.minen[id].stufe === 0 && S.minen[id].arbeiter > 20) && Math.random() < .5; },
+    bau(){
+      const id = offeneMinen().find(i => S.minen[i].stufe === 0 && S.minen[i].arbeiter > 20);
+      const def = MINEN.find(x=>x.id===id);
+      S.minen[id].stillBis = S.tag + 999;
+      return {
+        art:"Unfall", titel:`Stolleneinsturz in ${def.ort}`,
+        text:`In der Nacht ist ein Stollen eingestürzt. Es gibt Verletzte. Die Behörden sperren die Mine, bis geklärt ist, wie es weitergeht.`,
+        wahlen:[
+          {text:"Entschädigung zahlen und Stollen sichern", klein:"CHF 140'000, Mine läuft in 10 Tagen wieder",
+           tun(){ S.kasse -= 140000; S.ausgegeben += 140000; S.minen[id].stillBis = S.tag+10; S.minen[id].stufe = Math.max(1, S.minen[id].stufe); S.ruf += 4;
+                  notiz(`⛑️ ${def.ort} gesichert, Entschädigung bezahlt.`, "warn"); }},
+          {text:"Nur das Nötigste reparieren", klein:"CHF 30'000, Mine läuft in 25 Tagen, Ruf fällt",
+           tun(){ S.kasse -= 30000; S.ausgegeben += 30000; S.minen[id].stillBis = S.tag+25; S.ruf -= 15; S.minen[id].zufriedenheit = 15;
+                  notiz(`⚠️ Notreparatur in ${def.ort}. Die Belegschaft ist wütend.`, "alarm"); }}
+        ]
+      };
+    }
+  },
+  { id:"dollar", gewicht:10, wiederholbar:true, passt:()=>true, bau(){
+      const schwach = Math.random() < .5, w = schwach ? .82 : 1.18;
+      S.globalMod.push({art:"dollar", wert:w, bis:S.tag+50});
+      return {passiv:true, text:`💱 <b>US-Dollar ${schwach?"schwach":"stark"}</b> – Rohstoffe und Waren werden in Dollar gehandelt. Alle Preise ${schwach?"sinken":"steigen"} 50 Tage lang um ${Math.round(Math.abs(1-w)*100)} %.`, art:"warn"};
+  }},
+  { id:"buschfeuer", gewicht:7, wiederholbar:true,
+    passt:()=> offeneMinen().some(i => MINEN.find(x=>x.id===i).land === "australien"),
+    bau(){
+      offeneMinen().filter(i => MINEN.find(x=>x.id===i).land==="australien").forEach(i => S.minen[i].stillBis = S.tag+18);
+      return {passiv:true, text:"🔥 <b>Buschfeuer in Australien</b> – Zufahrtsstrassen gesperrt. Deine australischen Minen stehen 18 Tage still.", art:"alarm"};
+  }},
+  { id:"regenzeit", gewicht:8, wiederholbar:true,
+    passt:()=> offeneMinen().some(i => MINEN.find(x=>x.id===i).land === "kongo"),
+    bau(){
+      offeneMinen().filter(i => MINEN.find(x=>x.id===i).land==="kongo").forEach(i => { S.minen[i].malus=.55; S.minen[i].malusBis=S.tag+30; });
+      return {passiv:true, text:"🌧️ <b>Regenzeit im Kongo</b> – Pisten sind unpassierbar. Förderung dort 30 Tage lang nur bei 55 %.", art:"warn"};
+  }},
+  { id:"exportstopp", gewicht:6, wiederholbar:true, passt:()=>true, bau(){
+      S.preisMod.seltene = {faktor:3.2, bis:S.tag+80};
+      return {passiv:true, text:"🚫 <b>China beschränkt den Export Seltener Erden</b> – der Preis verdreifacht sich für 80 Tage. Wer eigene Minen und Raffinerien hat, verdient jetzt.", art:"warn"};
+  }},
+  { id:"taiwan", gewicht:5, wiederholbar:true, passt:()=>true, bau(){
+      S.preisMod.silizium = {faktor:2.4, bis:S.tag+70};
+      S.nachfrageMod.phone = {faktor:1.5, bis:S.tag+70};
+      S.nachfrageMod.konsole = {faktor:1.5, bis:S.tag+70};
+      return {passiv:true, text:"🌏 <b>Erdbeben bei Taiwan</b> – Chipfabriken stehen still. Silizium wird teuer, fertige Geräte sind gefragt wie nie.", art:"warn"};
+  }},
+  { id:"hafen", gewicht:7, wiederholbar:true, passt:()=> Object.keys(S.raff).length>0, bau(){
+      S.globalMod.push({art:"hafen", wert:.65, bis:S.tag+28});
+      return {passiv:true, text:"🚢 <b>Containerstau in Shanghai</b> – deine Raffinerien schaffen 28 Tage lang nur 65 % des Durchsatzes.", art:"warn"};
+  }},
+  { id:"konkurrenz", gewicht:8, wiederholbar:true, passt:()=> (S.ware.phone||0)>0 || S.fabriken.some(f=>f.produkt==="phone"), bau(){
+      S.nachfrageMod.phone = {faktor:.6, bis:S.tag+45};
+      return {passiv:true, text:"📱 <b>Konkurrenz zeigt neues Modell</b> – die Nachfrage nach deinem Velocity Phone fällt 45 Tage lang um 40 %.", art:"alarm"};
+  }},
+  { id:"lithiumcrash", gewicht:6, wiederholbar:true, passt:()=>true, bau(){
+      S.preisMod.lithium = {faktor:.45, bis:S.tag+70};
+      return {passiv:true, text:"📉 <b>Lithium-Preis bricht ein</b> – neue Minen weltweit liefern zu viel. Gut für Akku-Produzenten, schlecht für Lithium-Minen.", art:"warn"};
+  }},
+  { id:"lieferkettengesetz", gewicht:5, einmalig:true, passt:()=> S.tag>200, bau(){
+      if (S.ruf < 50){ S.kasse -= 180000; S.ausgegeben += 180000;
+        return {passiv:true, text:"⚖️ <b>Neues Lieferkettengesetz</b> – deine Firma kann die Herkunft nicht belegen. Busse: CHF 180'000.", art:"alarm"}; }
+      S.nachfrageMod.board = {faktor:1.3, bis:S.tag+90};
+      return {passiv:true, text:"⚖️ <b>Neues Lieferkettengesetz</b> – deine Nachweise sind sauber. Grosskunden bestellen mehr Mainboards.", art:"gut"};
+  }},
+  { id:"gewerkschaft", gewicht:5, einmalig:true, passt:()=> offeneMinen().length>2 && S.tag>150, bau(){
+      offeneMinen().forEach(i => { if (S.minen[i].stufe===0) S.minen[i].stufe = 1; });
+      return {passiv:true, text:"✊ <b>Gewerkschaft gegründet</b> – in allen deinen Minen gilt neu mindestens der landesübliche Lohn.", art:"gut"};
+  }},
+  { id:"recycling", gewicht:5, wiederholbar:true, passt:()=> S.tag>120, bau(){
+      const bonus = {kupfer:120, gold:25, silber:40, alu:150};
+      for (const k in bonus) S.mat[k] = (S.mat[k]||0) + bonus[k];
+      return {passiv:true, text:"♻️ <b>Altgeräte-Rücknahme</b> – aus alten Geräten gewinnst du Kupfer, Gold, Silber und Aluminium zurück, ganz ohne Mine.", art:"gut"};
+  }}
+];
+
+const offeneMinen = () => Object.keys(S.minen);
+
+function ereignisPruefen(){
+  if (S.tag < 15 || S.tag % 3 !== 0) return;
+  // Zwingende Ereignisse (Protest, Unfall, Reportage) zuerst
+  for (const e of EREIGNISSE){
+    if (e.gewicht !== 0) continue;
+    if (e.einmalig && S.erledigt[e.id]) continue;
+    if (S.erledigt["cool_"+e.id] > S.tag) continue;
+    if (!e.passt()) continue;
+    S.erledigt[e.id] = true; S.erledigt["cool_"+e.id] = S.tag + 90;
+    dialogZeigen(e.bau());
+    return;
+  }
+  // Zufällige Ereignisse
+  if (Math.random() > 0.10) return;
+  const pool = EREIGNISSE.filter(e => e.gewicht > 0 && !(e.einmalig && S.erledigt[e.id]) && e.passt() && (S.erledigt["cool_"+e.id]||0) <= S.tag);
+  if (!pool.length) return;
+  const gesamt = pool.reduce((a,e)=>a+e.gewicht, 0);
+  let w = Math.random()*gesamt, gewaehlt = pool[0];
+  for (const e of pool){ w -= e.gewicht; if (w <= 0){ gewaehlt = e; break; } }
+  S.erledigt[gewaehlt.id] = true; S.erledigt["cool_"+gewaehlt.id] = S.tag + 120;
+  const erg = gewaehlt.bau();
+  if (erg.passiv) notiz(erg.text, erg.art);
+  else dialogZeigen(erg);
+}
+
+
+/* ==========================================================
+   4. KARTE
+   ========================================================== */
+
+/* Standorte in Längen-/Breitengrad. Einzelne Pins sind leicht
+   auseinandergezogen, damit sie sich auf dem Handy nicht überdecken. */
+const ORT = {
+  kolwezi:[25.5,-10.7], katanga:[28.8,-7.5], rubaya:[28.9,-1.0], kigali:[30.4,-4.2],
+  bayanobo:[109.9,41.8], jiangxi:[116.5,27.6], liuzhou:[107.6,24.6],
+  sprucepine:[-82,36], mountainpass:[-115.5,35.5],
+  greenbushes:[115.6,-33.9], kalgoorlie:[122.5,-30.0],
+  atacama:[-67.0,-23.5], escondida:[-70.5,-20.5],
+  fresnillo:[-102.9,23.2], sanrafael:[-70.3,-14.2],
+  bangka:[105.0,-3.5], sulawesi:[121.5,-2.5],
+  obuasi:[-1.7,6.2], boke:[-14.3,10.9], potosi:[-65.7,-19.6],
+  r_china:[112.0,20.0], r_malay:[103.3,3.8], r_chile:[-71.5,-25.5],
+  r_de:[9.5,49.5], r_usa:[-95.0,29.0],
+  f_china:[119.0,31.0], f_vietnam:[105.0,20.5], f_mexiko:[-107.0,27.0],
+  f_deutschland:[14.5,52.0], f_usa:[-112.0,33.5]
+};
+
+const KARTE_B = 1000, KARTE_H = 560;
+const geo = ([lon,lat]) => [ (lon+180)/360*KARTE_B, (78-lat)/138*KARTE_H ];
+
+/* Pins duerfen sich nicht ueberdecken: die Rohposition wird solange leicht
+   auseinandergeschoben, bis alle mindestens PIN_ABSTAND auseinander liegen.
+   Die Standorte bleiben dadurch ungefaehr, aber tippbar. */
+const PIN_ABSTAND = 62;
+const POS = {};
+(function pinsEntzerren(){
+  for (const k in ORT) POS[k] = geo(ORT[k]);
+  const ids = Object.keys(POS);
+  for (let runde = 0; runde < 120; runde++){
+    let bewegt = false;
+    for (let i = 0; i < ids.length; i++) for (let j = i+1; j < ids.length; j++){
+      const a = POS[ids[i]], b = POS[ids[j]];
+      let dx = b[0]-a[0], dy = b[1]-a[1];
+      let d = Math.hypot(dx, dy);
+      if (d >= PIN_ABSTAND) continue;
+      if (d < 0.01){ dx = Math.random()-0.5; dy = Math.random()-0.5; d = 1; }
+      const schub = (PIN_ABSTAND - d) / 2 / d;
+      a[0] -= dx*schub; a[1] -= dy*schub;
+      b[0] += dx*schub; b[1] += dy*schub;
+      bewegt = true;
+    }
+    // Federkraft zurueck zum echten Ort: die Karte bleibt so nah wie moeglich an der Geografie
+    for (const k of ids){
+      const z = geo(ORT[k]);
+      POS[k][0] += (z[0]-POS[k][0])*0.10;
+      POS[k][1] += (z[1]-POS[k][1])*0.10;
+    }
+    if (!bewegt) break;
+  }
+  for (const k in POS){
+    POS[k][0] = Math.max(22, Math.min(KARTE_B-22, POS[k][0]));
+    POS[k][1] = Math.max(26, Math.min(KARTE_H-14, POS[k][1]));
+  }
+})();
+const px = id => POS[id];
+
+/* Duenne Linie vom echten Ort zum verschobenen Pin, damit die Geografie stimmt */
+function ankerLinien(){
+  return Object.keys(ORT).map(k => {
+    const [gx,gy] = geo(ORT[k]), [pxx,pyy] = POS[k];
+    if (Math.hypot(gx-pxx, gy-pyy) < 6) return "";
+    return `<line x1="${gx.toFixed(1)}" y1="${gy.toFixed(1)}" x2="${pxx.toFixed(1)}" y2="${pyy.toFixed(1)}"
+      stroke="#00000030" stroke-width="1.2" stroke-dasharray="3 3"/><circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="2.2" fill="#00000045"/>`;
+  }).join("");
+}
+
+const sicht = document.getElementById("sicht");
+const welt  = document.getElementById("welt");
+let ansicht = {x:0, y:0, z:1};
+const ebenen = {mine:true, raff:true, fab:true};
+
+function weltZeichnen(){
+  welt.innerHTML = `<svg viewBox="0 0 ${KARTE_B} ${KARTE_H}" xmlns="http://www.w3.org/2000/svg" aria-label="Weltkarte">
+    <g class="gitter">${[...Array(11)].map((_,i)=>`<line x1="0" y1="${i*56}" x2="1000" y2="${i*56}"/>`).join("")}
+      ${[...Array(13)].map((_,i)=>`<line x1="${i*83.3}" y1="0" x2="${i*83.3}" y2="560"/>`).join("")}</g>
+      <path class="land" d="M452.8 255.7 L455.6 231.3 L472.2 207.0 L483.3 190.7 L500.0 174.5 L527.8 166.4 L530.6 182.6 L555.6 186.7 L569.4 190.7 L588.9 190.7 L597.2 223.2 L605.6 247.5 L619.4 267.8 L641.7 267.8 L641.7 296.2 L622.2 308.4 L613.9 324.6 L611.1 357.1 L611.1 381.4 L597.2 397.7 L591.7 422.0 L577.8 446.4 L569.4 454.5 L555.6 454.5 L550.0 446.4 L541.7 418.0 L533.3 385.5 L536.1 365.2 L533.3 340.9 L525.0 316.5 L525.0 300.3 L508.3 292.2 L488.9 296.2 L477.8 300.3 L463.9 284.1 L452.8 267.8 Z"/>
+  <path class="land" d="M475.0 142.0 L475.0 158.3 L483.3 170.4 L500.0 158.3 L508.3 146.1 L522.2 138.0 L533.3 133.9 L538.9 146.1 L550.0 154.2 L555.6 154.2 L566.7 150.1 L577.8 150.1 L583.3 133.9 L605.6 133.9 L611.1 121.7 L605.6 105.5 L597.2 93.3 L588.9 64.9 L583.3 48.7 L577.8 32.5 L563.9 32.5 L541.7 40.6 L530.6 56.8 L513.9 73.0 L522.2 81.2 L530.6 93.3 L522.2 97.4 L511.1 105.5 L497.2 113.6 L486.1 121.7 Z"/>
+  <path class="land" d="M486.1 81.2 L491.7 81.2 L500.0 97.4 L502.8 109.6 L491.7 113.6 L486.1 105.5 Z"/>
+  <path class="land" d="M597.2 93.3 L611.1 121.7 L633.3 146.1 L638.9 166.4 L633.3 194.8 L655.6 211.0 L661.1 223.2 L672.2 215.1 L688.9 219.1 L694.4 235.4 L702.8 251.6 L713.9 284.1 L722.2 275.9 L727.8 247.5 L744.4 231.3 L755.6 231.3 L763.9 251.6 L772.2 280.0 L786.1 308.4 L788.9 275.9 L797.2 247.5 L805.6 235.4 L813.9 227.2 L827.8 219.1 L836.1 194.8 L838.9 166.4 L850.0 154.2 L858.3 142.0 L866.7 129.9 L875.0 113.6 L888.9 101.4 L897.2 77.1 L916.7 73.0 L944.4 69.0 L972.2 48.7 L997.2 48.7 L997.2 28.4 L944.4 28.4 L888.9 16.2 L833.3 12.2 L777.8 8.1 L722.2 16.2 L694.4 20.3 L666.7 32.5 L638.9 40.6 L611.1 40.6 L597.2 52.8 L588.9 64.9 Z"/>
+  <path class="land" d="M861.1 186.7 L875.0 178.6 L888.9 170.4 L894.4 150.1 L902.8 138.0 L891.7 133.9 L883.3 166.4 L866.7 178.6 Z"/>
+  <path class="land" d="M33.3 48.7 L41.7 73.0 L61.1 85.2 L77.8 81.2 L97.2 73.0 L111.1 73.0 L125.0 85.2 L138.9 105.5 L152.8 121.7 L155.6 146.1 L163.9 174.5 L175.0 186.7 L194.4 194.8 L208.3 227.2 L230.6 243.5 L236.1 251.6 L250.0 255.7 L255.6 231.3 L244.4 219.1 L230.6 211.0 L230.6 198.8 L250.0 198.8 L266.7 194.8 L275.0 215.1 L277.8 194.8 L288.9 174.5 L305.6 146.1 L316.7 133.9 L333.3 125.8 L347.2 113.6 L333.3 93.3 L319.4 73.0 L291.7 64.9 L277.8 32.5 L236.1 24.3 L194.4 20.3 L152.8 32.5 L111.1 32.5 L69.4 28.4 L41.7 36.5 Z"/>
+  <path class="land" d="M375.0 73.0 L416.7 40.6 L438.9 32.5 L444.4 8.1 L416.7 -16.2 L375.0 -20.3 L338.9 -16.2 L333.3 8.1 L355.6 40.6 Z"/>
+  <path class="land" d="M275.0 332.8 L283.3 308.4 L291.7 284.1 L302.8 267.8 L319.4 275.9 L333.3 284.1 L355.6 296.2 L361.1 316.5 L377.8 324.6 L394.4 336.8 L402.8 349.0 L391.7 373.3 L386.1 405.8 L366.7 418.0 L352.8 450.4 L338.9 470.7 L327.8 478.8 L319.4 499.1 L311.1 519.4 L305.6 535.7 L297.2 527.5 L291.7 499.1 L297.2 470.7 L300.0 438.3 L305.6 397.7 L302.8 373.3 L286.1 340.9 Z"/>
+  <path class="land" d="M816.7 405.8 L813.9 422.0 L819.4 446.4 L827.8 458.6 L844.4 450.4 L861.1 446.4 L875.0 458.6 L883.3 458.6 L891.7 470.7 L905.6 474.8 L916.7 466.7 L925.0 438.3 L925.0 426.1 L911.1 397.7 L897.2 365.2 L880.6 365.2 L866.7 361.2 L858.3 377.4 L847.2 373.3 L838.9 385.5 Z"/>
+  <path class="land" d="M977.8 482.9 L983.3 466.7 L994.4 470.7 L988.9 482.9 L975.0 499.1 L963.9 507.2 L972.2 495.1 Z"/>
+  <path class="land" d="M763.9 296.2 L777.8 308.4 L788.9 324.6 L794.4 340.9 L811.1 349.0 L822.2 353.0 L833.3 353.0 L844.4 353.0 L861.1 349.0 L875.0 332.8 L888.9 328.7 L891.7 353.0 L872.2 349.0 L855.6 332.8 L847.2 324.6 L838.9 316.5 L833.3 308.4 L825.0 300.3 L813.9 304.3 L802.8 308.4 L786.1 312.5 L772.2 300.3 Z"/>
+  <path class="land" d="M622.2 365.2 L638.9 377.4 L638.9 405.8 L630.6 418.0 L622.2 401.7 L619.4 381.4 Z"/>
+  <g class="anker">${ankerLinien()}</g>
+  </svg>`;
+}
+
+function ansichtAnwenden(){
+  const b = sicht.clientWidth, hh = sicht.clientHeight;
+  const zmin = Math.max(b/KARTE_B, 0.95), zmax = 4.5;
+  ansicht.z = Math.min(zmax, Math.max(zmin, ansicht.z));
+  const bb = KARTE_B*ansicht.z, bh = KARTE_H*ansicht.z;
+  ansicht.x = bb <= b ? (b-bb)/2 : Math.min(0, Math.max(b-bb, ansicht.x));
+  ansicht.y = bh <= hh ? (hh-bh)/2 : Math.min(0, Math.max(hh-bh, ansicht.y));
+  welt.style.transform = `translate(${ansicht.x}px,${ansicht.y}px) scale(${ansicht.z})`;
+  pinGroesse();
+}
+
+/* Pins behalten ihre Bildschirmgroesse, schrumpfen aber leicht beim Herauszoomen. */
+function pinGroesse(){
+  const k = Math.max(0.62, Math.min(1, 0.45 + ansicht.z*0.55));
+  const s = k / ansicht.z;
+  welt.classList.toggle("weit", ansicht.z < 0.99);
+  document.querySelectorAll(".pin").forEach(p => p.style.transform = `translate(-50%,-100%) scale(${s})`);
+}
+
+function zoomUm(f, mx, my){
+  const b = sicht.clientWidth, hh = sicht.clientHeight;
+  mx = mx ?? b/2; my = my ?? hh/2;
+  const alt = ansicht.z, neu = alt*f;
+  ansicht.x = mx - (mx-ansicht.x)*(neu/alt);
+  ansicht.y = my - (my-ansicht.y)*(neu/alt);
+  ansicht.z = neu; ansichtAnwenden();
+}
+
+/* ---------- Ziehen und Zoomen ---------- */
+(function steuerung(){
+  const zeiger = new Map();
+  let start = null, bewegt = 0, gefangen = false;
+  sicht.addEventListener("pointerdown", e => {
+    zeiger.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    // Erst greifen, wenn wirklich gezogen wird – sonst schluckt der Zeigerfang die Tipps auf Pins.
+    if (zeiger.size === 1){ start = {x:e.clientX-ansicht.x, y:e.clientY-ansicht.y}; bewegt = 0; gefangen = false; }
+  });
+  sicht.addEventListener("pointermove", e => {
+    if (!zeiger.has(e.pointerId)) return;
+    const vor = zeiger.get(e.pointerId);
+    zeiger.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (zeiger.size === 2){
+      const [a,b] = [...zeiger.values()];
+      const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (steuerung.dist) zoomUm(d/steuerung.dist, (a.x+b.x)/2, (a.y+b.y)/2);
+      steuerung.dist = d; return;
+    }
+    if (!start) return;
+    bewegt += Math.abs(e.clientX-vor.x) + Math.abs(e.clientY-vor.y);
+    if (bewegt < 9) return;
+    if (!gefangen){ gefangen = true; sicht.classList.add("zieht");
+      try { sicht.setPointerCapture(e.pointerId); } catch(err){} }
+    ansicht.x = e.clientX - start.x; ansicht.y = e.clientY - start.y;
+    ansichtAnwenden();
+  });
+  const ende = e => { zeiger.delete(e.pointerId); if (zeiger.size < 2) steuerung.dist = null;
+    if (!zeiger.size){ start = null; gefangen = false; sicht.classList.remove("zieht"); } };
+  sicht.addEventListener("pointerup", ende);
+  sicht.addEventListener("pointercancel", ende);
+  sicht.addEventListener("wheel", e => { e.preventDefault();
+    zoomUm(e.deltaY < 0 ? 1.15 : 1/1.15, e.clientX, e.clientY); }, {passive:false});
+  window.addEventListener("resize", ansichtAnwenden);
+})();
+
+/* ---------- Pins ---------- */
+function pinsZeichnen(){
+  const teile = [];
+  const ziel = typeof hinweisZiel === "function" ? hinweisZiel() : null;
+  const winkt = (art, offen) => {
+    if (!ziel) return "";
+    if (ziel === art + "-frei"  && !offen) return "wink";
+    if (ziel === "meine-" + art &&  offen) return "wink";
+    if (ziel.startsWith("dock:")) return "";
+    return "blass";
+  };
+
+  if (ebenen.mine) for (const def of MINEN){
+    const [x,y] = px(def.id);
+    const m = S.minen[def.id], mat = MATERIAL[def.mat];
+    const streik = m && m.stillBis > S.tag;
+    teile.push(`<button class="pin ${m?"":"zu"} ${streik?"alarm":""} ${winkt("minen", !!m)}" data-pin="mine" data-id="${def.id}"
+      style="left:${x}px;top:${y}px" aria-label="Mine ${def.ort}">
+      <span class="knopf" style="${m?`background:${mat.farbe};color:#fff`:""}">${m?mat.sym:"+"}
+        ${m&&m.arbeiter?`<span class="crew">${m.arbeiter}</span>`:""}</span>
+      <span class="bez">${LAND[def.land].flagge} ${def.ort}</span></button>`);
+  }
+
+  if (ebenen.raff) for (const def of RAFF_ORTE){
+    const [x,y] = px(def.id);
+    const r = S.raff[def.id];
+    teile.push(`<button class="pin werk ${r?"":"zu"} ${winkt("raff", !!r)}" data-pin="raff" data-id="${def.id}"
+      style="left:${x}px;top:${y}px" aria-label="Raffinerie ${def.ort}">
+      <span class="knopf" style="${r?"background:#5b8f7a;color:#fff":""}">🧪
+        ${r&&r.arbeiter?`<span class="crew">${r.arbeiter}</span>`:""}</span>
+      <span class="bez">${LAND[def.land].flagge} ${def.ort}</span></button>`);
+  }
+
+  if (ebenen.fab) for (const land of FAB_ORTE){
+    const [x,y] = px("f_"+land);
+    const meine = S.fabriken.filter(f => f.land === land);
+    const crew = meine.reduce((a,f)=>a+f.arbeiter, 0);
+    teile.push(`<button class="pin werk ${meine.length?"":"zu"} ${winkt("fab", !!meine.length)}" data-pin="fab" data-id="${land}"
+      style="left:${x}px;top:${y}px" aria-label="Fabrikstandort ${LAND[land].name}">
+      <span class="knopf" style="${meine.length?"background:#b5703c;color:#fff":""}">🏭
+        ${crew?`<span class="crew">${crew}</span>`:""}</span>
+      <span class="bez">${LAND[land].flagge} ${LAND[land].name}</span></button>`);
+  }
+
+  welt.querySelectorAll(".pin").forEach(p => p.remove());
+  welt.insertAdjacentHTML("beforeend", teile.join(""));
+  pinGroesse();
+}
+
+/* Karte auf einen Ort zentrieren, damit man nach dem Bauen sieht, wo es passiert ist. */
+function zeigeAuf(id, z){
+  const [mx,my] = px(id);
+  ansicht.z = z || Math.max(ansicht.z, 1.6);
+  ansicht.x = sicht.clientWidth/2 - mx*ansicht.z;
+  ansicht.y = sicht.clientHeight/2 - my*ansicht.z;
+  ansichtAnwenden();
+}
+
+
+/* ==========================================================
+   TUTORIAL
+   Führt Schritt für Schritt durch die Kette. Solange es läuft,
+   ist jeweils nur EIN Standort pro Sorte kaufbar – damit kein
+   Geld verloren geht, bevor klar ist, wie das Spiel funktioniert.
+   ========================================================== */
+const TUTORIAL = [
+  { id:"mine", emoji:"⛏️", titel:"Eröffne deine erste Mine",
+    text:"Tippe auf einen leuchtenden Pin auf der Karte.",
+    ziel:()=>"minen-frei",
+    fertig:()=> Object.keys(S.minen).length > 0 },
+  { id:"minecrew", emoji:"👥", titel:"Schick deine Leute in die Mine",
+    text:"Ohne Arbeiter wird nichts gefördert. Tippe die Mine an und drück auf +10.",
+    ziel:()=>"meine-minen",
+    fertig:()=> Object.values(S.minen).some(m => m.arbeiter >= 8) },
+  { id:"team", emoji:"🧑‍🏭", titel:"Stell mehr Leute an",
+    text:"Für die Raffinerie brauchst du zusätzliches Personal. Reiter «Team».",
+    ziel:()=>"dock:team",
+    fertig:()=> S.arbeiterGesamt >= 25 },
+  { id:"raff", emoji:"🧪", titel:"Bau eine Raffinerie",
+    text:"Roherz lässt sich nicht verbauen. Erst die Raffinerie macht Material daraus.",
+    ziel:()=>"raff-frei",
+    fertig:()=> Object.keys(S.raff).length > 0 },
+  { id:"raffcrew", emoji:"👥", titel:"Besetze die Raffinerie",
+    text:"Ohne Leute steht sie still und dein Erz stapelt sich.",
+    ziel:()=>"meine-raff",
+    fertig:()=> Object.values(S.raff).some(r => r.arbeiter >= 5) },
+  { id:"fab", emoji:"🏭", titel:"Bau eine Fabrik",
+    text:"Tippe einen Fabrik-Pin an und wähle ein Produkt.",
+    ziel:()=>"fab-frei",
+    fertig:()=> S.fabriken.length > 0 },
+  { id:"markt", emoji:"📦", titel:"Kauf fehlendes Material zu",
+    text:"Eine Mine liefert nur ein Material. Den Rest holst du im Markt – mit Aufschlag.",
+    ziel:()=>"dock:markt",
+    fertig:()=> S.gekauft },
+  { id:"fabcrew", emoji:"⚙️", titel:"Besetze die Fabrik",
+    text:"Sobald sie fertig gebaut ist, kannst du Leute einteilen.",
+    ziel:()=>"meine-fab",
+    fertig:()=> S.fabriken.some(f => f.restbau === 0 && f.arbeiter > 0) }
+];
+
+const tutorialLaeuft = () => S.tutorial >= 0 && S.tutorial < TUTORIAL.length;
+const tutorialSchritt = () => tutorialLaeuft() ? TUTORIAL[S.tutorial] : null;
+
+/* Während des Tutorials darf von jeder Sorte nur ein Standort gekauft werden. */
+function gesperrt(art){
+  if (!tutorialLaeuft()) return false;
+  if (art === "mine") return Object.keys(S.minen).length > 0;
+  if (art === "raff") return Object.keys(S.raff).length > 0;
+  if (art === "fab")  return S.fabriken.length > 0;
+  return false;
+}
+const SPERRTEXT = "Im Tutorial nur ein Standort";
+
+function tutorialPruefen(){
+  while (tutorialLaeuft() && TUTORIAL[S.tutorial].fertig()){
+    const erledigt = TUTORIAL[S.tutorial];
+    S.tutorial++;
+    notiz(tutorialLaeuft() ? "✅ Erledigt: " + erledigt.titel
+                           : "🎉 Tutorial geschafft – alle Standorte sind jetzt offen.", "gut");
+  }
+}
+
+/* ==========================================================
+   5. ANZEIGE
+   ========================================================== */
+const $ = s => document.querySelector(s);
+const blatt = $("#blatt"), blattinhalt = $("#blattinhalt"), seite = $("#seite");
+let offenesBlatt = null, aktiveSeite = "karte";
+
+/* ---------- Toasts statt Logliste ---------- */
+const gezeigt = new Set();
+function toastsErneuern(){
+  const neu = S.log.filter(e => !gezeigt.has(e.tag + e.text)).slice(0, 2).reverse();
+  for (const e of neu){
+    gezeigt.add(e.tag + e.text);
+    const d = document.createElement("div");
+    d.className = "toast " + (e.art || "");
+    d.innerHTML = e.text;
+    $("#toasts").appendChild(d);
+    setTimeout(() => { d.style.transition = "opacity .4s"; d.style.opacity = 0;
+      setTimeout(()=>d.remove(), 400); }, 4200);
+  }
+  while ($("#toasts").children.length > 2) $("#toasts").firstChild.remove();
+}
+
+/* ---------- Wegweiser ---------- */
+function naechsterSchritt(){
+  const minen = Object.keys(S.minen);
+  if (!minen.length) return ["Eröffne deine erste Mine", "Tippe auf einen hellen Pin. Günstig sind Boké, Katanga und Kolwezi."];
+  if (minen.every(id => S.minen[id].arbeiter === 0)) return ["Schick Leute in die Mine", "Ohne Arbeiter wird nichts gefördert."];
+  const gefahr = minen.find(id => S.minen[id].zufriedenheit < 35 && S.minen[id].arbeiter > 0);
+  if (gefahr) return ["Streikgefahr in " + MINEN.find(x=>x.id===gefahr).ort, "Zufriedenheit unter 35 %. Erhöh dort den Lohn."];
+  if (!Object.keys(S.raff).length) return ["Bau eine Raffinerie", "Roherz allein nützt nichts. Erst die Raffinerie macht Material daraus."];
+  const kapa = Object.keys(S.raff).reduce((a,id)=>{ const d=RAFF_ORTE.find(x=>x.id===id); return a + d.kapazitaet*(S.raff[id].arbeiter/d.plaetze); }, 0);
+  if (kapa === 0) return ["Die Raffinerie steht still", "Schick Arbeiter hin, sonst stapelt sich dein Erz."];
+  if (Object.values(S.erz).reduce((a,b)=>a+b,0) > kapa*5) return ["Deine Raffinerie kommt nicht nach", "Mehr Arbeiter dort – oder eine zweite bauen."];
+  if (!S.fabriken.length) return ["Bau deine erste Fabrik", "Tippe auf einen Fabrik-Pin. Das Mainboard braucht am wenigsten Materialien."];
+  const leer = S.fabriken.findIndex(f => f.restbau === 0 && f.arbeiter === 0);
+  if (leer >= 0) return ["Deine Fabrik hat keine Leute", "Sie ist fertig, produziert aber nichts."];
+  for (const f of S.fabriken){
+    if (f.restbau > 0) continue;
+    const fehlt = Object.keys(PRODUKT[f.produkt].rezept).filter(k => (S.mat[k]||0) < PRODUKT[f.produkt].rezept[k]*3);
+    if (fehlt.length) return ["Es fehlt " + fehlt.map(k=>MATERIAL[k].name).join(", "),
+      "Passende Mine eröffnen – oder im Markt zukaufen (60 % Aufschlag)."];
+  }
+  if (freieArbeiter() > 15) return [freieArbeiter() + " Leute ohne Aufgabe", "Sie kosten trotzdem Lohn. Einteilen oder entlassen."];
+  if (S.ruf < 55) return ["Dein Ruf ist tief", "Das senkt die Nachfrage nach allen Produkten. Prüf die Löhne."];
+  return null;
+}
+
+
+/* Zeigt entweder die Tutorial-Aufgabe oder danach den Wegweiser. */
+function questZeichnen(){
+  const k = $("#quest");
+  const t = tutorialSchritt();
+  k.classList.toggle("unten", aktiveSeite !== "karte");
+  if (t){
+    $("#q-emoji").textContent = t.emoji;
+    $("#q-art").textContent = `Aufgabe ${S.tutorial+1}/${TUTORIAL.length}`;
+    $("#q-titel").textContent = t.titel;
+    $("#q-text").textContent = t.text;
+    $("#q-punkte").innerHTML = TUTORIAL.map((_,i) =>
+      `<i class="${i < S.tutorial ? "ok" : i === S.tutorial ? "jetzt" : ""}"></i>`).join("");
+    k.hidden = false;
+    return;
+  }
+  const w = naechsterSchritt();
+  if (!w || offenesBlatt){ k.hidden = true; return; }
+  $("#q-emoji").textContent = "➜";
+  $("#q-art").textContent = "Nächster Schritt";
+  $("#q-titel").textContent = w[0];
+  $("#q-text").textContent = w[1];
+  $("#q-punkte").innerHTML = "";
+  k.hidden = false;
+}
+
+/* Welche Pins oder Reiter sollen blinken? */
+function hinweisZiel(){
+  const t = tutorialSchritt();
+  return t ? t.ziel() : null;
+}
+function hinweiseSetzen(){
+  const z = hinweisZiel();
+  document.querySelectorAll("#dock button").forEach(b =>
+    b.classList.toggle("wink", z === "dock:" + b.dataset.seite));
+}
+
+/* ---------- Hauptzeichnung ---------- */
+function zeichnen(){
+  $("#h-kasse").textContent = kurz(S.kasse);
+  $("#h-kasse").style.color = S.kasse < 0 ? "#ff9a95" : "#fff";
+  $("#h-crew").textContent = freieArbeiter() + "/" + S.arbeiterGesamt;
+  $("#h-tag").textContent = S.tag;
+  pinsZeichnen();
+  toastsErneuern();
+  questZeichnen();
+  hinweiseSetzen();
+  if (offenesBlatt) blattFuellen(offenesBlatt.art, offenesBlatt.id);
+  if (aktiveSeite !== "karte") seiteFuellen(aktiveSeite);
+}
+
+/* ---------- Blatt: Mine ---------- */
+function blattMine(id){
+  const def = MINEN.find(x=>x.id===id), m = S.minen[id];
+  const mat = MATERIAL[def.mat], land = LAND[def.land];
+  const kopf = `<div class="titelzeile"><span class="flagge">${land.flagge}</span>
+    <div><h2>${def.ort}</h2><div class="ort">${land.name}</div></div></div>
+    <div class="erzband" style="background:${mat.farbe}"><span>${mat.sym}</span>${mat.name}</div>
+    <div class="notiz">${def.info}</div>`;
+
+  if (!m){
+    const zu = gesperrt("mine");
+    const geht = S.kasse >= def.erschliessung && !zu;
+    return kopf + (zu ? `<div class="notiz">🔒 Im Tutorial eröffnest du zuerst nur <b>eine</b> Mine. Danach werden alle Standorte frei.</div>` : "") + `
+      <div class="werte">
+        <div class="wert"><small>Ergiebigkeit</small><b>${def.ergiebigkeit} Erz</b></div>
+        <div class="wert"><small>je Arbeiter · Tag</small><b>${def.plaetze} Plätze</b></div>
+        <div class="wert"><small>Lohn üblich</small><b>${chf(land.lohn)}</b></div>
+        <div class="wert"><small>Wofür</small><b style="font-size:12.5px">${mat.wofuer}</b></div>
+      </div>
+      <button class="cta" data-tun="mine-auf" data-id="${id}" ${geht?"":"disabled"}>
+        ${zu ? SPERRTEXT : geht ? "Mine eröffnen · " + chf(def.erschliessung) : "Zu wenig Geld · " + chf(def.erschliessung)}</button>`;
+  }
+
+  const st = LOHNSTUFE[m.stufe], zuf = Math.round(m.zufriedenheit);
+  const farbe = zuf < 32 ? "var(--alarm)" : zuf < 60 ? "var(--warn)" : "var(--gruen)";
+  const still = m.stillBis > S.tag;
+  const ertrag = still ? 0 : m.arbeiter * def.ergiebigkeit * (0.55 + zuf/100*0.6) * (m.malusBis>S.tag ? m.malus : 1);
+  return kopf +
+    (still ? `<div class="notiz rot"><b>Die Mine steht still.</b>${m.stillBis-S.tag<900?" Noch "+(m.stillBis-S.tag)+" Tage.":""}</div>` : "") + `
+    <div class="crewzeile">
+      <button data-tun="crew" data-id="${id}" data-n="-10" ${m.arbeiter<=0?"disabled":""}>−10</button>
+      <button data-tun="crew" data-id="${id}" data-n="-1" ${m.arbeiter<=0?"disabled":""}>−</button>
+      <div class="zahl"><b>${m.arbeiter}</b><small>von ${def.plaetze} Plätzen</small></div>
+      <button data-tun="crew" data-id="${id}" data-n="1" ${(freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""}>+</button>
+      <button data-tun="crew" data-id="${id}" data-n="10" ${(freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""}>+10</button>
+    </div>
+    <div class="ort" style="text-align:center;margin-bottom:8px">${freieArbeiter()} Leute frei im Team</div>
+
+    <div class="ort">Lohnstufe</div>
+    <div class="segment">${LOHNSTUFE.map((s,i)=>
+      `<button data-tun="lohn" data-id="${id}" data-stufe="${i}" aria-pressed="${i===m.stufe}">${s.label}</button>`).join("")}</div>
+    <div class="zeile"><span>${st.name}</span><b>${chf(land.lohn*st.faktor)}/Mt.</b></div>
+
+    <div style="margin-top:10px"><div class="ort">Zufriedenheit</div>
+      <div class="leiste"><i style="width:${zuf}%;background:${farbe}"></i></div>
+      <div class="zeile"><span>${zuf<32?"Streik ist wahrscheinlich":zuf<60?"angespannt":"gut"}</span><b>${zuf} %</b></div></div>
+
+    <div class="werte">
+      <div class="wert"><small>Förderung</small><b>${ertrag.toFixed(1)} Erz/Tag</b></div>
+      <div class="wert"><small>Lohnkosten</small><b>${chf(m.arbeiter*land.lohn*st.faktor)}</b></div>
+    </div>`;
+}
+
+/* ---------- Blatt: Raffinerie ---------- */
+function blattRaff(id){
+  const def = RAFF_ORTE.find(x=>x.id===id), r = S.raff[id], land = LAND[def.land];
+  const kopf = `<div class="titelzeile"><span class="flagge">${land.flagge}</span>
+    <div><h2>${def.ort}</h2><div class="ort">${land.name} · Raffinerie</div></div></div>
+    <div class="notiz">${def.info}</div>`;
+  if (!r){
+    const zu = gesperrt("raff");
+    const geht = S.kasse >= def.bau && !zu;
+    return kopf + (zu ? `<div class="notiz">🔒 Im Tutorial baust du zuerst nur <b>eine</b> Raffinerie.</div>` : "") + `<div class="werte">
+        <div class="wert"><small>Kapazität</small><b>${def.kapazitaet} Erz/Tag</b></div>
+        <div class="wert"><small>Arbeitsplätze</small><b>${def.plaetze}</b></div>
+        <div class="wert"><small>Lohn</small><b>${chf(land.lohn)}</b></div>
+        <div class="wert"><small>Betrieb</small><b>${chf(9000)}/Mt.</b></div>
+      </div>
+      <button class="cta" data-tun="raff-bau" data-id="${id}" ${geht?"":"disabled"}>
+        ${zu ? SPERRTEXT : geht ? "Raffinerie bauen · " + chf(def.bau) : "Zu wenig Geld · " + chf(def.bau)}</button>`;
+  }
+  const erzda = Object.values(S.erz).reduce((a,b)=>a+b,0);
+  return kopf + `
+    <div class="crewzeile">
+      <button data-tun="rcrew" data-id="${id}" data-n="-5" ${r.arbeiter<=0?"disabled":""}>−5</button>
+      <button data-tun="rcrew" data-id="${id}" data-n="-1" ${r.arbeiter<=0?"disabled":""}>−</button>
+      <div class="zahl"><b>${r.arbeiter}</b><small>von ${def.plaetze} Plätzen</small></div>
+      <button data-tun="rcrew" data-id="${id}" data-n="1" ${(freieArbeiter()<=0||r.arbeiter>=def.plaetze)?"disabled":""}>+</button>
+      <button data-tun="rcrew" data-id="${id}" data-n="5" ${(freieArbeiter()<=0||r.arbeiter>=def.plaetze)?"disabled":""}>+5</button>
+    </div>
+    <div class="werte">
+      <div class="wert"><small>Durchsatz</small><b>${Math.round(def.kapazitaet*(r.arbeiter/def.plaetze)*globalWert("hafen"))} Erz/Tag</b></div>
+      <div class="wert"><small>Roherz im Lager</small><b>${Math.round(erzda)}</b></div>
+    </div>
+    <div class="notiz">Aus 1 Erz wird je nach Material unterschiedlich viel: Silizium 70 %, Gold nur 8 %. Der Rest ist Abraum.</div>`;
+}
+
+/* ---------- Blatt: Fabrikstandort ---------- */
+function blattFab(land){
+  const meine = S.fabriken.map((f,i)=>({f,i})).filter(o => o.f.land === land);
+  const kopf = `<div class="titelzeile"><span class="flagge">${LAND[land].flagge}</span>
+    <div><h2>${LAND[land].name}</h2><div class="ort">Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat</div></div></div>`;
+
+  const laufend = meine.map(({f,i}) => {
+    const def = PRODUKT[f.produkt];
+    if (f.restbau > 0) return `<div class="karte"><h3>${def.name}</h3>
+      <div class="ort">Im Bau – noch ${f.restbau} Tage</div>
+      <div class="leiste"><i style="width:${100-f.restbau/def.bauzeit*100}%;background:var(--gold)"></i></div></div>`;
+    let stueck = Math.floor(f.arbeiter * def.proArbeiter);
+    for (const k in def.rezept) stueck = Math.min(stueck, Math.floor((S.mat[k]||0)/def.rezept[k]));
+    const fehlt = Object.keys(def.rezept).filter(k => (S.mat[k]||0) < def.rezept[k]);
+    return `<div class="karte"><h3>${def.name}</h3>
+      <div class="ort">Verkaufspreis ${chf(warenPreis(f.produkt))} · Nachfrage ${Math.round(nachfrage(f.produkt))}/Tag</div>
+      <div class="stueck">${Object.keys(def.rezept).map(k =>
+        `<span class="${fehlt.includes(k)?"fehlt":""}" style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")}</div>
+      <div class="crewzeile">
+        <button data-tun="fcrew" data-i="${i}" data-n="-5" ${f.arbeiter<=0?"disabled":""}>−5</button>
+        <button data-tun="fcrew" data-i="${i}" data-n="-1" ${f.arbeiter<=0?"disabled":""}>−</button>
+        <div class="zahl"><b>${f.arbeiter}</b><small>von ${def.plaetze}</small></div>
+        <button data-tun="fcrew" data-i="${i}" data-n="1" ${(freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""}>+</button>
+        <button data-tun="fcrew" data-i="${i}" data-n="5" ${(freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""}>+5</button>
+      </div>
+      <div class="zeile"><span>Produktion heute</span><b>${stueck} Stück</b></div>
+      ${fehlt.length ? `<div class="notiz rot">Es fehlt: ${fehlt.map(k=>MATERIAL[k].name).join(", ")}</div>` : ""}</div>`;
+  }).join("");
+
+  const zu = gesperrt("fab");
+  const neu = Object.keys(PRODUKT).map(p => {
+    const def = PRODUKT[p], geht = S.kasse >= def.kosten && !zu;
+    return `<div class="karte"><h3>${def.name}</h3>
+      <div class="ort">${chf(def.preis)} · Bauzeit ${def.bauzeit} Tage</div>
+      <div class="stueck">${Object.keys(def.rezept).map(k =>
+        `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")}</div>
+      <div class="notiz">${def.info}</div>
+      <button class="cta gruen" data-tun="fab-bau" data-p="${p}" data-l="${land}" ${geht?"":"disabled"}>
+        ${zu ? SPERRTEXT : geht ? "Hier bauen · " + chf(def.kosten) : "Zu wenig Geld · " + chf(def.kosten)}</button></div>`;
+  }).join("");
+
+  return kopf + laufend + (zu ? `<div class="notiz">🔒 Im Tutorial baust du zuerst nur <b>eine</b> Fabrik.</div>` : "")
+    + `<h3 style="margin:16px 0 8px">Neue Produktlinie</h3>` + neu;
+}
+
+let blattStand = "";
+function blattFuellen(art, id){
+  offenesBlatt = {art, id};
+  const html = art === "mine" ? blattMine(id) : art === "raff" ? blattRaff(id) : blattFab(id);
+  if (html !== blattStand){ blattinhalt.innerHTML = html; blattStand = html; }
+  blatt.classList.add("auf");
+  $("#blattschleier").classList.add("auf");
+}
+function blattZu(){ blatt.classList.remove("auf"); $("#blattschleier").classList.remove("auf");
+  offenesBlatt = null; blattStand = ""; zeichnen(); }
+
+/* ---------- Seiten ---------- */
+function seiteFuellen(name){
+  seite.innerHTML = {markt:seiteMarkt, team:seiteTeam, ziel:seiteZiel, wissen:seiteWissen}[name]();
+}
+
+function seiteMarkt(){
+  const mat = Object.keys(MATERIAL).map(k => {
+    const p = matPreis(k), d = p/MATERIAL[k].preis - 1;
+    return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}</td>
+      <td class="n">${Math.round(S.mat[k]||0)}</td>
+      <td class="n" style="color:${d>.03?"var(--gruen)":d<-.03?"var(--alarm)":"inherit"}">${p.toFixed(0)}${d>.03?" ▲":d<-.03?" ▼":""}</td>
+      <td><div class="handel">
+        <button data-tun="kaufen" data-k="${k}" ${S.kasse>=kaufPreis(k)*HANDELSMENGE?"":"disabled"}>+100</button>
+        <button data-tun="verkaufen" data-k="${k}" ${(S.mat[k]||0)>=HANDELSMENGE?"":"disabled"}>−100</button></div></td></tr>`;
+  }).join("");
+  const prod = Object.keys(PRODUKT).map(p =>
+    `<tr><td>${PRODUKT[p].name}</td><td class="n">${S.ware[p]||0}</td>
+     <td class="n">${Math.round(nachfrage(p))}</td><td class="n">${Math.round(warenPreis(p))}</td></tr>`).join("");
+  const eff = S.globalMod.filter(m => m.bis > S.tag);
+  return `<h1>Markt</h1><div class="unter">Preise bewegen sich alle 5 Tage</div>
+    <div class="karte"><h3>Rohstoffe</h3>
+      <table><tr><th>Material</th><th class="n">Lager</th><th class="n">CHF</th><th></th></tr>${mat}</table>
+      <div class="notiz">Zukauf kostet 60 % Aufschlag, Verkauf bringt 25 % Abschlag. Wer selber abbaut, spart diese Spanne – zahlt dafür Löhne und trägt Verantwortung.</div></div>
+    <div class="karte"><h3>Produkte</h3>
+      <table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>${prod}</table>
+      <div class="notiz">Produzierst du mehr, als der Markt aufnimmt, füllt sich das Lager und der Preis fällt um bis zu 35 %.</div></div>
+    ${eff.length ? `<div class="karte"><h3>Aktuelle Sondereffekte</h3>${eff.map(m =>
+      `<div class="zeile"><span>${m.art==="dollar"?"US-Dollar-Kurs":"Hafen-Durchsatz"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>` : ""}`;
+}
+
+function seiteTeam(){
+  const rows = [];
+  for (const id in S.minen){ const d = MINEN.find(x=>x.id===id);
+    if (S.minen[id].arbeiter) rows.push([`${LAND[d.land].flagge} Mine ${d.ort}`, S.minen[id].arbeiter, LAND[d.land].lohn*LOHNSTUFE[S.minen[id].stufe].faktor]); }
+  for (const id in S.raff){ const d = RAFF_ORTE.find(x=>x.id===id);
+    if (S.raff[id].arbeiter) rows.push([`${LAND[d.land].flagge} Raffinerie ${d.ort}`, S.raff[id].arbeiter, LAND[d.land].lohn]); }
+  S.fabriken.forEach(f => { if (f.arbeiter) rows.push([`${LAND[f.land].flagge} Fabrik ${PRODUKT[f.produkt].name}`, f.arbeiter, LAND[f.land].lohn]); });
+  return `<h1>Dein Team</h1><div class="unter">Jeder Mensch kostet Lohn – auch ohne Aufgabe</div>
+    <div class="karte">
+      <div class="werte">
+        <div class="wert"><small>Angestellt</small><b>${S.arbeiterGesamt}</b></div>
+        <div class="wert"><small>Ohne Aufgabe</small><b style="color:${freieArbeiter()>10?"var(--warn)":"inherit"}">${freieArbeiter()}</b></div>
+        <div class="wert"><small>Lohnsumme</small><b>${chf(lohnsumme())}</b></div>
+        <div class="wert"><small>pro Monat</small><b>${chf(lohnsumme()/30)}/Tag</b></div>
+      </div>
+      <div class="wahlgruppe">
+        <button data-tun="anstellen" ${S.kasse<18000?"disabled":""}>+10 anstellen<br><small>${chf(18000)}</small></button>
+        <button data-tun="entlassen" ${freieArbeiter()<10?"disabled":""}>−10 entlassen<br><small>nur freie</small></button>
+      </div>
+      <div class="notiz">Nicht eingeteilte Leute kosten CHF 200 pro Monat. Stell nur so viele an, wie du beschäftigen kannst.</div>
+    </div>
+    <div class="karte"><h3>Wer arbeitet wo?</h3>
+      ${rows.length ? `<table><tr><th>Ort</th><th class="n">Leute</th><th class="n">Lohn</th></tr>
+        ${rows.map(r=>`<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${Math.round(r[2]).toLocaleString("de-CH")}</td></tr>`).join("")}</table>`
+      : `<p style="color:var(--grau)">Noch niemand eingeteilt.</p>`}</div>`;
+}
+
+function seiteZiel(){
+  const gewinn = S.eingenommen - S.ausgegeben, ruf = Math.round(S.ruf);
+  return `<h1>Ziel der Runde</h1><div class="unter">Beides muss stimmen – Geld allein reicht nicht</div>
+    <div class="karte">
+      <div class="zeile"><span>Gewinn</span><b>${chf(gewinn)}</b></div>
+      <div class="leiste"><i style="width:${klemm(gewinn/ZIEL_GEWINN*100,0,100)}%;background:var(--gold)"></i></div>
+      <div class="ort">Ziel ${chf(ZIEL_GEWINN)}</div>
+      <div class="zeile" style="margin-top:12px"><span>Ruf</span><b style="color:${ruf<40?"var(--alarm)":ruf<60?"var(--warn)":"var(--gruen)"}">${ruf}</b></div>
+      <div class="leiste"><i style="width:${klemm(ruf/ZIEL_RUF*100,0,100)}%;background:var(--gruen)"></i></div>
+      <div class="ort">Ziel ${ZIEL_RUF} · Ein tiefer Ruf senkt die Nachfrage nach allen deinen Produkten</div>
+      <div class="zeile" style="margin-top:12px"><span>Verbleibende Tage</span><b>${Math.max(0, ZIEL_TAGE - S.tag)}</b></div>
+    </div>
+    <div class="karte"><h3>Lager</h3>
+      ${Object.keys(MATERIAL).filter(k=>(S.mat[k]||0)>.5||(S.erz[k]||0)>.5).map(k=>
+        `<div class="zeile"><span><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}</span>
+         <b>${Math.round(S.mat[k]||0)} <small style="color:var(--grau);font-weight:600">+ ${Math.round(S.erz[k]||0)} Erz</small></b></div>`).join("")
+        || `<p style="color:var(--grau)">Noch nichts gefördert.</p>`}</div>
+    <div class="karte"><h3>Meldungen</h3>
+      ${S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:12.5px">${e.text}</span><b style="font-size:11px;color:var(--grau)">T${e.tag}</b></div>`).join("")
+        || `<p style="color:var(--grau)">Noch nichts passiert.</p>`}</div>
+    <button class="cta still" data-tun="reset">Neue Runde starten</button>`;
+}
+
+function seiteWissen(){
+  const zeilen = Object.keys(MATERIAL).map(k => {
+    const orte = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>LAND[m.land].flagge+" "+LAND[m.land].name))];
+    return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${MATERIAL[k].name}</b><br>
+      <small style="color:var(--grau);font-weight:600">${MATERIAL[k].wofuer}</small></td>
+      <td style="font-size:12px">${orte.join(", ")}</td><td class="n">${(MATERIAL[k].ausbeute*100).toFixed(0)} %</td></tr>`;
+  }).join("");
+  return `<h1>Wissen &amp; Modell</h1><div class="unter">Was hinter dem Spiel steckt</div>
+    <div class="karte"><h3>Die Kette</h3>
+      <p><code>Mine → Raffinerie → Fabrik → Markt</code></p>
+      <p>Du gewinnst nur, wenn am Ende <b>${chf(ZIEL_GEWINN)} Gewinn</b> <b>und</b> ein <b>Ruf von ${ZIEL_RUF}</b> stehen.</p></div>
+    <div class="karte"><h3>Woher die Rohstoffe kommen</h3>
+      <p>Die Spalte rechts sagt, wie viel Material aus einer Einheit Roherz entsteht. Bei Gold sind es 8 % – der Rest ist Abraum.</p>
+      <table><tr><th>Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>${zeilen}</table></div>
+    <div class="karte"><h3>Was im Gerät steckt</h3>
+      <table>${Object.keys(PRODUKT).map(p=>`<tr><td><b>${PRODUKT[p].name}</b><br>
+        <span class="stueck">${Object.keys(PRODUKT[p].rezept).map(k=>
+          `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${PRODUKT[p].rezept[k]}</span>`).join("")}</span></td></tr>`).join("")}</table></div>
+    <div class="karte"><h3>Die Formeln im Code</h3>
+      <table>
+        <tr><td>Förderung/Tag</td><td><code>Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)</code></td></tr>
+        <tr><td>Material aus Erz</td><td><code>Erz × Ausbeute</code></td></tr>
+        <tr><td>Fabrik-Ausstoss</td><td><code>Arbeiter × Ausstoss</code>, begrenzt vom knappsten Material</td></tr>
+        <tr><td>Nachfrage</td><td><code>Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)</code></td></tr>
+        <tr><td>Verkaufspreis</td><td><code>Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs</code></td></tr>
+      </table>
+      <div class="notiz">Aufgabe: Such im Quelltext die Funktion <code>tagVor()</code>. Sie ist der Herzschlag des Spiels. In welcher Reihenfolge passiert was – und warum ist die Reihenfolge wichtig?</div></div>
+    <div class="karte"><h3>Warum Löhne im Spiel zählen</h3>
+      <p>Tiefe Löhne senken deine Kosten sofort. Sie senken auch die Zufriedenheit, und unter 32 % wird gestreikt. Ein Streik stoppt die Förderung. Sitzt du ihn aus, fällt dein Ruf – und ein schlechter Ruf senkt die Nachfrage nach allem, was du verkaufst.</p>
+      <p>In der Wirklichkeit ist der Zusammenhang nicht so direkt. Trotzdem gilt: Die Länder mit den tiefsten Löhnen sind oft genau jene mit den Rohstoffen, die wir für Smartphones brauchen. Das ist kein Zufall, sondern Geschichte.</p></div>
+    <div class="karte"><h3>Zum Nachdenken</h3>
+      <p>1. Warum ist China bei Seltenen Erden mächtiger, als sein Anteil am Abbau vermuten lässt?<br>
+      2. Warum ist es riskant, alles in einem Land zu raffinieren?<br>
+      3. Welche Entscheidung würdest du im echten Leben anders treffen – und warum?</p></div>`;
+}
+
+/* ---------- Ereignisdialog ---------- */
+function dialogZeigen(e){
+  modalOffen = true;
+  $("#d-art").textContent = e.art || "Ereignis";
+  $("#d-titel").textContent = e.titel || "";
+  $("#d-text").innerHTML = e.text || "";
+  $("#d-wahlen").innerHTML = "";
+  e.wahlen.forEach((w,i) => {
+    const b = document.createElement("button");
+    b.className = "wahl";
+    b.innerHTML = `<b>${w.text}</b><small>${w.klein||""}</small>`;
+    b.onclick = () => { w.tun(); S.ruf = klemm(S.ruf,0,100);
+      modalOffen = false; $("#schleier").hidden = true; speichern(); zeichnen(); };
+    $("#d-wahlen").appendChild(b);
+    if (!i) setTimeout(()=>b.focus(), 60);
+  });
+  $("#schleier").hidden = false;
+  zeichnen();
+}
+
+/* ---------- Steuerung ---------- */
+document.addEventListener("click", e => {
+  if (e.target.id === "zu" || e.target.id === "blattschleier"){ blattZu(); return; }
+
+  const pin = e.target.closest(".pin");
+  if (pin){ blattFuellen(pin.dataset.pin, pin.dataset.id); return; }
+
+  const eb = e.target.closest("[data-ebene]");
+  if (eb){ const k = eb.dataset.ebene; ebenen[k] = !ebenen[k];
+    eb.setAttribute("aria-pressed", ebenen[k]); pinsZeichnen(); return; }
+
+  const zo = e.target.closest("[data-zoom]");
+  if (zo){ zoomUm(+zo.dataset.zoom > 0 ? 1.5 : 1/1.5); return; }
+
+  const tm = e.target.closest("[data-tempo]");
+  if (tm){ tempoSetzen(+tm.dataset.tempo); return; }
+
+  const sb = e.target.closest("[data-seite]");
+  if (sb){
+    aktiveSeite = sb.dataset.seite; blattZu();
+    document.querySelectorAll("[data-seite]").forEach(b => b.setAttribute("aria-selected", b.dataset.seite === aktiveSeite));
+    seite.hidden = aktiveSeite === "karte";
+    if (!seite.hidden){ seiteFuellen(aktiveSeite); seite.scrollTop = 0; }
+    zeichnen(); return;
+  }
+
+  const t = e.target.closest("[data-tun]");
+  if (!t){ if (!e.target.closest("#blatt") && !e.target.closest("#seite")) blattZu(); return; }
+  const id = t.dataset.id, n = +t.dataset.n;
+
+  switch (t.dataset.tun){
+    case "mine-auf": {
+      const def = MINEN.find(x=>x.id===id);
+      if (S.kasse < def.erschliessung || gesperrt("mine")) return;
+      S.kasse -= def.erschliessung; S.ausgegeben += def.erschliessung;
+      S.minen[id] = {arbeiter:0, stufe:1, zufriedenheit:55, stillBis:0, malus:1, malusBis:0};
+      notiz(`⛏️ Mine <b>${def.ort}</b> eröffnet. Jetzt Leute hinschicken.`, "gut");
+      zeigeAuf(id); break; }
+    case "crew": {
+      const def = MINEN.find(x=>x.id===id), m = S.minen[id];
+      m.arbeiter = Math.max(0, Math.min(def.plaetze, m.arbeiter + Math.min(n, n>0?freieArbeiter():n)));
+      break; }
+    case "lohn": {
+      const neu = +t.dataset.stufe;
+      if (neu < S.minen[id].stufe && S.minen[id].zufriedenheit > 70) S.minen[id].zufriedenheit -= 12;
+      S.minen[id].stufe = neu; break; }
+    case "raff-bau": {
+      const def = RAFF_ORTE.find(x=>x.id===id);
+      if (S.kasse < def.bau || gesperrt("raff")) return;
+      S.kasse -= def.bau; S.ausgegeben += def.bau; S.raff[id] = {arbeiter:0};
+      notiz(`🧪 Raffinerie <b>${def.ort}</b> gebaut.`, "gut"); zeigeAuf(id); break; }
+    case "rcrew": {
+      const def = RAFF_ORTE.find(x=>x.id===id), r = S.raff[id];
+      r.arbeiter = Math.max(0, Math.min(def.plaetze, r.arbeiter + Math.min(n, n>0?freieArbeiter():n)));
+      break; }
+    case "fab-bau": {
+      const p = t.dataset.p, l = t.dataset.l, def = PRODUKT[p];
+      if (S.kasse < def.kosten || gesperrt("fab")) return;
+      S.kasse -= def.kosten; S.ausgegeben += def.kosten;
+      S.fabriken.push({produkt:p, land:l, arbeiter:0, restbau:def.bauzeit});
+      notiz(`🏭 Fabrik für <b>${def.name}</b> in ${LAND[l].name} – fertig in ${def.bauzeit} Tagen.`, "geld"); break; }
+    case "fcrew": {
+      const i = +t.dataset.i, f = S.fabriken[i], def = PRODUKT[f.produkt];
+      f.arbeiter = Math.max(0, Math.min(def.plaetze, f.arbeiter + Math.min(n, n>0?freieArbeiter():n)));
+      break; }
+    case "anstellen":
+      if (S.kasse < 18000) return;
+      S.kasse -= 18000; S.ausgegeben += 18000; S.arbeiterGesamt += 10;
+      notiz("👥 10 Leute angestellt.", "geld"); break;
+    case "entlassen":
+      if (freieArbeiter() >= 10){ S.arbeiterGesamt -= 10; notiz("👋 10 Leute entlassen.", "warn"); } break;
+    case "kaufen": {
+      const k = t.dataset.k, summe = kaufPreis(k)*HANDELSMENGE;
+      if (S.kasse < summe) return;
+      S.kasse -= summe; S.ausgegeben += summe; S.mat[k] = (S.mat[k]||0) + HANDELSMENGE; S.gekauft = true;
+      notiz(`📦 ${HANDELSMENGE} ${MATERIAL[k].name} zugekauft für ${chf(summe)}.`, "geld"); break; }
+    case "verkaufen": {
+      const k = t.dataset.k, summe = verkaufPreis(k)*HANDELSMENGE;
+      if ((S.mat[k]||0) < HANDELSMENGE) return;
+      S.mat[k] -= HANDELSMENGE; S.kasse += summe; S.eingenommen += summe;
+      notiz(`💸 ${HANDELSMENGE} ${MATERIAL[k].name} verkauft für ${chf(summe)}.`, "geld"); break; }
+    case "reset":
+      if (confirm("Neue Runde starten? Der bisherige Verlauf geht verloren.")) zuruecksetzen();
+      return;
+  }
+  tutorialPruefen(); speichern(); zeichnen();
+});
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !modalOffen && e.target === document.body){
+    e.preventDefault(); tempoSetzen(tempo > 0 ? 0 : 1); }
+  if (e.key === "Escape") blattZu();
+});
+
+/* ---------- Uhr ---------- */
+function tempoSetzen(v){
+  tempo = v;
+  document.querySelectorAll("[data-tempo]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.tempo === v));
+  if (takt) clearInterval(takt);
+  if (v > 0) takt = setInterval(() => { tagVor(); tutorialPruefen(); zeichnen(); }, 1400/v);
+}
+
+/* ---------- Speichern ---------- */
+function speichern(){ try { SPEICHER.schreib("erzwelt_v1", JSON.stringify(S)); } catch(e){} }
+function laden(){
+  try { const roh = SPEICHER.lies("erzwelt_v1"); if (!roh) return false;
+    const g = JSON.parse(roh); if (!g || typeof g.tag !== "number") return false;
+    S = Object.assign(neuerZustand(), g); return true;
+  } catch(e){ return false; }
+}
+function zuruecksetzen(){
+  SPEICHER.loesch("erzwelt_v1"); S = neuerZustand();
+  modalOffen = false; $("#schleier").hidden = true; blattZu();
+  notiz("🎬 Neue Runde. Tippe auf einen Pin und eröffne deine erste Mine.", "gut");
+  tempoSetzen(1); zeigeAuf("obuasi", 1.15); zeichnen();
+}
+
+/* ---------- Start ---------- */
+weltZeichnen();
+if (!laden()){ S = neuerZustand();
+  notiz("👋 Willkommen in der Erzwelt. Tippe auf einen Pin, um eine Mine zu eröffnen.", "gut"); }
+ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
+tempoSetzen(1);
+zeichnen();
+
+</script>
+</body>
+</html>
