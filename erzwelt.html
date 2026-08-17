@@ -146,6 +146,40 @@ svg{display:block}
 .pin.foerdert .staub.c{animation-delay:1s}
 @keyframes staub{0%{opacity:0;transform:translate(-50%,0) scale(.5)}
   25%{opacity:.85}100%{opacity:0;transform:translate(-160%,-20px) scale(1.5)}}
+/* ---------- Leben auf der Karte: aktive Standorte bewegen sich ---------- */
+/* Minenarbeiter laufen neben der Mine hin und her und verschwinden
+   kurz hinter dem Stolleneingang */
+.pin .treiben{position:absolute;left:50%;top:6px;width:104px;height:34px;margin-left:-52px;
+  pointer-events:none;z-index:0}
+.pin .laeufer{position:absolute;bottom:0;left:0;width:22px;height:32px;opacity:.97;
+  filter:drop-shadow(0 1px 1px #0003)}
+.pin .laeufer svg{width:22px;height:32px}
+#welt.weit .pin .treiben{display:none}
+body[data-anim="1"] .pin .laeufer,body[data-anim="2"] .pin .laeufer{animation:patrouille 7s ease-in-out infinite}
+.pin .laeufer.l1{animation-delay:-2.4s}
+.pin .laeufer.l2{animation-delay:-4.8s}
+@keyframes patrouille{
+  0%   {transform:translateX(0) scaleX(1)}
+  46%  {transform:translateX(82px) scaleX(1)}
+  50%  {transform:translateX(82px) scaleX(-1)}
+  96%  {transform:translateX(0) scaleX(-1)}
+  100% {transform:translateX(0) scaleX(1)}}
+/* Raffinerie blubbert */
+.pin .blubb{position:absolute;left:50%;top:2px;width:6px;height:6px;border-radius:50%;
+  background:#ffffffcc;opacity:0;pointer-events:none}
+body[data-anim="1"] .pin.kocht .blubb,body[data-anim="2"] .pin.kocht .blubb{animation:blubbauf 2.4s ease-out infinite}
+.pin .blubb.b{animation-delay:.8s;left:38%}
+.pin .blubb.c{animation-delay:1.6s;left:62%}
+@keyframes blubbauf{0%{opacity:0;transform:translate(-50%,6px) scale(.4)}
+  30%{opacity:.9}100%{opacity:0;transform:translate(-50%,-16px) scale(1.3)}}
+/* Fabrik raucht */
+.pin .qualm{position:absolute;left:58%;top:-2px;width:9px;height:9px;border-radius:50%;
+  background:#ffffffbb;opacity:0;pointer-events:none}
+body[data-anim="1"] .pin.raucht .qualm,body[data-anim="2"] .pin.raucht .qualm{animation:qualmauf 3s ease-out infinite}
+.pin .qualm.b{animation-delay:1.5s}
+@keyframes qualmauf{0%{opacity:0;transform:translate(-50%,4px) scale(.4)}
+  25%{opacity:.8}100%{opacity:0;transform:translate(-140%,-22px) scale(1.7)}}
+
 /* frisch gekauft */
 .pin.pop .knopf{animation:popauf .75s cubic-bezier(.2,1.6,.4,1)}
 @keyframes popauf{0%{transform:scale(.2) rotate(-25deg)}55%{transform:scale(1.35) rotate(6deg)}100%{transform:scale(1)}}
@@ -170,12 +204,18 @@ svg{display:block}
   border-top:4px solid var(--gold);box-shadow:var(--sh);padding:9px 12px 11px
 }
 #quest[hidden]{display:none}
-/* Bei offener Seite bleibt der Kasten oben, wird aber zur vollen Breite –
-   die Seite bekommt dafür oben Platz (--questh). */
-#quest.breit{top:calc(env(safe-area-inset-top) + 10px);left:10px;right:114px;width:auto;z-index:46}
+/* Der Kasten sitzt IMMER oben rechts – auf der Karte unter dem HUD, bei
+   offener Seite unter den Schliessknöpfen. Nie mitten im Menü. */
+#quest.breit{top:calc(env(safe-area-inset-top) + 64px);left:auto;right:12px;
+  width:min(64%,300px);z-index:46}
 #quest .kopf{display:flex;align-items:center;gap:6px;font-size:var(--f0);font-weight:800;
   letter-spacing:.06em;text-transform:uppercase;color:var(--grau)}
 #quest .kopf svg{width:18px;height:18px;flex:none}
+#quest .qstand{margin-left:auto;background:var(--gold);color:#4a3000;border-radius:99px;
+  padding:2px 9px;font-size:var(--f0);letter-spacing:0;text-transform:none;white-space:nowrap}
+#quest .qstand:empty{display:none}
+#quest.belohnt{animation:questfeier .9s cubic-bezier(.2,1.5,.4,1)}
+@keyframes questfeier{0%{transform:scale(1)}30%{transform:scale(1.06)}60%{transform:scale(.99)}100%{transform:scale(1)}}
 #quest b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f2);line-height:1.2;margin:4px 0 2px}
 #quest small{display:block;color:var(--grau);font-size:var(--f0);font-weight:600;line-height:1.35}
 #quest .fortschritt{display:flex;gap:3px;margin-top:8px}
@@ -245,11 +285,12 @@ svg{display:block}
   position:absolute;inset:0;bottom:var(--dockh);z-index:35;
   background:var(--papier);overflow-y:auto;
   padding:calc(env(safe-area-inset-top) + 12px + var(--questh)) 14px 62px;
+  scroll-padding-top:var(--questh);
   -webkit-overflow-scrolling:touch
 }
 #seite[hidden]{display:none}
-#seite h1{font-size:var(--f5);margin-bottom:2px;padding-right:104px}
-#seite .unter{color:var(--grau);font-size:var(--f1);margin-bottom:14px;padding-right:104px}
+#seite h1{font-size:var(--f5);margin-bottom:2px}
+#seite .unter{color:var(--grau);font-size:var(--f1);margin-bottom:14px}
 .seitenkopf{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
 .seitenkopf .txt{flex:1;min-width:0}
 
@@ -261,9 +302,11 @@ svg{display:block}
 .xzu svg{width:19px;height:19px}
 .xzu:active{transform:translateY(3px);box-shadow:0 0 0 #b83c37}
 #blatt .xzu{top:8px}
-/* Auf den Seiten kleben Zahnrad und Kreuz oben rechts und scrollen nicht weg */
-.seitenleiste{position:sticky;top:0;height:0;z-index:7;display:flex;justify-content:flex-end;gap:8px;pointer-events:none}
-.seitenleiste .xzu,.seitenleiste .seitenknopf{position:relative;top:0;right:0;pointer-events:auto}
+/* Zahnrad und Kreuz liegen über der Seite und scrollen nie weg */
+#seitenkopf{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:12px;z-index:47;
+  display:flex;gap:8px}
+#seitenkopf[hidden]{display:none}
+#seitenkopf .xzu,#seitenkopf .seitenknopf{position:relative;top:0;right:0}
 .seitenknopf{width:42px;height:42px;border-radius:14px;background:#fff;border:3px solid var(--linie);
   color:var(--grau);display:grid;place-items:center;box-shadow:0 3px 0 #e0d3b8}
 .seitenknopf svg{width:21px;height:21px}
@@ -468,6 +511,16 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 .perkkarte p{font-size:var(--f1);font-weight:600;color:var(--grau);line-height:1.45}
 .wirkung{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
 .wirkung span{background:#e9f7f0;color:#126b47;border-radius:99px;padding:4px 10px;font-size:var(--f0);font-weight:800}
+.geraetbild{display:flex;justify-content:center;margin:6px 0 14px}
+.geraetbild svg{width:min(210px,58%);height:auto}
+.geraetliste{margin-bottom:6px}
+.geraetzeile{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--linie)}
+.geraetzeile:last-child{border:none}
+.geraetzeile .gnr{flex:none;width:30px;height:30px;border-radius:50%;background:#0e2b3c;color:#fff;
+  display:grid;place-items:center;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f1)}
+.geraetzeile .gtxt{min-width:0}
+.geraetzeile b{font-family:"Baloo 2",sans-serif;font-size:var(--f2)}
+.geraetzeile small{display:block;color:var(--grau);font-size:var(--f0);font-weight:600;line-height:1.45}
 .fakt{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--linie);font-size:var(--f1);font-weight:600;line-height:1.45}
 .fakt:last-child{border:none}
 .fakt .nr{flex:none;width:26px;height:26px;border-radius:9px;background:var(--papier2);color:var(--grau);
@@ -494,12 +547,29 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 #toasts{position:absolute;top:calc(var(--hudh) + 4px);left:10px;width:min(45%,300px);z-index:42;
   display:flex;flex-direction:column;gap:6px;pointer-events:none;transition:opacity .2s}
 /* Meldungen gehören auf die Karte – sobald ein Fenster offen ist, treten sie zurück */
-body.fensterauf #toasts{opacity:0}
-.toast{background:#fffaf0f5;border-radius:15px;padding:9px 13px;font-size:var(--f0);font-weight:700;line-height:1.4;
+body.fensterauf #toasts{opacity:0;visibility:hidden}
+.toast{position:relative;overflow:hidden;isolation:isolate;
+  background:#fffaf0f7;border-radius:15px;padding:10px 14px;font-size:var(--f0);font-weight:700;line-height:1.45;
   box-shadow:var(--sh);animation:rein .3s cubic-bezier(.22,1,.3,1)}
+/* Zweiter Hintergrund: ein Band, das langsam nach links zieht.
+   Es zeigt nebenbei, wie lange die Meldung noch bleibt. */
+.toast::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(100deg, #f5b73d00 0%, #f5b73d30 26%, #f5b73d12 46%, #f5b73d00 68%);
+  background-size:220% 100%;background-position:100% 0}
+body[data-anim="1"] .toast::before,body[data-anim="2"] .toast::before{
+  animation:toastzug 10s linear forwards}
+@keyframes toastzug{from{background-position:120% 0}to{background-position:-90% 0}}
+.toast .balken{position:absolute;left:0;right:0;bottom:0;height:3px;background:#00000012;z-index:-1}
+.toast .balken i{display:block;height:100%;width:100%;background:var(--gold);transform-origin:0 50%}
+body[data-anim="1"] .toast .balken i,body[data-anim="2"] .toast .balken i{
+  animation:toastbalken 10s linear forwards}
+@keyframes toastbalken{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .toast.gut{border-left:5px solid var(--gruen)}
+.toast.gut .balken i{background:var(--gruen)}
 .toast.warn{border-left:5px solid var(--warn)}
+.toast.warn .balken i{background:var(--warn)}
 .toast.alarm{border-left:5px solid var(--alarm)}
+.toast.alarm .balken i{background:var(--alarm)}
 .toast.geld{border-left:5px solid var(--gold)}
 @keyframes rein{from{opacity:0;transform:translateY(-10px)}}
 
@@ -519,7 +589,8 @@ body[data-anim="0"] *{animation:none!important}
   #blatt{left:50%;transform:translate(-50%,calc(100% + var(--dockh) + 44px));width:470px}
   #blatt.auf{transform:translate(-50%,0)}
   #seite{left:50%;transform:translateX(-50%);width:600px;border-radius:22px 22px 0 0;top:64px}
-  #quest.breit{left:calc(50% - 286px);right:auto;width:472px;top:78px}
+  #seitenkopf{right:calc(50% - 292px);top:76px}
+  #quest.breit{left:auto;right:calc(50% - 292px);width:320px;top:130px}
 }
 </style>
 </head>
@@ -556,12 +627,17 @@ body[data-anim="0"] *{animation:none!important}
   </div>
 
   <div id="quest" hidden>
-    <div class="kopf"><span id="q-emoji"></span><span id="q-art">Aufgabe</span></div>
+    <div class="kopf"><span id="q-emoji"></span><span id="q-art">Aufgabe</span>
+      <span id="q-stand" class="qstand"></span></div>
     <b id="q-titel"></b><small id="q-text"></small>
     <div class="fortschritt" id="q-punkte"></div>
   </div>
 
   <div id="seite" hidden></div>
+  <div id="seitenkopf" hidden>
+    <button class="seitenknopf" data-tun="einst" aria-label="Einstellungen"></button>
+    <button class="xzu" data-schliessen="seite" aria-label="Schliessen"></button>
+  </div>
 
   <nav id="dock" role="tablist"></nav>
 
@@ -726,7 +802,17 @@ const PRODUKT = {
     info:"Ein E-Bike-Akku enthält ungefähr so viel Kobalt wie 30 Smartphones."}
 };
 
+/* Fabrikstandorte: echte Städte, in denen wirklich Elektronik gebaut wird.
+   Das Land steht nur noch für den Lohn dahinter. */
 const FAB_ORTE = ["china","vietnam","mexiko","deutschland","usa"];
+const FAB_STADT = {
+  china:      {ort:"Shenzhen",       info:"Shenzhen war vor 40 Jahren ein Fischerdorf. Heute wird hier ein grosser Teil der Weltelektronik montiert."},
+  vietnam:    {ort:"Bac Ninh",       info:"In Bac Ninh stehen riesige Werke für Smartphones. Viele Firmen bauen dort, weil die Löhne tiefer sind als in China."},
+  mexiko:     {ort:"Ciudad Juárez",  info:"An der Grenze zu den USA stehen hunderte «Maquiladoras» – Fabriken, die für den US-Markt montieren."},
+  deutschland:{ort:"Dresden",        info:"Rund um Dresden liegt Europas grösster Chip-Standort, das «Silicon Saxony»."},
+  usa:        {ort:"Austin",         info:"In Texas entstehen neue Chip- und Gerätefabriken, gefördert vom Staat."}
+};
+const fabOrt = land => FAB_STADT[land] ? FAB_STADT[land].ort : LAND[land].name;
 
 /* ---------- Ausbau (Idle-Stufen) ----------
    Jede Mine und jede Raffinerie lässt sich in Stufen ausbauen.
@@ -769,7 +855,7 @@ const TUTORIAL_MAX_LEUTE = 60;
 /* Lohnstufen: Faktor auf den Landeslohn, Zielwert der Zufriedenheit, Risikofaktor. */
 const LOHNSTUFE = [
   {label:"knapp",  faktor:0.7, ziel:22, name:"unter üblichem Lohn"},
-  {label:"üblich", faktor:1.0, ziel:56, name:"landesüblicher Lohn"},
+  {label:"üblich", faktor:1.0, ziel:62, name:"landesüblicher Lohn"},
   {label:"fair",   faktor:1.45,ziel:86, name:"deutlich über üblich, mit Schutzausrüstung"}
 ];
 
@@ -1032,7 +1118,62 @@ IK.schild = sv(`<path d="M12 2.6 4 5.8v6.4c0 4.6 3.4 8.2 8 9.2 4.6-1 8-4.6 8-9.2
   <path d="m8.4 12 2.6 2.6 4.6-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>`);
 IK.code = sv(`<path d="m8.4 8-4.6 4 4.6 4M15.6 8l4.6 4-4.6 4M13.6 4.6l-3.2 14.8"
   stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>`);
+IK.handy = sv(`<rect x="6.4" y="2.2" width="11.2" height="19.6" rx="2.6" stroke="currentColor" stroke-width="1.8"/>
+  <rect x="8.4" y="5" width="7.2" height="11.4" rx="1" fill="currentColor" opacity=".25"/>
+  <circle cx="12" cy="19" r="1.15" fill="currentColor"/>`);
 IK.plus = sv(`<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`);
+
+/* ---------- Aufgeschnittenes Handy: welcher Rohstoff sitzt wo ----------
+   Kern des Lernziels: sichtbar machen, dass ein Gerät aus vielen Erzen
+   aus vielen Ländern besteht.                                          */
+const GERAET_TEILE = [
+  {nr:1, teil:"Bildschirm",        mat:["indium"],
+   was:"Über dem Glas liegt eine hauchdünne, durchsichtige Schicht aus Indium-Zinn-Oxid. Sie leitet Strom – deshalb merkt der Bildschirm, wo dein Finger ist."},
+  {nr:2, teil:"Platine",           mat:["silizium","kupfer","gold","zinn","tantal","silber"],
+   was:"Das Gehirn: Chips aus Silizium, Leiterbahnen aus Kupfer, Kontakte aus Gold, Lötstellen aus Zinn, winzige Kondensatoren aus Tantal."},
+  {nr:3, teil:"Akku",              mat:["lithium","kobalt","nickel"],
+   was:"Lithium wandert beim Laden hin und her, Kobalt und Nickel halten die Kathode stabil. Ein E-Bike-Akku enthält so viel Kobalt wie 30 Handys."},
+  {nr:4, teil:"Lautsprecher & Vibration", mat:["seltene"],
+   was:"Die stärksten Magnete der Welt bestehen aus Seltenen Erden. Ohne sie kein Ton, kein Vibrationsalarm, kein kleiner Motor."},
+  {nr:5, teil:"Gehäuse & Kühlung", mat:["alu"],
+   was:"Aluminium ist leicht, stabil und leitet Wärme gut ab. Es wird aus Bauxit gewonnen."}
+];
+
+function geraetBild(){
+  const punkt = (nr,x,y) => `<g transform="translate(${x} ${y})">
+      <circle r="11" fill="#0e2b3c" stroke="#fff" stroke-width="2.5"/>
+      <text y="5" text-anchor="middle" font-family="Baloo 2,sans-serif" font-size="14" font-weight="800" fill="#fff">${nr}</text></g>`;
+  return `<div class="geraetbild">
+    <svg viewBox="0 0 220 270" aria-label="Aufgeschnittenes Smartphone">
+      <rect x="46" y="8" width="128" height="254" rx="18" fill="#c3ced8" stroke="#8a97a3" stroke-width="3"/>
+      <rect x="54" y="16" width="112" height="120" rx="7" fill="#17384d"/>
+      <path d="M60 132 150 22h16L64 136z" fill="#ffffff14"/>
+      <rect x="54" y="144" width="112" height="110" rx="7" fill="#f3ecdd"/>
+      <rect x="60" y="150" width="100" height="48" rx="5" fill="#2f7a52"/>
+      <g fill="#12492f">
+        <rect x="68" y="158" width="24" height="18" rx="2"/><rect x="100" y="160" width="14" height="14" rx="2"/>
+        <rect x="122" y="158" width="12" height="10" rx="2"/></g>
+      <g stroke="#d9a516" stroke-width="2.2">
+        <path d="M64 186h34M104 186h22M132 186h22"/></g>
+      <g fill="#7a5ad8"><rect x="122" y="172" width="7" height="9" rx="1.5"/><rect x="133" y="172" width="7" height="9" rx="1.5"/></g>
+      <rect x="60" y="204" width="64" height="44" rx="6" fill="#dfe8ee" stroke="#9aa8b4" stroke-width="2"/>
+      <path d="M68 226h48" stroke="#9a6ce4" stroke-width="5" stroke-linecap="round"/>
+      <text x="92" y="219" text-anchor="middle" font-family="Baloo 2,sans-serif" font-size="11" font-weight="800" fill="#6b5f50">AKKU</text>
+      <circle cx="145" cy="226" r="15" fill="#3f4750"/>
+      <circle cx="145" cy="226" r="9" fill="#6b757f"/><circle cx="145" cy="226" r="4" fill="#d94a80"/>
+      ${punkt(1, 92, 76)}${punkt(2, 76, 174)}${punkt(3, 70, 226)}${punkt(4, 145, 250)}${punkt(5, 174, 40)}
+    </svg></div>
+  <div class="geraetliste">${GERAET_TEILE.map(t => `
+    <div class="geraetzeile">
+      <span class="gnr">${t.nr}</span>
+      <div class="gtxt">
+        <b>${t.teil}</b>
+        <span class="stueck">${t.mat.map(k =>
+          `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${MATERIAL[k].name}</span>`).join("")}</span>
+        <small>${t.was}</small>
+      </div>
+    </div>`).join("")}</div>`;
+}
 
 /* ---------- Szenen: kleine bewegte Bilder in den Fenstern ---------- */
 function szeneMine(def, m){
@@ -1148,6 +1289,26 @@ function szeneFabrik(f, def){
    öffnen; ganz unten kann Wissen erworben werden (Perk).
    ============================================================ */
 const WISSEN = [
+  {
+    id:"geraet", titel:"Was steckt im Handy?", farbe:"#4a6cf7", ikon:"handy",
+    kurz:"Zehn Rohstoffe aus zehn Ländern – in einem Gerät in deiner Hand.",
+    text:["Ein Smartphone sieht aus wie ein Stück Glas. In Wirklichkeit stecken darin über <b>60 verschiedene Elemente</b> aus der ganzen Welt. Jedes hat eine Aufgabe, und für fast jedes wurde irgendwo Gestein bewegt.",
+      "Besonders wichtig sind die <b>Seltenen Erden</b>. Sie heissen so, weil sie in der Erdkruste zwar überall vorkommen, aber fast nirgends in abbaubarer Menge. Aus ihnen werden die stärksten Magnete der Welt gemacht – und ohne die gibt es keinen Lautsprecher, keinen Vibrationsalarm und keinen kleinen Motor.",
+      "Auch dein Computer, dein Fernseher, dein Kopfhörer und jedes E-Auto brauchen dieselben Rohstoffe. Deshalb streiten Staaten darum."],
+    geraet:true,
+    fakten:["Für ein einziges Smartphone werden rund 70 Kilogramm Gestein bewegt.",
+      "In einer Tonne Althandys steckt mehr Gold als in einer Tonne Golderz.",
+      "Weniger als ein Viertel der Elektrogeräte weltweit wird richtig recycelt.",
+      "China verarbeitet fast 90 % der Seltenen Erden – egal, wo sie abgebaut wurden."],
+    perks:[
+      {id:"geraet1", titel:"Ersatzteil-Programm", kosten:90000,
+       text:"Wer sein Gerät reparieren kann, kauft beim nächsten Mal wieder bei dir.",
+       wirkung:["Ruf sofort +6","Nachfrage +4 %"], mult:{nachfrage:1.04}, sofort:{ruf:6}},
+      {id:"geraet2", titel:"Recycling-Kreislauf", kosten:260000,
+       text:"Alte Geräte kommen zurück und werden zerlegt. Aus Schrott wird Rohstoff.",
+       wirkung:["Ausbeute +10 %","Betriebskosten −8 %"], mult:{ausbeute:1.10, betrieb:0.92}}
+    ]
+  },
   {
     id:"kette", titel:"Die Lieferkette", farbe:"#3f7fb0", ikon:"schiff",
     kurz:"Mine → Raffinerie → Fabrik → Markt: warum jedes Glied zählt.",
@@ -1302,7 +1463,7 @@ WISSEN.forEach(seg => seg.perks.forEach((p,i) => { PERK_INDEX[p.id] = {perk:p, s
    5. MOTOR
    ============================================================ */
 
-const ZIEL_GEWINN = 5000000;   // Rundenziel in CHF
+const ZIEL_GEWINN = 2000000;   // Rundenziel in CHF
 const ZIEL_RUF    = 60;
 const ZIEL_TAGE   = 720;       // 2 Spieljahre
 const STARTKAPITAL= 1250000;
@@ -1349,7 +1510,7 @@ function optAnwenden(){
 function neuerZustand(){
   return {
     tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0,
-    arbeiterGesamt:10, tutorial:0, verkaeufer:0, handverkaufTag:0, verkauftSelber:false,
+    arbeiterGesamt:10, tutorial:0, auftrag:0, verkaeufer:0, handverkaufTag:0, verkauftSelber:false,
     minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis, ausbau}
     raff:{},         // id -> {arbeiter, ausbau}
     fabriken:[],     // {produkt, land, arbeiter, restbau}
@@ -1446,7 +1607,12 @@ function warenLager(){
    Pro Produkt bremst zusätzlich die Tagesnachfrage. */
 function wareVerkaufen(grenze){
   let rest = grenze, stueck = 0, erloes = 0;
-  for (const p in PRODUKT){
+  // Zuerst das Teuerste: sonst verbrauchen billige Kabel die Verkaufskraft,
+  // die für ein Mainboard viel mehr Geld gebracht hätte.
+  const reihenfolge = Object.keys(PRODUKT)
+    .filter(p => (S.ware[p] || 0) > 0)
+    .sort((a,b) => warenPreis(b) - warenPreis(a));
+  for (const p of reihenfolge){
     if (rest <= 0) break;
     const lager = S.ware[p] || 0;
     if (lager <= 0) continue;
@@ -1557,7 +1723,7 @@ function tagVor(){
   // 4) Fabrikbau + Produktion
   const fabrikBonus = perkMult("fabrik");
   for (const f of S.fabriken){
-    if (f.restbau > 0){ f.restbau--; if (f.restbau === 0) notiz(`Fabrik <b>${PRODUKT[f.produkt].name}</b> in ${LAND[f.land].name} nimmt die Produktion auf.`, "gut"); continue; }
+    if (f.restbau > 0){ f.restbau--; if (f.restbau === 0) notiz(`Fabrik <b>${PRODUKT[f.produkt].name}</b> in ${fabOrt(f.land)} nimmt die Produktion auf.`, "gut"); continue; }
     if (f.arbeiter === 0) continue;
     const def = PRODUKT[f.produkt];
     let stueck = Math.floor(f.arbeiter * def.proArbeiter * fabrikBonus);
@@ -1589,7 +1755,7 @@ function tagVor(){
   ereignisPruefen();
 
   // 9) Ende der Runde?
-  if (S.tag > ZIEL_TAGE || S.kasse < -800000) rundeBeenden();
+  if (S.tag > ZIEL_TAGE || S.kasse < -1200000) rundeBeenden();
   speichern();
 }
 
@@ -1598,7 +1764,7 @@ function rufAnpassen(){
   for (const id in S.minen){ summe += LOHNSTUFE[S.minen[id].stufe].faktor; n++; }
   if (n === 0) return;
   const schnitt = summe / n;
-  const ziel = schnitt < 0.85 ? 25 : schnitt < 1.15 ? 58 : 88;
+  const ziel = schnitt < 0.85 ? 25 : schnitt < 1.15 ? 64 : 88;
   rufAendern((ziel - S.ruf) * 0.18);
 }
 
@@ -1941,7 +2107,6 @@ const frischePins = new Map();          // id -> Zeitpunkt des Kaufs (für die P
 function pinFeiern(id){ frischePins.set(id, Date.now()); }
 
 function pinsZeichnen(){
-  const teile = [];
   const jetzt = Date.now();
   const ziel = typeof hinweisZiel === "function" ? hinweisZiel() : null;
   const winkt = (art, offen, erlaubt) => {
@@ -1953,44 +2118,76 @@ function pinsZeichnen(){
   };
   const frisch = id => (jetzt - (frischePins.get(id)||0)) < 900 ? "pop" : "";
   const staub = `<span class="staub"></span><span class="staub b"></span><span class="staub c"></span>`;
+  /* Kleine Leute, die vor einer laufenden Mine hin und her gehen */
+  const leute = n => [...Array(Math.max(1, Math.min(3, n)))].map((_,i) =>
+    `<span class="laeufer l${i}"><svg viewBox="0 0 22 32" aria-hidden="true">${
+      kumpel(10, 30, .95, i%2?"#4d94c6":"#3f7fb0", i*.35)}</svg></span>`).join("");
+
+  const gebaut = [];   // {id, sig, html}
 
   if (ebenen.mine) for (const def of MINEN){
     const [x,y] = px(def.id);
     const m = S.minen[def.id], mat = MATERIAL[def.mat];
     const streik = m && m.stillBis > S.tag;
     const foerdert = m && m.arbeiter > 0 && !streik;
-    teile.push(`<button class="pin ${m?"":"zu"} ${streik?"alarm":""} ${foerdert?"foerdert":""} ${winkt("minen", !!m, mineErlaubt(def.id))} ${frisch(def.id)}"
-      data-pin="mine" data-id="${def.id}" style="left:${x}px;top:${y}px" aria-label="Mine ${def.ort}, ${LAND[def.land].name}">
-      <span class="knopf" style="${m?`background:${mat.farbe};color:#fff`:""}">
-        ${m?`<span class="sym">${mat.sym}</span>`:IK.hacke}
-        ${foerdert?staub:""}
-        ${m&&m.arbeiter?`<span class="crew">${m.arbeiter}</span>`:""}</span>
-      <span class="bez">${flagge(def.land)}${def.ort}</span></button>`);
+    const klassen = `${m?"":"zu"} ${streik?"alarm":""} ${foerdert?"foerdert":""} ${winkt("minen", !!m, mineErlaubt(def.id))} ${frisch(def.id)}`;
+    gebaut.push({id:"m_"+def.id, sig:klassen + "|" + (m?m.arbeiter:0),
+      html:`<button class="pin ${klassen}" data-pin="mine" data-id="${def.id}"
+        style="left:${x}px;top:${y}px" aria-label="Mine ${def.ort}, ${LAND[def.land].name}">
+        <span class="knopf" style="${m?`background:${mat.farbe};color:#fff`:""}">
+          ${m?`<span class="sym">${mat.sym}</span>`:IK.hacke}
+          ${foerdert?staub:""}
+          ${m&&m.arbeiter?`<span class="crew">${m.arbeiter}</span>`:""}</span>
+        ${foerdert?`<span class="treiben">${leute(Math.ceil(m.arbeiter/15))}</span>`:""}
+        <span class="bez">${flagge(def.land)}${def.ort}</span></button>`});
   }
 
   if (ebenen.raff) for (const def of RAFF_ORTE){
     const [x,y] = px(def.id);
     const r = S.raff[def.id];
-    teile.push(`<button class="pin werk ${r?"":"zu"} ${winkt("raff", !!r)} ${frisch(def.id)}" data-pin="raff" data-id="${def.id}"
-      style="left:${x}px;top:${y}px" aria-label="Raffinerie ${def.ort}, ${LAND[def.land].name}">
-      <span class="knopf" style="${r?"background:#5b8f7a;color:#fff":""}">${IK.kolben}
-        ${r&&r.arbeiter?`<span class="crew">${r.arbeiter}</span>`:""}</span>
-      <span class="bez">${flagge(def.land)}${def.ort}</span></button>`);
+    const laeuft = r && r.arbeiter > 0;
+    const klassen = `werk ${r?"":"zu"} ${laeuft?"kocht":""} ${winkt("raff", !!r)} ${frisch(def.id)}`;
+    gebaut.push({id:"r_"+def.id, sig:klassen + "|" + (r?r.arbeiter:0),
+      html:`<button class="pin ${klassen}" data-pin="raff" data-id="${def.id}"
+        style="left:${x}px;top:${y}px" aria-label="Raffinerie ${def.ort}, ${LAND[def.land].name}">
+        <span class="knopf" style="${r?"background:#5b8f7a;color:#fff":""}">${IK.kolben}
+          ${laeuft?`<span class="blubb"></span><span class="blubb b"></span><span class="blubb c"></span>`:""}
+          ${r&&r.arbeiter?`<span class="crew">${r.arbeiter}</span>`:""}</span>
+        <span class="bez">${flagge(def.land)}${def.ort}</span></button>`});
   }
 
   if (ebenen.fab) for (const land of FAB_ORTE){
     const [x,y] = px("f_"+land);
     const meine = S.fabriken.filter(f => f.land === land);
     const crew = meine.reduce((a,f)=>a+f.arbeiter, 0);
-    teile.push(`<button class="pin werk ${meine.length?"":"zu"} ${winkt("fab", !!meine.length)} ${frisch("f_"+land)}"
-      data-pin="fab" data-id="${land}" style="left:${x}px;top:${y}px" aria-label="Fabrikstandort ${LAND[land].name}">
-      <span class="knopf" style="${meine.length?"background:#b5703c;color:#fff":""}">${IK.fabrik}
-        ${crew?`<span class="crew">${crew}</span>`:""}</span>
-      <span class="bez">${flagge(land)}${LAND[land].name}</span></button>`);
+    const laeuft = meine.some(f => f.restbau === 0 && f.arbeiter > 0);
+    const klassen = `werk ${meine.length?"":"zu"} ${laeuft?"raucht":""} ${winkt("fab", !!meine.length)} ${frisch("f_"+land)}`;
+    gebaut.push({id:"f_"+land, sig:klassen + "|" + crew,
+      html:`<button class="pin ${klassen}" data-pin="fab" data-id="${land}"
+        style="left:${x}px;top:${y}px" aria-label="Fabrikstandort ${fabOrt(land)}, ${LAND[land].name}">
+        <span class="knopf" style="${meine.length?"background:#b5703c;color:#fff":""}">${IK.fabrik}
+          ${laeuft?`<span class="qualm"></span><span class="qualm b"></span>`:""}
+          ${crew?`<span class="crew">${crew}</span>`:""}</span>
+        <span class="bez">${flagge(land)}${fabOrt(land)}</span></button>`});
   }
 
-  welt.querySelectorAll(".pin").forEach(p => p.remove());
-  welt.insertAdjacentHTML("beforeend", teile.join(""));
+  /* Nur austauschen, was sich geändert hat – sonst würden die Animationen
+     (laufende Leute, Rauch, Blasen) bei jedem Spieltag neu starten. */
+  const vorhanden = new Map();
+  welt.querySelectorAll(".pin").forEach(p => vorhanden.set(p.dataset.schluessel, p));
+  const behalten = new Set();
+  for (const g of gebaut){
+    behalten.add(g.id);
+    const alt = vorhanden.get(g.id);
+    if (alt && alt.dataset.sig === g.sig) continue;
+    const huelle = document.createElement("div");
+    huelle.innerHTML = g.html;
+    const neu = huelle.firstElementChild;
+    neu.dataset.schluessel = g.id;
+    neu.dataset.sig = g.sig;
+    if (alt) alt.replaceWith(neu); else welt.appendChild(neu);
+  }
+  vorhanden.forEach((el, id) => { if (!behalten.has(id)) el.remove(); });
   pinGroesse();
 }
 
@@ -2060,6 +2257,90 @@ const TUTORIAL = [
     ziel:()=>"dock:markt",
     fertig:()=> (S.verkaeufer || 0) >= 2 }
 ];
+
+/* ==========================================================
+   AUFTRÄGE — nach dem Tutorial geht die Führung weiter.
+   Jeder erledigte Auftrag schenkt fünf Mitarbeitende.
+   Die Kette führt Schritt für Schritt durch alle Erze und
+   durch alle Produkte.
+   ========================================================== */
+const AUFTRAG_LOHN = 5;          // geschenkte Leute pro Auftrag
+
+const AUFTRAEGE = [
+  { id:"a_silizium", ikon:"berg", titel:"Silizium für die Chips",
+    text:"Jeder Prozessor und jeder Speicher besteht aus Silizium. Eröffne eine Mine dafür.",
+    ziel:()=>"minen-frei",
+    stand:()=> [materialMine("silizium") ? 1 : 0, 1] },
+  { id:"a_gold", ikon:"muenze", titel:"Gold für die Kontakte",
+    text:"Gold rostet nicht – deshalb sitzt es auf jedem wichtigen Kontakt. Eröffne eine Goldmine.",
+    ziel:()=>"minen-frei",
+    stand:()=> [materialMine("gold") ? 1 : 0, 1] },
+  { id:"a_tantal", ikon:"hacke", titel:"Tantal und Silber",
+    text:"Tantal steckt in winzigen Kondensatoren, Silber leitet Strom am besten von allen Metallen. Eröffne für beide eine Mine.",
+    ziel:()=>"minen-frei",
+    stand:()=> [["tantal","silber"].filter(k => materialMine(k)).length, 2] },
+  { id:"a_board", ikon:"fabrik", titel:"Bau das Mainboard",
+    text:"Jetzt hast du alles für eine Platine: Silizium, Kupfer, Gold, Zinn, Tantal und Silber. Bau eine Fabrik für das Mainboard.",
+    ziel:()=>"fab-frei",
+    stand:()=> [S.fabriken.some(f => f.produkt === "board") ? 1 : 0, 1] },
+  { id:"a_verkauf", ikon:"markt", titel:"Mehr Verkaufskraft",
+    text:"Zwei Produkte brauchen mehr Leute im Verkauf. Bring dein Verkaufsteam auf acht Personen.",
+    ziel:()=>"dock:markt",
+    stand:()=> [S.verkaeufer || 0, 8] },
+  { id:"a_wissen", ikon:"gluehbirne", titel:"Wissen erwerben",
+    text:"Im Reiter Wissen kannst du dauerhafte Vorteile freischalten. Erforsche zwei davon.",
+    ziel:()=>"dock:wissen",
+    stand:()=> [Object.keys(S.perks).length, 2] },
+  { id:"a_ausbau", ikon:"berg", titel:"Bau eine Mine aus",
+    text:"Jede Ausbaustufe bringt mehr Förderung. Bring eine Mine auf Stufe 5.",
+    ziel:()=>"meine-minen",
+    stand:()=> [Object.values(S.minen).reduce((a,m)=>Math.max(a, m.ausbau||0), 0), 5] },
+  { id:"a_akku", ikon:"hacke", titel:"Rohstoffe für den Akku",
+    text:"Ein Akku braucht Lithium, Kobalt und Nickel. Diese drei Erze stecken in jedem Handy und in jedem E-Bike. Eröffne für alle drei eine Mine.",
+    ziel:()=>"minen-frei",
+    stand:()=> [["lithium","kobalt","nickel"].filter(k => materialMine(k)).length, 3] },
+  { id:"a_ebike", ikon:"fabrik", titel:"Bau den E-Bike-Akku",
+    text:"Mit Lithium, Kobalt, Nickel, Kupfer und Aluminium kannst du Akkus bauen. Eröffne die Fabrik.",
+    ziel:()=>"fab-frei",
+    stand:()=> [S.fabriken.some(f => f.produkt === "akku") ? 1 : 0, 1] },
+  { id:"a_seltene", ikon:"berg", titel:"Seltene Erden und Indium",
+    text:"Seltene Erden stecken in jedem Lautsprecher und jedem Vibrationsmotor. Indium macht den Touchscreen durchsichtig und leitfähig. Ohne die beiden gibt es kein Smartphone.",
+    ziel:()=>"minen-frei",
+    stand:()=> [["seltene","indium"].filter(k => materialMine(k)).length, 2] },
+  { id:"a_phone", ikon:"fabrik", titel:"Bau das Velocity Phone",
+    text:"Jetzt hast du alle zehn Rohstoffe für ein Smartphone beisammen. Bau die Fabrik.",
+    ziel:()=>"fab-frei",
+    stand:()=> [S.fabriken.some(f => f.produkt === "phone") ? 1 : 0, 1] },
+  { id:"a_ruf", ikon:"schild", titel:"Sauberer Ruf",
+    text:"Faire Löhne und saubere Nachweise zahlen sich aus. Bring deinen Ruf auf 75.",
+    ziel:()=>"meine-minen",
+    stand:()=> [Math.round(S.ruf), 75], anzeige:()=> Math.round(S.ruf) + "/75" },
+  { id:"a_doppel", ikon:"berg", titel:"Die erste Verdopplung",
+    text:"Zehn Ausbaustufen in einer Mine verdoppeln ihre Förderung. Schaff es einmal.",
+    ziel:()=>"meine-minen",
+    stand:()=> [Object.values(S.minen).reduce((a,m)=>Math.max(a, m.ausbau||0), 0), 10] },
+  { id:"a_million", ikon:"muenze", titel:"Die erste Million",
+    text:"Erwirtschafte eine Million Gewinn. Danach läuft dein Betrieb von allein.",
+    ziel:()=>"dock:ziel",
+    stand:()=> [Math.max(0, S.eingenommen - S.ausgegeben), 1000000],
+    anzeige:()=> kurz(Math.max(0, S.eingenommen - S.ausgegeben)) + " / 1 Mio" }
+];
+
+const auftragLaeuft = () => !tutorialLaeuft() && (S.auftrag || 0) < AUFTRAEGE.length;
+const auftragJetzt  = () => auftragLaeuft() ? AUFTRAEGE[S.auftrag || 0] : null;
+
+function auftragPruefen(){
+  while (auftragLaeuft()){
+    const a = AUFTRAEGE[S.auftrag || 0];
+    const [ist, soll] = a.stand();
+    if (ist < soll) break;
+    S.auftrag = (S.auftrag || 0) + 1;
+    S.arbeiterGesamt += AUFTRAG_LOHN;
+    belohnung = {titel:a.titel, tag:S.tag};
+    notiz(`Auftrag erledigt: <b>${a.titel}</b> – ${AUFTRAG_LOHN} neue Mitarbeitende geschenkt.`, "gut");
+  }
+}
+let belohnung = null;   // für die kleine Feier auf dem Bildschirm
 
 const tutorialLaeuft = () => S.tutorial >= 0 && S.tutorial < TUTORIAL.length;
 const tutorialSchritt = () => tutorialLaeuft() ? TUTORIAL[S.tutorial] : null;
@@ -2133,18 +2414,20 @@ function dockZeichnen(){
 
 /* ---------- Toasts statt Logliste ---------- */
 const gezeigt = new Set();
+const TOAST_DAUER = 10000;      // Meldungen bleiben 10 Sekunden stehen
 function toastsErneuern(){
-  const neu = S.log.filter(e => !gezeigt.has(e.tag + e.text)).slice(0, 2).reverse();
+  const neu = S.log.filter(e => !gezeigt.has(e.tag + e.text)).slice(0, 3).reverse();
   for (const e of neu){
     gezeigt.add(e.tag + e.text);
     const d = document.createElement("div");
     d.className = "toast " + (e.art || "");
-    d.innerHTML = e.text;
+    d.innerHTML = e.text + `<span class="balken"><i></i></span>`;
     $("#toasts").appendChild(d);
-    setTimeout(() => { d.style.transition = "opacity .4s"; d.style.opacity = 0;
-      setTimeout(()=>d.remove(), 400); }, 4200);
+    setTimeout(() => { d.style.transition = "opacity .5s, transform .5s";
+      d.style.opacity = 0; d.style.transform = "translateX(-14px)";
+      setTimeout(()=>d.remove(), 500); }, TOAST_DAUER);
   }
-  while ($("#toasts").children.length > 2) $("#toasts").firstChild.remove();
+  while ($("#toasts").children.length > 3) $("#toasts").firstChild.remove();
 }
 
 /* ---------- Funken: kleine Feier bei Käufen ---------- */
@@ -2217,8 +2500,14 @@ function naechsterSchritt(){
   for (const f of S.fabriken){
     if (f.restbau > 0) continue;
     const fehlt = Object.keys(PRODUKT[f.produkt].rezept).filter(k => (S.mat[k]||0) < PRODUKT[f.produkt].rezept[k]*3);
-    if (fehlt.length) return ["Es fehlt " + fehlt.map(k=>MATERIAL[k].name).join(", "),
-      "Rohstoffe kannst du nicht zukaufen. Eröffne dafür eine eigene Mine."];
+    if (fehlt.length){
+      const k = fehlt[0], eigene = materialMine(k);
+      if (!eigene) return ["Es fehlt " + MATERIAL[k].name,
+        "Rohstoffe kannst du nicht zukaufen. Eröffne eine Mine für " + MATERIAL[k].name + "."];
+      const d = MINEN.find(x => x.id === eigene);
+      return ["Zu wenig " + MATERIAL[k].name,
+        `Deine Mine in ${d.ort} kommt nicht nach. Schick mehr Leute hin oder bau sie aus.`];
+    }
   }
   if (warenLager() > 0 && verkaufsKraft() === 0)
     return ["Deine Ware bleibt liegen", "Stell im Markt Verkäufer an – oder verkauf einmal selber."];
@@ -2244,9 +2533,15 @@ function naechsterSchritt(){
 
 /* Wie viel Platz braucht der Aufgabenkasten oben auf einer Seite? */
 function questHoeheMessen(){
-  const k = $("#quest");
-  const h = (!k.hidden && k.classList.contains("breit")) ? k.offsetHeight + 16 : 0;
-  document.documentElement.style.setProperty("--questh", h + "px");
+  const k = $("#quest"), kopf = $("#seitenkopf");
+  if (aktiveSeite === "karte" || kopf.hidden){
+    document.documentElement.style.setProperty("--questh", "0px"); return;
+  }
+  const oben = seite.getBoundingClientRect().top;
+  let unten = kopf.getBoundingClientRect().bottom;
+  if (!k.hidden && k.classList.contains("breit"))
+    unten = Math.max(unten, k.getBoundingClientRect().bottom);
+  document.documentElement.style.setProperty("--questh", Math.max(0, Math.round(unten - oben) + 12) + "px");
 }
 
 /* Zeigt entweder die Tutorial-Aufgabe oder danach den Wegweiser.
@@ -2259,6 +2554,7 @@ function questZeichnen(){
   if (t){
     $("#q-emoji").innerHTML = IK[t.ikon] || IK.ziel;
     $("#q-art").textContent = `Aufgabe ${S.tutorial+1}/${TUTORIAL.length}`;
+    $("#q-stand").textContent = "";
     $("#q-titel").textContent = t.titel;
     $("#q-text").textContent = t.text;
     $("#q-punkte").innerHTML = TUTORIAL.map((_,i) =>
@@ -2267,6 +2563,29 @@ function questZeichnen(){
     questHoeheMessen();
     return;
   }
+  const a = auftragJetzt();
+  if (a){
+    const [ist, soll] = a.stand();
+    $("#q-emoji").innerHTML = IK[a.ikon] || IK.ziel;
+    $("#q-art").textContent = `Auftrag ${(S.auftrag||0)+1}/${AUFTRAEGE.length}`;
+    $("#q-stand").textContent = a.anzeige ? a.anzeige() : (soll > 1 ? `${Math.min(ist,soll)}/${soll}` : "");
+    $("#q-titel").textContent = a.titel;
+    $("#q-text").textContent = a.text;
+    $("#q-punkte").innerHTML = AUFTRAEGE.map((_,i) =>
+      `<i class="${i < (S.auftrag||0) ? "ok" : i === (S.auftrag||0) ? "jetzt" : ""}"></i>`).join("");
+    k.hidden = false;
+    // kleine Feier, wenn gerade ein Auftrag fertig wurde
+    if (belohnung && belohnung.tag === S.tag && !k.classList.contains("belohnt")){
+      k.classList.add("belohnt");
+      const r = k.getBoundingClientRect();
+      funken(r.left + r.width/2, r.top + r.height/2, ["#2fbe7e","#f5b73d","#fff","#6fb8e0"], 30);
+      setTimeout(()=>k.classList.remove("belohnt"), 950);
+      belohnung = null;
+    }
+    questHoeheMessen();
+    return;
+  }
+  $("#q-stand").textContent = "";
   const w = naechsterSchritt();
   if (!w || offenesBlatt){ k.hidden = true; questHoeheMessen(); return; }
   $("#q-emoji").innerHTML = IK.pfeil;
@@ -2281,7 +2600,9 @@ function questZeichnen(){
 /* Welche Pins oder Reiter sollen blinken? */
 function hinweisZiel(){
   const t = tutorialSchritt();
-  return t ? t.ziel() : null;
+  if (t) return t.ziel();
+  const a = auftragJetzt();
+  return a ? a.ziel() : null;
 }
 function hinweiseSetzen(){
   const z = hinweisZiel();
@@ -2480,7 +2801,8 @@ function blattRaff(id){
 function blattFab(land){
   const meine = S.fabriken.map((f,i)=>({f,i})).filter(o => o.f.land === land);
   const kopf = `<div class="titelzeile">${flagge(land,"gross")}
-    <div><h2>${LAND[land].name}</h2><div class="ort">Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat</div></div></div>`;
+    <div><h2>${fabOrt(land)}</h2><div class="ort">${LAND[land].name} · Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat</div></div></div>
+    ${FAB_STADT[land] ? `<div class="notiz">${FAB_STADT[land].info}</div>` : ""}`;
 
   const laufend = meine.map(({f,i}) => {
     const def = PRODUKT[f.produkt];
@@ -2564,13 +2886,12 @@ function seiteFuellen(name){
   const html = {markt:seiteMarkt, team:seiteTeam, ziel:seiteZiel, wissen:seiteWissen}[name]();
   if (html === seitenStand) return;
   seitenStand = html;
-  seite.innerHTML = `<div class="seitenleiste">
-      <button class="seitenknopf" data-tun="einst" aria-label="Einstellungen">${IK.zahnrad}</button>
-      <button class="xzu" data-schliessen="seite" aria-label="Schliessen">${IK.x}</button></div>` + html;
+  seite.innerHTML = html;
 }
 function seiteWechseln(name){
   aktiveSeite = name; blattZu(); seitenStand = "";
   seite.hidden = name === "karte";
+  $("#seitenkopf").hidden = seite.hidden;
   if (!seite.hidden){ seiteFuellen(name); seite.scrollTop = 0; einzug(seite); }
   zeichnen();
 }
@@ -2651,7 +2972,7 @@ function seiteTeam(){
     if (S.minen[id].arbeiter) rows.push([d.land, "Mine " + d.ort, S.minen[id].arbeiter, LAND[d.land].lohn*LOHNSTUFE[S.minen[id].stufe].faktor]); }
   for (const id in S.raff){ const d = RAFF_ORTE.find(x=>x.id===id);
     if (S.raff[id].arbeiter) rows.push([d.land, "Raffinerie " + d.ort, S.raff[id].arbeiter, LAND[d.land].lohn]); }
-  S.fabriken.forEach(f => { if (f.arbeiter) rows.push([f.land, "Fabrik " + PRODUKT[f.produkt].name, f.arbeiter, LAND[f.land].lohn]); });
+  S.fabriken.forEach(f => { if (f.arbeiter) rows.push([f.land, fabOrt(f.land) + " · " + PRODUKT[f.produkt].name, f.arbeiter, LAND[f.land].lohn]); });
   if (S.verkaeufer) rows.push([null, "Verkauf", S.verkaeufer, VERKAUF_LOHN]);
   const menge = anstellbar();
   const kosten = menge * LOHN_PRO_KOPF;
@@ -2772,6 +3093,7 @@ function lupeFuellen(segId){
   const formeln = seg.formeln ? `<div class="karte"><h3>Formeln</h3><table>${
     seg.formeln.map(f=>`<tr><td>${f[0]}</td><td><code>${f[1]}</code></td></tr>`).join("")}</table></div>` : "";
 
+  const geraet = seg.geraet ? geraetBild() : "";
   const materialTabelle = seg.id === "geologie" ? `<div class="karte"><h3>Woher die Rohstoffe kommen</h3>
     <table><tr><th>Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>
     ${Object.keys(MATERIAL).map(k => {
@@ -2798,7 +3120,7 @@ function lupeFuellen(segId){
       <span class="sicon" style="background:${seg.farbe}22;color:${seg.farbe};width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none">${IK[seg.ikon]||IK.wissen}</span>
       <div><h2>${seg.titel}</h2><div class="ort">${seg.kurz}</div></div></div>
     ${seg.text.map(t=>`<p>${t}</p>`).join("")}
-    ${materialTabelle}${loehne}${rezepte}${formeln}
+    ${geraet}${materialTabelle}${loehne}${rezepte}${formeln}
     <div class="karte"><h3>Zum Merken</h3>
       ${seg.fakten.map((f,i)=>`<div class="fakt"><span class="nr">${i+1}</span><span>${f}</span></div>`).join("")}</div>
     ${erforscht}${angebot}`;
@@ -2953,7 +3275,7 @@ document.addEventListener("click", e => {
       S.kasse -= def.kosten; S.ausgegeben += def.kosten;
       const tage = Math.max(3, Math.round(def.bauzeit * perkMult("bauzeit")));
       S.fabriken.push({produkt:p, land:l, arbeiter:0, restbau:tage});
-      notiz(`Fabrik für <b>${def.name}</b> in ${LAND[l].name} – fertig in ${tage} Tagen.`, "geld");
+      notiz(`Fabrik für <b>${def.name}</b> in ${fabOrt(l)} – fertig in ${tage} Tagen.`, "geld");
       pinFeiern("f_"+l);
       const [fx,fy] = pinAufSchirm("f_"+l); funken(fx, fy, ["#b5703c","#f5b73d","#fff"], 22);
       break; }
@@ -3020,14 +3342,14 @@ document.addEventListener("click", e => {
       if (e2.perk.sofort && e2.perk.sofort.ruf) rufAendern(e2.perk.sofort.ruf);
       notiz(`Neues Wissen: <b>${e2.perk.titel}</b> · ${e2.perk.wirkung.join(" · ")}`, "gut");
       funkenAn(t, ["#f5b73d","#2fbe7e","#ffe9a8","#fff"], 28);
-      speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
+      auftragPruefen(); speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
       return; }
     case "reset":
       if (confirm("Neue Runde starten? Der bisherige Verlauf geht verloren.")){
         $("#einst").hidden = true; zuruecksetzen(); }
       return;
   }
-  tutorialPruefen(); speichern(); seitenStand = ""; zeichnen();
+  tutorialPruefen(); auftragPruefen(); speichern(); seitenStand = ""; zeichnen();
 });
 
 /* ---------- Regler ---------- */
@@ -3069,7 +3391,7 @@ function tempoSetzen(v){
   if (takt) clearInterval(takt);
   if (v > 0){
     const ms = Math.max(120, 1400 / v * (100 / OPT.tempo));
-    takt = setInterval(() => { tagVor(); tutorialPruefen(); zeichnen(); }, ms);
+    takt = setInterval(() => { tagVor(); tutorialPruefen(); auftragPruefen(); zeichnen(); }, ms);
   }
 }
 
@@ -3107,6 +3429,7 @@ optAnwenden();
 $("#einstauf").innerHTML = IK.zahnrad;
 $("#zu").innerHTML = IK.x;
 document.querySelectorAll("[data-schliessen]").forEach(b => b.innerHTML = IK.x);
+$("#seitenkopf .seitenknopf").innerHTML = IK.zahnrad;
 $("#h-kasse-i").innerHTML = IK.muenze;
 $("#h-crew-i").innerHTML = IK.person;
 $("#h-tag-i").innerHTML = IK.kalender;
