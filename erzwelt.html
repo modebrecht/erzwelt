@@ -317,6 +317,27 @@ svg{display:block}
   font-family:"Baloo 2",sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px}
 .segment button svg{width:30px;height:22px}
 .segment button[aria-pressed="true"]{background:#fff;color:var(--tinte);box-shadow:0 2px 5px #0000001a}
+/* ---------- Ausbaureihe: zehn Kästchen, das zehnte verdoppelt ---------- */
+.ausbaukopf{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ausbaumarke{background:var(--gruen);color:#04331f;border-radius:99px;padding:3px 11px;
+  font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f1)}
+.ausbaureihe{display:flex;gap:4px;margin:9px 0 4px}
+/* Die Kästchen sind Markierungen, keine Lesetexte: Ihre Beschriftung
+   passt sich der Kästchenbreite an, damit auch zehn Stück auf 320px passen. */
+.ausbaureihe i{flex:1;min-width:0;height:calc(24px + 6px * var(--fs));border-radius:8px;background:#ece2cc;
+  border:2px solid #00000012;display:grid;place-items:center;font-style:normal;overflow:hidden;
+  font-family:"Baloo 2",sans-serif;font-weight:800;color:#a99a80;
+  font-size:clamp(10px, 3.2vw, var(--f0))}
+.ausbaureihe i.voll{background:linear-gradient(#ffdc86,var(--gold));border-color:#c48d1c;
+  color:#5a3c00;box-shadow:0 2px 0 #c48d1c}
+.ausbaureihe i.doppel{background:#e4f5ec;border-color:#9ed8bd;color:#1a7a54}
+.ausbaureihe i.doppel.voll{background:linear-gradient(#82e2b4,var(--gruen));border-color:#1d8d5c;
+  color:#04331f;box-shadow:0 2px 0 #1d8d5c}
+.ausbaureihe i.naechst{border-color:var(--gold);border-style:dashed;color:var(--gold2)}
+body[data-anim="1"] .ausbaureihe i.naechst,body[data-anim="2"] .ausbaureihe i.naechst{animation:blinken 1.5s ease-in-out infinite}
+.ausbaureihe i.frisch{animation:stufeRein .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stufeRein{0%{transform:scale(.4) rotate(-16deg)}60%{transform:scale(1.25) rotate(5deg)}100%{transform:scale(1)}}
+
 .leiste{height:13px;border-radius:99px;background:#e6dcc6;overflow:hidden;margin:6px 0}
 .leiste i{display:block;height:100%;border-radius:99px;transition:width .35s ease}
 .zeile{display:flex;justify-content:space-between;align-items:center;gap:4px 10px;flex-wrap:wrap;
@@ -706,6 +727,30 @@ const PRODUKT = {
 };
 
 const FAB_ORTE = ["china","vietnam","mexiko","deutschland","usa"];
+
+/* ---------- Ausbau (Idle-Stufen) ----------
+   Jede Mine und jede Raffinerie lässt sich in Stufen ausbauen.
+   Zehn Stufen bilden eine Reihe. Jede einzelne Stufe bringt +5 %,
+   die zehnte Stufe einer Reihe VERDOPPELT die Ausbringung.
+   Jede Stufe kostet mehr als die vorherige.                        */
+const AUSBAU_REIHE    = 10;      // Kästchen pro Reihe
+const AUSBAU_SCHRITT  = 1.05;    // was eine normale Stufe bringt
+const AUSBAU_WACHSTUM = 1.38;    // wie stark der Preis pro Stufe steigt
+const AUSBAU_BASIS    = 0.05;    // erste Stufe = 5 % der Baukosten
+const AUSBAU_MAX      = 60;
+
+/* Gesamtfaktor auf die Ausbringung bei Stufe n */
+function ausbauFaktor(n){
+  n = n || 0;
+  const reihen = Math.floor(n / AUSBAU_REIHE);
+  return Math.pow(AUSBAU_SCHRITT, n - reihen) * Math.pow(2, reihen);
+}
+/* Was kostet der Sprung von Stufe n auf n+1? */
+function ausbauKosten(grundpreis, n){
+  return Math.round(grundpreis * AUSBAU_BASIS * Math.pow(AUSBAU_WACHSTUM, n || 0) / 100) * 100;
+}
+/* Ist die nächste Stufe eine Verdopplung? */
+const ausbauVerdoppelt = n => ((n || 0) + 1) % AUSBAU_REIHE === 0;
 
 /* Das Einsteigerprodukt und die Rohstoffe, die es braucht.
    Solange das Tutorial läuft, sind nur diese Minen und diese Fabrik offen. */
@@ -1124,7 +1169,8 @@ const WISSEN = [
     id:"geologie", titel:"Geologie & Lagerstätten", farbe:"#b5703c", ikon:"berg",
     kurz:"Wo Erz liegt, entscheidet die Erdgeschichte – nicht die Politik.",
     text:["Rohstoffe liegen dort, wo vor Millionen Jahren Vulkane, Meere oder Verwitterung sie angereichert haben. Deshalb sind die Karten so ungleich verteilt: Kobalt im kongolesischen Kupfergürtel, Lithium im Dreieck Chile–Bolivien–Argentinien, Bauxit in Guinea.",
-      "Die <b>Ergiebigkeit</b> im Spiel sagt, wie viel Roherz ein Mensch pro Tag aus dem Berg holt. Sie ist in offenen Tagebauen mit Maschinen riesig, in Handarbeit winzig."],
+      "Die <b>Ergiebigkeit</b> im Spiel sagt, wie viel Roherz ein Mensch pro Tag aus dem Berg holt. Sie ist in offenen Tagebauen mit Maschinen riesig, in Handarbeit winzig.",
+      "Mit dem <b>Ausbau</b> einer Mine kaufst du genau das: Bagger, Förderbänder, Brecher. Jede Stufe bringt etwas mehr, jede zehnte Stufe verdoppelt die Förderung – und jede Stufe kostet mehr als die vorherige."],
     fakten:["Für 1 Gramm Gold wird oft über 1 Tonne Gestein bewegt.",
       "Der Cerro Rico in Potosí wird seit 1545 abgebaut – seit fast 500 Jahren.",
       "Hochreiner Quarz für Chip-Schmelztiegel kommt fast nur aus einem einzigen Tal in North Carolina."],
@@ -1304,8 +1350,8 @@ function neuerZustand(){
   return {
     tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0,
     arbeiterGesamt:10, tutorial:0, verkaeufer:0, handverkaufTag:0, verkauftSelber:false,
-    minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis}
-    raff:{},         // id -> {arbeiter}
+    minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis, ausbau}
+    raff:{},         // id -> {arbeiter, ausbau}
     fabriken:[],     // {produkt, land, arbeiter, restbau}
     erz:{}, mat:{}, ware:{},
     perks:{},        // perkId -> true
@@ -1478,7 +1524,7 @@ function tagVor(){
   for (const id in S.minen){
     const m = S.minen[id], def = MINEN.find(x=>x.id===id);
     if (m.stillBis > S.tag) continue;
-    let f = foerderBonus;
+    let f = foerderBonus * ausbauFaktor(m.ausbau);
     if (m.malusBis > S.tag) f *= m.malus;
     f *= 0.55 + (m.zufriedenheit/100) * 0.6;          // müde, unzufriedene Leute fördern weniger
     const menge = m.arbeiter * def.ergiebigkeit * f;
@@ -1494,7 +1540,7 @@ function tagVor(){
   for (const id in S.raff){
     const r = S.raff[id], def = RAFF_ORTE.find(x=>x.id===id);
     if (r.arbeiter === 0) continue;
-    const rest = def.kapazitaet * (r.arbeiter / def.plaetze) * hafen;
+    const rest = def.kapazitaet * ausbauFaktor(r.ausbau) * (r.arbeiter / def.plaetze) * hafen;
     // Die Kapazitaet wird anteilig auf alle vorhandenen Erze verteilt,
     // damit nicht immer nur das erste Material in der Liste verarbeitet wird.
     const vorrat = Object.keys(MATERIAL).filter(k => (S.erz[k]||0) > 0.5);
@@ -2048,7 +2094,7 @@ function tutorialPruefen(){
     const erledigt = TUTORIAL[S.tutorial];
     S.tutorial++;
     notiz(tutorialLaeuft() ? "Erledigt: " + erledigt.titel
-                           : "Tutorial geschafft – alle Standorte sind jetzt offen.", "gut");
+                           : "Tutorial geschafft – alle Standorte, alle Produkte und der Ausbau von Minen und Raffinerien sind jetzt offen.", "gut");
   }
 }
 
@@ -2182,6 +2228,17 @@ function naechsterSchritt(){
   if (S.ruf < 55) return ["Dein Ruf ist tief", "Das senkt die Nachfrage nach allen Produkten. Prüf die Löhne."];
   const offen = WISSEN.filter(s => naechsterPerk(s) && S.kasse > naechsterPerk(s).kosten*2.5);
   if (offen.length) return ["Neues Wissen ist bezahlbar", `Im Reiter Wissen: «${naechsterPerk(offen[0]).titel}» im Feld ${offen[0].titel}.`];
+  // Ausbau lohnt sich vor allem kurz vor einer Verdopplung
+  for (const id in S.minen){
+    const d = MINEN.find(x=>x.id===id), st = S.minen[id].ausbau || 0;
+    if (ausbauVerdoppelt(st) && S.kasse > ausbauKosten(d.erschliessung, st) * 1.5)
+      return ["Verdopplung in " + d.ort + " möglich", "Die nächste Ausbaustufe verdoppelt dort die Förderung."];
+  }
+  const billigsteMine = Object.keys(S.minen).sort((a,b) =>
+    ausbauKosten(MINEN.find(x=>x.id===a).erschliessung, S.minen[a].ausbau||0)
+    - ausbauKosten(MINEN.find(x=>x.id===b).erschliessung, S.minen[b].ausbau||0))[0];
+  if (billigsteMine && S.kasse > ausbauKosten(MINEN.find(x=>x.id===billigsteMine).erschliessung, S.minen[billigsteMine].ausbau||0) * 4)
+    return ["Du hast Geld auf der Seite", "Bau eine Mine oder Raffinerie aus – jede zehnte Stufe verdoppelt."];
   return null;
 }
 
@@ -2261,6 +2318,40 @@ function zeichnen(){
   }
 }
 
+/* ---------- Ausbau-Karte (Mine wie Raffinerie) ----------
+   Zehn Kästchen pro Reihe, das zehnte verdoppelt. Frisch gekaufte
+   Stufen ploppen kurz auf.                                          */
+let frischeStufe = {};        // id -> Zeitpunkt der letzten Stufe
+function ausbauKarte(art, id, stufe, grundpreis, was){
+  stufe = stufe || 0;
+  const reihen  = Math.floor(stufe / AUSBAU_REIHE);
+  const inReihe = stufe % AUSBAU_REIHE;
+  const kosten  = ausbauKosten(grundpreis, stufe);
+  const geht    = S.kasse >= kosten && stufe < AUSBAU_MAX;
+  const doppelt = ausbauVerdoppelt(stufe);
+  const frisch  = Date.now() - (frischeStufe[id] || 0) < 800;
+
+  const kaesten = [...Array(AUSBAU_REIHE)].map((_,i) => {
+    const voll = i < inReihe, letzte = i === AUSBAU_REIHE - 1;
+    const naechst = i === inReihe && stufe < AUSBAU_MAX;
+    return `<i class="${voll?"voll":""} ${letzte?"doppel":""} ${naechst?"naechst":""}
+      ${voll && frisch && i === inReihe-1 ? "frisch" : ""}">${letzte ? "×2" : voll ? "✓" : ""}</i>`;
+  }).join("");
+
+  return `<div class="karte">
+    <div class="ausbaukopf"><h3>Ausbau</h3>
+      ${reihen ? `<span class="ausbaumarke">×${Math.pow(2,reihen)}</span>` : ""}</div>
+    <div class="ort">Stufe ${stufe} · Reihe ${reihen+1} · ${was} ×${ausbauFaktor(stufe).toFixed(2)}</div>
+    <div class="ausbaureihe">${kaesten}</div>
+    <div class="zeile"><span>${doppelt ? "Nächste Stufe verdoppelt!" : "Nächste Stufe"}</span>
+      <b>${stufe >= AUSBAU_MAX ? "voll ausgebaut" : "+" + Math.round((ausbauFaktor(stufe+1)/ausbauFaktor(stufe)-1)*100) + " %"}</b></div>
+    ${stufe >= AUSBAU_MAX ? "" : `<button class="cta ${doppelt?"gruen":""} ${geht&&doppelt?"puls":""}"
+      data-tun="ausbau" data-art="${art}" data-id="${id}" ${geht?"":"disabled"}>
+      ${geht?IK.berg:""}${geht ? (doppelt ? "VERDOPPELN · " : "Ausbauen · ") + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>`}
+    <div class="notiz">Jede Stufe bringt +5 % und kostet mehr als die vorherige. Jede zehnte Stufe verdoppelt die Ausbringung.</div>
+  </div>`;
+}
+
 /* ---------- Blatt: Mine ---------- */
 function blattMine(id){
   const def = MINEN.find(x=>x.id===id), m = S.minen[id];
@@ -2291,7 +2382,8 @@ function blattMine(id){
   const farbe = zuf < 32 ? "var(--alarm)" : zuf < 60 ? "var(--warn)" : "var(--gruen)";
   const still = m.stillBis > S.tag;
   const ertrag = still ? 0 : m.arbeiter * def.ergiebigkeit * (0.55 + zuf/100*0.6)
-                             * (m.malusBis>S.tag ? m.malus : 1) * perkMult("foerderung");
+                             * (m.malusBis>S.tag ? m.malus : 1) * perkMult("foerderung")
+                             * ausbauFaktor(m.ausbau);
   const leuteBild = ikonTeam(Math.max(1, Math.ceil(m.arbeiter / Math.max(1, def.plaetze/5))), 60, .34);
 
   return kopf + band + szeneMine(def, m)
@@ -2314,6 +2406,8 @@ function blattMine(id){
       </div>
       <div class="leiste"><i style="width:${(m.arbeiter/def.plaetze*100).toFixed(0)}%;background:#6fb8e0"></i></div>
     </div>
+
+    ${tutorialLaeuft() ? "" : ausbauKarte("mine", id, m.ausbau, def.erschliessung, "Förderung")}
 
     <div class="karte">
       <h3>Lohnstufe</h3>
@@ -2362,7 +2456,7 @@ function blattRaff(id){
   const erzda = Object.values(S.erz).reduce((a,b)=>a+b,0);
   return kopf + szeneRaff(def, r) + `
     <div class="werte">
-      <div class="wert"><span class="wi">${IK.kolben}</span><span class="wt"><small>Durchsatz</small><b>${Math.round(def.kapazitaet*(r.arbeiter/def.plaetze)*globalWert("hafen")*perkMult("durchsatz"))}/Tag</b></span></div>
+      <div class="wert"><span class="wi">${IK.kolben}</span><span class="wt"><small>Durchsatz</small><b>${Math.round(def.kapazitaet*ausbauFaktor(r.ausbau)*(r.arbeiter/def.plaetze)*globalWert("hafen")*perkMult("durchsatz"))}/Tag</b></span></div>
       <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Roherz im Lager</small><b>${Math.round(erzda)}</b></span></div>
     </div>
     <div class="karte">
@@ -2377,6 +2471,7 @@ function blattRaff(id){
       </div>
       <div class="leiste"><i style="width:${(r.arbeiter/def.plaetze*100).toFixed(0)}%;background:#5b8f7a"></i></div>
     </div>
+    ${tutorialLaeuft() ? "" : ausbauKarte("raff", id, r.ausbau, def.bau, "Durchsatz")}
     <div class="notiz">Aus 1 Erz wird je nach Material unterschiedlich viel: Silizium 70 %, Gold nur 8 %. Der Rest ist Abraum.</div>
     <div class="notiz blau">${def.info}</div>`;
 }
@@ -2816,7 +2911,7 @@ document.addEventListener("click", e => {
       const def = MINEN.find(x=>x.id===id);
       if (S.kasse < def.erschliessung || gesperrt("mine", id)) return;
       S.kasse -= def.erschliessung; S.ausgegeben += def.erschliessung;
-      S.minen[id] = {arbeiter:0, stufe:1, zufriedenheit:55, stillBis:0, malus:1, malusBis:0};
+      S.minen[id] = {arbeiter:0, stufe:1, zufriedenheit:55, stillBis:0, malus:1, malusBis:0, ausbau:0};
       notiz(`Mine <b>${def.ort}</b> eröffnet. Jetzt Leute hinschicken.`, "gut");
       zeigeAuf(id); pinFeiern(id);
       const [fx,fy] = pinAufSchirm(id);
@@ -2841,7 +2936,7 @@ document.addEventListener("click", e => {
     case "raff-bau": {
       const def = RAFF_ORTE.find(x=>x.id===id);
       if (S.kasse < def.bau || gesperrt("raff")) return;
-      S.kasse -= def.bau; S.ausgegeben += def.bau; S.raff[id] = {arbeiter:0};
+      S.kasse -= def.bau; S.ausgegeben += def.bau; S.raff[id] = {arbeiter:0, ausbau:0};
       notiz(`Raffinerie <b>${def.ort}</b> gebaut.`, "gut");
       zeigeAuf(id); pinFeiern(id);
       const [fx,fy] = pinAufSchirm(id); funken(fx, fy, ["#5b8f7a","#cfe8dd","#fff"], 22);
@@ -2894,6 +2989,24 @@ document.addEventListener("click", e => {
       einstFuellen(); return;
     case "zumteam":
       seiteWechseln("team"); return;
+    case "ausbau": {
+      const art = t.dataset.art;
+      const ziel = art === "mine" ? S.minen[id] : S.raff[id];
+      if (!ziel || (ziel.ausbau||0) >= AUSBAU_MAX) return;
+      const grund = art === "mine" ? MINEN.find(x=>x.id===id).erschliessung : RAFF_ORTE.find(x=>x.id===id).bau;
+      const kosten = ausbauKosten(grund, ziel.ausbau||0);
+      if (S.kasse < kosten) return;
+      const verdoppelt = ausbauVerdoppelt(ziel.ausbau||0);
+      S.kasse -= kosten; S.ausgegeben += kosten;
+      ziel.ausbau = (ziel.ausbau||0) + 1;
+      frischeStufe[id] = Date.now();
+      const ort = art === "mine" ? MINEN.find(x=>x.id===id).ort : RAFF_ORTE.find(x=>x.id===id).ort;
+      notiz(verdoppelt
+        ? `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut – die Ausbringung ist jetzt <b>doppelt</b> so hoch.`
+        : `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut.`, verdoppelt ? "gut" : "geld");
+      funkenAn(t, verdoppelt ? ["#2fbe7e","#82e2b4","#f5b73d","#fff"] : ["#f5b73d","#ffe9a8","#fff"],
+        verdoppelt ? 40 : 16);
+      break; }
     case "segment":
       lupeFuellen(t.dataset.s); return;
     case "perk": {
