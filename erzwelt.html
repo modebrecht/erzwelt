@@ -69,7 +69,26 @@ svg{display:block}
 .pille i svg{width:16px;height:16px}
 .pille b{font-family:"Baloo 2",sans-serif;font-size:var(--f2);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pille small{font-size:var(--f0);opacity:.75;display:block;line-height:1;margin-bottom:2px;letter-spacing:.04em}
+.pille.kasse{cursor:pointer;text-align:left}
+.pille.kasse:active{transform:translateY(2px)}
 .pille.kasse i{background:var(--gold);color:#5a3c00}
+.pille .lupezeichen{width:16px;height:16px;border-radius:50%;border:2px solid #ffffff66;
+  display:grid;place-items:center;flex:none;margin-left:2px}
+.pille .lupezeichen::after{content:"";width:0;height:0;border:4px solid transparent;
+  border-top:5px solid #ffffffcc;margin-top:3px}
+/* Kassenbuch */
+.buchtabelle{width:100%;border-collapse:collapse;font-size:var(--f1);display:table}
+.buchtabelle th{font-size:var(--f0);text-transform:uppercase;letter-spacing:.04em;color:var(--grau);
+  text-align:right;padding:8px 4px;border-bottom:1px solid var(--linie)}
+.buchtabelle th:first-child{text-align:left}
+.buchtabelle td{padding:8px 4px;border-bottom:1px solid var(--linie);text-align:right;
+  font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
+.buchtabelle td:first-child{text-align:left;font-weight:600;white-space:normal}
+.buchtabelle tr.summe td{border-top:2px solid var(--tinte);border-bottom:none;
+  font-family:"Baloo 2",sans-serif;font-size:var(--f2);padding-top:11px}
+.buchtabelle .ein{color:#0f7a4f}
+.buchtabelle .aus{color:#b8443e}
+.buchpunkt{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px}
 .pille.crew i{background:#6fb8e0;color:#0a3a55}
 .pille.tag i{background:#ffffff26;color:#fff}
 .hudrechts{margin-left:auto;display:flex;gap:5px;pointer-events:auto;align-items:center}
@@ -601,7 +620,9 @@ body[data-anim="0"] *{animation:none!important}
   </div>
 
   <div id="hud">
-    <div class="pille kasse"><i id="h-kasse-i"></i><div><small>Kasse</small><b id="h-kasse">–</b></div></div>
+    <button class="pille kasse" data-tun="kassebuch" aria-label="Kasse aufschlüsseln">
+      <i id="h-kasse-i"></i><div><small>Kasse</small><b id="h-kasse">–</b></div>
+      <span class="lupezeichen"></span></button>
     <div class="pille crew"><i id="h-crew-i"></i><div><small>Frei</small><b id="h-crew">–</b></div></div>
     <div class="pille tag"><i id="h-tag-i"></i><div><small>Tag</small><b id="h-tag">1</b></div></div>
     <div class="hudrechts">
@@ -663,6 +684,13 @@ body[data-anim="0"] *{animation:none!important}
   <div class="tafel" role="dialog" aria-modal="true" aria-label="Einstellungen">
     <button class="xzu" data-schliessen="einst" aria-label="Schliessen"></button>
     <div id="einstinhalt"></div>
+  </div>
+</div>
+
+<div id="kasse" class="ueberlage" hidden>
+  <div class="tafel" role="dialog" aria-modal="true" aria-label="Kasse">
+    <button class="xzu" data-schliessen="kasse" aria-label="Schliessen"></button>
+    <div id="kasseinhalt"></div>
   </div>
 </div>
 
@@ -1463,6 +1491,20 @@ WISSEN.forEach(seg => seg.perks.forEach((p,i) => { PERK_INDEX[p.id] = {perk:p, s
    5. MOTOR
    ============================================================ */
 
+/* ---------- Schwierigkeitsgrad ----------
+   Zwei Stellschrauben, beide gut erklärbar: was Kundschaft zahlt und
+   wie viel Startkapital in der Kasse liegt. */
+const GRADE = {
+  einfach: {name:"Einfach", erloes:1.25, start:1600000,
+    text:"Kundschaft zahlt 25 % mehr, mehr Startkapital. Zum Kennenlernen."},
+  mittel:  {name:"Mittel",  erloes:1.00, start:1250000,
+    text:"Die normalen Preise. So ist das Spiel gedacht."},
+  schwer:  {name:"Schwer",  erloes:0.75, start:1000000,
+    text:"Kundschaft zahlt 25 % weniger, weniger Startkapital. Jede Entscheidung zählt."}
+};
+const grad = () => GRADE[S && S.grad] || GRADE.mittel;
+const erloesFaktor = () => grad().erloes;
+
 const ZIEL_GEWINN = 2000000;   // Rundenziel in CHF
 const ZIEL_RUF    = 60;
 const ZIEL_TAGE   = 720;       // 2 Spieljahre
@@ -1509,7 +1551,7 @@ function optAnwenden(){
 
 function neuerZustand(){
   return {
-    tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0,
+    tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0, grad:"mittel",
     arbeiterGesamt:10, tutorial:0, auftrag:0, verkaeufer:0, handverkaufTag:0, verkauftSelber:false,
     minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis, ausbau}
     raff:{},         // id -> {arbeiter, ausbau}
@@ -1518,7 +1560,7 @@ function neuerZustand(){
     perks:{},        // perkId -> true
     preisMod:{}, nachfrageMod:{},   // material/produkt -> {faktor, bis}
     globalMod:[],                   // {art, wert, bis, text}
-    log:[], erledigt:{}, ende:null
+    buch:[], log:[], erledigt:{}, ende:null
   };
 }
 
@@ -1528,6 +1570,41 @@ const kurz = n => Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+" Mio" : Math.abs(n)>=10
 const zufall = (a,b) => a + Math.random()*(b-a);
 const klemm = (v,a,b) => Math.max(a, Math.min(b, v));
 const monat = () => Math.floor((S.tag-1)/30) + 1;
+
+/* ---------- Kassenbuch ----------
+   Jeder Franken wird mit Datum und Grund verbucht. Daraus entsteht die
+   Aufschlüsselung, die beim Tippen auf die Kasse aufklappt. */
+const BUCH_ARTEN = ["verkauf","lohn","betrieb","bau","personal","ausbau","wissen","ereignis","sonstiges"];
+const BUCH_NAME = {verkauf:"Verkauf", lohn:"Löhne", betrieb:"Betrieb", bau:"Neubauten",
+  personal:"Anstellen", ausbau:"Ausbau", wissen:"Wissen", ereignis:"Ereignisse", sonstiges:"Sonstiges"};
+const BUCH_TAGE = 45;
+
+function buchTag(){
+  if (!Array.isArray(S.buch)) S.buch = [];
+  let e = S.buch[S.buch.length - 1];
+  if (!e || e.t !== S.tag){
+    e = {t:S.tag}; BUCH_ARTEN.forEach(a => e[a] = 0);
+    S.buch.push(e);
+    while (S.buch.length > BUCH_TAGE) S.buch.shift();
+  }
+  return e;
+}
+function buchen(art, betrag){
+  if (!betrag) return;
+  const e = buchTag();
+  e[art] = (e[art] || 0) + betrag;
+}
+/* Geld ausgeben – immer über diesen Weg, dann stimmt das Buch. */
+function zahlen(betrag, art){
+  S.kasse -= betrag; S.ausgegeben += betrag; buchen(art || "sonstiges", betrag);
+}
+/* Summe der letzten n Tage je Art */
+function buchSumme(n){
+  const ab = S.tag - n;
+  const summe = {}; BUCH_ARTEN.forEach(a => summe[a] = 0);
+  (S.buch || []).forEach(e => { if (e.t > ab) BUCH_ARTEN.forEach(a => summe[a] += e[a] || 0); });
+  return summe;
+}
 
 function notiz(text, art){
   S.log.unshift({tag:S.tag, text, art:art||""});
@@ -1660,7 +1737,7 @@ function warenPreis(p){
   const lager = S.ware[p] || 0;
   const n = Math.max(1, nachfrage(p));
   const ueber = klemm(lager / (n*12), 0, 1);
-  return PRODUKT[p].preis * (1 - 0.35*ueber) * dollarFaktor() * perkMult("warenpreis");
+  return PRODUKT[p].preis * (1 - 0.35*ueber) * dollarFaktor() * perkMult("warenpreis") * erloesFaktor();
 }
 
 /* Rohstoffe lassen sich nicht zukaufen: Jedes Material muss aus einer
@@ -1721,28 +1798,55 @@ function tagVor(){
   }
 
   // 4) Fabrikbau + Produktion
+  //    Knappes Material wird ANTEILIG auf alle Fabriken verteilt: keine
+  //    Fabrik nimmt der anderen alles weg, nur weil sie zuerst dran ist.
   const fabrikBonus = perkMult("fabrik");
+  const laufende = [];
   for (const f of S.fabriken){
     if (f.restbau > 0){ f.restbau--; if (f.restbau === 0) notiz(`Fabrik <b>${PRODUKT[f.produkt].name}</b> in ${fabOrt(f.land)} nimmt die Produktion auf.`, "gut"); continue; }
     if (f.arbeiter === 0) continue;
     const def = PRODUKT[f.produkt];
-    let stueck = Math.floor(f.arbeiter * def.proArbeiter * fabrikBonus);
-    for (const k in def.rezept) stueck = Math.min(stueck, Math.floor((S.mat[k]||0) / def.rezept[k]));
-    if (stueck <= 0) continue;
-    for (const k in def.rezept) S.mat[k] -= stueck * def.rezept[k];
-    S.ware[f.produkt] = (S.ware[f.produkt] || 0) + stueck;
+    const wunsch = Math.floor(f.arbeiter * def.proArbeiter * fabrikBonus * ausbauFaktor(f.ausbau));
+    if (wunsch > 0) laufende.push({f, def, wunsch, stueck:0});
+  }
+  if (laufende.length){
+    // Wie viel von jedem Material wollen alle Fabriken zusammen?
+    const bedarf = {};
+    for (const l of laufende)
+      for (const k in l.def.rezept) bedarf[k] = (bedarf[k] || 0) + l.wunsch * l.def.rezept[k];
+    // Anteil, den jede Fabrik davon bekommt
+    const anteil = {};
+    for (const k in bedarf) anteil[k] = Math.min(1, (S.mat[k] || 0) / bedarf[k]);
+    for (const l of laufende){
+      let f2 = 1;
+      for (const k in l.def.rezept) f2 = Math.min(f2, anteil[k]);
+      l.stueck = Math.floor(l.wunsch * f2);
+      for (const k in l.def.rezept) S.mat[k] -= l.stueck * l.def.rezept[k];
+    }
+    // Zweiter Durchgang: was übrig bleibt, geht an die wertvollste Ware –
+    // sonst läge Material ungenutzt herum.
+    laufende.sort((a,b) => b.def.preis - a.def.preis);
+    for (const l of laufende){
+      let mehr = l.wunsch - l.stueck;
+      for (const k in l.def.rezept) mehr = Math.min(mehr, Math.floor((S.mat[k] || 0) / l.def.rezept[k]));
+      if (mehr <= 0) continue;
+      for (const k in l.def.rezept) S.mat[k] -= mehr * l.def.rezept[k];
+      l.stueck += mehr;
+    }
+    for (const l of laufende)
+      if (l.stueck > 0) S.ware[l.f.produkt] = (S.ware[l.f.produkt] || 0) + l.stueck;
   }
 
   // 5) Verkauf: nur so viel, wie deine Verkäuferinnen schaffen –
   //    und höchstens so viel, wie der Markt an einem Tag aufnimmt.
   const kraft = verkaufsKraft();
-  if (kraft > 0) wareVerkaufen(kraft);
+  if (kraft > 0){ const erg = wareVerkaufen(kraft); buchen("verkauf", erg.erloes); }
 
   // 6) Monatsende: Löhne, Betriebskosten, Ruf
   if ((S.tag - 1) % 30 === 0){
     const lohn = lohnsumme();
     const betrieb = (Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000) * perkMult("betrieb");
-    S.kasse -= lohn + betrieb; S.ausgegeben += lohn + betrieb;
+    zahlen(lohn, "lohn"); zahlen(betrieb, "betrieb");
     notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`, "geld");
     rufAnpassen();
     if (S.kasse < 0) notiz("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.", "alarm");
@@ -1812,7 +1916,7 @@ const EREIGNISSE = [
            tun(){ S.minen[id].stufe = Math.min(2, S.minen[id].stufe+1); S.minen[id].zufriedenheit = 62; S.minen[id].stillBis = S.tag+2; rufAendern(6);
                   notiz(`Löhne in ${def.ort} erhöht. Die Arbeit läuft wieder.`, "gut"); }},
           {text:"Verhandeln und Sicherheitsausrüstung stellen", klein:"Einmalig CHF 60'000, Ruf steigt",
-           tun(){ S.kasse -= 60000; S.ausgegeben += 60000; S.minen[id].zufriedenheit = 55; S.minen[id].stillBis = S.tag+5; rufAendern(10);
+           tun(){ zahlen(60000, "ereignis"); S.minen[id].zufriedenheit = 55; S.minen[id].stillBis = S.tag+5; rufAendern(10);
                   notiz(`Verhandlung in ${def.ort}: Ausrüstung bezahlt, Streik nach 5 Tagen beendet.`, "gut"); }},
           {text:"Aussitzen und Streikende ersetzen", klein:"Kostet nichts, Mine steht 20 Tage, Ruf fällt stark",
            tun(){ S.minen[id].stillBis = S.tag+20; S.minen[id].zufriedenheit = 12; rufAendern(-18);
@@ -1832,7 +1936,7 @@ const EREIGNISSE = [
         text:`Ein Recherche-Team veröffentlicht Bilder aus ${def.ort}: Jugendliche schleppen Säcke, ohne Helm, ohne Vertrag. Dein Name steht im Artikel. Kunden fragen nach.`,
         wahlen:[
           {text:"Unabhängiges Audit bezahlen und Löhne anheben", klein:"CHF 90'000, Ruf steigt deutlich",
-           tun(){ S.kasse -= 90000; S.ausgegeben += 90000; S.minen[id].stufe = 2; rufAendern(14); notiz("Audit beauftragt, Löhne angehoben.", "gut"); }},
+           tun(){ zahlen(90000, "ereignis"); S.minen[id].stufe = 2; rufAendern(14); notiz("Audit beauftragt, Löhne angehoben.", "gut"); }},
           {text:"Erklären, das sei ein Zulieferer gewesen", klein:"Kostet nichts, Ruf fällt, Nachfrage sinkt 60 Tage",
            tun(){ rufAendern(-22); S.nachfrageMod.phone = {faktor:.7, bis:S.tag+60}; notiz("Dementi veröffentlicht. Die Nachfrage nach dem Phone bricht ein.", "alarm"); }}
         ]
@@ -1851,10 +1955,10 @@ const EREIGNISSE = [
         text:`In der Nacht ist ein Stollen eingestürzt. Es gibt Verletzte. Die Behörden sperren die Mine, bis geklärt ist, wie es weitergeht.`,
         wahlen:[
           {text:"Entschädigung zahlen und Stollen sichern", klein:"CHF 140'000, Mine läuft in 10 Tagen wieder",
-           tun(){ S.kasse -= 140000; S.ausgegeben += 140000; S.minen[id].stillBis = S.tag+10; S.minen[id].stufe = Math.max(1, S.minen[id].stufe); rufAendern(4);
+           tun(){ zahlen(140000, "ereignis"); S.minen[id].stillBis = S.tag+10; S.minen[id].stufe = Math.max(1, S.minen[id].stufe); rufAendern(4);
                   notiz(`${def.ort} gesichert, Entschädigung bezahlt.`, "warn"); }},
           {text:"Nur das Nötigste reparieren", klein:"CHF 30'000, Mine läuft in 25 Tagen, Ruf fällt",
-           tun(){ S.kasse -= 30000; S.ausgegeben += 30000; S.minen[id].stillBis = S.tag+25; rufAendern(-15); S.minen[id].zufriedenheit = 15;
+           tun(){ zahlen(30000, "ereignis"); S.minen[id].stillBis = S.tag+25; rufAendern(-15); S.minen[id].zufriedenheit = 15;
                   notiz(`Notreparatur in ${def.ort}. Die Belegschaft ist wütend.`, "alarm"); }}
         ]
       };
@@ -1900,7 +2004,7 @@ const EREIGNISSE = [
       return {passiv:true, text:"<b>Lithium-Preis bricht ein</b> – neue Minen weltweit liefern zu viel. Gut für Akku-Produzenten, schlecht für Lithium-Minen.", art:"warn"};
   }},
   { id:"lieferkettengesetz", gewicht:5, einmalig:true, passt:()=> S.tag>200, bau(){
-      if (S.ruf < 50){ S.kasse -= 180000; S.ausgegeben += 180000;
+      if (S.ruf < 50){ zahlen(180000, "ereignis");
         return {passiv:true, text:"<b>Neues Lieferkettengesetz</b> – deine Firma kann die Herkunft nicht belegen. Busse: CHF 180'000.", art:"alarm"}; }
       S.nachfrageMod.board = {faktor:1.3, bis:S.tag+90};
       return {passiv:true, text:"<b>Neues Lieferkettengesetz</b> – deine Nachweise sind sauber. Grosskunden bestellen mehr Mainboards.", art:"gut"};
@@ -2295,6 +2399,10 @@ const AUFTRAEGE = [
     text:"Jede Ausbaustufe bringt mehr Förderung. Bring eine Mine auf Stufe 5.",
     ziel:()=>"meine-minen",
     stand:()=> [Object.values(S.minen).reduce((a,m)=>Math.max(a, m.ausbau||0), 0), 5] },
+  { id:"a_raffausbau", ikon:"kolben", titel:"Bau deine Raffinerie aus",
+    text:"Die Raffinerie ist oft der Engpass: Erz stapelt sich, weil sie nicht nachkommt. Bring sie auf Ausbaustufe 3.",
+    ziel:()=>"meine-raff",
+    stand:()=> [Object.values(S.raff).reduce((a,r)=>Math.max(a, r.ausbau||0), 0), 3] },
   { id:"a_akku", ikon:"hacke", titel:"Rohstoffe für den Akku",
     text:"Ein Akku braucht Lithium, Kobalt und Nickel. Diese drei Erze stecken in jedem Handy und in jedem E-Bike. Eröffne für alle drei eine Mine.",
     ziel:()=>"minen-frei",
@@ -2303,6 +2411,10 @@ const AUFTRAEGE = [
     text:"Mit Lithium, Kobalt, Nickel, Kupfer und Aluminium kannst du Akkus bauen. Eröffne die Fabrik.",
     ziel:()=>"fab-frei",
     stand:()=> [S.fabriken.some(f => f.produkt === "akku") ? 1 : 0, 1] },
+  { id:"a_fabausbau", ikon:"fabrik", titel:"Bau eine Fabrik aus",
+    text:"Auch Fabriken lassen sich ausbauen: bessere Maschinen, mehr Stück pro Person. Bring eine auf Ausbaustufe 3.",
+    ziel:()=>"meine-fab",
+    stand:()=> [S.fabriken.reduce((a,f)=>Math.max(a, f.ausbau||0), 0), 3] },
   { id:"a_seltene", ikon:"berg", titel:"Seltene Erden und Indium",
     text:"Seltene Erden stecken in jedem Lautsprecher und jedem Vibrationsmotor. Indium macht den Touchscreen durchsichtig und leitfähig. Ohne die beiden gibt es kein Smartphone.",
     ziel:()=>"minen-frei",
@@ -2614,7 +2726,8 @@ function hinweiseSetzen(){
 /* Ist gerade irgendein Fenster offen? Dann treten die Meldungen zurück. */
 function fensterKlasse(){
   document.body.classList.toggle("fensterauf",
-    !!offenesBlatt || aktiveSeite !== "karte" || !$("#lupe").hidden || !$("#einst").hidden || !$("#schleier").hidden);
+    !!offenesBlatt || aktiveSeite !== "karte" || !$("#lupe").hidden || !$("#einst").hidden
+    || !$("#kasse").hidden || !$("#schleier").hidden);
 }
 function zeichnen(){
   fensterKlasse();
@@ -2627,6 +2740,7 @@ function zeichnen(){
   toastsErneuern();
   questZeichnen();
   hinweiseSetzen();
+  if (!$("#kasse").hidden) kasseFuellen();
   if (offenesBlatt) blattFuellen(offenesBlatt.art, offenesBlatt.id);
   if (aktiveSeite !== "karte") seiteFuellen(aktiveSeite);
   // Fördermenge des Tages im offenen Minenfenster als schwebende Zahl
@@ -2643,7 +2757,7 @@ function zeichnen(){
    Zehn Kästchen pro Reihe, das zehnte verdoppelt. Frisch gekaufte
    Stufen ploppen kurz auf.                                          */
 let frischeStufe = {};        // id -> Zeitpunkt der letzten Stufe
-function ausbauKarte(art, id, stufe, grundpreis, was){
+function ausbauKarte(art, id, stufe, grundpreis, was, index){
   stufe = stufe || 0;
   const reihen  = Math.floor(stufe / AUSBAU_REIHE);
   const inReihe = stufe % AUSBAU_REIHE;
@@ -2667,7 +2781,7 @@ function ausbauKarte(art, id, stufe, grundpreis, was){
     <div class="zeile"><span>${doppelt ? "Nächste Stufe verdoppelt!" : "Nächste Stufe"}</span>
       <b>${stufe >= AUSBAU_MAX ? "voll ausgebaut" : "+" + Math.round((ausbauFaktor(stufe+1)/ausbauFaktor(stufe)-1)*100) + " %"}</b></div>
     ${stufe >= AUSBAU_MAX ? "" : `<button class="cta ${doppelt?"gruen":""} ${geht&&doppelt?"puls":""}"
-      data-tun="ausbau" data-art="${art}" data-id="${id}" ${geht?"":"disabled"}>
+      data-tun="ausbau" data-art="${art}" data-id="${id}" ${index!=null?`data-i="${index}"`:""} ${geht?"":"disabled"}>
       ${geht?IK.berg:""}${geht ? (doppelt ? "VERDOPPELN · " : "Ausbauen · ") + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>`}
     <div class="notiz">Jede Stufe bringt +5 % und kostet mehr als die vorherige. Jede zehnte Stufe verdoppelt die Ausbringung.</div>
   </div>`;
@@ -2810,7 +2924,7 @@ function blattFab(land){
       <div class="ort">Im Bau – noch ${f.restbau} Tage</div>
       ${szeneFabrik(f, def)}
       <div class="leiste"><i style="width:${(100-f.restbau/def.bauzeit*100).toFixed(0)}%;background:var(--gold)"></i></div></div>`;
-    let stueck = Math.floor(f.arbeiter * def.proArbeiter * perkMult("fabrik"));
+    let stueck = Math.floor(f.arbeiter * def.proArbeiter * perkMult("fabrik") * ausbauFaktor(f.ausbau));
     for (const k in def.rezept) stueck = Math.min(stueck, Math.floor((S.mat[k]||0)/def.rezept[k]));
     const fehlt = Object.keys(def.rezept).filter(k => (S.mat[k]||0) < def.rezept[k]);
     return `<div class="karte"><h3>${def.name}</h3>
@@ -2827,6 +2941,7 @@ function blattFab(land){
       </div>
       <div class="zeile"><span>Produktion heute</span><b>${stueck} Stück</b></div>
       <div class="zeile"><span>Lager</span><b>${S.ware[f.produkt]||0} Stück</b></div>
+      ${tutorialLaeuft() ? "" : ausbauKarte("fab", land, f.ausbau, def.kosten, "Ausstoss", i)}
       ${fehlt.length ? `<div class="notiz rot">Es fehlt: ${fehlt.map(k=>MATERIAL[k].name).join(", ")}.
         Zukaufen geht nicht – eröffne dafür eine Mine.</div>` : ""}</div>`;
   }).join("");
@@ -3129,6 +3244,78 @@ function lupeFuellen(segId){
   fensterKlasse();
 }
 
+/* ---------- Kassenbuch: was ist wohin geflossen? ---------- */
+const BUCH_FARBE = {verkauf:"#2fbe7e", lohn:"#e0504a", betrieb:"#f08c2e", bau:"#b5703c",
+  personal:"#6fb8e0", ausbau:"#f5b73d", wissen:"#8a6ae8", ereignis:"#8a97a3", sonstiges:"#a99a80"};
+
+function kasseFuellen(){
+  const w = buchSumme(7), m = buchSumme(30);
+  const tage7 = Math.min(7, S.tag), tage30 = Math.min(30, S.tag);
+  const ausArten = BUCH_ARTEN.filter(a => a !== "verkauf");
+  const ausSumme = o => ausArten.reduce((sum,a) => sum + o[a], 0);
+  const saldo7 = w.verkauf - ausSumme(w), saldo30 = m.verkauf - ausSumme(m);
+
+  const zahl = (wert, ein) => {
+    const v = Math.round(Math.abs(wert));
+    if (v === 0) return `<td style="color:var(--grau)">0</td>`;
+    return `<td class="${ein?"ein":"aus"}">${ein?"+":"−"}${v.toLocaleString("de-CH")}</td>`;
+  };
+  const zeile = (art, name) => (w[art] === 0 && m[art] === 0) ? "" :
+    `<tr><td><i class="buchpunkt" style="background:${BUCH_FARBE[art]}"></i>${name}</td>
+      ${zahl(w[art], art==="verkauf")}${zahl(m[art], art==="verkauf")}</tr>`;
+
+  // Balken: woran die Ausgaben der letzten 30 Tage hängen
+  const gesamtAus = ausSumme(m);
+  const balken = gesamtAus > 0 ? `<div class="leiste" style="height:18px;display:flex">${
+    ausArten.filter(a => m[a] > 0).map(a =>
+      `<i style="width:${(m[a]/gesamtAus*100).toFixed(1)}%;background:${BUCH_FARBE[a]};border-radius:0"
+         title="${BUCH_NAME[a]}"></i>`).join("")}</div>` : "";
+
+  const html = `
+    <h2>Deine Kasse</h2>
+    <div class="unter">Woher das Geld kommt und wohin es geht</div>
+    <div class="werte">
+      <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Kontostand</small>
+        <b style="color:${S.kasse<0?"var(--alarm)":"inherit"}">${chf(S.kasse)}</b></span></div>
+      <div class="wert"><span class="wi">${IK.kalender}</span><span class="wt"><small>pro Tag (30 T.)</small>
+        <b style="color:${saldo30<0?"var(--alarm)":"var(--gruen)"}">${chf(saldo30/Math.max(1,tage30))}</b></span></div>
+    </div>
+
+    <div class="karte">
+      <h3>Bewegungen</h3>
+      <table class="buchtabelle">
+        <tr><th>Was</th><th>${tage7} Tage</th><th>${tage30} Tage</th></tr>
+        ${zeile("verkauf", BUCH_NAME.verkauf)}
+        ${ausArten.map(a => zeile(a, BUCH_NAME[a])).join("")}
+        <tr class="summe"><td>Saldo</td>${zahl(saldo7, saldo7>=0)}${zahl(saldo30, saldo30>=0)}</tr>
+      </table>
+      ${balken ? `<div style="margin-top:14px"><div class="ort">Wofür die Ausgaben der letzten ${tage30} Tage draufgingen</div>${balken}</div>` : ""}
+      <div class="notiz">Löhne und Betriebskosten werden immer am Monatsende abgebucht. Deshalb sieht die 7-Tage-Spalte manchmal leer aus – schau dann in die 30-Tage-Spalte.</div>
+    </div>
+
+    <div class="karte">
+      <h3>Was jeden Monat fällig wird</h3>
+      <div class="zeile"><span><b style="font-family:inherit;font-size:inherit">Löhne gesamt</b></span><b>${chf(lohnsumme())}</b></div>
+      <div class="zeile"><span style="padding-left:14px;color:var(--grau)">davon Verkaufsteam</span>
+        <b style="color:var(--grau)">${chf((S.verkaeufer||0) * VERKAUF_LOHN * perkMult("lohn"))}</b></div>
+      <div class="zeile"><span style="padding-left:14px;color:var(--grau)">davon Leute ohne Aufgabe</span>
+        <b style="color:var(--grau)">${chf(freieArbeiter() * 200 * perkMult("lohn"))}</b></div>
+      <div class="zeile"><span>Betrieb (Werke &amp; Fabriken)</span><b>${chf((Object.keys(S.raff).length*9000 + S.fabriken.length*14000) * perkMult("betrieb"))}</b></div>
+      <div class="notiz">Zusammen ${chf(lohnsumme() + (Object.keys(S.raff).length*9000 + S.fabriken.length*14000) * perkMult("betrieb"))} pro Monat. Das wird jeweils am Monatsende abgebucht.</div>
+    </div>
+
+    <div class="karte">
+      <h3>Seit dem ersten Tag</h3>
+      <div class="zeile"><span>Eingenommen</span><b class="ein" style="color:#0f7a4f">${chf(S.eingenommen)}</b></div>
+      <div class="zeile"><span>Ausgegeben</span><b style="color:#b8443e">${chf(S.ausgegeben)}</b></div>
+      <div class="zeile"><span>Gewinn</span><b>${chf(S.eingenommen - S.ausgegeben)}</b></div>
+    </div>`;
+  if (html !== kasseStand){ $("#kasseinhalt").innerHTML = html; kasseStand = html; }
+  $("#kasse").hidden = false;
+  fensterKlasse();
+}
+let kasseStand = "";
+
 /* ---------- Einstellungen ---------- */
 function regler(id, label, hilfe, min, max, step, wert, anzeige){
   const p = ((wert-min)/(max-min)*100).toFixed(1);
@@ -3150,6 +3337,15 @@ function einstFuellen(){
     ${regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
     <div class="karte" style="margin-top:18px">
+      <h3>Schwierigkeit</h3>
+      <div class="ort">Wirkt auf den Erlös aus allen Verkäufen</div>
+      <div class="segment">${Object.keys(GRADE).map(g =>
+        `<button data-tun="grad" data-g="${g}" aria-pressed="${(S.grad||"mittel")===g}">
+           ${GRADE[g].name}<small style="display:block;font-size:var(--f0);font-weight:700">${Math.round(GRADE[g].erloes*100)} %</small></button>`).join("")}</div>
+      <div class="notiz">${grad().text}</div>
+    </div>
+
+    <div class="karte" style="margin-top:18px">
       <h3>Fortschritt</h3>
       <div class="zeile"><span>Gespeichert</span><b>Tag ${S.tag}</b></div>
       <div class="zeile"><span>Speicherort</span><b style="font-size:var(--f0)">${SPEICHER.echt?"localStorage":"nur diese Sitzung"}</b></div>
@@ -3160,6 +3356,26 @@ function einstFuellen(){
     </div>`;
   $("#einst").hidden = false;
   fensterKlasse();
+}
+
+/* ---------- Schwierigkeit wählen ---------- */
+function gradWaehlen(beimStart){
+  dialogZeigen({
+    art: "Schwierigkeit",
+    titel: beimStart ? "Wie schwer soll es sein?" : "Schwierigkeit ändern",
+    text: beimStart
+      ? "Du übernimmst eine Rohstofffirma. Wähle, wie streng gerechnet wird – du kannst das später in den Einstellungen ändern."
+      : "Die Änderung gilt ab sofort für alle Verkäufe. Das Startkapital bleibt, wie es ist.",
+    wahlen: Object.keys(GRADE).map(g => ({
+      text: GRADE[g].name,
+      klein: GRADE[g].text + (beimStart ? ` · Startkapital ${chf(GRADE[g].start)}` : ""),
+      tun(){
+        S.grad = g;
+        if (beimStart){ S.kasse = GRADE[g].start; }
+        notiz(`Schwierigkeit: <b>${GRADE[g].name}</b>.`, "gut");
+      }
+    }))
+  });
 }
 
 /* ---------- Ereignisdialog ---------- */
@@ -3186,10 +3402,12 @@ function dialogZeigen(e){
 function ueberlageZu(welche){
   $("#" + welche).hidden = true;
   if (welche === "lupe") offeneLupe = null;
+  if (welche === "kasse") kasseStand = "";
   zeichnen();
 }
 /* ESC / rotes X: immer das oberste offene Menü schliessen */
 function obersteSchliessen(){
+  if (!$("#kasse").hidden){ ueberlageZu("kasse"); return true; }
   if (!$("#lupe").hidden){ ueberlageZu("lupe"); return true; }
   if (!$("#einst").hidden){ ueberlageZu("einst"); return true; }
   if (offenesBlatt){ blattZu(); zeichnen(); return true; }
@@ -3232,7 +3450,7 @@ document.addEventListener("click", e => {
     case "mine-auf": {
       const def = MINEN.find(x=>x.id===id);
       if (S.kasse < def.erschliessung || gesperrt("mine", id)) return;
-      S.kasse -= def.erschliessung; S.ausgegeben += def.erschliessung;
+      zahlen(def.erschliessung, "bau");
       S.minen[id] = {arbeiter:0, stufe:1, zufriedenheit:55, stillBis:0, malus:1, malusBis:0, ausbau:0};
       notiz(`Mine <b>${def.ort}</b> eröffnet. Jetzt Leute hinschicken.`, "gut");
       zeigeAuf(id); pinFeiern(id);
@@ -3258,7 +3476,7 @@ document.addEventListener("click", e => {
     case "raff-bau": {
       const def = RAFF_ORTE.find(x=>x.id===id);
       if (S.kasse < def.bau || gesperrt("raff")) return;
-      S.kasse -= def.bau; S.ausgegeben += def.bau; S.raff[id] = {arbeiter:0, ausbau:0};
+      zahlen(def.bau, "bau"); S.raff[id] = {arbeiter:0, ausbau:0};
       notiz(`Raffinerie <b>${def.ort}</b> gebaut.`, "gut");
       zeigeAuf(id); pinFeiern(id);
       const [fx,fy] = pinAufSchirm(id); funken(fx, fy, ["#5b8f7a","#cfe8dd","#fff"], 22);
@@ -3272,9 +3490,9 @@ document.addEventListener("click", e => {
     case "fab-bau": {
       const p = t.dataset.p, l = t.dataset.l, def = PRODUKT[p];
       if (S.kasse < def.kosten || gesperrt("fab")) return;
-      S.kasse -= def.kosten; S.ausgegeben += def.kosten;
+      zahlen(def.kosten, "bau");
       const tage = Math.max(3, Math.round(def.bauzeit * perkMult("bauzeit")));
-      S.fabriken.push({produkt:p, land:l, arbeiter:0, restbau:tage});
+      S.fabriken.push({produkt:p, land:l, arbeiter:0, restbau:tage, ausbau:0});
       notiz(`Fabrik für <b>${def.name}</b> in ${fabOrt(l)} – fertig in ${tage} Tagen.`, "geld");
       pinFeiern("f_"+l);
       const [fx,fy] = pinAufSchirm("f_"+l); funken(fx, fy, ["#b5703c","#f5b73d","#fff"], 22);
@@ -3288,7 +3506,7 @@ document.addEventListener("click", e => {
     case "anstellen": {
       const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF;
       if (menge <= 0 || S.kasse < kosten) return;
-      S.kasse -= kosten; S.ausgegeben += kosten; S.arbeiterGesamt += menge;
+      zahlen(kosten, "personal"); S.arbeiterGesamt += menge;
       notiz(`<b>${menge} Leute</b> angestellt für ${chf(kosten)}.`, "geld");
       funkenAn(t, ["#6fb8e0","#f5b73d","#fff","#2fbe7e"], 26);
       break; }
@@ -3309,20 +3527,32 @@ document.addEventListener("click", e => {
       break; }
     case "einst":
       einstFuellen(); return;
+    case "kassebuch":
+      kasseFuellen(); return;
+    case "grad": {
+      S.grad = t.dataset.g;
+      notiz(`Schwierigkeit: <b>${grad().name}</b>.`, "gut");
+      speichern(); einstFuellen(); zeichnen(); return; }
     case "zumteam":
       seiteWechseln("team"); return;
     case "ausbau": {
       const art = t.dataset.art;
-      const ziel = art === "mine" ? S.minen[id] : S.raff[id];
+      const ziel = art === "mine" ? S.minen[id]
+                 : art === "raff" ? S.raff[id]
+                 : S.fabriken[+t.dataset.i];
       if (!ziel || (ziel.ausbau||0) >= AUSBAU_MAX) return;
-      const grund = art === "mine" ? MINEN.find(x=>x.id===id).erschliessung : RAFF_ORTE.find(x=>x.id===id).bau;
+      const grund = art === "mine" ? MINEN.find(x=>x.id===id).erschliessung
+                  : art === "raff" ? RAFF_ORTE.find(x=>x.id===id).bau
+                  : PRODUKT[ziel.produkt].kosten;
       const kosten = ausbauKosten(grund, ziel.ausbau||0);
       if (S.kasse < kosten) return;
       const verdoppelt = ausbauVerdoppelt(ziel.ausbau||0);
-      S.kasse -= kosten; S.ausgegeben += kosten;
+      zahlen(kosten, "ausbau");
       ziel.ausbau = (ziel.ausbau||0) + 1;
       frischeStufe[id] = Date.now();
-      const ort = art === "mine" ? MINEN.find(x=>x.id===id).ort : RAFF_ORTE.find(x=>x.id===id).ort;
+      const ort = art === "mine" ? MINEN.find(x=>x.id===id).ort
+                : art === "raff" ? RAFF_ORTE.find(x=>x.id===id).ort
+                : PRODUKT[ziel.produkt].name;
       notiz(verdoppelt
         ? `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut – die Ausbringung ist jetzt <b>doppelt</b> so hoch.`
         : `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut.`, verdoppelt ? "gut" : "geld");
@@ -3337,7 +3567,7 @@ document.addEventListener("click", e => {
       const i = e2.seg.perks.indexOf(e2.perk);
       if (i > 0 && !S.perks[e2.seg.perks[i-1].id]) return;
       if (S.kasse < e2.perk.kosten) return;
-      S.kasse -= e2.perk.kosten; S.ausgegeben += e2.perk.kosten;
+      zahlen(e2.perk.kosten, "wissen");
       S.perks[e2.perk.id] = true;
       if (e2.perk.sofort && e2.perk.sofort.ruf) rufAendern(e2.perk.sofort.ruf);
       notiz(`Neues Wissen: <b>${e2.perk.titel}</b> · ${e2.perk.wirkung.join(" · ")}`, "gut");
@@ -3421,6 +3651,7 @@ function zuruecksetzen(){
   blattZu(); seiteWechseln("karte");
   notiz("Neue Runde. Tippe auf einen Pin und eröffne deine erste Mine.", "gut");
   tempoSetzen(1); zeigeAuf("obuasi", 1.15); zeichnen();
+  setTimeout(() => gradWaehlen(true), 300);
 }
 
 /* ---------- Start ---------- */
@@ -3434,13 +3665,15 @@ $("#h-kasse-i").innerHTML = IK.muenze;
 $("#h-crew-i").innerHTML = IK.person;
 $("#h-tag-i").innerHTML = IK.kalender;
 weltZeichnen();
-if (!laden()){ S = neuerZustand();
+let frischGestartet = false;
+if (!laden()){ S = neuerZustand(); frischGestartet = true;
   notiz("Willkommen in der Erzwelt. Tippe auf einen Pin, um eine Mine zu eröffnen.", "gut"); }
 letzterTagGezeigt = S.tag;
 ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
 dockZeichnen();
 tempoSetzen(1);
 zeichnen();
+if (frischGestartet) setTimeout(() => gradWaehlen(true), 400);
 masseMessen();
 setTimeout(masseMessen, 300);
 window.addEventListener("load", masseMessen);
