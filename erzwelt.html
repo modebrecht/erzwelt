@@ -687,6 +687,13 @@ body[data-anim="0"] *{animation:none!important}
   </div>
 </div>
 
+<div id="bilanz" class="ueberlage" hidden>
+  <div class="tafel" role="dialog" aria-modal="true" aria-label="Auswertung">
+    <button class="xzu" data-schliessen="bilanz" aria-label="Schliessen"></button>
+    <div id="bilanzinhalt"></div>
+  </div>
+</div>
+
 <div id="kasse" class="ueberlage" hidden>
   <div class="tafel" role="dialog" aria-modal="true" aria-label="Kasse">
     <button class="xzu" data-schliessen="kasse" aria-label="Schliessen"></button>
@@ -863,6 +870,15 @@ function ausbauFaktor(n){
 function ausbauKosten(grundpreis, n){
   return Math.round(grundpreis * AUSBAU_BASIS * Math.pow(AUSBAU_WACHSTUM, n || 0) / 100) * 100;
 }
+/* Was wurde bis Stufe n insgesamt in den Ausbau gesteckt? */
+function ausbauInvestiert(grundpreis, n){
+  let summe = 0;
+  for (let i = 0; i < (n || 0); i++) summe += ausbauKosten(grundpreis, i);
+  return summe;
+}
+/* Beim Schliessen gibt es 40 % des Gebauten zurück. */
+const RUECK_ANTEIL = 0.4;
+
 /* Ist die nächste Stufe eine Verdopplung? */
 const ausbauVerdoppelt = n => ((n || 0) + 1) % AUSBAU_REIHE === 0;
 
@@ -1529,7 +1545,7 @@ const SCHLUESSEL = "erzwelt_v2";
 const OPT_SCHLUESSEL = "erzwelt_opt";
 
 /* ---------- Einstellungen (Regler) ---------- */
-const OPT_STD = {schrift:106, tempo:100, anim:1};
+const OPT_STD = {schrift:106, tempo:100, anim:1, ton:30};
 let OPT = Object.assign({}, OPT_STD);
 
 function optLaden(){
@@ -1540,6 +1556,7 @@ function optLaden(){
   OPT.schrift = klemm(OPT.schrift, 90, 175);
   OPT.tempo   = klemm(OPT.tempo, 50, 250);
   OPT.anim    = klemm(OPT.anim, 0, 2);
+  OPT.ton     = klemm(OPT.ton == null ? OPT_STD.ton : OPT.ton, 0, 100);
 }
 function optSpeichern(){ try { SPEICHER.schreib(OPT_SCHLUESSEL, JSON.stringify(OPT)); } catch(e){} }
 function optAnwenden(){
@@ -1560,7 +1577,7 @@ function neuerZustand(){
     perks:{},        // perkId -> true
     preisMod:{}, nachfrageMod:{},   // material/produkt -> {faktor, bis}
     globalMod:[],                   // {art, wert, bis, text}
-    buch:[], log:[], erledigt:{}, ende:null
+    buch:[], lohnLand:{}, erzGesamt:{}, log:[], erledigt:{}, ende:null
   };
 }
 
@@ -1671,6 +1688,68 @@ function anstellbar(){
   return Math.min(anstellMenge, grenze);
 }
 
+/* ---------- Auslastung der Kette ----------
+   Damit sichtbar wird, wo es klemmt: Fördern die Minen mehr, als die
+   Raffinerien schaffen? Produzieren die Fabriken mehr, als verkauft
+   werden kann?                                                       */
+function erzProTag(){
+  let summe = 0;
+  for (const id in S.minen){
+    const m = S.minen[id], def = MINEN.find(x=>x.id===id);
+    if (m.stillBis > S.tag) continue;
+    summe += m.arbeiter * def.ergiebigkeit * ausbauFaktor(m.ausbau) * perkMult("foerderung")
+             * (0.55 + m.zufriedenheit/100 * 0.6) * (m.malusBis > S.tag ? m.malus : 1);
+  }
+  return summe;
+}
+function raffProTag(){
+  let summe = 0;
+  const hafen = globalWert("hafen") * perkMult("durchsatz");
+  for (const id in S.raff){
+    const r = S.raff[id], def = RAFF_ORTE.find(x=>x.id===id);
+    summe += def.kapazitaet * ausbauFaktor(r.ausbau) * (r.arbeiter / def.plaetze) * hafen;
+  }
+  return summe;
+}
+/* Wie viel könnten die Fabriken bauen, wenn Material da wäre? */
+function fabrikWunsch(){
+  return S.fabriken.reduce((a,f) => f.restbau === 0
+    ? a + Math.floor(f.arbeiter * PRODUKT[f.produkt].proArbeiter * perkMult("fabrik") * ausbauFaktor(f.ausbau))
+    : a, 0);
+}
+/* Wie viel nimmt der Markt pro Tag ab? */
+function nachfrageGesamt(){
+  return S.fabriken.reduce((a,f) => a + (f.restbau === 0 ? nachfrage(f.produkt) : 0), 0);
+}
+
+/* Balken, der zwei Werte vergleicht und den Engpass benennt */
+function engpassBalken(ist, kann, einheitIst, einheitKann){
+  const anteil = kann > 0 ? Math.min(1, ist / kann) : (ist > 0 ? 1 : 0);
+  const eng = kann > 0 && ist > kann * 1.02;
+  const farbe = eng ? "var(--alarm)" : anteil > 0.85 ? "var(--warn)" : "var(--gruen)";
+  return `<div class="leiste" style="height:16px"><i style="width:${(anteil*100).toFixed(0)}%;background:${farbe}"></i></div>
+    <div class="zeile" style="padding-top:4px"><span>${einheitIst}</span><b>${Math.round(ist)}</b></div>
+    <div class="zeile"><span>${einheitKann}</span><b>${Math.round(kann)}</b></div>`;
+}
+
+/* Lohnsumme aufgeschlüsselt nach Land – für die Auswertung am Rundenende */
+function lohnNachLand(){
+  const nach = {};
+  const dazu = (land, betrag) => { nach[land] = (nach[land] || 0) + betrag; };
+  for (const id in S.minen){
+    const m = S.minen[id], def = MINEN.find(x=>x.id===id);
+    dazu(def.land, m.arbeiter * LAND[def.land].lohn * LOHNSTUFE[m.stufe].faktor);
+  }
+  for (const id in S.raff){
+    const def = RAFF_ORTE.find(x=>x.id===id);
+    dazu(def.land, S.raff[id].arbeiter * LAND[def.land].lohn);
+  }
+  for (const f of S.fabriken) dazu(f.land, f.arbeiter * LAND[f.land].lohn);
+  const f = perkMult("lohn");
+  for (const l in nach) nach[l] *= f;
+  return nach;
+}
+
 /* Wie viele Stück können deine Verkäuferinnen heute absetzen? */
 function verkaufsKraft(){
   return Math.floor((S.verkaeufer || 0) * STUECK_PRO_VERKAEUFER * perkMult("verkaufskraft"));
@@ -1773,6 +1852,8 @@ function tagVor(){
     const menge = m.arbeiter * def.ergiebigkeit * f;
     if (menge > 0){
       S.erz[def.mat] = (S.erz[def.mat] || 0) + menge;
+      if (!S.erzGesamt) S.erzGesamt = {};
+      S.erzGesamt[def.mat] = (S.erzGesamt[def.mat] || 0) + menge;
       letzteFoerderung[id] = menge;
     }
   }
@@ -1847,6 +1928,9 @@ function tagVor(){
     const lohn = lohnsumme();
     const betrieb = (Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000) * perkMult("betrieb");
     zahlen(lohn, "lohn"); zahlen(betrieb, "betrieb");
+    if (!S.lohnLand) S.lohnLand = {};
+    const jeLand = lohnNachLand();
+    for (const l in jeLand) S.lohnLand[l] = (S.lohnLand[l] || 0) + jeLand[l];
     notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`, "geld");
     rufAnpassen();
     if (S.kasse < 0) notiz("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.", "alarm");
@@ -1884,17 +1968,9 @@ function rundeBeenden(){
   const geschafft = gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
   S.ende = {gewinn, ruf:Math.round(S.ruf), geschafft};
   tempoSetzen(0);
-  dialogZeigen({
-    art: "Runde beendet",
-    titel: geschafft ? "Ziel erreicht" : "Ziel verfehlt",
-    text: `Gewinn: ${chf(gewinn)} (Ziel ${chf(ZIEL_GEWINN)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br><br>`
-        + (geschafft
-            ? "Du hast Geld verdient <b>und</b> den Ruf gehalten. Notiere dir: welche Entscheidung hat am meisten dazu beigetragen?"
-            : (gewinn >= ZIEL_GEWINN
-               ? "Der Gewinn stimmt, aber der Ruf nicht. Billige Löhne haben sich kurzfristig gelohnt und langfristig gerächt."
-               : "Der Gewinn reicht nicht. Wo ist die Lieferkette gerissen – zu wenig Erz, zu wenig Raffination oder zu wenig Nachfrage?")),
-    wahlen:[{text:"Neue Runde starten", klein:"Alles auf Anfang", tun:()=>{ zuruecksetzen(); }}]
-  });
+  speichern();
+  klang(geschafft ? "verdopplung" : "warnung");
+  bilanzZeigen();
 }
 
 /* ============================================================
@@ -2013,6 +2089,92 @@ const EREIGNISSE = [
       offeneMinen().forEach(i => { if (S.minen[i].stufe===0) S.minen[i].stufe = 1; });
       return {passiv:true, text:"<b>Gewerkschaft gegründet</b> – in allen deinen Minen gilt neu mindestens der landesübliche Lohn.", art:"gut"};
   }},
+  {
+    id:"wasser", gewicht:9, wiederholbar:true,
+    passt:()=> offeneMinen().length > 0 && S.tag > 40,
+    bau(){
+      const id = offeneMinen()[Math.floor(Math.random()*offeneMinen().length)];
+      const def = MINEN.find(x=>x.id===id);
+      return {
+        art:"Protest", titel:`Streit ums Wasser in ${def.ort}`, land:def.land,
+        text:`Deine Mine braucht viel Wasser. Bauernfamilien in der Umgebung sagen, ihre Brunnen fallen trocken. Die Lokalzeitung ist schon da.`,
+        wahlen:[
+          {text:"Kläranlage und eigenen Brunnen bauen", klein:"CHF 55'000, Ruf steigt deutlich",
+           tun(){ zahlen(55000, "ereignis"); rufAendern(9);
+                  notiz(`Wasseraufbereitung in ${def.ort} gebaut. Die Dörfer sind zufrieden.`, "gut"); }},
+          {text:"Wasser aus der Ferne herankarren", klein:"CHF 25'000, ändert wenig",
+           tun(){ zahlen(25000, "ereignis"); rufAendern(2);
+                  notiz(`Wasser wird nach ${def.ort} gefahren. Eine Notlösung.`, "warn"); }},
+          {text:"Nichts tun", klein:"Kostet nichts, Ruf fällt",
+           tun(){ rufAendern(-11); notiz(`Der Wasserstreit in ${def.ort} eskaliert.`, "alarm"); }}
+        ]
+      };
+  }},
+  {
+    id:"grosskunde", gewicht:8, wiederholbar:true,
+    passt:()=> S.fabriken.some(f => f.restbau === 0),
+    bau(){
+      const f = S.fabriken.find(x => x.restbau === 0);
+      const pr = PRODUKT[f.produkt];
+      return {
+        art:"Anfrage", titel:"Grosskunde will Nachweise",
+        text:`Eine Handelskette will ${pr.name} in grosser Menge kaufen – aber nur, wenn du für jeden Rohstoff belegen kannst, woher er kommt. Das kostet Zeit und Geld.`,
+        wahlen:[
+          {text:"Lieferkette prüfen lassen", klein:"CHF 50'000, Nachfrage +40 % für 90 Tage",
+           tun(){ zahlen(50000, "ereignis"); S.nachfrageMod[f.produkt] = {faktor:1.4, bis:S.tag+90}; rufAendern(6);
+                  notiz(`Nachweise erbracht. Der Grosskunde bestellt <b>${pr.name}</b>.`, "gut"); }},
+          {text:"Auftrag ausschlagen", klein:"Kostet nichts, die Kette kauft anderswo",
+           tun(){ notiz("Grossauftrag abgelehnt. Die Kette kauft bei der Konkurrenz.", "warn"); }}
+        ]
+      };
+  }},
+  {
+    id:"halde", gewicht:7, wiederholbar:true,
+    passt:()=> offeneMinen().some(i => (S.minen[i].ausbau||0) >= 3) && S.tag > 60,
+    bau(){
+      const id = offeneMinen().find(i => (S.minen[i].ausbau||0) >= 3);
+      const def = MINEN.find(x=>x.id===id);
+      return {
+        art:"Warnung", titel:`Abraumhalde in ${def.ort} wackelt`, land:def.land,
+        text:`Je mehr du förderst, desto grösser wird der Abraum. Ein Gutachten sagt: der Damm der Schlammhalde hält dem nächsten starken Regen vielleicht nicht stand.`,
+        wahlen:[
+          {text:"Damm jetzt sanieren", klein:"CHF 85'000, danach ist Ruhe",
+           tun(){ zahlen(85000, "ereignis"); rufAendern(3);
+                  notiz(`Halde in ${def.ort} gesichert.`, "gut"); }},
+          {text:"Auf gutes Wetter hoffen", klein:"Kostet nichts – wenn es gutgeht",
+           tun(){
+             if (Math.random() < 0.45){
+               S.minen[id].stillBis = S.tag + 30; rufAendern(-20); zahlen(90000, "ereignis");
+               notiz(`Der Damm in ${def.ort} ist gebrochen. Schlamm im Tal, Mine 30 Tage gesperrt.`, "alarm");
+             } else {
+               notiz(`Die Halde in ${def.ort} hat gehalten. Diesmal.`, "warn");
+             } }}
+        ]
+      };
+  }},
+  {
+    id:"abwerben", gewicht:8, wiederholbar:true,
+    passt:()=> offeneMinen().some(i => S.minen[i].arbeiter >= 10 && S.minen[i].stufe === 0) || (S.tag > 90 && offeneMinen().length > 1),
+    bau(){
+      const id = offeneMinen().filter(i => S.minen[i].arbeiter >= 10)
+        .sort((a,b) => S.minen[a].stufe - S.minen[b].stufe)[0] || offeneMinen()[0];
+      const def = MINEN.find(x=>x.id===id);
+      return {
+        art:"Personal", titel:`Konkurrenz wirbt in ${def.ort} ab`, land:def.land,
+        text:`Eine andere Firma eröffnet nebenan und bietet mehr Lohn. Deine erfahrenen Leute überlegen zu wechseln.`,
+        wahlen:[
+          {text:"Löhne anheben", klein:"Dauerhaft teurer, alle bleiben",
+           tun(){ S.minen[id].stufe = Math.min(2, S.minen[id].stufe + 1);
+                  S.minen[id].zufriedenheit = Math.min(100, S.minen[id].zufriedenheit + 12);
+                  notiz(`Löhne in ${def.ort} angehoben. Die Belegschaft bleibt.`, "gut"); }},
+          {text:"Ziehen lassen", klein:"Ein Viertel der Leute geht",
+           tun(){ const weg = Math.ceil(S.minen[id].arbeiter * 0.25);
+                  S.minen[id].arbeiter -= weg; S.arbeiterGesamt -= weg;
+                  S.minen[id].zufriedenheit = Math.max(0, S.minen[id].zufriedenheit - 8);
+                  notiz(`${weg} Leute haben ${def.ort} verlassen.`, "alarm"); }}
+        ]
+      };
+  }},
   { id:"recycling", gewicht:5, wiederholbar:true, passt:()=> S.tag>120, bau(){
       const bonus = {kupfer:120, gold:25, silber:40, alu:150};
       for (const k in bonus) S.mat[k] = (S.mat[k]||0) + bonus[k];
@@ -2023,7 +2185,7 @@ const EREIGNISSE = [
 const offeneMinen = () => Object.keys(S.minen);
 
 function ereignisPruefen(){
-  if (S.tag < 15 || S.tag % 3 !== 0) return;
+  if (S.tag < 12 || S.tag % 2 !== 0) return;
   // Zwingende Ereignisse (Protest, Unfall, Reportage) zuerst
   for (const e of EREIGNISSE){
     if (e.gewicht !== 0) continue;
@@ -2035,13 +2197,13 @@ function ereignisPruefen(){
     return;
   }
   // Zufällige Ereignisse
-  if (Math.random() > 0.10) return;
+  if (Math.random() > 0.13) return;
   const pool = EREIGNISSE.filter(e => e.gewicht > 0 && !(e.einmalig && S.erledigt[e.id]) && e.passt() && (S.erledigt["cool_"+e.id]||0) <= S.tag);
   if (!pool.length) return;
   const gesamt = pool.reduce((a,e)=>a+e.gewicht, 0);
   let w = Math.random()*gesamt, gewaehlt = pool[0];
   for (const e of pool){ w -= e.gewicht; if (w <= 0){ gewaehlt = e; break; } }
-  S.erledigt[gewaehlt.id] = true; S.erledigt["cool_"+gewaehlt.id] = S.tag + 120;
+  S.erledigt[gewaehlt.id] = true; S.erledigt["cool_"+gewaehlt.id] = S.tag + 90;
   const erg = gewaehlt.bau();
   if (erg.passiv) notiz(erg.text, erg.art);
   else dialogZeigen(erg);
@@ -2542,6 +2704,42 @@ function toastsErneuern(){
   while ($("#toasts").children.length > 3) $("#toasts").firstChild.remove();
 }
 
+/* ---------- Ton ----------
+   Kleine Klänge, direkt im Browser erzeugt – keine Dateien, kein Netz.
+   Lautstärke steht in den Einstellungen, 0 heisst stumm.            */
+const KLAENGE = {
+  kauf:      {noten:[[523,0,.10],[784,.07,.14]],           form:"triangle", stark:.5},
+  erfolg:    {noten:[[523,0,.10],[659,.09,.10],[784,.18,.22]], form:"triangle", stark:.55},
+  verdopplung:{noten:[[523,0,.09],[659,.08,.09],[784,.16,.09],[1047,.24,.3]], form:"triangle", stark:.6},
+  muenze:    {noten:[[988,0,.06],[1319,.05,.09]],          form:"sine",     stark:.35},
+  klick:     {noten:[[440,0,.05]],                          form:"sine",     stark:.25},
+  warnung:   {noten:[[330,0,.14],[247,.12,.22]],            form:"sawtooth", stark:.3},
+  fehler:    {noten:[[196,0,.18]],                          form:"square",   stark:.22}
+};
+let tonRaum = null;
+function klang(name){
+  if (!OPT.ton) return;
+  const k = KLAENGE[name]; if (!k) return;
+  try {
+    if (!tonRaum){
+      const AK = window.AudioContext || window.webkitAudioContext;
+      if (!AK) return;
+      tonRaum = new AK();
+    }
+    if (tonRaum.state === "suspended") tonRaum.resume();
+    const jetzt = tonRaum.currentTime, laut = (OPT.ton/100) * k.stark;
+    for (const [hz, ab, dauer] of k.noten){
+      const o = tonRaum.createOscillator(), g = tonRaum.createGain();
+      o.type = k.form; o.frequency.value = hz;
+      g.gain.setValueAtTime(0.0001, jetzt + ab);
+      g.gain.exponentialRampToValueAtTime(laut, jetzt + ab + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, jetzt + ab + dauer);
+      o.connect(g); g.connect(tonRaum.destination);
+      o.start(jetzt + ab); o.stop(jetzt + ab + dauer + 0.02);
+    }
+  } catch(e){}
+}
+
 /* ---------- Funken: kleine Feier bei Käufen ---------- */
 const FUNKENFARBEN = ["#f5b73d","#ffe9a8","#2fbe7e","#6fb8e0","#fff"];
 function funken(x, y, farben, n){
@@ -2691,6 +2889,7 @@ function questZeichnen(){
       k.classList.add("belohnt");
       const r = k.getBoundingClientRect();
       funken(r.left + r.width/2, r.top + r.height/2, ["#2fbe7e","#f5b73d","#fff","#6fb8e0"], 30);
+      klang("erfolg");
       setTimeout(()=>k.classList.remove("belohnt"), 950);
       belohnung = null;
     }
@@ -2727,7 +2926,7 @@ function hinweiseSetzen(){
 function fensterKlasse(){
   document.body.classList.toggle("fensterauf",
     !!offenesBlatt || aktiveSeite !== "karte" || !$("#lupe").hidden || !$("#einst").hidden
-    || !$("#kasse").hidden || !$("#schleier").hidden);
+    || !$("#kasse").hidden || !$("#bilanz").hidden || !$("#schleier").hidden);
 }
 function zeichnen(){
   fensterKlasse();
@@ -2784,6 +2983,24 @@ function ausbauKarte(art, id, stufe, grundpreis, was, index){
       data-tun="ausbau" data-art="${art}" data-id="${id}" ${index!=null?`data-i="${index}"`:""} ${geht?"":"disabled"}>
       ${geht?IK.berg:""}${geht ? (doppelt ? "VERDOPPELN · " : "Ausbauen · ") + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>`}
     <div class="notiz">Jede Stufe bringt +5 % und kostet mehr als die vorherige. Jede zehnte Stufe verdoppelt die Ausbringung.</div>
+  </div>`;
+}
+
+/* ---------- Standort schliessen ----------
+   Wer sich verbaut hat, soll wieder herauskommen: 40 % des Gebauten
+   kommen zurück, die Leute gehen ins Team zurück. Wer Belegschaft
+   entlässt, verliert etwas Ruf.                                     */
+function schliessKarte(art, id, grundpreis, stufe, arbeiter, index){
+  const zurueck = Math.round((grundpreis + ausbauInvestiert(grundpreis, stufe)) * RUECK_ANTEIL);
+  return `<div class="karte">
+    <h3>Standort schliessen</h3>
+    <div class="ort">Wenn du dich verbaut hast, kommst du hier wieder heraus</div>
+    <div class="zeile"><span>Du bekommst zurück</span><b>${chf(zurueck)}</b></div>
+    <div class="zeile"><span>Leute gehen ins Team zurück</span><b>${arbeiter}</b></div>
+    ${arbeiter > 0 ? `<div class="zeile"><span>Ruf</span><b style="color:var(--alarm)">−4</b></div>` : ""}
+    <button class="cta still" data-tun="schliessen" data-art="${art}" data-id="${id}"
+      ${index!=null?`data-i="${index}"`:""}>Schliessen · ${chf(zurueck)} zurück</button>
+    <div class="notiz">40 % des Gebauten kommen zurück. Der Rest ist weg – ein Bergwerk lässt sich nicht einpacken.</div>
   </div>`;
 }
 
@@ -2865,7 +3082,8 @@ function blattMine(id){
       </div>
     </div>
 
-    <div class="notiz">${def.info}</div>`;
+    <div class="notiz">${def.info}</div>
+    ${tutorialLaeuft() ? "" : schliessKarte("mine", id, def.erschliessung, m.ausbau, m.arbeiter)}`;
 }
 
 /* ---------- Blatt: Raffinerie ---------- */
@@ -2906,9 +3124,22 @@ function blattRaff(id){
       </div>
       <div class="leiste"><i style="width:${(r.arbeiter/def.plaetze*100).toFixed(0)}%;background:#5b8f7a"></i></div>
     </div>
+    <div class="karte">
+      <h3>Kommst du nach?</h3>
+      <div class="ort">Alle Minen zusammen gegen alle Raffinerien zusammen</div>
+      ${engpassBalken(erzProTag(), raffProTag(), "Minen fördern pro Tag", "Raffinerien schaffen pro Tag")}
+      ${(() => {
+        const f = erzProTag(), k = raffProTag(), halde = Object.values(S.erz).reduce((a,b)=>a+b,0);
+        if (k <= 0) return `<div class="notiz rot">Keine Raffinerie besetzt – dein Erz bleibt liegen.</div>`;
+        if (f > k * 1.02) return `<div class="notiz rot">Deine Minen fördern <b>${Math.round(f-k)} Erz mehr pro Tag</b>, als verarbeitet werden kann. Das Erz stapelt sich. Mehr Leute in die Raffinerie, ausbauen oder eine zweite bauen.</div>`;
+        if (halde > k * 3) return `<div class="notiz">Es liegen noch <b>${Math.round(halde)} Erz</b> auf Halde. Die Raffinerie holt es nach und nach auf.</div>`;
+        return `<div class="notiz gruen">Deine Raffinerien kommen mit. Noch <b>${Math.round(k-f)} Erz Reserve</b> pro Tag.</div>`;
+      })()}
+    </div>
     ${tutorialLaeuft() ? "" : ausbauKarte("raff", id, r.ausbau, def.bau, "Durchsatz")}
     <div class="notiz">Aus 1 Erz wird je nach Material unterschiedlich viel: Silizium 70 %, Gold nur 8 %. Der Rest ist Abraum.</div>
-    <div class="notiz blau">${def.info}</div>`;
+    <div class="notiz blau">${def.info}</div>
+    ${tutorialLaeuft() ? "" : schliessKarte("raff", id, def.bau, r.ausbau, r.arbeiter)}`;
 }
 
 /* ---------- Blatt: Fabrikstandort ---------- */
@@ -2924,7 +3155,8 @@ function blattFab(land){
       <div class="ort">Im Bau – noch ${f.restbau} Tage</div>
       ${szeneFabrik(f, def)}
       <div class="leiste"><i style="width:${(100-f.restbau/def.bauzeit*100).toFixed(0)}%;background:var(--gold)"></i></div></div>`;
-    let stueck = Math.floor(f.arbeiter * def.proArbeiter * perkMult("fabrik") * ausbauFaktor(f.ausbau));
+    const moeglich = Math.floor(f.arbeiter * def.proArbeiter * perkMult("fabrik") * ausbauFaktor(f.ausbau));
+    let stueck = moeglich;
     for (const k in def.rezept) stueck = Math.min(stueck, Math.floor((S.mat[k]||0)/def.rezept[k]));
     const fehlt = Object.keys(def.rezept).filter(k => (S.mat[k]||0) < def.rezept[k]);
     return `<div class="karte"><h3>${def.name}</h3>
@@ -2940,8 +3172,12 @@ function blattFab(land){
         <button data-tun="fcrew" data-i="${i}" data-n="5" ${(freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""}>+5</button>
       </div>
       <div class="zeile"><span>Produktion heute</span><b>${stueck} Stück</b></div>
+      <div class="zeile"><span>Möglich mit dieser Belegschaft</span><b>${moeglich} Stück</b></div>
+      <div class="leiste"><i style="width:${moeglich?Math.min(100,stueck/moeglich*100).toFixed(0):0}%;background:${stueck<moeglich?"var(--warn)":"var(--gruen)"}"></i></div>
+      ${stueck < moeglich ? `<div class="notiz rot">Material bremst dich: nur ${stueck} statt ${moeglich} Stück.</div>` : ""}
       <div class="zeile"><span>Lager</span><b>${S.ware[f.produkt]||0} Stück</b></div>
       ${tutorialLaeuft() ? "" : ausbauKarte("fab", land, f.ausbau, def.kosten, "Ausstoss", i)}
+      ${tutorialLaeuft() ? "" : schliessKarte("fab", land, def.kosten, f.ausbau, f.arbeiter, i)}
       ${fehlt.length ? `<div class="notiz rot">Es fehlt: ${fehlt.map(k=>MATERIAL[k].name).join(", ")}.
         Zukaufen geht nicht – eröffne dafür eine Mine.</div>` : ""}</div>`;
   }).join("");
@@ -3069,6 +3305,22 @@ function seiteMarkt(){
       ${lager > 0 && kraft === 0 ? `<div class="notiz rot">Deine Ware bleibt liegen. Ohne Verkäufer verkauft nur dein eigener Fingerdruck.</div>` : ""}
     </div>
 
+    <div class="karte">
+      <h3>Verkaufst du, was du baust?</h3>
+      <div class="ort">Tagesproduktion gegen das, was Verkauf und Markt aufnehmen</div>
+      ${engpassBalken(fabrikWunsch(), Math.min(kraft, nachfrageGesamt()),
+        "Fabriken bauen pro Tag", "Abgesetzt werden können")}
+      ${(() => {
+        const bau = fabrikWunsch(), ab = Math.min(kraft, nachfrageGesamt());
+        if (bau === 0) return "";
+        if (kraft === 0) return `<div class="notiz rot">Ohne Verkaufsteam wird gar nichts abgesetzt.</div>`;
+        if (kraft < nachfrageGesamt() && bau > kraft)
+          return `<div class="notiz rot">Dein Verkaufsteam ist der Engpass: Der Markt würde ${Math.round(nachfrageGesamt())} Stück nehmen, deine Leute schaffen ${kraft}.</div>`;
+        if (bau > ab) return `<div class="notiz">Du baust mehr, als der Markt aufnimmt. Das Lager füllt sich und der Preis fällt.</div>`;
+        return `<div class="notiz gruen">Alles, was du baust, wird auch verkauft.</div>`;
+      })()}
+    </div>
+
     <div class="karte"><h3>Deine Produkte</h3>
       <table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>${prod}</table>
       <div class="notiz">Der Markt nimmt pro Tag nur die Nachfrage auf. Produzierst du mehr, füllt sich das Lager und der Preis fällt um bis zu 35 %.</div></div>
@@ -3149,6 +3401,7 @@ function seiteZiel(){
     <div class="karte"><h3>Meldungen</h3>
       ${S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:var(--f0)">${e.text}</span><b style="font-size:var(--f0);color:var(--grau)">T${e.tag}</b></div>`).join("")
         || `<p style="color:var(--grau)">Noch nichts passiert.</p>`}</div>
+    <button class="cta" data-tun="bilanz">${IK.ziel}Auswertung ansehen</button>
     <button class="cta still" data-tun="reset">Neue Runde starten</button>`;
 }
 
@@ -3336,6 +3589,8 @@ function einstFuellen(){
              50, 250, 10, OPT.tempo, OPT.tempo + " %")}
     ${regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
+    ${regler("ton", "Ton", "Kleine Klänge beim Kaufen, Verkaufen und bei erledigten Aufträgen. Im Klassenzimmer besser auf 0.",
+             0, 100, 5, OPT.ton, OPT.ton === 0 ? "aus" : OPT.ton + " %")}
     <div class="karte" style="margin-top:18px">
       <h3>Schwierigkeit</h3>
       <div class="ort">Wirkt auf den Erlös aus allen Verkäufen</div>
@@ -3355,6 +3610,107 @@ function einstFuellen(){
       <button class="cta still" data-tun="reset">Spielstand löschen und neu starten</button>
     </div>`;
   $("#einst").hidden = false;
+  fensterKlasse();
+}
+
+/* ---------- Auswertung am Rundenende ----------
+   Nicht nur «geschafft/verfehlt», sondern: Wo hast du gefördert, was
+   hast du wo bezahlt, wie ist der Ruf zustande gekommen?            */
+function bilanzZeigen(){
+  const e = S.ende || {gewinn:S.eingenommen-S.ausgegeben, ruf:Math.round(S.ruf), geschafft:false};
+  const gewinn = e.gewinn, ruf = e.ruf;
+  const zielGeld = gewinn >= ZIEL_GEWINN, zielRuf = ruf >= ZIEL_RUF;
+
+  // Erze nach Menge
+  const erze = Object.keys(S.erzGesamt || {}).filter(k => S.erzGesamt[k] > 1)
+    .sort((a,b) => S.erzGesamt[b] - S.erzGesamt[a]);
+  const erzGesamtSumme = erze.reduce((a,k) => a + S.erzGesamt[k], 0);
+
+  // Löhne nach Land
+  const laender = Object.keys(S.lohnLand || {}).filter(l => S.lohnLand[l] > 1)
+    .sort((a,b) => S.lohnLand[b] - S.lohnLand[a]);
+  const lohnSummeGesamt = laender.reduce((a,l) => a + S.lohnLand[l], 0);
+
+  // Lohnpolitik
+  const stufen = [0,0,0];
+  for (const id in S.minen) stufen[S.minen[id].stufe]++;
+  const minenZahl = stufen[0] + stufen[1] + stufen[2];
+
+  const perkListe = Object.keys(S.perks || {}).map(id => PERK_INDEX[id]).filter(Boolean);
+
+  $("#bilanzinhalt").innerHTML = `
+    <div style="text-align:center;padding:6px 0 2px">
+      <div style="width:78px;margin:0 auto;color:${e.geschafft?"var(--gruen)":"var(--warn)"}">
+        ${e.geschafft ? IK.schild : IK.ziel}</div>
+      <h2 style="padding:0;margin-top:6px">${e.geschafft ? "Ziel erreicht" : "Ziel verfehlt"}</h2>
+      <div class="unter" style="margin-bottom:4px">Nach ${Math.min(S.tag, ZIEL_TAGE)} Tagen · ${grad().name}</div>
+    </div>
+
+    <div class="karte">
+      <h3>Die zwei Ziele</h3>
+      <div class="zeile"><span>Gewinn</span><b style="color:${zielGeld?"var(--gruen)":"var(--alarm)"}">${chf(gewinn)}</b></div>
+      <div class="leiste"><i style="width:${klemm(gewinn/ZIEL_GEWINN*100,0,100)}%;background:${zielGeld?"var(--gruen)":"var(--gold)"}"></i></div>
+      <div class="ort">Ziel ${chf(ZIEL_GEWINN)}</div>
+      <div class="zeile" style="margin-top:10px"><span>Ruf</span><b style="color:${zielRuf?"var(--gruen)":"var(--alarm)"}">${ruf}</b></div>
+      <div class="leiste"><i style="width:${klemm(ruf/ZIEL_RUF*100,0,100)}%;background:${zielRuf?"var(--gruen)":"var(--warn)"}"></i></div>
+      <div class="ort">Ziel ${ZIEL_RUF}</div>
+      <div class="notiz ${e.geschafft?"gruen":""}">${
+        e.geschafft ? "Geld verdient <b>und</b> den Ruf gehalten. Beides zusammen ist der schwierige Teil."
+        : zielGeld ? "Der Gewinn stimmt, aber der Ruf nicht. Tiefe Löhne haben sich kurzfristig gelohnt und langfristig gerächt."
+        : zielRuf ? "Der Ruf stimmt, das Geld nicht. Wo ist die Kette gerissen – zu wenig Erz, zu wenig Raffination oder zu wenig Verkauf?"
+        : "Weder das eine noch das andere. Schau in der Auswertung, wo am meisten Geld hingegangen ist."}</div>
+    </div>
+
+    ${erze.length ? `<div class="karte">
+      <h3>Was du aus der Erde geholt hast</h3>
+      <div class="ort">Insgesamt ${Math.round(erzGesamtSumme).toLocaleString("de-CH")} Einheiten Roherz</div>
+      ${erze.map(k => `<div class="zeile">
+        <span><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}</span>
+        <b>${Math.round(S.erzGesamt[k]).toLocaleString("de-CH")}</b></div>`).join("")}
+      <div class="notiz">${erze.length >= 8
+        ? "Du hast fast das ganze Periodensystem eines Smartphones angefasst."
+        : "In einem Smartphone stecken zehn davon. Wie viele hast du gefördert?"}</div>
+    </div>` : ""}
+
+    ${laender.length ? `<div class="karte">
+      <h3>Wo dein Lohn hingegangen ist</h3>
+      <div class="ort">Insgesamt ${chf(lohnSummeGesamt)} an Löhnen</div>
+      ${laender.map(l => `<div class="zeile">
+        <span class="flz">${flagge(l)}<span>${LAND[l].name}</span></span>
+        <b>${chf(S.lohnLand[l])} <small style="color:var(--grau);font-weight:600">${Math.round(S.lohnLand[l]/lohnSummeGesamt*100)} %</small></b></div>`).join("")}
+      <div class="notiz">Vergleich das mit der Menge Erz von dort. Wo viel gefördert wurde, floss nicht unbedingt viel Lohn.</div>
+    </div>` : ""}
+
+    ${minenZahl ? `<div class="karte">
+      <h3>Wie du bezahlt hast</h3>
+      ${LOHNSTUFE.map((st,i) => `<div class="zeile"><span>${st.label} – ${st.name}</span>
+        <b>${stufen[i]} ${stufen[i]===1?"Mine":"Minen"}</b></div>`).join("")}
+      <div class="notiz">${stufen[0] > stufen[2]
+        ? "Du hast überwiegend unter dem üblichen Lohn gezahlt. Das war billig – und hat den Ruf gekostet."
+        : stufen[2] > 0 ? "Du hast an mindestens einem Ort deutlich über dem üblichen Lohn gezahlt."
+        : "Du bist beim landesüblichen Lohn geblieben."}</div>
+    </div>` : ""}
+
+    <div class="karte">
+      <h3>Dein Betrieb am Schluss</h3>
+      <div class="zeile"><span>Minen</span><b>${Object.keys(S.minen).length}</b></div>
+      <div class="zeile"><span>Raffinerien</span><b>${Object.keys(S.raff).length}</b></div>
+      <div class="zeile"><span>Fabriken</span><b>${S.fabriken.length}</b></div>
+      <div class="zeile"><span>Mitarbeitende</span><b>${S.arbeiterGesamt}</b></div>
+      <div class="zeile"><span>Erledigte Aufträge</span><b>${Math.min(S.auftrag||0, AUFTRAEGE.length)} von ${AUFTRAEGE.length}</b></div>
+      <div class="zeile"><span>Erforschtes Wissen</span><b>${perkListe.length} von ${WISSEN.reduce((a,x)=>a+x.perks.length,0)}</b></div>
+    </div>
+
+    <div class="karte">
+      <h3>Zum Nachdenken</h3>
+      <div class="fakt"><span class="nr">1</span><span>Welche Entscheidung hat am meisten Geld gebracht – und welche am meisten Ruf?</span></div>
+      <div class="fakt"><span class="nr">2</span><span>Du hast Löhne in ${laender.length || "mehreren"} Ländern gezahlt. Warum sind die Unterschiede so gross?</span></div>
+      <div class="fakt"><span class="nr">3</span><span>Was würdest du im echten Leben anders machen als hier im Spiel?</span></div>
+    </div>
+
+    <button class="cta" data-tun="neuerunde">${IK.pfeil}Neue Runde starten</button>
+    <button class="cta still" data-schliessen="bilanz">Auswertung schliessen</button>`;
+  $("#bilanz").hidden = false;
   fensterKlasse();
 }
 
@@ -3395,6 +3751,7 @@ function dialogZeigen(e){
     if (!i) setTimeout(()=>b.focus(), 60);
   });
   $("#schleier").hidden = false;
+  if (e.wahlen && e.wahlen.length > 1) klang("warnung");
   zeichnen();
 }
 
@@ -3407,6 +3764,7 @@ function ueberlageZu(welche){
 }
 /* ESC / rotes X: immer das oberste offene Menü schliessen */
 function obersteSchliessen(){
+  if (!$("#bilanz").hidden){ ueberlageZu("bilanz"); return true; }
   if (!$("#kasse").hidden){ ueberlageZu("kasse"); return true; }
   if (!$("#lupe").hidden){ ueberlageZu("lupe"); return true; }
   if (!$("#einst").hidden){ ueberlageZu("einst"); return true; }
@@ -3455,7 +3813,7 @@ document.addEventListener("click", e => {
       notiz(`Mine <b>${def.ort}</b> eröffnet. Jetzt Leute hinschicken.`, "gut");
       zeigeAuf(id); pinFeiern(id);
       const [fx,fy] = pinAufSchirm(id);
-      funken(fx, fy, [MATERIAL[def.mat].farbe, "#f5b73d", "#fff", "#ffe9a8"], 24);
+      funken(fx, fy, [MATERIAL[def.mat].farbe, "#f5b73d", "#fff", "#ffe9a8"], 24); klang("kauf");
       break; }
     case "crew": {
       const def = MINEN.find(x=>x.id===id), m = S.minen[id];
@@ -3468,7 +3826,7 @@ document.addEventListener("click", e => {
       if (neu === m.stufe) return;
       if (neu < m.stufe && m.zufriedenheit > 70) m.zufriedenheit -= 12;
       if (neu > m.stufe){
-        funkenAn(t, ["#f5b73d","#ffe9a8","#2fbe7e"], 18);
+        funkenAn(t, ["#f5b73d","#ffe9a8","#2fbe7e"], 18); klang("muenze");
         m.zufriedenheit = Math.min(100, m.zufriedenheit + 6);
         notiz(`Lohnstufe in <b>${MINEN.find(x=>x.id===id).ort}</b> auf «${LOHNSTUFE[neu].label}» erhöht.`, "gut");
       }
@@ -3479,7 +3837,7 @@ document.addEventListener("click", e => {
       zahlen(def.bau, "bau"); S.raff[id] = {arbeiter:0, ausbau:0};
       notiz(`Raffinerie <b>${def.ort}</b> gebaut.`, "gut");
       zeigeAuf(id); pinFeiern(id);
-      const [fx,fy] = pinAufSchirm(id); funken(fx, fy, ["#5b8f7a","#cfe8dd","#fff"], 22);
+      const [fx,fy] = pinAufSchirm(id); funken(fx, fy, ["#5b8f7a","#cfe8dd","#fff"], 22); klang("kauf");
       break; }
     case "rcrew": {
       const def = RAFF_ORTE.find(x=>x.id===id), r = S.raff[id];
@@ -3495,7 +3853,7 @@ document.addEventListener("click", e => {
       S.fabriken.push({produkt:p, land:l, arbeiter:0, restbau:tage, ausbau:0});
       notiz(`Fabrik für <b>${def.name}</b> in ${fabOrt(l)} – fertig in ${tage} Tagen.`, "geld");
       pinFeiern("f_"+l);
-      const [fx,fy] = pinAufSchirm("f_"+l); funken(fx, fy, ["#b5703c","#f5b73d","#fff"], 22);
+      const [fx,fy] = pinAufSchirm("f_"+l); funken(fx, fy, ["#b5703c","#f5b73d","#fff"], 22); klang("kauf");
       break; }
     case "fcrew": {
       const i = +t.dataset.i, f = S.fabriken[i], def = PRODUKT[f.produkt];
@@ -3508,7 +3866,7 @@ document.addEventListener("click", e => {
       if (menge <= 0 || S.kasse < kosten) return;
       zahlen(kosten, "personal"); S.arbeiterGesamt += menge;
       notiz(`<b>${menge} Leute</b> angestellt für ${chf(kosten)}.`, "geld");
-      funkenAn(t, ["#6fb8e0","#f5b73d","#fff","#2fbe7e"], 26);
+      funkenAn(t, ["#6fb8e0","#f5b73d","#fff","#2fbe7e"], 26); klang("kauf");
       break; }
     case "entlassen":
       if (freieArbeiter() >= 5){ S.arbeiterGesamt -= 5; notiz("5 Leute entlassen.", "warn"); } break;
@@ -3518,7 +3876,7 @@ document.addEventListener("click", e => {
       if (erg.stueck <= 0) return;
       S.handverkaufTag = S.tag; S.verkauftSelber = true;
       notiz(`Selber verkauft: <b>${erg.stueck} Stück</b> für ${chf(erg.erloes)}.`, "geld");
-      funkenAn(t, ["#f5b73d","#ffe9a8","#2fbe7e","#fff"], 26);
+      funkenAn(t, ["#f5b73d","#ffe9a8","#2fbe7e","#fff"], 26); klang("muenze");
       break; }
     case "vcrew": {
       const vorher = S.verkaeufer || 0;
@@ -3529,6 +3887,32 @@ document.addEventListener("click", e => {
       einstFuellen(); return;
     case "kassebuch":
       kasseFuellen(); return;
+    case "bilanz":
+      bilanzZeigen(); return;
+    case "neuerunde":
+      $("#bilanz").hidden = true; zuruecksetzen(); return;
+    case "schliessen": {
+      const art = t.dataset.art;
+      const i = t.dataset.i != null ? +t.dataset.i : null;
+      const ziel = art === "mine" ? S.minen[id] : art === "raff" ? S.raff[id] : S.fabriken[i];
+      if (!ziel) return;
+      const grund = art === "mine" ? MINEN.find(x=>x.id===id).erschliessung
+                  : art === "raff" ? RAFF_ORTE.find(x=>x.id===id).bau
+                  : PRODUKT[ziel.produkt].kosten;
+      const name = art === "mine" ? "Mine " + MINEN.find(x=>x.id===id).ort
+                 : art === "raff" ? "Raffinerie " + RAFF_ORTE.find(x=>x.id===id).ort
+                 : "Fabrik " + PRODUKT[ziel.produkt].name + " in " + fabOrt(ziel.land);
+      const zurueck = Math.round((grund + ausbauInvestiert(grund, ziel.ausbau)) * RUECK_ANTEIL);
+      if (!confirm(`${name} wirklich schliessen?\n\nDu bekommst ${chf(zurueck)} zurück, ${ziel.arbeiter} Leute gehen ins Team.`)) return;
+      S.kasse += zurueck; S.eingenommen += zurueck; buchen("verkauf", 0);
+      if (ziel.arbeiter > 0) rufAendern(-4);
+      if (art === "mine") delete S.minen[id];
+      else if (art === "raff") delete S.raff[id];
+      else S.fabriken.splice(i, 1);
+      notiz(`<b>${name}</b> geschlossen. ${chf(zurueck)} zurück${ziel.arbeiter?`, ${ziel.arbeiter} Leute wieder frei`:""}.`, "warn");
+      klang("warnung");
+      blattZu();
+      break; }
     case "grad": {
       S.grad = t.dataset.g;
       notiz(`Schwierigkeit: <b>${grad().name}</b>.`, "gut");
@@ -3558,6 +3942,7 @@ document.addEventListener("click", e => {
         : `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut.`, verdoppelt ? "gut" : "geld");
       funkenAn(t, verdoppelt ? ["#2fbe7e","#82e2b4","#f5b73d","#fff"] : ["#f5b73d","#ffe9a8","#fff"],
         verdoppelt ? 40 : 16);
+      klang(verdoppelt ? "verdopplung" : "kauf");
       break; }
     case "segment":
       lupeFuellen(t.dataset.s); return;
@@ -3571,7 +3956,7 @@ document.addEventListener("click", e => {
       S.perks[e2.perk.id] = true;
       if (e2.perk.sofort && e2.perk.sofort.ruf) rufAendern(e2.perk.sofort.ruf);
       notiz(`Neues Wissen: <b>${e2.perk.titel}</b> · ${e2.perk.wirkung.join(" · ")}`, "gut");
-      funkenAn(t, ["#f5b73d","#2fbe7e","#ffe9a8","#fff"], 28);
+      funkenAn(t, ["#f5b73d","#2fbe7e","#ffe9a8","#fff"], 28); klang("erfolg");
       auftragPruefen(); speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
       return; }
     case "reset":
@@ -3594,6 +3979,8 @@ document.addEventListener("input", e => {
     case "schrift": OPT.schrift = wert; if (anzeige) anzeige.textContent = wert + " %"; optAnwenden(); optSpeichern(); break;
     case "tempo":   OPT.tempo = wert;   if (anzeige) anzeige.textContent = wert + " %"; optAnwenden(); optSpeichern(); break;
     case "anim":    OPT.anim = wert;    if (anzeige) anzeige.textContent = ANIM_NAME[wert]; optAnwenden(); optSpeichern(); break;
+    case "ton":     OPT.ton = wert;     if (anzeige) anzeige.textContent = wert === 0 ? "aus" : wert + " %";
+                    optSpeichern(); if (wert > 0) klang("klick"); break;
     case "anstell": anstellMenge = wert; if (anzeige) anzeige.textContent = wert + " Leute";
       { const knopf = document.querySelector('[data-tun="anstellen"]');
         const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF, geht = menge > 0 && S.kasse >= kosten;
