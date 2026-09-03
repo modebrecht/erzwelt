@@ -8,6 +8,9 @@ on:
       - .github/workflows/didactic-must-fixes.yml
       - scripts/fix_didactic_musts.py
       - scripts/simplify_didactic_patch.py
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
