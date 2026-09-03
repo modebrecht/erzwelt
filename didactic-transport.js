@@ -91,7 +91,7 @@ function lieferwegTransportZeichnen(){
   glow(mine,raff);
   glow(raff,fab);
 
-  if(OPT.anim!==0){
+  if(OPT.anim!==0 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
     animiereTransport(g,"truck",mine,raff,6.2,0);
     animiereTransport(g,"ship",raff,umschlag,8.4,.8);
     animiereTransport(g,"truck",umschlag,fab,3.6,2.0);
