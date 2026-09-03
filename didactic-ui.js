@@ -168,7 +168,6 @@ document.addEventListener("click", e => {
   const kosten = Math.max(20000, Math.round(SICHERHEIT_BASIS_KOSTEN * perkMult("sicherheit") / 1000) * 1000);
   if (S.kasse < kosten) return;
   S.kasse -= kosten; S.ausgegeben += kosten; m.sicherheit = true;
-  rufAendern(1);
   notiz(`<b>${MINEN.find(x=>x.id===id).ort}</b>: Sicherheit verbessert.`, "gut");
   speichern(); blattStand=""; seitenStand=""; zeichnen();
 }, true);
