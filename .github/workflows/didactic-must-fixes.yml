@@ -1,0 +1,61 @@
+name: Apply didactic MUST fixes
+
+on:
+  push:
+    branches:
+      - didactic-must-fixes
+    paths:
+      - .github/workflows/didactic-must-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: didactic-must-fixes
+          fetch-depth: 0
+
+      - name: Apply didactic fixes
+        run: python scripts/fix_didactic_musts.py
+
+      - name: Check JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('erzwelt.html').read_text(encoding='utf-8')
+          scripts = re.findall(r'<script[^>]*>(.*?)</script>', html, re.S | re.I)
+          if not scripts:
+              raise SystemExit('no inline script found')
+          Path('/tmp/erzwelt.js').write_text('\n'.join(scripts), encoding='utf-8')
+          print(f'extracted {len(scripts)} inline script block(s)')
+          PY
+          node --check /tmp/erzwelt.js
+
+      - name: Check didactic invariants
+        run: |
+          ! grep -q 'S\.preisMod' erzwelt.html
+          ! grep -q 'function matPreis' erzwelt.html
+          ! grep -q 'Weltpreis</th>' erzwelt.html
+          grep -q 'Lieferketten-Nachweise' erzwelt.html
+          grep -q 'Zinkerz (Indium als Nebenprodukt)' erzwelt.html
+          grep -q 'Sicherheitsstandard' erzwelt.html
+          git diff --check
+
+      - name: Commit clean result
+        run: |
+          rm scripts/fix_didactic_musts.py
+          rm .github/workflows/didactic-must-fixes.yml
+          rmdir scripts 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name 'didactic-fix-bot'
+          git config user.email 'didactic-fix-bot@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: resolve didactic model inconsistencies'
+          git push origin HEAD:didactic-must-fixes
