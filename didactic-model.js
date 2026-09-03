@@ -36,7 +36,7 @@ const ROHSTOFF_ORT = {
   bayanobo: "Erz mit Seltenen Erden",
   jiangxi: "Quarz → Rohsilizium",
   liuzhou: "Zinkerz (Indium als Nebenprodukt)",
-  sprucepine: "hochreiner Quarz",
+  sprucepine: "Quarz (Spielmodell)",
   mountainpass: "Erz mit Seltenen Erden",
   greenbushes: "Lithiumerz (Spodumen)",
   kalgoorlie: "Golderz",
