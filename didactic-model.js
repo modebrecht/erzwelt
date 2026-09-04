@@ -87,10 +87,15 @@ if (leuteSeg){
     "Im Spiel beeinflusst der <b>Lohn</b> vor allem die Zufriedenheit. Sinkt sie stark, kann es zum Streik kommen.",
     "<b>Sicherheit ist separat:</b> Schutz, Ausrüstung und Schulung senken das Unfallrisiko. Ein hoher Lohn ersetzt keine Sicherheitsmassnahmen – und gute Sicherheit ersetzt keinen fairen Lohn."
   ];
+  leuteSeg.fakten = [
+    "Sicherheitsmassnahmen wie geeignete Ausrüstung, Schulung und klare Arbeitsabläufe können Unfallrisiken senken.",
+    "Im Spiel beeinflusst die Zufriedenheit die Förderleistung. Die Stärke dieses Effekts ist eine vereinfachte Spielregel.",
+    "Lohn und Sicherheit werden im Spiel getrennt dargestellt, damit ihre unterschiedlichen Wirkungen sichtbar bleiben."
+  ];
   const sicherPerk = leuteSeg.perks.find(p => p.id === "leute1");
   if (sicherPerk){
     sicherPerk.titel = "Sicherheitsprogramm";
-    sicherPerk.text = "Ein gemeinsamer Standard macht Sicherheitsausbauten in deinen Minen einfacher und günstiger.";
+    sicherPerk.text = "Ein gemeinsamer Standard macht Sicherheitsausbauten in deinen Rohstoffquellen einfacher und günstiger.";
     sicherPerk.wirkung = ["Sicherheitsausbau −50 % Kosten"];
     delete sicherPerk.plus;
     sicherPerk.mult = {sicherheit:0.50};
@@ -120,12 +125,12 @@ const modellSeg = WISSEN.find(s => s.id === "modell");
 if (modellSeg){
   modellSeg.text = [
     "Erzwelt ist ein <b>Spielmodell</b>. Mengen, Kosten, Löhne und Rezepte sind bewusst vereinfacht und dienen dem Spiel – sie sind keine aktuellen Statistiken.",
-    "Der Kern des Modells steht in <code>erzwelt-core.html</code>. Die didaktischen Korrekturen stehen in <code>didactic-model.js</code>, <code>didactic-events.js</code> und <code>didactic-ui.js</code>. Vergleiche: Welche Regeln wurden vereinfacht, damit Ursache und Wirkung klar bleiben?"
+    "Das Modell zeigt nur ausgewählte Zusammenhänge. Vergleiche beim Spielen: Welche Faktoren sind sichtbar dargestellt, und welche zusätzlichen Einflüsse gäbe es in einer realen Lieferkette?"
   ];
   modellSeg.fakten = [
     "Spielwerte sind gerundet und vereinfacht; reale Lieferketten haben deutlich mehr Faktoren.",
-    "Die Reihenfolge im Tagesschritt ist Absicht: fördern, raffinieren, produzieren, verkaufen.",
-    "Rohstoff-Weltmarktpreise werden im Spiel bewusst nicht simuliert."
+    "Ein Spieltag folgt der Reihenfolge: fördern, raffinieren, produzieren, verkaufen.",
+    "Rohstoffpreise am Weltmarkt werden im Spiel nicht berechnet."
   ];
   if (modellSeg.formeln){
     modellSeg.formeln = modellSeg.formeln.map(f => [f[0].replace("Material aus Erz", "Material aus Rohstoff"), f[1].replace("Erz ×", "Rohstoff ×")]);

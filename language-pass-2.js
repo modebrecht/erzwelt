@@ -16,7 +16,10 @@
     ["Lieferketten-Nachweise", "Lieferkettennachweise"],
     ["US-Dollar schwach", "Schwacher US-Dollar"],
     ["US-Dollar stark", "Starker US-Dollar"],
-    ["Lohn üblich", "Üblicher Lohn"]
+    ["Lohn üblich", "Üblicher Lohn"],
+    ["Praxisbezüge", "Voraussetzungen"],
+    ["Mine <b>", "Rohstoffquelle <b>"],
+    ["Jetzt Leute hinschicken.", "Jetzt Personal zuweisen."]
   ];
 
   function korrigiere(text){
@@ -67,6 +70,23 @@
   };
   ["blattMine","blattRaff","blattFab","seiteMarkt","seiteTeam","seiteZiel","seiteWissen"].forEach(wrapHtml);
 
+  if(typeof seiteTeam==="function"){
+    const original=seiteTeam;
+    seiteTeam=function(...args){
+      return original.apply(this,args).replace(/>Mine ([^<]+)<\/span>/g,">Rohstoffquelle $1</span>");
+    };
+  }
+
+  if(typeof dockZeichnen==="function"){
+    const original=dockZeichnen;
+    dockZeichnen=function(...args){
+      const r=original.apply(this,args);
+      const team=document.querySelector("#dock button[data-seite='team']");
+      if(team) team.setAttribute("aria-label","Team – Personal einstellen");
+      return r;
+    };
+  }
+
   if(typeof lupeFuellen==="function"){
     const original=lupeFuellen;
     lupeFuellen=function(...args){
@@ -84,5 +104,5 @@
     };
   }
 
-  window.__erzweltLanguagePass2={version:2,locale:"de-CH"};
+  window.__erzweltLanguagePass2={version:3,locale:"de-CH"};
 })();
