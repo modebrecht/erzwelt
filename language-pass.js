@@ -13,21 +13,38 @@
     ["Noch nicht erfüllt.", "Voraussetzung noch nicht erfüllt."],
     ["Erst im Spiel beobachten", "Voraussetzung noch nicht erfüllt"],
     ["Wissens-Verbesserung", "Verbesserung"],
+    ["Verbesserung umgesetzt:", "Verbesserung finanziert:"],
+    ["Verbesserungen umgesetzt", "Verbesserungen finanziert"],
+    ["Verbesserung umsetzen", "Verbesserung finanzieren"],
+    ["Alle Verbesserungen umgesetzt", "Alle Verbesserungen finanziert"],
+    ["Umgesetzte Verbesserungen", "Finanzierte Verbesserungen"],
+    ["Umgesetzt", "Finanziert"],
     ["Ein Wissensfeld passt zu deiner Erfahrung", "Voraussetzung für eine Verbesserung erfüllt"],
     ["Ein Ausbau steht vor einem Sprung", "Nächste Ausbaustufe mit grösserer Wirkung"],
     ["Material hat noch kein Ziel", "Noch keine Fabrik vorhanden"],
     ["Rohstoff wird noch nicht zu Material", "Noch keine Raffinerie vorhanden"],
+    ["Rohstofflager wächst", "Rohstoffbestand ist hoch"],
+    ["Das Warenlager wächst", "Warenbestand ist hoch"],
+    ["Unruhe in ", "Tiefe Zufriedenheit in "],
+    ["Die Nachfrage leidet unter deinem Ruf", "Ein tiefer Ruf senkt die Nachfrage"],
+    ["Ruf und Nachfrage leiden", "Ruf sinkt · Nachfrage sinkt"],
+    ["Die Nachfrage leidet.", "Die Nachfrage sinkt."],
     ["Ware verkauft sich nicht von allein", "Fertige Produkte müssen verkauft werden"],
     ["Fertige Ware verkauft sich nicht von allein", "Fertige Produkte müssen verkauft werden"],
     ["SELBER VERKAUFEN", "SELBST VERKAUFEN"],
     ["Selber verkaufen", "Selbst verkaufen"],
     ["selber verkaufen", "selbst verkaufen"],
+    ["Stell im Team neue Leute an.", "Stelle im Team weitere Personen ein."],
+    ["Stell zuerst im Team neue Leute an", "Stelle zuerst im Team weitere Personen ein"],
+    [" Leute frei", " Personen frei"],
+    [" Leute ohne Aufgabe", " Personen ohne Aufgabe"],
     ["Kein Weltpreis-Spielsystem: Primärrohstoffe kommen aus deinen eigenen Quellen und werden raffiniert. Recycling kann später einen Teil ersetzen.", "Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert."],
     ["Aktuelle Sondereffekte", "Aktuelle Einflüsse"],
     ["Hafen-Durchsatz", "Durchsatz im Hafen"],
     ["Dollar / Fertigwaren", "US-Dollar / Fertigwaren"],
     ["Spielrezept · stark vereinfacht", "Vereinfachtes Rezept · Spielmodell"],
     ["Spielrezepte:", "Vereinfachte Rezepte:"],
+    ["Setzen ab", "Verkaufskapazität"],
     ["Spielwerte sind gerundet und vereinfacht; reale Lieferketten haben deutlich mehr Faktoren.", "Die Werte sind gerundet und vereinfacht. Reale Lieferketten umfassen weitere Einflussfaktoren."],
     ["Die Reihenfolge im Tagesschritt ist Absicht:", "Ein Spieltag folgt dieser Reihenfolge:"],
     ["Rohstoff-Weltmarktpreise werden im Spiel bewusst nicht simuliert.", "Rohstoffpreise am Weltmarkt werden im Spiel nicht berechnet."],
@@ -40,6 +57,13 @@
     ["Transportfluss", "Transportweg"],
     ["Wegweiser", "Hinweis"],
     ["Nächster Schritt", "Hinweis"],
+    ["Die Belegschaft legt die Arbeit wegen der Lohnsituation nieder.", "Die Belegschaft streikt. Die Zufriedenheit ist wegen des gewählten Lohns sehr tief."],
+    ["Streik aussitzen", "Keine Einigung suchen"],
+    [" ausgesessen.", " ohne Einigung fortgesetzt."],
+    ["Sichern und entschädigen", "Sicherheitsmassnahmen verbessern und entschädigen"],
+    ["Sicherheit bleibt offen", "Sicherheitsmassnahmen bleiben unverändert"],
+    ["Geld kauft nicht das Wissen. Es finanziert die konkrete Verbesserung, nachdem du den Zusammenhang im Spiel erlebt hast.", "Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist."],
+    ["Acht Felder. Wissen kostet nichts: Lies nach, beobachte das Prinzip im Spiel und finanziere danach eine passende Verbesserung.", "Die acht Wissensbereiche können jederzeit gelesen werden. Eine Verbesserung kann finanziert werden, sobald ihre Voraussetzung im Spiel erfüllt ist."],
     ["Phones", "Smartphones"],
     ["Phone", "Smartphone"]
   ];
@@ -181,6 +205,17 @@
       return [textKorrigieren(w[0]),textKorrigieren(w[1])];
     };
   }
+  if(typeof questZeichnen==="function"){
+    const original=questZeichnen;
+    questZeichnen=function(){
+      const r=original();
+      if(!tutorialLaeuft()){
+        const art=document.getElementById("q-art");
+        if(art&&art.textContent==="Wegweiser") art.textContent="Hinweis";
+      }
+      return r;
+    };
+  }
 
   if(typeof ensureTransportLegend==="function"){
     const original=ensureTransportLegend;
@@ -199,5 +234,5 @@
     };
   }
 
-  window.__erzweltLanguagePass={version:1,locale:"de-CH"};
+  window.__erzweltLanguagePass={version:2,locale:"de-CH"};
 })();
