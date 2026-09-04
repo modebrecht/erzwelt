@@ -143,10 +143,12 @@
     if(now-last<520)return;
     scene.dataset.enhancePulse=String(now);
     scene.classList.remove("prozess-takt");
-    void scene.offsetWidth;
-    scene.classList.add("prozess-takt");
-    clearTimeout(scene._prozessTaktTimer);
-    scene._prozessTaktTimer=setTimeout(()=>scene.classList.remove("prozess-takt"),460);
+    requestAnimationFrame(()=>{
+      if(!scene.isConnected)return;
+      scene.classList.add("prozess-takt");
+      clearTimeout(scene._prozessTaktTimer);
+      scene._prozessTaktTimer=setTimeout(()=>scene.classList.remove("prozess-takt"),460);
+    });
   }
 
   function enhanceRaff(scene){
@@ -210,15 +212,6 @@
     const original=zeichnen;
     zeichnen=function(){const out=original();enhanceScenes();return out;};
   }
-
-  const observer=new MutationObserver(records=>{
-    for(const rec of records)for(const node of rec.addedNodes){
-      if(!(node instanceof HTMLElement))continue;
-      if(node.classList.contains("verkauf-paket"))node.setAttribute("aria-hidden","true");
-      if(node.classList.contains("verkauf-geld"))node.setAttribute("aria-hidden","true");
-    }
-  });
-  observer.observe(document.body,{childList:true,subtree:true});
 
   enhanceScenes();
   window.__erzweltProcessEnhance={version:1,features:["phasen","zustandsklarheit","fehlmaterial","verkaufsfeedback"]};
