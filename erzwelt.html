@@ -18,7 +18,7 @@ html,body{margin:0;height:100%;background:#0a2f42;color:#fff;font-family:system-
     const response=await fetch("./erzwelt-core.html",{cache:"no-cache"});
     if(!response.ok) throw new Error("Core HTTP "+response.status);
     let html=await response.text();
-    const patches=["didactic-model.js","didactic-events.js","didactic-ui.js","didactic-should.js","didactic-transport.js","language-pass.js","language-pass-2.js","performance-pass.js","transformation-animations.js","transformation-enhance.js"]
+    const patches=["didactic-model.js","didactic-events.js","didactic-ui.js","didactic-should.js","didactic-transport.js","language-pass.js","language-pass-2.js","performance-pass.js","transformation-animations.js","transformation-enhance.js","tutorial-enhance.js"]
       .map(src=>`<script src="./${src}"><\/script>`).join("");
     if(!html.includes("</body>")) throw new Error("Core-Datei ist unvollständig");
     html=html.replace("</body>",patches+"</body>");
