@@ -15,11 +15,22 @@ html,body{margin:0;height:100%;background:#0a2f42;color:#fff;font-family:system-
 <script>
 (async()=>{
   try{
-    const response=await fetch("./erzwelt-core.html",{cache:"no-cache"});
-    if(!response.ok) throw new Error("Core HTTP "+response.status);
-    let html=await response.text();
-    const patches=["didactic-model.js","didactic-events.js","didactic-ui.js","didactic-should.js","didactic-transport.js","language-pass.js","language-pass-2.js","performance-pass.js","transformation-animations.js","transformation-enhance.js","tutorial-enhance.js","construction-visibility.js","construction-animation-enhance.js","premium-animation-treatment.js","premium-animation-polish.js","premium-animation-treatment-v2.js","notification-history.js","stop-safety-visual.js","map-focus-navigation.js"]
-      .map(src=>`<script src="./${src}"><\/script>`).join("");
+    const [coreResponse,manifestResponse]=await Promise.all([
+      fetch("./erzwelt-core.html",{cache:"no-cache"}),
+      fetch("./patches.json",{cache:"no-cache"})
+    ]);
+    if(!coreResponse.ok) throw new Error("Core HTTP "+coreResponse.status);
+    if(!manifestResponse.ok) throw new Error("Patch-Manifest HTTP "+manifestResponse.status);
+
+    let html=await coreResponse.text();
+    const manifest=await manifestResponse.json();
+    if(!Array.isArray(manifest.groups)) throw new Error("Patch-Manifest ist ungültig");
+
+    const patchFiles=manifest.groups.flatMap(group=>Array.isArray(group.files)?group.files:[]);
+    if(!patchFiles.length) throw new Error("Patch-Manifest ist leer");
+    if(new Set(patchFiles).size!==patchFiles.length) throw new Error("Patch-Manifest enthält doppelte Dateien");
+
+    const patches=patchFiles.map(src=>`<script src="./${src}"><\/script>`).join("");
     if(!html.includes("</body>")) throw new Error("Core-Datei ist unvollständig");
     html=html.replace("</body>",patches+"</body>");
     document.open();
