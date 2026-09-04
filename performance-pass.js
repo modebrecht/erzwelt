@@ -12,9 +12,10 @@
     .pin:active{filter:none!important}
     .pin .knopf{box-shadow:0 3px 5px rgba(0,0,0,.32)}
     .pin .bez{box-shadow:0 2px 4px rgba(0,0,0,.28)}
-    .pin.foerdert .knopf>svg,.pin.foerdert .knopf>span.sym,.pin.wink .knopf,
     .didaktik-truck,.didaktik-ship{will-change:transform}
-    .pin .staub{will-change:transform,opacity}
+    body[data-anim="1"] .pin.foerdert .staub.b,body[data-anim="1"] .pin.foerdert .staub.c{display:none}
+    #sicht.zieht .pin.foerdert .knopf>svg,#sicht.zieht .pin.foerdert .knopf>span.sym,
+    #sicht.zieht .pin.foerdert .staub{animation-play-state:paused!important}
     #didaktik-transport-legende{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#0b3648f2!important}
   `;
   document.head.appendChild(style);
@@ -43,6 +44,29 @@
     };
   }
 
+  // localStorage is synchronous. At max simulation speed the core can request a save
+  // around seven times per second; coalesce those writes while still flushing on exit.
+  if(typeof speichern==="function"){
+    const original=speichern;
+    const SAVE_INTERVAL=600;
+    let dirty=false,timer=0,lastWrite=-1e9;
+    const flushSave=()=>{
+      if(timer){clearTimeout(timer);timer=0;}
+      if(!dirty)return;
+      dirty=false;lastWrite=performance.now();
+      return original();
+    };
+    speichern=function(){
+      dirty=true;
+      const rest=SAVE_INTERVAL-(performance.now()-lastWrite);
+      if(rest<=0)return flushSave();
+      if(!timer)timer=setTimeout(flushSave,rest);
+    };
+    window.addEventListener("pagehide",flushSave);
+    window.addEventListener("beforeunload",flushSave);
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)flushSave();});
+  }
+
   const sortedEntries=o=>Object.keys(o||{}).sort().map(k=>[k,o[k]]);
   // Only values that are actually visible on map pins belong in the cache key.
   // Cash, inventories, satisfaction drift and upgrades must NOT force a pin rebuild.
@@ -52,7 +76,7 @@
   const routeState=()=>JSON.stringify([
     tutorialLaeuft()?S.tutorial:-1,
     Object.keys(S.minen).sort(),Object.keys(S.raff).sort(),
-    S.fabriken.map(f=>[f.produkt,f.land,f.restbau])
+    S.fabriken.map(f=>[f.produkt,f.land,f.restbau===0?0:1])
   ]);
 
   if(typeof beispielKette==="function"){
@@ -236,7 +260,7 @@
   };
 
   window.__erzweltPerf={
-    version:3,
-    note:"Memoized map UI and migrations; rAF-batched pan/zoom; fast-tick panels capped near 2 Hz; full-tree didactic scan replaced by mutation tracking; quiet transport uses fewer SVG animations."
+    version:4,
+    note:"Memoized map UI/migrations; rAF-batched pan/zoom; synchronous saves coalesced; fast-tick panels capped near 2 Hz; full-tree scan replaced by mutation tracking; quiet-mode continuous effects reduced."
   };
 })();
