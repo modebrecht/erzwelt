@@ -34,14 +34,14 @@ if (protestEv){
     S.minen[id].stillBis = S.tag + 999;
     return {
       art:"Protest", titel:`Streik in ${def.ort}`, land:def.land,
-      text:"Die Belegschaft legt die Arbeit wegen der Lohnsituation nieder. Die Förderung steht still.",
+      text:"Die Belegschaft streikt. Die Zufriedenheit ist wegen des gewählten Lohns sehr niedrig. Die Förderung steht still.",
       wahlen:[
-        {text:"Lohn erhöhen", klein:"Dauerhaft höhere Kosten · Zufriedenheit steigt",
-         tun(){ S.minen[id].stufe=Math.min(2,S.minen[id].stufe+1); S.minen[id].zufriedenheit=62; S.minen[id].stillBis=S.tag+2; rufAendern(4); notiz(`Lohn in ${def.ort} erhöht.`,"gut"); }},
-        {text:"Verhandeln und Prämie zahlen", klein:"CHF 60'000 · Arbeit läuft in 5 Tagen wieder",
-         tun(){ S.kasse-=60000; S.ausgegeben+=60000; S.minen[id].zufriedenheit=52; S.minen[id].stillBis=S.tag+5; rufAendern(3); notiz(`Einigung in ${def.ort}: Prämie bezahlt.`,"gut"); }},
-        {text:"Streik aussitzen", klein:"20 Tage Stillstand · Ruf fällt",
-         tun(){ S.minen[id].stillBis=S.tag+20; S.minen[id].zufriedenheit=12; rufAendern(-15); notiz(`Streik in ${def.ort} ausgesessen.`,"alarm"); }}
+        {text:"Lohn erhöhen", klein:"Dauerhaft höhere Kosten · Zufriedenheit steigt · 2 Tage Stillstand",
+         tun(){ S.minen[id].stufe=Math.min(2,S.minen[id].stufe+1); S.minen[id].zufriedenheit=62; S.minen[id].stillBis=S.tag+2; notiz(`Lohn in ${def.ort} erhöht.`,"gut"); }},
+        {text:"Verhandeln und Prämie zahlen", klein:"CHF 60'000 · Zufriedenheit steigt · 5 Tage Stillstand",
+         tun(){ S.kasse-=60000; S.ausgegeben+=60000; S.minen[id].zufriedenheit=52; S.minen[id].stillBis=S.tag+5; notiz(`Einigung in ${def.ort}: Prämie bezahlt.`,"gut"); }},
+        {text:"Keine Einigung suchen", klein:"20 Tage Stillstand · Zufriedenheit bleibt sehr niedrig · Ruf sinkt",
+         tun(){ S.minen[id].stillBis=S.tag+20; S.minen[id].zufriedenheit=12; rufAendern(-15); notiz(`Streik in ${def.ort} ohne Einigung fortgesetzt.`,"alarm"); }}
       ]
     };
   };
@@ -59,12 +59,12 @@ if (unfallEv){
     S.minen[id].stillBis = S.tag + 999;
     return {
       art:"Unfall", titel:`Unfall in ${def.ort}`, land:def.land,
-      text:"In der Mine gab es einen schweren Unfall. Die Mine bleibt geschlossen, bis du über die Sicherheitsmassnahmen entscheidest.",
+      text:"In der Rohstoffquelle gab es einen schweren Unfall. Sie bleibt geschlossen, bis du über die Sicherheitsmassnahmen entscheidest.",
       wahlen:[
-        {text:"Sichern und entschädigen", klein:"CHF 140'000 · Sicherheit verbessert · 10 Tage Stillstand",
-         tun(){ S.kasse-=140000; S.ausgegeben+=140000; S.minen[id].sicherheit=true; S.minen[id].stillBis=S.tag+10; rufAendern(4); notiz(`${def.ort}: Sicherheit verbessert und Entschädigung bezahlt.`,"warn"); }},
-        {text:"Nur reparieren", klein:"CHF 30'000 · 25 Tage Stillstand · Sicherheit bleibt offen",
-         tun(){ S.kasse-=30000; S.ausgegeben+=30000; S.minen[id].stillBis=S.tag+25; rufAendern(-12); S.minen[id].zufriedenheit=Math.max(15,S.minen[id].zufriedenheit-12); notiz(`Notreparatur in ${def.ort}. Sicherheitsproblem bleibt offen.`,"alarm"); }}
+        {text:"Sicherheitsmassnahmen verbessern und Betroffene entschädigen", klein:"CHF 140'000 · Sicherheit verbessert · 10 Tage Stillstand",
+         tun(){ S.kasse-=140000; S.ausgegeben+=140000; S.minen[id].sicherheit=true; S.minen[id].stillBis=S.tag+10; notiz(`${def.ort}: Sicherheitsmassnahmen verbessert und Entschädigung bezahlt.`,"warn"); }},
+        {text:"Nur reparieren", klein:"CHF 30'000 · 25 Tage Stillstand · Sicherheit bleibt unverändert",
+         tun(){ S.kasse-=30000; S.ausgegeben+=30000; S.minen[id].stillBis=S.tag+25; notiz(`Notreparatur in ${def.ort}. Sicherheitsproblem bleibt offen.`,"alarm"); }}
       ]
     };
   };
@@ -84,9 +84,9 @@ if (rechercheEv){
       text:`Eine Recherche stellt Fragen zu den Arbeitsbedingungen in ${def.ort}. Deine Firma kann für diese Rohstoffquelle noch keine unabhängige Prüfung vorlegen.`,
       wahlen:[
         {text:"Unabhängige Prüfung beauftragen", klein:"CHF 90'000 · Nachweis vorhanden",
-         tun(){ S.kasse-=90000; S.ausgegeben+=90000; S.minen[id].nachweis=true; rufAendern(8); notiz(`${def.ort}: unabhängige Prüfung abgeschlossen.`,"gut"); }},
-        {text:"Keine Prüfung vorlegen", klein:"Kostet nichts · Ruf und Nachfrage leiden",
-         tun(){ rufAendern(-18); S.nachfrageMod.phone={faktor:.8,bis:S.tag+60}; notiz("Keine unabhängigen Nachweise vorgelegt. Die Nachfrage leidet.","alarm"); }}
+         tun(){ S.kasse-=90000; S.ausgegeben+=90000; S.minen[id].nachweis=true; notiz(`${def.ort}: unabhängige Prüfung abgeschlossen.`,"gut"); }},
+        {text:"Keine Prüfung vorlegen", klein:"Kostet nichts · Ruf sinkt · Smartphone-Nachfrage 60 Tage −20 %",
+         tun(){ rufAendern(-18); S.nachfrageMod.phone={faktor:.8,bis:S.tag+60}; notiz("Keine unabhängigen Nachweise vorgelegt. Ruf und Smartphone-Nachfrage sinken.","alarm"); }}
       ]
     };
   };
