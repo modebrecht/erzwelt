@@ -239,6 +239,10 @@
     const priorQuest=questZeichnen;
     questZeichnen=function(){const out=priorQuest();decorateQuest();return out;};
   }
+  if(typeof hinweiseSetzen==="function"){
+    const priorHints=hinweiseSetzen;
+    hinweiseSetzen=function(){const out=priorHints();decorateQuest();return out;};
+  }
 
   decorateToasts();decorateQuest();
   window.__erzweltMapFocusNavigation={version:1,features:["clickable-location-notifications","quest-context-focus","suggested-purchase-location","smooth-camera-focus"]};
