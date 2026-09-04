@@ -6,6 +6,7 @@
   const style=document.createElement("style");
   style.id="erzwelt-tutorial-enhance-style";
   style.textContent=`
+    #quest.tutorial-aktiv:not(.breit){width:min(64%,300px)}
     #quest .tutorial-kette{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:8px 0 6px}
     #quest .tutorial-phase{min-width:0;padding:4px 3px;border-radius:8px;background:#e8deca;color:#78684e;
       text-align:center;font-size:9px;font-weight:800;line-height:1.1;border:1px solid transparent}
@@ -38,17 +39,61 @@
   ];
 
   const COPY={
-    mine1:{titel:"Erste Rohstoffquelle eröffnen",text:"Das Ladekabel braucht Kupfer, Aluminium und Zinn. Beginne mit einer Quelle für einen dieser Rohstoffe.",zusammenhang:"Rohstoffquellen liefern die Ausgangsstoffe der Lieferkette."},
-    minecrew:{titel:"Förderung starten",text:"Eine eröffnete Rohstoffquelle produziert erst mit Personal. Weise mindestens 10 Personen zu.",zusammenhang:"Rohstoffquelle + Personal → Rohstoff"},
-    team:{titel:"Personal für die Kette bereitstellen",text:"Mehrere Stationen brauchen gleichzeitig Personal. Erhöhe den Personalbestand auf mindestens 40 Personen.",zusammenhang:"Personal ist begrenzt und muss auf die Stationen der Lieferkette verteilt werden."},
-    minen3:{titel:"Drei Rohstoffe sichern",text:"Eröffne je eine Quelle für Kupfererz, Bauxit und Zinnerz. Daraus entstehen später Kupfer, Aluminium und Zinn.",zusammenhang:"Kupfererz → Kupfer · Bauxit → Aluminium · Zinnerz → Zinn"},
-    crew3:{titel:"Alle Rohstoffquellen aktivieren",text:"Eine eröffnete Quelle ohne Personal fördert nichts. Weise jeder der drei Quellen mindestens 5 Personen zu.",zusammenhang:"Erst aktive Rohstoffquellen versorgen die nächste Station."},
-    raff:{titel:"Rohstoffe verarbeiten",text:"Die geförderten Rohstoffe können nicht direkt in der Fabrik verwendet werden. Baue eine Raffinerie.",zusammenhang:"Rohstoff → Raffinerie → nutzbares Material"},
-    raffcrew:{titel:"Raffination starten",text:"Auch die Raffinerie arbeitet nur mit Personal. Weise ihr mindestens 5 Personen zu.",zusammenhang:"Die Raffinerie wandelt Rohstoffe in Materialien für die Fertigung um."},
-    fab:{titel:"Kabelfabrik bauen",text:"Jetzt kann aus den Materialien ein Produkt entstehen. Baue die Fabrik für Ladekabel.",zusammenhang:"Materialien → Fabrik → Produkt"},
-    fabcrew:{titel:"Produktion starten",text:"Eine fertige Fabrik braucht Personal und die Materialien ihres Rezepts. Weise ihr Personal zu.",zusammenhang:"Nur wenn Personal und alle benötigten Materialien vorhanden sind, entsteht ein Produkt."},
-    verkauf:{titel:"Erstes Produkt verkaufen",text:"Produktion erzeugt Warenbestand, aber noch kein Geld. Verkaufe Ladekabel einmal selbst im Markt.",zusammenhang:"Produkt → Verkauf → Geld"},
-    verkaeufer:{titel:"Verkaufsteam einsetzen",text:"Der manuelle Verkauf gilt nur für einen Spieltag. Weise mindestens 2 Personen dem Verkauf zu.",zusammenhang:"Verkaufskapazität bestimmt, wie viele fertige Produkte pro Tag verkauft werden können."}
+    mine1:{
+      titel:"Erste Rohstoffquelle eröffnen",
+      text:"Das Ladekabel braucht Kupfer, Aluminium und Zinn. Beginne mit einer Quelle für einen dieser Rohstoffe.",
+      zusammenhang:"Rohstoffquellen liefern die Ausgangsstoffe der Lieferkette."
+    },
+    minecrew:{
+      titel:"Förderung starten",
+      text:"Eine eröffnete Rohstoffquelle produziert erst mit Personal. Weise mindestens 10 Personen zu.",
+      zusammenhang:"Rohstoffquelle + Personal → Rohstoff"
+    },
+    team:{
+      titel:"Personal für die Kette bereitstellen",
+      text:"Mehrere Stationen brauchen gleichzeitig Personal. Erhöhe den Personalbestand auf mindestens 40 Personen.",
+      zusammenhang:"Personal ist begrenzt und muss auf die Stationen der Lieferkette verteilt werden."
+    },
+    minen3:{
+      titel:"Drei Rohstoffe sichern",
+      text:"Eröffne je eine Quelle für Kupfererz, Bauxit und Zinnerz. Daraus entstehen später Kupfer, Aluminium und Zinn.",
+      zusammenhang:"Kupfererz → Kupfer · Bauxit → Aluminium · Zinnerz → Zinn"
+    },
+    crew3:{
+      titel:"Alle Rohstoffquellen aktivieren",
+      text:"Eine eröffnete Quelle ohne Personal fördert nichts. Weise jeder der drei Quellen mindestens 5 Personen zu.",
+      zusammenhang:"Erst aktive Rohstoffquellen versorgen die nächste Station."
+    },
+    raff:{
+      titel:"Rohstoffe verarbeiten",
+      text:"Die geförderten Rohstoffe können nicht direkt in der Fabrik verwendet werden. Baue eine Raffinerie.",
+      zusammenhang:"Rohstoff → Raffinerie → nutzbares Material"
+    },
+    raffcrew:{
+      titel:"Raffination starten",
+      text:"Auch die Raffinerie arbeitet nur mit Personal. Weise ihr mindestens 5 Personen zu.",
+      zusammenhang:"Die Raffinerie wandelt Rohstoffe in Materialien für die Fertigung um."
+    },
+    fab:{
+      titel:"Kabelfabrik bauen",
+      text:"Jetzt kann aus den Materialien ein Produkt entstehen. Baue die Fabrik für Ladekabel.",
+      zusammenhang:"Materialien → Fabrik → Produkt"
+    },
+    fabcrew:{
+      titel:"Produktion starten",
+      text:"Eine fertige Fabrik braucht Personal und die Materialien ihres Rezepts. Weise ihr Personal zu.",
+      zusammenhang:"Nur wenn Personal und alle benötigten Materialien vorhanden sind, entsteht ein Produkt."
+    },
+    verkauf:{
+      titel:"Erstes Produkt verkaufen",
+      text:"Produktion erzeugt Warenbestand, aber noch kein Geld. Verkaufe Ladekabel einmal selbst im Markt.",
+      zusammenhang:"Produkt → Verkauf → Geld"
+    },
+    verkaeufer:{
+      titel:"Verkaufsteam einsetzen",
+      text:"Der manuelle Verkauf gilt nur für einen Spieltag. Weise mindestens 2 Personen dem Verkauf zu.",
+      zusammenhang:"Verkaufskapazität bestimmt, wie viele fertige Produkte pro Tag verkauft werden können."
+    }
   };
 
   const tut=Object.fromEntries(TUTORIAL.map(t=>[t.id,t]));
@@ -59,7 +104,10 @@
     tut[id].zusammenhang=c.zusammenhang;
   }
 
-  if(tut.minecrew)tut.minecrew.fertig=()=>Object.values(S.minen).some(m=>m.arbeiter>=10);
+  // Sichtbarer Auftrag und Abschlusskriterium sollen dieselbe Zahl nennen.
+  if(tut.minecrew){
+    tut.minecrew.fertig=()=>Object.values(S.minen).some(m=>m.arbeiter>=10);
+  }
 
   function phaseFor(id){return PHASEN.findIndex(p=>p.steps.includes(id));}
 
@@ -67,19 +115,22 @@
     if(!t)return "";
     if(t.id==="fabcrew"){
       const baut=S.fabriken.filter(f=>f.restbau>0);
-      if(baut.length){const rest=Math.min(...baut.map(f=>f.restbau));return `Die Kabelfabrik wird gebaut. Noch ${rest} ${rest===1?"Tag":"Tage"}. Danach kannst du Personal zuweisen.`;}
+      if(baut.length){
+        const rest=Math.min(...baut.map(f=>f.restbau));
+        return `Die Kabelfabrik wird gebaut. Noch ${rest} ${rest===1?"Tag":"Tage"}. Danach kannst du Personal zuweisen.`;
+      }
       const fertig=S.fabriken.find(f=>f.restbau<=0);
-      if(fertig&&fertig.arbeiter<=0)return "Die Kabelfabrik ist fertig. Weise ihr jetzt Personal zu, damit die Produktion starten kann.";
+      if(fertig&&fertig.arbeiter<=0) return "Die Kabelfabrik ist fertig. Weise ihr jetzt Personal zu, damit die Produktion starten kann.";
     }
     if(t.id==="verkauf"){
       const lager=S.ware?.[START_PRODUKT]||0;
       if(lager<=0){
         const fab=S.fabriken.find(f=>f.produkt===START_PRODUKT&&f.restbau<=0);
-        if(!fab)return "Noch ist keine fertige Kabelfabrik vorhanden. Lass den Bau zuerst abschliessen.";
-        if(fab.arbeiter<=0)return "Noch entstehen keine Ladekabel. Der Fabrik ist noch kein Personal zugewiesen.";
+        if(!fab) return "Noch ist keine fertige Kabelfabrik vorhanden. Lass den Bau zuerst abschliessen.";
+        if(fab.arbeiter<=0) return "Noch entstehen keine Ladekabel. Der Fabrik ist noch kein Personal zugewiesen.";
         const def=PRODUKT[START_PRODUKT];
         const fehlt=Object.keys(def.rezept||{}).filter(k=>(S.mat[k]||0)<def.rezept[k]);
-        if(fehlt.length)return `Noch entstehen keine Ladekabel. Es fehlt ${fehlt.map(k=>MATERIAL[k].name).join(", ")}. Prüfe Rohstoffquellen und Raffinerie.`;
+        if(fehlt.length) return `Noch entstehen keine Ladekabel. Es fehlt ${fehlt.map(k=>MATERIAL[k].name).join(", ")}. Prüfe Rohstoffquellen und Raffinerie.`;
         return "Die Fabrik kann produzieren. Lass die Zeit laufen, bis mindestens ein Ladekabel im Lager liegt; verkaufe es danach im Markt.";
       }
       return `Im Lager liegen ${Math.round(lager)} Ladekabel. Verkaufe einmal selbst im Markt und beobachte, wie aus Ware Geld wird.`;
@@ -90,14 +141,24 @@
   function ensureExtras(q){
     let chain=q.querySelector(".tutorial-kette");
     if(!chain){
-      chain=document.createElement("div");chain.className="tutorial-kette";chain.setAttribute("aria-label","Fortschritt in der Lieferkette");
+      chain=document.createElement("div");
+      chain.className="tutorial-kette";
+      chain.setAttribute("aria-label","Fortschritt in der Lieferkette");
       chain.innerHTML=PHASEN.map(p=>`<div class="tutorial-phase" data-phase="${p.id}"><b>${p.nr}</b><span>${p.label}</span></div>`).join("");
-      const progress=q.querySelector(".fortschritt");if(progress)progress.insertAdjacentElement("beforebegin",chain);else q.appendChild(chain);
+      const progress=q.querySelector(".fortschritt");
+      if(progress)progress.insertAdjacentElement("beforebegin",chain);else q.appendChild(chain);
     }
     let phaseName=q.querySelector(".tutorial-phase-name");
-    if(!phaseName){phaseName=document.createElement("div");phaseName.className="tutorial-phase-name";chain.insertAdjacentElement("afterend",phaseName);}
+    if(!phaseName){
+      phaseName=document.createElement("div");phaseName.className="tutorial-phase-name";
+      chain.insertAdjacentElement("afterend",phaseName);
+    }
     let relation=q.querySelector(".tutorial-zusammenhang");
-    if(!relation){relation=document.createElement("div");relation.className="tutorial-zusammenhang";const text=q.querySelector("#q-text");if(text)text.insertAdjacentElement("afterend",relation);else q.appendChild(relation);}
+    if(!relation){
+      relation=document.createElement("div");relation.className="tutorial-zusammenhang";
+      const text=q.querySelector("#q-text");
+      if(text)text.insertAdjacentElement("afterend",relation);else q.appendChild(relation);
+    }
     return {chain,phaseName,relation};
   }
 
@@ -108,15 +169,23 @@
       const out=originalQuest();
       const q=document.getElementById("quest"),t=tutorialSchritt();
       if(!q)return out;
-      if(!t||q.hidden){q.querySelectorAll(".tutorial-kette,.tutorial-phase-name,.tutorial-zusammenhang").forEach(el=>el.hidden=true);lastQuestKey="";return out;}
+      if(!t||q.hidden){
+        q.classList.remove("tutorial-aktiv");q.querySelectorAll(".tutorial-kette,.tutorial-phase-name,.tutorial-zusammenhang").forEach(el=>el.hidden=true);lastQuestKey="";return out;}
+      q.classList.add("tutorial-aktiv");
       const text=dynamischerText(t);
-      const key=[S.tutorial,S.tag,t.id,text,t.zusammenhang,aktiveSeite,!!offenesBlatt].join("|");
+      const key=[S.tutorial,t.id,text,t.zusammenhang,aktiveSeite,!!offenesBlatt].join("|");
       if(key===lastQuestKey)return out;
       lastQuestKey=key;
-      const qText=document.getElementById("q-text");if(qText&&qText.textContent!==text)qText.textContent=text;
-      const {chain,phaseName,relation}=ensureExtras(q);chain.hidden=phaseName.hidden=relation.hidden=false;
+
+      const qText=document.getElementById("q-text");
+      if(qText&&qText.textContent!==text)qText.textContent=text;
+      const {chain,phaseName,relation}=ensureExtras(q);
+      chain.hidden=phaseName.hidden=relation.hidden=false;
       const current=phaseFor(t.id);
-      chain.querySelectorAll(".tutorial-phase").forEach((el,i)=>{el.classList.toggle("erledigt",i<current);el.classList.toggle("aktiv",i===current);});
+      chain.querySelectorAll(".tutorial-phase").forEach((el,i)=>{
+        el.classList.toggle("erledigt",i<current);
+        el.classList.toggle("aktiv",i===current);
+      });
       phaseName.textContent=`Phase ${current+1}/4 · ${PHASEN[current]?.label||"Lieferkette"}`;
       relation.innerHTML=`<b>Zusammenhang:</b> ${t.zusammenhang||""}`;
       if(typeof questHoeheMessen==="function")questHoeheMessen();
@@ -128,31 +197,45 @@
   function feedback(html,finale){
     let el=document.getElementById("tutorial-lernfeedback");
     if(!el){el=document.createElement("div");el.id="tutorial-lernfeedback";document.body.appendChild(el);}
-    clearTimeout(feedbackTimer);el.classList.remove("rein");
+    clearTimeout(feedbackTimer);
+    el.classList.remove("rein");
     el.innerHTML=finale?`<b>Tutorial abgeschlossen</b><br>${html}`:`<b>Schritt verstanden</b><br>${html}`;
-    if(OPT.anim!==0&&!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches){requestAnimationFrame(()=>el.classList.add("rein"));feedbackTimer=setTimeout(()=>el.remove(),3000);}
-    else{el.style.opacity="1";feedbackTimer=setTimeout(()=>el.remove(),2200);}
+    if(OPT.anim!==0&&!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches){
+      requestAnimationFrame(()=>el.classList.add("rein"));
+      feedbackTimer=setTimeout(()=>el.remove(),3000);
+    }else{
+      el.style.opacity="1";
+      feedbackTimer=setTimeout(()=>el.remove(),2200);
+    }
   }
 
   if(typeof tutorialPruefen==="function"){
     const originalTutorialPruefen=tutorialPruefen;
     tutorialPruefen=function(){
-      const before=S.tutorial,step=TUTORIAL[before];
+      const before=S.tutorial;
+      const step=TUTORIAL[before];
       const out=originalTutorialPruefen();
       const after=S.tutorial;
       if(after>before){
-        if(after>=TUTORIAL.length)feedback("Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",true);
-        else if(step?.zusammenhang)feedback(step.zusammenhang,false);
-        lastQuestKey="";if(typeof questZeichnen==="function")questZeichnen();
+        if(after>=TUTORIAL.length){
+          feedback("Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",true);
+        }else if(step?.zusammenhang){
+          feedback(step.zusammenhang,false);
+        }
+        lastQuestKey="";
+        if(typeof questZeichnen==="function")questZeichnen();
       }
       return out;
     };
   }
 
+  // Abschlussmeldung des alten Tutorials präzisieren, ohne die Logik zu verändern.
   if(typeof notiz==="function"){
     const originalNotiz=notiz;
     notiz=function(text,art){
-      if(typeof text==="string"&&text.startsWith("Tutorial geschafft –"))text="Tutorial abgeschlossen – du hast die Lieferkette einmal vollständig aufgebaut. Weitere Standorte, Produkte und Ausbauten sind jetzt verfügbar.";
+      if(typeof text==="string"&&text.startsWith("Tutorial geschafft –")){
+        text="Tutorial abgeschlossen – du hast die Lieferkette einmal vollständig aufgebaut. Weitere Standorte, Produkte und Ausbauten sind jetzt verfügbar.";
+      }
       return originalNotiz(text,art);
     };
   }
