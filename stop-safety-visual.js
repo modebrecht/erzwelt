@@ -89,6 +89,12 @@
 
   function latestCause(def,m){
     const ort=String(def?.ort||"").toLowerCase();
+    const dialogTitle=(document.getElementById("d-titel")?.textContent||"").toLowerCase();
+    const dialogArt=(document.getElementById("d-art")?.textContent||"").toLowerCase();
+    if(typeof modalOffen!=="undefined"&&modalOffen&&(!ort||dialogTitle.includes(ort))){
+      if(dialogArt.includes("unfall")||dialogTitle.includes("unfall"))return "sicherheit";
+      if(dialogArt.includes("protest")||dialogTitle.includes("streik"))return "streik";
+    }
     for(const e of (S?.log||[])){
       const t=textOf(e.text).toLowerCase();
       if(ort&&!t.includes(ort))continue;
