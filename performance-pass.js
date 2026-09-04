@@ -19,6 +19,30 @@
   `;
   document.head.appendChild(style);
 
+  // Both didactic migrations are called from hot render paths. Once the current
+  // state already has the required schema, skip the repeated object walk/reset.
+  if(typeof didaktikMigration==="function"){
+    const original=didaktikMigration;
+    didaktikMigration=function(){
+      const complete=!!S
+        && S.didaktikVersion===DIDAKTIK_VERSION
+        && S.preisMod && typeof S.preisMod==="object" && Object.keys(S.preisMod).length===0
+        && Object.values(S.minen||{}).every(m=>m.sicherheit!==undefined&&m.nachweis!==undefined);
+      if(complete)return;
+      return original();
+    };
+  }
+  if(typeof shouldMigration==="function"){
+    const original=shouldMigration;
+    shouldMigration=function(){
+      const complete=!!S
+        && S.shouldDidaktikVersion===SHOULD_DIDAKTIK_VERSION
+        && S.wissenGesehen && typeof S.wissenGesehen==="object";
+      if(complete)return;
+      return original();
+    };
+  }
+
   const sortedEntries=o=>Object.keys(o||{}).sort().map(k=>[k,o[k]]);
   // Only values that are actually visible on map pins belong in the cache key.
   // Cash, inventories, satisfaction drift and upgrades must NOT force a pin rebuild.
@@ -212,7 +236,7 @@
   };
 
   window.__erzweltPerf={
-    version:2,
-    note:"Memoized map UI; fast-tick panels capped near 2 Hz; full-tree didactic scan replaced by mutation tracking; quiet transport uses fewer SVG animations."
+    version:3,
+    note:"Memoized map UI and migrations; rAF-batched pan/zoom; fast-tick panels capped near 2 Hz; full-tree didactic scan replaced by mutation tracking; quiet transport uses fewer SVG animations."
   };
 })();
