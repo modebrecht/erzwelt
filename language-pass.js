@@ -5,7 +5,8 @@
 
 (function(){
   const ersetzen = [
-    ["Spiel-Schwerpunkt", "Raffinerie-Spezialisierung"],
+    ["Spiel-Schwerpunkt", "Spezialisierung im Spiel"],
+    ["Raffinerie-Spezialisierung", "Spezialisierung im Spiel"],
     ["kein Schwerpunkt", "keine Spezialisierung"],
     ["Praxisbezug:", "Voraussetzung:"],
     ["Praxisbezug erfüllt.", "Voraussetzung erfüllt."],
@@ -25,8 +26,11 @@
     ["Rohstoff wird noch nicht zu Material", "Noch keine Raffinerie vorhanden"],
     ["Rohstofflager wächst", "Rohstoffbestand ist hoch"],
     ["Das Warenlager wächst", "Warenbestand ist hoch"],
-    ["Unruhe in ", "Tiefe Zufriedenheit in "],
-    ["Die Nachfrage leidet unter deinem Ruf", "Ein tiefer Ruf senkt die Nachfrage"],
+    ["Unruhe in ", "Niedrige Zufriedenheit in "],
+    ["Die Zufriedenheit ist tief.", "Die Zufriedenheit ist niedrig."],
+    ["sehr tiefer Zufriedenheit", "sehr niedriger Zufriedenheit"],
+    ["Ein tiefer Ruf", "Ein niedriger Ruf"],
+    ["Die Nachfrage leidet unter deinem Ruf", "Ein niedriger Ruf senkt die Nachfrage"],
     ["Ruf und Nachfrage leiden", "Ruf sinkt · Nachfrage sinkt"],
     ["Die Nachfrage leidet.", "Die Nachfrage sinkt."],
     ["Ware verkauft sich nicht von allein", "Fertige Produkte müssen verkauft werden"],
@@ -57,13 +61,17 @@
     ["Transportfluss", "Transportweg"],
     ["Wegweiser", "Hinweis"],
     ["Nächster Schritt", "Hinweis"],
-    ["Die Belegschaft legt die Arbeit wegen der Lohnsituation nieder.", "Die Belegschaft streikt. Die Zufriedenheit ist wegen des gewählten Lohns sehr tief."],
+    ["Die Belegschaft legt die Arbeit wegen der Lohnsituation nieder.", "Die Belegschaft streikt. Die Zufriedenheit ist wegen des gewählten Lohns sehr niedrig."],
     ["Streik aussitzen", "Keine Einigung suchen"],
     [" ausgesessen.", " ohne Einigung fortgesetzt."],
     ["Sichern und entschädigen", "Sicherheitsmassnahmen verbessern und entschädigen"],
     ["Sicherheit bleibt offen", "Sicherheitsmassnahmen bleiben unverändert"],
     ["Geld kauft nicht das Wissen. Es finanziert die konkrete Verbesserung, nachdem du den Zusammenhang im Spiel erlebt hast.", "Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist."],
     ["Acht Felder. Wissen kostet nichts: Lies nach, beobachte das Prinzip im Spiel und finanziere danach eine passende Verbesserung.", "Die acht Wissensbereiche können jederzeit gelesen werden. Eine Verbesserung kann finanziert werden, sobald ihre Voraussetzung im Spiel erfüllt ist."],
+    ["enorm viel Strom", "viel elektrische Energie"],
+    ["Ohne Indium kein Touchscreen.", "Indium wird unter anderem für transparente leitfähige Schichten in Displays verwendet."],
+    ["Deshalb ist die Ausbeute im Spiel so tief.", "Im Spiel ist die Ausbeute deshalb niedrig angesetzt."],
+    ["Das braucht sehr viel Wasser", "Die Gewinnung benötigt viel Wasser"],
     ["Phones", "Smartphones"],
     ["Phone", "Smartphone"]
   ];
@@ -89,11 +97,26 @@
     return kopie;
   }
 
+  const materialVerwendung={
+    zinn:"Lötverbindungen auf Leiterplatten",
+    lithium:"Lithium-Ionen-Akkus",
+    kobalt:"Kathodenmaterial in Akkus",
+    silber:"Elektrische Kontakte und Lötpasten",
+    seltene:"Permanentmagnete in Lautsprechern und Motoren",
+    tantal:"Kondensatoren in elektronischen Geräten",
+    indium:"Transparente leitfähige Schichten in Displays (ITO)",
+    gold:"Korrosionsbeständige elektrische Kontakte"
+  };
+  for(const [id,text] of Object.entries(materialVerwendung)) if(MATERIAL[id]) MATERIAL[id].wofuer=text;
+  for(const m of MINEN) if(typeof m.info==="string") m.info=textKorrigieren(m.info);
+  for(const r of RAFF_ORTE) if(typeof r.info==="string") r.info=textKorrigieren(r.info);
+  for(const p of Object.values(PRODUKT)) if(typeof p.info==="string") p.info=textKorrigieren(p.info);
+
   const tutorialTexte={
     mine1:["Eröffne eine Rohstoffquelle", "Für das Ladekabel brauchst du Kupfer, Aluminium und Zinn. Eröffne zuerst eine passende Rohstoffquelle."],
-    minecrew:["Personal zuweisen", "Eine Rohstoffquelle fördert nur mit Personal. Weise der geöffneten Quelle mindestens 10 Personen zu."],
+    minecrew:["Personal zuweisen", "In einer Rohstoffquelle wird nur gefördert, wenn Personal zugewiesen ist. Weise der geöffneten Quelle mindestens 10 Personen zu."],
     team:["Personal einstellen", "Für weitere Standorte brauchst du zusätzliches Personal. Erhöhe den Personalbestand auf mindestens 40 Personen."],
-    minen3:["Drei Rohstoffquellen eröffnen", "Eröffne je eine Quelle für Kupfererz, Bauxit und Zinnerz. Daraus entstehen Kupfer, Aluminium und Zinn."],
+    minen3:["Drei Rohstoffquellen eröffnen", "Eröffne je eine Quelle für Kupfererz, Bauxit und Zinnerz. Diese Rohstoffe werden später zu Kupfer, Aluminium und Zinn raffiniert."],
     crew3:["Rohstoffquellen besetzen", "Weise jeder der drei Rohstoffquellen mindestens 5 Personen zu."],
     raff:["Raffinerie bauen", "Rohstoffe können nicht direkt in der Fabrik verwendet werden. Baue eine Raffinerie, die daraus nutzbares Material herstellt."],
     raffcrew:["Raffinerie besetzen", "Weise der Raffinerie mindestens 5 Personen zu. Ohne Personal findet keine Verarbeitung statt."],
@@ -134,7 +157,7 @@
   if(ruf){
     ruf.kurz="Ruf beeinflusst die Nachfrage. Nachweise dokumentieren die Herkunft der Rohstoffe.";
     ruf.text=[
-      "Der <b>Ruf</b> beschreibt die Wahrnehmung des Unternehmens durch die Kundschaft. Ein tiefer Ruf senkt die Nachfrage.",
+      "Der <b>Ruf</b> beschreibt die Wahrnehmung des Unternehmens durch die Kundschaft. Ein niedriger Ruf senkt die Nachfrage.",
       "<b>Nachweise</b> dokumentieren die Herkunft der Rohstoffe. Das Lieferkettengesetz prüft diese Nachweise unabhängig vom Ruf."
     ];
   }
@@ -142,7 +165,7 @@
   if(leute){
     leute.kurz="Lohn beeinflusst die Zufriedenheit; Sicherheitsmassnahmen beeinflussen das Unfallrisiko.";
     leute.text=[
-      "Der <b>Lohn</b> beeinflusst im Spiel die Zufriedenheit. Bei sehr tiefer Zufriedenheit kann es zu einem Streik kommen.",
+      "Der <b>Lohn</b> beeinflusst im Spiel die Zufriedenheit. Bei sehr niedriger Zufriedenheit kann es zu einem Streik kommen.",
       "<b>Sicherheitsmassnahmen</b> senken das Unfallrisiko. Lohn und Sicherheit werden als getrennte Entscheidungen behandelt."
     ];
   }
@@ -167,6 +190,15 @@
     }
   }
 
+  function statischesLabel(selector,text){
+    const el=document.querySelector(selector);
+    if(!el)return;
+    const node=[...el.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.nodeValue.trim());
+    if(node)node.nodeValue=text;
+  }
+  statischesLabel("#ebenen [data-ebene='mine']","Rohstoffquellen");
+  statischesLabel("#ebenen [data-ebene='raff']","Raffinerien");
+
   if(typeof notiz==="function"){
     const original=notiz;
     notiz=function(text,art){ return original(textKorrigieren(text),art); };
@@ -186,6 +218,16 @@
     globalThis[name]=function(...args){ return textKorrigieren(original.apply(this,args)); };
   };
   ["blattMine","blattRaff","blattFab","seiteMarkt","seiteTeam","seiteZiel","seiteWissen"].forEach(wrapHtml);
+
+  if(typeof pinsZeichnen==="function"){
+    const original=pinsZeichnen;
+    pinsZeichnen=function(){
+      const r=original();
+      document.querySelectorAll("[data-pin='mine'][aria-label]").forEach(p=>p.setAttribute("aria-label",p.getAttribute("aria-label").replace(/^Mine /,"Rohstoffquelle ")));
+      document.querySelectorAll("[data-pin='raff'][aria-label]").forEach(p=>p.setAttribute("aria-label",p.getAttribute("aria-label").replace(/^Raffinerie /,"Raffinerie ")));
+      return r;
+    };
+  }
 
   if(typeof lupeFuellen==="function"){
     const original=lupeFuellen;
@@ -234,5 +276,5 @@
     };
   }
 
-  window.__erzweltLanguagePass={version:2,locale:"de-CH"};
+  window.__erzweltLanguagePass={version:3,locale:"de-CH"};
 })();
