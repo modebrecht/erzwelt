@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "name": "didactic",
+      "files": [
+        "didactic-model.js",
+        "didactic-events.js",
+        "didactic-ui.js",
+        "didactic-should.js",
+        "didactic-transport.js",
+        "language-pass.js",
+        "language-pass-2.js"
+      ]
+    },
+    {
+      "name": "performance",
+      "files": [
+        "performance-pass.js"
+      ]
+    },
+    {
+      "name": "process",
+      "files": [
+        "transformation-animations.js",
+        "transformation-enhance.js",
+        "tutorial-enhance.js"
+      ]
+    },
+    {
+      "name": "world-presentation",
+      "files": [
+        "construction-visibility.js",
+        "construction-animation-enhance.js",
+        "premium-animation-treatment.js",
+        "premium-animation-polish.js",
+        "premium-animation-treatment-v2.js"
+      ]
+    },
+    {
+      "name": "interaction",
+      "files": [
+        "notification-history.js",
+        "stop-safety-visual.js",
+        "map-focus-navigation.js"
+      ]
+    }
+  ]
+}
