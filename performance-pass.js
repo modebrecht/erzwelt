@@ -17,6 +17,7 @@
     #sicht.zieht .pin.foerdert .knopf>svg,#sicht.zieht .pin.foerdert .knopf>span.sym,
     #sicht.zieht .pin.foerdert .staub{animation-play-state:paused!important}
     #didaktik-transport-legende{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#0b3648f2!important}
+    .ueberlage{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#06202ef2!important}
   `;
   document.head.appendChild(style);
 
@@ -117,7 +118,7 @@
       raf=requestAnimationFrame(()=>{
         raf=0;
         welt.style.transform=`translate(${ansicht.x}px,${ansicht.y}px) scale(${ansicht.z})`;
-        if(Math.abs(ansicht.z-lastPinZoom)>0.0001){
+        if(!Number.isFinite(lastPinZoom)||Math.abs(ansicht.z-lastPinZoom)>0.0001){
           pinGroesse();
           lastPinZoom=ansicht.z;
         }
