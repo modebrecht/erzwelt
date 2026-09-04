@@ -6,6 +6,8 @@
   const korrekturen = [
     ["Ein Teil davon aus Kleinstminen", "Ein Teil davon stammt aus Kleinstminen"],
     ["Die grösste Lagerstätte Seltener Erden der Welt, in der Inneren Mongolei.", "Die grösste Lagerstätte Seltener Erden der Welt liegt in der Inneren Mongolei."],
+    ["Die einzige grosse Mine für Seltene Erden in den USA.", "Mountain Pass ist die einzige grosse Mine für Seltene Erden in den USA."],
+    ["Die grösste Kupfermine der Welt.", "Escondida ist die grösste Kupfermine der Welt."],
     ["Australien fördert etwa die Hälfte des Weltlithiums", "Australien fördert etwa die Hälfte des weltweit gewonnenen Lithiums"],
     ["Chile liefert rund einen Viertel", "Chile liefert rund ein Viertel"],
     ["Sicherheitsmassnahmen verbessern und entschädigen", "Sicherheitsmassnahmen verbessern und Betroffene entschädigen"],
@@ -14,14 +16,7 @@
     ["Lieferketten-Nachweise", "Lieferkettennachweise"],
     ["US-Dollar schwach", "Schwacher US-Dollar"],
     ["US-Dollar stark", "Starker US-Dollar"],
-    ["Lohn üblich", "Üblicher Lohn"],
-    ["von 40 Personen", "von 40 Personen"],
-    ["pro Person und Monat", "pro Person und Monat"],
-    ["keine aktuelle Lohnstatistik", "keine aktuelle Lohnstatistik"],
-    ["Wichtige Förderländer", "Wichtige Förderländer"],
-    ["Rohstoff im Lager", "Rohstoff im Lager"],
-    ["Fertige Produkte müssen verkauft werden", "Fertige Produkte müssen verkauft werden"],
-    ["Spezialisierung im Spiel", "Spezialisierung im Spiel"]
+    ["Lohn üblich", "Üblicher Lohn"]
   ];
 
   function korrigiere(text){
@@ -89,5 +84,5 @@
     };
   }
 
-  window.__erzweltLanguagePass2={version:1,locale:"de-CH"};
+  window.__erzweltLanguagePass2={version:2,locale:"de-CH"};
 })();
