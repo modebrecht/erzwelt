@@ -102,8 +102,43 @@ if (!standalone.includes("ERZWELT STANDALONE BUILD")) {
 // network fetch and the decompressed document still contains every patch as its own
 // classic <script> execution unit.
 const compressed = brotliCompressSync(Buffer.from(standalone, "utf8"));
-const payload = compressed.toString("base64");
-const payloadWrapped = payload.match(/.{1,10000}/g).join("\n");
+function encode15Bit(bytes) {
+  let acc = 0;
+  let bits = 0;
+  let out = "";
+  for (const byte of bytes) {
+    acc = (acc << 8) | byte;
+    bits += 8;
+    while (bits >= 15) {
+      bits -= 15;
+      out += String.fromCharCode(0x4000 + ((acc >> bits) & 0x7fff));
+      acc &= (1 << bits) - 1;
+    }
+  }
+  if (bits) out += String.fromCharCode(0x4000 + ((acc << (15 - bits)) & 0x7fff));
+  return out;
+}
+
+function decode15Bit(text, byteLength) {
+  let acc = 0;
+  let bits = 0;
+  const out = [];
+  for (const ch of text) {
+    acc = (acc << 15) | (ch.charCodeAt(0) - 0x4000);
+    bits += 15;
+    while (bits >= 8 && out.length < byteLength) {
+      bits -= 8;
+      out.push((acc >> bits) & 0xff);
+      acc &= (1 << bits) - 1;
+    }
+  }
+  return Buffer.from(out);
+}
+
+const payload = encode15Bit(compressed);
+if (!decode15Bit(payload, compressed.length).equals(compressed)) {
+  throw new Error("15-Bit-Payload-Roundtrip fehlgeschlagen");
+}
 
 // Build-time round-trip gate: packing must be lossless before anything is written.
 const roundTrip = brotliDecompressSync(compressed).toString("utf8");
@@ -120,13 +155,21 @@ const bootstrap = `<!doctype html>
 <title>Erzwelt — Rohstoffe &amp; Lieferketten</title>
 </head>
 <body>
-<script id="erzwelt-standalone-brotli" type="application/octet-stream">${payloadWrapped}<\/script>
+<script id="erzwelt-standalone-brotli" type="application/octet-stream" data-bytes="${compressed.length}">${payload}<\/script>
 <script>
 (async()=>{
   try{
     if(typeof DecompressionStream!=="function")throw new Error("Dieser Browser unterstützt DecompressionStream nicht.");
-    const b64=document.getElementById("erzwelt-standalone-brotli").textContent.trim();
-    const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    const node=document.getElementById("erzwelt-standalone-brotli");
+    const text=node.textContent;
+    const byteLength=Number(node.dataset.bytes);
+    let acc=0,bits=0,index=0;
+    const bytes=new Uint8Array(byteLength);
+    for(const ch of text){
+      acc=(acc<<15)|(ch.charCodeAt(0)-0x4000); bits+=15;
+      while(bits>=8&&index<byteLength){ bits-=8; bytes[index++]=(acc>>bits)&255; acc&=(1<<bits)-1; }
+    }
+    if(index!==byteLength)throw new Error("Eingebetteter Payload ist unvollständig.");
     const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("brotli"));
     const html=await new Response(stream).text();
     document.open();
