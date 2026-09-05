@@ -103,6 +103,7 @@ if (!standalone.includes("ERZWELT STANDALONE BUILD")) {
 // classic <script> execution unit.
 const compressed = gzipSync(Buffer.from(standalone, "utf8"), { level: 9, mtime: 0 });
 const payload = compressed.toString("base64");
+const payloadWrapped = payload.match(/.{1,10000}/g).join("\n");
 
 // Build-time round-trip gate: packing must be lossless before anything is written.
 const roundTrip = gunzipSync(compressed).toString("utf8");
@@ -119,7 +120,7 @@ const bootstrap = `<!doctype html>
 <title>Erzwelt — Rohstoffe &amp; Lieferketten</title>
 </head>
 <body>
-<script id="erzwelt-standalone-gzip" type="application/octet-stream">${payload}<\/script>
+<script id="erzwelt-standalone-gzip" type="application/octet-stream">${payloadWrapped}<\/script>
 <script>
 (async()=>{
   try{
