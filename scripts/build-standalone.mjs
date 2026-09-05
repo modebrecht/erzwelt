@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { access } from "node:fs/promises";
 import path from "node:path";
+import vm from "node:vm";
 
 const root = process.cwd();
 const corePath = path.join(root, "erzwelt-core.html");
@@ -9,6 +10,14 @@ const outputPath = path.join(root, "erzwelt.html");
 
 const core = await readFile(corePath, "utf8");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+
+function assertScriptSyntax(source, filename) {
+  try {
+    new vm.Script(source, { filename });
+  } catch (error) {
+    throw new Error(`JavaScript-Syntaxfehler in ${filename}: ${error.message}`);
+  }
+}
 
 if (!Array.isArray(manifest.groups) || !manifest.groups.length) {
   throw new Error("patches.json enthält keine Patch-Gruppen");
@@ -31,12 +40,19 @@ if (!core.includes("</body>")) {
   throw new Error("erzwelt-core.html enthält kein </body>");
 }
 
+const coreScripts = [...core.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+if (!coreScripts.length) {
+  throw new Error("erzwelt-core.html enthält kein eingebettetes JavaScript");
+}
+coreScripts.forEach((match, index) => assertScriptSyntax(match[1], `erzwelt-core.html#script-${index + 1}`));
+
 const blocks = [];
 for (const { group, file } of entries) {
   const filePath = path.join(root, file);
   await access(filePath);
   const source = await readFile(filePath, "utf8");
   if (!source.trim()) throw new Error(`${file} ist leer`);
+  assertScriptSyntax(source, file);
 
   // Each source remains its own classic-script execution unit. This preserves
   // the existing patch order and avoids changing global declaration semantics.
@@ -87,4 +103,5 @@ if (written !== standalone) {
 }
 
 console.log(`Generated ${path.relative(root, outputPath)} with ${entries.length} patches.`);
+console.log(`JavaScript syntax passed: ${coreScripts.length} core script(s) + ${entries.length} patch scripts.`);
 console.log("Standalone verification passed: no runtime fetch, no local script dependencies, patch order exact.");
