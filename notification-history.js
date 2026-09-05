@@ -89,6 +89,7 @@
 
     @media(max-width:560px){
       #toasts{width:min(72%,310px)!important}
+      body:has(#quest:not([hidden])) #toasts{width:min(45%,300px)!important}
       #toast-history-panel{right:10px;width:auto}
     }
     @media(prefers-reduced-motion:reduce){
