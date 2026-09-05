@@ -186,6 +186,16 @@
   }
   document.addEventListener("keydown",event=>{if(event.key==="Escape")closeHistory();});
 
+  // Pflicht-Ereignisse dürfen nie hinter dem Verlauf liegen. Die Simulation läuft
+  // beim Lesen weiter; sobald ein Ereignisdialog erscheint, wird der Verlauf geschlossen.
+  if(typeof dialogZeigen==="function"){
+    const priorDialogZeigen=dialogZeigen;
+    dialogZeigen=function(...args){
+      closeHistory();
+      return priorDialogZeigen.apply(this,args);
+    };
+  }
+
   // Preserve the original toast semantics: newest unseen messages, max two visible,
   // but use a slower premium exit and keep history accessible through S.log.
   if(typeof toastsErneuern==="function"){
@@ -211,5 +221,5 @@
   }
 
   ensureUi();
-  window.__erzweltNotificationHistory={version:1,maxEntries:60,source:"S.log"};
+  window.__erzweltNotificationHistory={version:2,maxEntries:60,source:"S.log"};
 })();
