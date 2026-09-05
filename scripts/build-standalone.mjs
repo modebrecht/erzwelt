@@ -2,7 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { access } from "node:fs/promises";
 import path from "node:path";
 import vm from "node:vm";
-import { gzipSync, gunzipSync } from "node:zlib";
+import { brotliCompressSync, brotliDecompressSync } from "node:zlib";
 
 const root = process.cwd();
 const corePath = path.join(root, "erzwelt-core.html");
@@ -97,16 +97,16 @@ if (!standalone.includes("ERZWELT STANDALONE BUILD")) {
 }
 
 // Keep the release file self-contained while avoiding a 400+ KB checked-in HTML
-// artifact. The exact verified standalone document is gzip-compressed and embedded
+// artifact. The exact verified standalone document is Brotli-compressed and embedded
 // directly in index.html. At runtime the browser expands it in memory; there is no
 // network fetch and the decompressed document still contains every patch as its own
 // classic <script> execution unit.
-const compressed = gzipSync(Buffer.from(standalone, "utf8"), { level: 9, mtime: 0 });
+const compressed = brotliCompressSync(Buffer.from(standalone, "utf8"));
 const payload = compressed.toString("base64");
 const payloadWrapped = payload.match(/.{1,10000}/g).join("\n");
 
 // Build-time round-trip gate: packing must be lossless before anything is written.
-const roundTrip = gunzipSync(compressed).toString("utf8");
+const roundTrip = brotliDecompressSync(compressed).toString("utf8");
 if (roundTrip !== standalone) {
   throw new Error("Komprimierter Standalone-Payload ist nicht verlustfrei");
 }
@@ -120,14 +120,14 @@ const bootstrap = `<!doctype html>
 <title>Erzwelt — Rohstoffe &amp; Lieferketten</title>
 </head>
 <body>
-<script id="erzwelt-standalone-gzip" type="application/octet-stream">${payloadWrapped}<\/script>
+<script id="erzwelt-standalone-brotli" type="application/octet-stream">${payloadWrapped}<\/script>
 <script>
 (async()=>{
   try{
     if(typeof DecompressionStream!=="function")throw new Error("Dieser Browser unterstützt DecompressionStream nicht.");
-    const b64=document.getElementById("erzwelt-standalone-gzip").textContent.trim();
+    const b64=document.getElementById("erzwelt-standalone-brotli").textContent.trim();
     const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("brotli"));
     const html=await new Response(stream).text();
     document.open();
     document.write(html);
