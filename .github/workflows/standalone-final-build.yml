@@ -1,0 +1,40 @@
+name: Standalone final build
+
+on:
+  push:
+    branches:
+      - standalone-final-build
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: standalone-final-build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build standalone
+        run: node scripts/build-standalone.mjs
+      - name: Verify generated file
+        run: |
+          test -s erzwelt.html
+          grep -q 'ERZWELT STANDALONE BUILD' erzwelt.html
+          ! grep -q 'fetch("./erzwelt-core.html"' erzwelt.html
+          ! grep -q '<script src="./' erzwelt.html
+      - name: Commit generated standalone
+        run: |
+          if git diff --quiet -- erzwelt.html; then
+            echo 'Standalone already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add erzwelt.html
+          git commit -m 'build: generate standalone erzwelt'
+          git push origin HEAD:standalone-final-build
