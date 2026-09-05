@@ -134,7 +134,7 @@
       q.classList.add("tutorial-aktiv");
       const text=dynamischerText(t);
       const key=[S.tutorial,t.id,text,t.zusammenhang,aktiveSeite,!!offenesBlatt].join("|");
-      if(key===lastQuestKey){requestAnimationFrame(()=>syncTutorialToastLayout(q,t));return out;}
+      if(key===lastQuestKey)return out;
       lastQuestKey=key;
       const qText=document.getElementById("q-text");if(qText&&qText.textContent!==text)qText.textContent=text;
       const {chain,phaseName,relation}=ensureExtras(q);chain.hidden=phaseName.hidden=relation.hidden=false;
@@ -148,10 +148,16 @@
     };
   }
 
-  window.addEventListener("resize",()=>{
+  function scheduleToastLayout(){
     const q=document.getElementById("quest"),t=typeof tutorialSchritt==="function"?tutorialSchritt():null;
     requestAnimationFrame(()=>syncTutorialToastLayout(q,t));
-  });
+  }
+  window.addEventListener("resize",scheduleToastLayout);
+  const tutorialQuest=document.getElementById("quest");
+  if(tutorialQuest&&typeof ResizeObserver==="function"){
+    const observer=new ResizeObserver(scheduleToastLayout);
+    observer.observe(tutorialQuest);
+  }
 
   let feedbackTimer=0;
   function feedback(html,finale){
@@ -187,5 +193,5 @@
   }
 
   if(typeof questZeichnen==="function")questZeichnen();
-  window.__erzweltTutorialEnhance={version:2,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),mobileToastStack:true};
+  window.__erzweltTutorialEnhance={version:3,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),mobileToastStack:true,eventDrivenToastLayout:true};
 })();
