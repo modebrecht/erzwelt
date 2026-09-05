@@ -43,7 +43,8 @@
         "notification-history.js",
         "notification-reload-fix.js",
         "stop-safety-visual.js",
-        "map-focus-navigation.js"
+        "map-focus-navigation.js",
+        "interaction-focus-final-fix.js"
       ]
     }
   ]
