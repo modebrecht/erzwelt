@@ -46,6 +46,12 @@
         "map-focus-navigation.js",
         "interaction-focus-final-fix.js"
       ]
+    },
+    {
+      "name": "accessibility",
+      "files": [
+        "reduced-motion-final.js"
+      ]
     }
   ]
 }
