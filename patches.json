@@ -41,6 +41,7 @@
       "name": "interaction",
       "files": [
         "notification-history.js",
+        "notification-reload-fix.js",
         "stop-safety-visual.js",
         "map-focus-navigation.js"
       ]
