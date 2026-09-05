@@ -102,6 +102,21 @@
     return {chain,phaseName,relation};
   }
 
+  function syncTutorialToastLayout(q,t){
+    const root=document.getElementById("toasts");
+    if(!root)return;
+    const small=window.matchMedia?.("(max-width:560px)").matches;
+    const stacked=!!t&&!!q&&!q.hidden&&q.classList.contains("tutorial-aktiv")&&!q.classList.contains("breit")&&small&&aktiveSeite==="karte"&&!offenesBlatt;
+    if(!stacked){
+      root.style.removeProperty("top");
+      root.style.removeProperty("width");
+      return;
+    }
+    const bottom=Math.ceil(q.getBoundingClientRect().bottom+8);
+    root.style.setProperty("top",bottom+"px","important");
+    root.style.setProperty("width","min(72%,310px)","important");
+  }
+
   let lastQuestKey="";
   if(typeof questZeichnen==="function"){
     const originalQuest=questZeichnen;
@@ -109,11 +124,17 @@
       const out=originalQuest();
       const q=document.getElementById("quest"),t=tutorialSchritt();
       if(!q)return out;
-      if(!t||q.hidden){q.classList.remove("tutorial-aktiv");q.querySelectorAll(".tutorial-kette,.tutorial-phase-name,.tutorial-zusammenhang").forEach(el=>el.hidden=true);lastQuestKey="";return out;}
+      if(!t||q.hidden){
+        q.classList.remove("tutorial-aktiv");
+        q.querySelectorAll(".tutorial-kette,.tutorial-phase-name,.tutorial-zusammenhang").forEach(el=>el.hidden=true);
+        lastQuestKey="";
+        syncTutorialToastLayout(q,null);
+        return out;
+      }
       q.classList.add("tutorial-aktiv");
       const text=dynamischerText(t);
       const key=[S.tutorial,t.id,text,t.zusammenhang,aktiveSeite,!!offenesBlatt].join("|");
-      if(key===lastQuestKey)return out;
+      if(key===lastQuestKey){requestAnimationFrame(()=>syncTutorialToastLayout(q,t));return out;}
       lastQuestKey=key;
       const qText=document.getElementById("q-text");if(qText&&qText.textContent!==text)qText.textContent=text;
       const {chain,phaseName,relation}=ensureExtras(q);chain.hidden=phaseName.hidden=relation.hidden=false;
@@ -122,9 +143,15 @@
       phaseName.textContent=`Phase ${current+1}/4 · ${PHASEN[current]?.label||"Lieferkette"}`;
       relation.innerHTML=`<b>Zusammenhang:</b> ${t.zusammenhang||""}`;
       if(typeof questHoeheMessen==="function")questHoeheMessen();
+      requestAnimationFrame(()=>syncTutorialToastLayout(q,t));
       return out;
     };
   }
+
+  window.addEventListener("resize",()=>{
+    const q=document.getElementById("quest"),t=typeof tutorialSchritt==="function"?tutorialSchritt():null;
+    requestAnimationFrame(()=>syncTutorialToastLayout(q,t));
+  });
 
   let feedbackTimer=0;
   function feedback(html,finale){
@@ -160,5 +187,5 @@
   }
 
   if(typeof questZeichnen==="function")questZeichnen();
-  window.__erzweltTutorialEnhance={version:1,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id)};
+  window.__erzweltTutorialEnhance={version:2,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),mobileToastStack:true};
 })();
