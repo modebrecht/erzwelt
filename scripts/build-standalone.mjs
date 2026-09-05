@@ -6,7 +6,7 @@ import vm from "node:vm";
 const root = process.cwd();
 const corePath = path.join(root, "erzwelt-core.html");
 const manifestPath = path.join(root, "patches.json");
-const outputPath = path.join(root, "erzwelt.html");
+const outputPath = path.join(root, "index.html");
 
 const core = await readFile(corePath, "utf8");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
