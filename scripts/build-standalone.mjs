@@ -59,6 +59,32 @@ const banner = [
 ].join("\n");
 
 const standalone = banner + core.replace("</body>", blocks.join("") + "</body>");
+
+// Packaging gates: the generated file must contain every patch exactly once,
+// in manifest order, and must not depend on the old HTTP loader at runtime.
+const embedded = [...standalone.matchAll(/data-erzwelt-patch="([^"]+)"/g)].map(match => match[1]);
+if (embedded.length !== names.length || embedded.some((name, i) => name !== names[i])) {
+  throw new Error("Standalone-Patchreihenfolge stimmt nicht mit patches.json überein");
+}
+if (new Set(embedded).size !== embedded.length) {
+  throw new Error("Standalone enthält doppelte Patch-Marker");
+}
+if (standalone.includes('fetch("./erzwelt-core.html"') || standalone.includes('fetch("./patches.json"')) {
+  throw new Error("Standalone enthält noch Abhängigkeiten des alten HTTP-Loaders");
+}
+if (standalone.includes('<script src="./')) {
+  throw new Error("Standalone enthält noch lokale externe Script-Abhängigkeiten");
+}
+if (!standalone.includes("ERZWELT STANDALONE BUILD")) {
+  throw new Error("Standalone-Build-Banner fehlt");
+}
+
 await writeFile(outputPath, standalone, "utf8");
 
+const written = await readFile(outputPath, "utf8");
+if (written !== standalone) {
+  throw new Error("Geschriebene Standalone-Datei weicht vom erzeugten Inhalt ab");
+}
+
 console.log(`Generated ${path.relative(root, outputPath)} with ${entries.length} patches.`);
+console.log("Standalone verification passed: no runtime fetch, no local script dependencies, patch order exact.");
