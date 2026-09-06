@@ -49,4 +49,8 @@ new5="""            left=target-q('S.verkaeufer');n=1
 """
 if s.count(old5)!=1: raise SystemExit(f'expected seller crew control block once, got {s.count(old5)}')
 s=s.replace(old5,new5)
+old6='    def sheet(kind,id): page.evaluate("x=>blattFuellen(x.k,x.id)",{\'k\':kind,\'id\':id})\n'
+new6='''    def sheet(kind,id):\n        page.evaluate("x=>blattFuellen(x.k,x.id)",{\'k\':kind,\'id\':id})\n        # Direct tagVor() calls compress many game days into milliseconds. The\n        # performance patch may throttle the first same-sheet redraw; a second\n        # call on the same game tick is the catch-up render a real-time player\n        # would naturally receive after >480 ms.\n        page.evaluate("x=>blattFuellen(x.k,x.id)",{\'k\':kind,\'id\':id})\n'''
+if s.count(old6)!=1: raise SystemExit(f'expected sheet helper once, got {s.count(old6)}')
+s=s.replace(old6,new6)
 p.write_text(s)
