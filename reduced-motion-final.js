@@ -22,6 +22,16 @@
       animation:none!important;
       transition:none!important;
     }
+    /* Premium presentation rules intentionally use !important. Give the final
+       in-game motion gate an ID-scoped specificity advantage so Animationen = aus
+       wins over every motion rule inside the game, plus body-level tutorial/toast UI. */
+    body[data-anim="0"] #spiel *,body[data-anim="0"] #spiel *::before,body[data-anim="0"] #spiel *::after,
+    body[data-anim="0"] #tutorial-lernfeedback,body[data-anim="0"] #tutorial-lernfeedback::before,body[data-anim="0"] #tutorial-lernfeedback::after,
+    body[data-anim="0"] #toasts,body[data-anim="0"] #toasts *,body[data-anim="0"] #toasts *::before,body[data-anim="0"] #toasts *::after,
+    body[data-anim="0"] #toast-history-control,body[data-anim="0"] #toast-history-backdrop,body[data-anim="0"] #toast-history-panel{
+      animation:none!important;
+      transition:none!important;
+    }
     body[data-anim="0"] #welt,
     body[data-anim="0"] .didaktik-truck,
     body[data-anim="0"] .didaktik-ship{will-change:auto!important}
@@ -77,5 +87,5 @@
     mapObserver.observe(map,{childList:true,subtree:false});
   }
 
-  window.__erzweltReducedMotionFinal={version:3,mode:"os-or-game-setting",smil:true};
+  window.__erzweltReducedMotionFinal={version:4,mode:"os-or-game-setting",smil:true};
 })();
