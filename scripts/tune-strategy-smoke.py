@@ -3,7 +3,7 @@ p=Path('scripts/full-easy-strategy-smoke.py')
 s=p.read_text()
 old="assert buy_mine(m['id']);assert set_mine(m['id'],10)"
 new="""assert buy_mine(m['id'])
-        ok=set_mine(m['id'],5)
+        ok=set_mine(m['id'],10)
         if not ok:
             dump('STARTER_STAFF_FAIL',{'mine':m,'state':state(),'mineState':q(f\"S.minen[{json.dumps(m['id'])}]\")})
         assert ok"""
@@ -28,7 +28,7 @@ new3="""assert advance(12)
     if not ok:
         dump('STARTER_FAB_STAFF_FAIL',{'state':state(),'fab':q(\"()=>S.fabriken[0]\"),'free':q('freieArbeiter()'),'buttons':q(\"()=>[...document.querySelectorAll('[data-tun=\\\"fcrew\\\"]')].map(b=>({i:b.dataset.i,n:b.dataset.n,disabled:b.disabled}))\")})
     assert ok
-    assert set_sellers(5)"""
+    assert set_sellers(4)"""
 if s.count(old3)!=1: raise SystemExit(f'expected starter factory line once, got {s.count(old3)}')
 s=s.replace(old3,new3)
 old4="""            left=target-q(f\"S.fabriken[{index}].arbeiter\")
