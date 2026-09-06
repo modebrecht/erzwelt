@@ -23,6 +23,30 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Preserve an unchosen difficulty across reload
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('erzwelt-core.html')
+          s=p.read_text()
+          replacements=[
+            ('schwierigkeit:"mittel", etappe:1, etappeStartEingenommen:0, etappeStartAusgegeben:0,',
+             'schwierigkeit:null, etappe:1, etappeStartEingenommen:0, etappeStartAusgegeben:0,'),
+            ('if (!SCHWIERIGKEIT[S.schwierigkeit]) S.schwierigkeit = "mittel";',
+             'if (g.schwierigkeit === undefined) S.schwierigkeit = "mittel";\n    else if (g.schwierigkeit !== null && !SCHWIERIGKEIT[g.schwierigkeit]) S.schwierigkeit = "mittel";'),
+            ('const frischeRunde = !laden();\nif (frischeRunde){ S = neuerZustand();\n  notiz("Willkommen in der Erzwelt. Wähle zuerst deine Schwierigkeit.", "gut"); }\nletzterTagGezeigt = S.tag;\nansicht.z = 1.15; zeigeAuf("obuasi", 1.15);\ndockZeichnen();\ntempoSetzen(frischeRunde ? 0 : 1);\nzeichnen();\nif (frischeRunde) schwierigkeitZeigen();',
+             'const geladen = laden();\nif (!geladen){ S = neuerZustand();\n  notiz("Willkommen in der Erzwelt. Wähle zuerst deine Schwierigkeit.", "gut"); }\nconst brauchtSchwierigkeit = !SCHWIERIGKEIT[S.schwierigkeit];\nletzterTagGezeigt = S.tag;\nansicht.z = 1.15; zeigeAuf("obuasi", 1.15);\ndockZeichnen();\ntempoSetzen(brauchtSchwierigkeit ? 0 : 1);\nzeichnen();\nif (brauchtSchwierigkeit) schwierigkeitZeigen();')
+          ]
+          for old,new in replacements:
+              if s.count(old)!=1:
+                  raise SystemExit(f'expected exactly one replacement, got {s.count(old)}')
+              s=s.replace(old,new)
+          p.write_text(s)
+          PY
+          test "$(git hash-object erzwelt-core.html)" = "1eab52af4a1a21705b79acd4f5da61307ba21d08"
+          node scripts/build-standalone.mjs
+          git diff --check
+
       - name: Install Chromium driver
         run: |
           pip install playwright
@@ -55,6 +79,7 @@ jobs:
               out["hard_initial_disabled"]=page.locator('#d-wahlen .wahl').nth(2).is_disabled()
               out["difficulty_labels"]=[page.locator('#d-wahlen .wahl').nth(i).inner_text() for i in range(3)]
               out["overflow"]=page.evaluate('document.documentElement.scrollWidth-document.documentElement.clientWidth')
+              out["pending_initial"]=page.evaluate('S.schwierigkeit')
 
               page.locator('#d-wahlen .wahl').nth(1).click()
               page.wait_for_timeout(80)
@@ -78,6 +103,7 @@ jobs:
               page.wait_for_timeout(50)
               out["medium_unlock"]=page.evaluate('META.mittelGeschafft')
               out["unlock_copy"]='Schwer freigeschaltet' in page.locator('#d-text').inner_text()
+              # Result choice 1 is Neue Runde. It must reopen the difficulty chooser.
               page.locator('#d-wahlen .wahl').nth(1).click()
               page.wait_for_timeout(150)
               out["hard_after_unlock_disabled"]=page.locator('#d-wahlen .wahl').nth(2).is_disabled()
@@ -103,7 +129,6 @@ jobs:
               page.evaluate('tagVor()')
               page.wait_for_timeout(50)
               out["boundary_via_tagVor"]=page.evaluate('({tag:S.tag,ende:S.ende&&{grund:S.ende.grund,etappe:S.ende.etappe}})')
-              # close result through Continue so insolvency can be tested independently
               page.locator('#d-wahlen .wahl').nth(0).click()
               page.wait_for_timeout(80)
 
@@ -112,16 +137,23 @@ jobs:
               out["insolvency"]=page.evaluate('S.ende&&S.ende.grund')
               out["insolvency_buttons"]=page.locator('#d-wahlen .wahl').count()
 
-              # Hard unlock is profile metadata: remove only the game save and reload.
-              page.evaluate("()=>{localStorage.removeItem('erzwelt_v2');localStorage.removeItem('erzwelt_v1')}")
+              # Use the actual New Round action. Hard is profile metadata and must remain unlocked.
+              page.locator('#d-wahlen .wahl').nth(0).click()
+              page.wait_for_timeout(150)
+              out["new_round_pending"]=page.evaluate('S.schwierigkeit')
+              out["hard_after_new_round"]=not page.locator('#d-wahlen .wahl').nth(2).is_disabled()
+
+              # Reload without choosing: pagehide may save, but chooser must return and Hard must stay unlocked.
               page.reload(wait_until='networkidle')
               page.wait_for_timeout(150)
+              out["pending_after_reload"]=page.evaluate('S.schwierigkeit')
+              out["chooser_after_reload"]=not page.locator('#schleier').is_hidden()
               out["hard_persisted_after_reload"]=not page.locator('#d-wahlen .wahl').nth(2).is_disabled()
 
-              # v1/v2 migration: old save without the new fields defaults to Medium / Etappe 1.
+              # v1 migration: prevent the normal pagehide flush from recreating v2 after setting a legacy-only save.
               page.locator('#d-wahlen .wahl').nth(1).click()
               page.wait_for_timeout(50)
-              page.evaluate('''()=>{const old=JSON.parse(localStorage.getItem('erzwelt_v2'));delete old.schwierigkeit;delete old.etappe;delete old.etappeStartEingenommen;delete old.etappeStartAusgegeben;localStorage.removeItem('erzwelt_v2');localStorage.setItem('erzwelt_v1',JSON.stringify(old));}''')
+              page.evaluate('''()=>{const old=JSON.parse(localStorage.getItem('erzwelt_v2'));delete old.schwierigkeit;delete old.etappe;delete old.etappeStartEingenommen;delete old.etappeStartAusgegeben;localStorage.removeItem('erzwelt_v2');localStorage.setItem('erzwelt_v1',JSON.stringify(old));speichern=()=>{};}''')
               page.reload(wait_until='networkidle')
               page.wait_for_timeout(150)
               out["migration"]=page.evaluate('({schwierigkeit:S.schwierigkeit,etappe:S.etappe,startE:S.etappeStartEingenommen,startA:S.etappeStartAusgegeben})')
@@ -131,7 +163,7 @@ jobs:
           print(json.dumps(out,ensure_ascii=False,indent=2))
           print('ERRORS',json.dumps(errors,ensure_ascii=False,indent=2))
           assert out['patches']==22
-          assert out['modal_initial'] and out['hard_initial_disabled']
+          assert out['modal_initial'] and out['hard_initial_disabled'] and out['pending_initial'] is None
           assert out['overflow']<=0 and out['chosen_medium']=='mittel' and out['tutorial_visible']
           assert math.isclose(out['ratios']['eRatio'],1.2,rel_tol=1e-12)
           assert math.isclose(out['ratios']['hRatio'],0.7,rel_tol=1e-12)
@@ -144,18 +176,20 @@ jobs:
           assert all(out['ziel_copy'].values())
           assert out['boundary_via_tagVor']['tag']==1441 and out['boundary_via_tagVor']['ende']=={'grund':'etappe','etappe':2}
           assert out['insolvency']=='insolvenz' and out['insolvency_buttons']==1
-          assert out['hard_persisted_after_reload']
+          assert out['new_round_pending'] is None and out['hard_after_new_round']
+          assert out['pending_after_reload'] is None and out['chooser_after_reload'] and out['hard_persisted_after_reload']
           assert out['migration']=={'schwierigkeit':'mittel','etappe':1,'startE':0,'startA':0}
           assert not errors, errors
           print('EXACT PACKED BROWSER SMOKE PASS')
           PY
           python /tmp/erzwelt-smoke.py
 
-      - name: Remove temporary smoke workflow
+      - name: Commit reload fix and remove temporary smoke workflow
         if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/difficulty-replay-smoke.yml
-          git commit -m "chore: remove temporary browser smoke"
+          git add erzwelt-core.html index.html
+          git commit -m "fix: preserve pending difficulty selection"
           git push origin HEAD:difficulty-replay-pass
