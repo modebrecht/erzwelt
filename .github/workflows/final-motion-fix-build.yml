@@ -1,0 +1,41 @@
+name: Final motion fix build
+
+on:
+  push:
+    branches:
+      - final-motion-qa-fix
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: final-motion-qa-fix
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build verified standalone
+        run: node scripts/build-standalone.mjs
+
+      - name: Commit generated index and remove helper workflow
+        shell: bash
+        run: |
+          rm .github/workflows/final-motion-fix-build.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/final-motion-fix-build.yml
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git commit -m "build: refresh standalone after motion fix"
+            git push origin HEAD:final-motion-qa-fix
+          fi
