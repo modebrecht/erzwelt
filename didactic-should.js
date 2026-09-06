@@ -224,7 +224,7 @@ tagVor=function(){
     S.kasse-=lohn+betrieb;S.ausgegeben+=lohn+betrieb;notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`,"geld");rufAnpassen();
     if(S.kasse<0)notiz("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.","alarm");
   }
-  if(S.tag%5===0)marktBewegen();ereignisPruefen();if(S.tag>ZIEL_TAGE||S.kasse<-800000)rundeBeenden();speichern();
+  if(S.tag%5===0)marktBewegen();ereignisPruefen();if(S.kasse<-800000)rundeBeenden("insolvenz");else if(S.tag>etappenEnde())rundeBeenden("etappe");speichern();
 };
 function kmDistanz(idA,idB){
   const a=ORT[idA],b=ORT[idB];if(!a||!b)return 0;const rad=x=>x*Math.PI/180,dLat=rad(b[1]-a[1]),dLon=rad(b[0]-a[0]);

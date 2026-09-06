@@ -104,18 +104,3 @@ if (gesetzEv){
     return {passiv:true, text:`<b>Lieferkettengesetz</b> – deine Nachweise sind ${status.text}. Grosskunden bestellen 90 Tage lang mehr Mainboards.`, art:"gut"};
   };
 }
-
-rundeBeenden = function(){
-  const gewinn = S.eingenommen - S.ausgegeben;
-  const geschafft = gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
-  S.ende = {gewinn, ruf:Math.round(S.ruf), geschafft};
-  tempoSetzen(0);
-  dialogZeigen({
-    art:"Runde beendet", titel:geschafft?"Ziel erreicht":"Ziel verfehlt",
-    text:`Gewinn: ${chf(gewinn)} (Ziel ${chf(ZIEL_GEWINN)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br><br>` +
-      (geschafft ? "Du hast Geld verdient und den Ruf gehalten. Welche Entscheidung war dafür besonders wichtig?" :
-       gewinn>=ZIEL_GEWINN ? "Der Gewinn stimmt, aber der Ruf nicht. Welche sichtbaren Entscheidungen oder Ereignisse haben Ruf gekostet?" :
-       "Der Gewinn reicht nicht. Wo war der Engpass – Rohstoff, Raffination, Produktion oder Verkauf?"),
-    wahlen:[{text:"Neue Runde starten", klein:"Alles auf Anfang", tun:()=>{ zuruecksetzen(); }}]
-  });
-};
