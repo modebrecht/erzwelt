@@ -53,4 +53,12 @@ old6='    def sheet(kind,id): page.evaluate("x=>blattFuellen(x.k,x.id)",{\'k\':k
 new6='''    def sheet(kind,id):\n        page.evaluate("x=>blattFuellen(x.k,x.id)",{\'k\':kind,\'id\':id})\n        # Direct tagVor() calls compress many game days into milliseconds. The\n        # performance patch may throttle the first same-sheet redraw; a second\n        # call on the same game tick is the catch-up render a real-time player\n        # would naturally receive after >480 ms.\n        page.evaluate("x=>blattFuellen(x.k,x.id)",{\'k\':kind,\'id\':id})\n'''
 if s.count(old6)!=1: raise SystemExit(f'expected sheet helper once, got {s.count(old6)}')
 s=s.replace(old6,new6)
+old7="        set_sellers(min(30,8+q('S.fabriken.length')*3))\n"
+new7="""        # Seller headcount tracks the theoretical output of staffed lines instead of
+        # jumping by +3 per factory. Overhiring sellers is a guaranteed cash drain.
+        seller_target=q("()=>Math.max(4,Math.ceil(S.fabriken.filter(f=>f.restbau===0).reduce((a,f)=>a+f.arbeiter*PRODUKT[f.produkt].proArbeiter,0)/STUECK_PRO_VERKAEUFER))")
+        set_sellers(seller_target)
+"""
+if s.count(old7)!=1: raise SystemExit(f'expected seller scaling once, got {s.count(old7)}')
+s=s.replace(old7,new7)
 p.write_text(s)
