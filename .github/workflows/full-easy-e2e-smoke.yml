@@ -31,9 +31,6 @@ jobs:
           node scripts/build-standalone.mjs
           git diff --check
 
-      - name: Harden temporary smoke driver
-        run: python scripts/harden-full-easy-smoke.py
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -49,15 +46,15 @@ jobs:
           python -m http.server 8000 --bind 127.0.0.1 >/tmp/erzwelt-http.log 2>&1 &
           sleep 1
 
-      - name: Play full Easy infrastructure run
-        run: python scripts/full-easy-e2e-smoke.py
+      - name: Play strategic full Easy game
+        run: python scripts/full-easy-strategy-smoke.py
 
       - name: Remove temporary smoke files
         if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -- index.html scripts/full-easy-e2e-smoke.py
-          git rm .github/workflows/full-easy-e2e-smoke.yml scripts/full-easy-e2e-smoke.py scripts/harden-full-easy-smoke.py
+          git checkout -- index.html
+          git rm .github/workflows/full-easy-e2e-smoke.yml scripts/full-easy-e2e-smoke.py scripts/harden-full-easy-smoke.py scripts/full-easy-strategy-smoke.py
           git commit -m "chore: remove temporary full easy smoke"
           git push origin HEAD:full-easy-e2e-smoke
