@@ -61,4 +61,8 @@ new7="""        # Seller headcount tracks the theoretical output of staffed line
 """
 if s.count(old7)!=1: raise SystemExit(f'expected seller scaling once, got {s.count(old7)}')
 s=s.replace(old7,new7)
+old8="            assert buy_mine(m['id']);assert set_mine(m['id'],5);owned_materials.add(m['mat'])\n"
+new8="            assert buy_mine(m['id']);assert set_mine(m['id'],10);owned_materials.add(m['mat'])\n"
+if s.count(old8)!=1: raise SystemExit(f'expected product-family mine staffing once, got {s.count(old8)}')
+s=s.replace(old8,new8)
 p.write_text(s)
