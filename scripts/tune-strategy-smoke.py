@@ -26,9 +26,27 @@ new3="""assert advance(12)
         assert advance(5)
     ok=set_fab(0,5)
     if not ok:
-        dump('STARTER_FAB_STAFF_FAIL',{'state':state(),'fab':q(\"()=>S.fabriken[0]\"),'free':q('freieArbeiter()')})
+        dump('STARTER_FAB_STAFF_FAIL',{'state':state(),'fab':q(\"()=>S.fabriken[0]\"),'free':q('freieArbeiter()'),'buttons':q(\"()=>[...document.querySelectorAll('[data-tun=\\\"fcrew\\\"]')].map(b=>({i:b.dataset.i,n:b.dataset.n,disabled:b.disabled}))\")})
     assert ok
     assert set_sellers(5)"""
 if s.count(old3)!=1: raise SystemExit(f'expected starter factory line once, got {s.count(old3)}')
 s=s.replace(old3,new3)
+old4="""            left=target-q(f\"S.fabriken[{index}].arbeiter\")
+            n=5 if left>=5 else 1
+            if not click(f'[data-tun=\"fcrew\"][data-i=\"{index}\"][data-n=\"{n}\"]'):return False
+"""
+new4="""            left=target-q(f\"S.fabriken[{index}].arbeiter\")
+            n=1
+            if not click(f'[data-tun=\"fcrew\"][data-i=\"{index}\"][data-n=\"{n}\"]'):return False
+"""
+if s.count(old4)!=1: raise SystemExit(f'expected factory crew control block once, got {s.count(old4)}')
+s=s.replace(old4,new4)
+old5="""            left=target-q('S.verkaeufer');n=5 if left>=5 else 1
+            if not click(f'[data-tun=\"vcrew\"][data-n=\"{n}\"]'):return False
+"""
+new5="""            left=target-q('S.verkaeufer');n=1
+            if not click(f'[data-tun=\"vcrew\"][data-n=\"{n}\"]'):return False
+"""
+if s.count(old5)!=1: raise SystemExit(f'expected seller crew control block once, got {s.count(old5)}')
+s=s.replace(old5,new5)
 p.write_text(s)
