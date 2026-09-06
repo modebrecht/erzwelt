@@ -1,0 +1,47 @@
+name: Difficulty replay build
+
+on:
+  push:
+    branches:
+      - difficulty-replay-pass
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: difficulty-replay-pass
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply direct product changes
+        run: |
+          git apply --check scripts/product-pass.patch
+          git apply scripts/product-pass.patch
+          test "$(git hash-object erzwelt-core.html)" = "c28590204f288660eed85d26f3152e28897ed3f2"
+          test "$(git hash-object didactic-events.js)" = "a84d173641d2c79517de598118667d637ed8707a"
+          test "$(git hash-object didactic-should.js)" = "8e36d5ec57342fe7bcfd51be0da71d7f71fca162"
+
+      - name: Build standalone
+        run: |
+          node scripts/build-standalone.mjs
+          git diff --check
+
+      - name: Commit product pass and remove helper files
+        run: |
+          rm scripts/product-pass.patch .github/workflows/difficulty-replay-build.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add difficulty and replay progression"
+          git push origin HEAD:difficulty-replay-pass
