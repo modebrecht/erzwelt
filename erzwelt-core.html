@@ -1364,7 +1364,7 @@ function optAnwenden(){
 function neuerZustand(){
   return {
     tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0,
-    schwierigkeit:"mittel", etappe:1, etappeStartEingenommen:0, etappeStartAusgegeben:0,
+    schwierigkeit:null, etappe:1, etappeStartEingenommen:0, etappeStartAusgegeben:0,
     arbeiterGesamt:10, tutorial:0, verkaeufer:0, handverkaufTag:0, verkauftSelber:false,
     minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis, ausbau}
     raff:{},         // id -> {arbeiter, ausbau}
@@ -3185,7 +3185,8 @@ function laden(){
     const g = JSON.parse(roh); if (!g || typeof g.tag !== "number") return false;
     S = Object.assign(neuerZustand(), g);
     if (!S.perks || typeof S.perks !== "object") S.perks = {};
-    if (!SCHWIERIGKEIT[S.schwierigkeit]) S.schwierigkeit = "mittel";
+    if (g.schwierigkeit === undefined) S.schwierigkeit = "mittel";
+    else if (g.schwierigkeit !== null && !SCHWIERIGKEIT[g.schwierigkeit]) S.schwierigkeit = "mittel";
     if (!Number.isFinite(S.etappe) || S.etappe < 1) S.etappe = 1;
     if (!Number.isFinite(S.etappeStartEingenommen)) S.etappeStartEingenommen = 0;
     if (!Number.isFinite(S.etappeStartAusgegeben)) S.etappeStartAusgegeben = 0;
@@ -3220,15 +3221,16 @@ $("#h-kasse-i").innerHTML = IK.muenze;
 $("#h-crew-i").innerHTML = IK.person;
 $("#h-tag-i").innerHTML = IK.kalender;
 weltZeichnen();
-const frischeRunde = !laden();
-if (frischeRunde){ S = neuerZustand();
+const geladen = laden();
+if (!geladen){ S = neuerZustand();
   notiz("Willkommen in der Erzwelt. Wähle zuerst deine Schwierigkeit.", "gut"); }
+const brauchtSchwierigkeit = !SCHWIERIGKEIT[S.schwierigkeit];
 letzterTagGezeigt = S.tag;
 ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
 dockZeichnen();
-tempoSetzen(frischeRunde ? 0 : 1);
+tempoSetzen(brauchtSchwierigkeit ? 0 : 1);
 zeichnen();
-if (frischeRunde) schwierigkeitZeigen();
+if (brauchtSchwierigkeit) schwierigkeitZeigen();
 masseMessen();
 setTimeout(masseMessen, 300);
 window.addEventListener("load", masseMessen);
