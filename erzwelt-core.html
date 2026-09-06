@@ -489,6 +489,10 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 .wahl:active{transform:translateY(2px);box-shadow:0 1px 0 #e0d3b8}
 .wahl b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f2)}
 .wahl small{color:var(--grau);font-size:var(--f0);font-weight:600;line-height:1.4}
+.wahl.schwierigkeit{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center}
+.wahl.schwierigkeit .schwierigkeitsicon{width:46px;height:46px;border-radius:14px;background:var(--papier2);display:grid;place-items:center;font-size:25px}
+.wahl.schwierigkeit .schwierigkeitsstatus{font-family:"Baloo 2",sans-serif;font-size:var(--f0);font-weight:800;color:var(--grau);white-space:nowrap}
+.wahl.schwierigkeit[disabled]{opacity:.52;cursor:not-allowed;transform:none;box-shadow:0 3px 0 #e0d3b8}
 
 /* ---------- Meldungen ---------- */
 #toasts{position:absolute;top:calc(var(--hudh) + 4px);left:10px;width:min(45%,300px);z-index:42;
@@ -1304,9 +1308,14 @@ WISSEN.forEach(seg => seg.perks.forEach((p,i) => { PERK_INDEX[p.id] = {perk:p, s
 
 const ZIEL_GEWINN = 5000000;   // Rundenziel in CHF
 const ZIEL_RUF    = 60;
-const ZIEL_TAGE   = 720;       // 2 Spieljahre
+const ZIEL_TAGE   = 720;       // eine Etappe = 2 Spieljahre
 const STARTKAPITAL= 1250000;
 const LOHN_PRO_KOPF = 1800;    // einmalige Kosten beim Anstellen
+const SCHWIERIGKEIT = {
+  einfach:{name:"Einfach", icon:"🌱", verkauf:1.20, effekt:"Verkaufserlöse +20 %"},
+  mittel: {name:"Mittel",  icon:"⚙️", verkauf:1.00, effekt:"Standard-Balancing"},
+  schwer: {name:"Schwer",  icon:"🔥", verkauf:0.70, effekt:"Verkaufserlöse −30 %"}
+};
 
 let S;            // der gesamte Spielzustand
 let takt = null;  // Intervall-Handle
@@ -1324,6 +1333,12 @@ const SPEICHER = (() => {
 })();
 const SCHLUESSEL = "erzwelt_v2";
 const OPT_SCHLUESSEL = "erzwelt_opt";
+const META_SCHLUESSEL = "erzwelt_meta";
+let META = {mittelGeschafft:false};
+function metaLaden(){
+  try { const roh=SPEICHER.lies(META_SCHLUESSEL); if (roh) META=Object.assign({},META,JSON.parse(roh)); } catch(e){}
+}
+function metaSpeichern(){ try { SPEICHER.schreib(META_SCHLUESSEL,JSON.stringify(META)); } catch(e){} }
 
 /* ---------- Einstellungen (Regler) ---------- */
 const OPT_STD = {schrift:106, tempo:100, anim:1};
@@ -1349,6 +1364,7 @@ function optAnwenden(){
 function neuerZustand(){
   return {
     tag:1, kasse:STARTKAPITAL, ruf:70, ausgegeben:0, eingenommen:0,
+    schwierigkeit:"mittel", etappe:1, etappeStartEingenommen:0, etappeStartAusgegeben:0,
     arbeiterGesamt:10, tutorial:0, verkaeufer:0, handverkaufTag:0, verkauftSelber:false,
     minen:{},        // id -> {arbeiter, stufe, zufriedenheit, stillBis, malus, malusBis, ausbau}
     raff:{},         // id -> {arbeiter, ausbau}
@@ -1367,6 +1383,10 @@ const kurz = n => Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+" Mio" : Math.abs(n)>=10
 const zufall = (a,b) => a + Math.random()*(b-a);
 const klemm = (v,a,b) => Math.max(a, Math.min(b, v));
 const monat = () => Math.floor((S.tag-1)/30) + 1;
+const schwierigkeitInfo = () => SCHWIERIGKEIT[S.schwierigkeit] || SCHWIERIGKEIT.mittel;
+const etappenEnde = () => Math.max(1,S.etappe||1) * ZIEL_TAGE;
+const etappenGewinn = () => (S.eingenommen-(S.etappeStartEingenommen||0)) - (S.ausgegeben-(S.etappeStartAusgegeben||0));
+const gesamtGewinn = () => S.eingenommen - S.ausgegeben;
 
 function notiz(text, art){
   S.log.unshift({tag:S.tag, text, art:art||""});
@@ -1494,7 +1514,7 @@ function warenPreis(p){
   const lager = S.ware[p] || 0;
   const n = Math.max(1, nachfrage(p));
   const ueber = klemm(lager / (n*12), 0, 1);
-  return PRODUKT[p].preis * (1 - 0.35*ueber) * dollarFaktor() * perkMult("warenpreis");
+  return PRODUKT[p].preis * (1 - 0.35*ueber) * dollarFaktor() * perkMult("warenpreis") * schwierigkeitInfo().verkauf;
 }
 
 /* Rohstoffe lassen sich nicht zukaufen: Jedes Material muss aus einer
@@ -1588,8 +1608,9 @@ function tagVor(){
   // 8) Ereignisse
   ereignisPruefen();
 
-  // 9) Ende der Runde?
-  if (S.tag > ZIEL_TAGE || S.kasse < -800000) rundeBeenden();
+  // 9) Ende der Etappe oder Insolvenz?
+  if (S.kasse < -800000) rundeBeenden("insolvenz");
+  else if (S.tag > etappenEnde()) rundeBeenden("etappe");
   speichern();
 }
 
@@ -1609,21 +1630,51 @@ function marktBewegen(){
   S.preisMod[k] = {faktor:neu, bis:S.tag + 60};
 }
 
-function rundeBeenden(){
-  const gewinn = S.eingenommen - S.ausgegeben;
-  const geschafft = gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
-  S.ende = {gewinn, ruf:Math.round(S.ruf), geschafft};
+function etappeWeiter(vorherTempo){
+  S.etappe = Math.max(1,S.etappe||1) + 1;
+  S.etappeStartEingenommen = S.eingenommen;
+  S.etappeStartAusgegeben = S.ausgegeben;
+  S.ende = null;
+  notiz(`<b>Etappe ${S.etappe}</b> gestartet – nächste Abrechnung nach weiteren ${ZIEL_TAGE} Tagen.`, "gut");
+  tempoSetzen(vorherTempo > 0 ? vorherTempo : 1);
+}
+
+function rundeBeenden(grund){
+  if (S.ende) return;
+  const vorherTempo = tempo > 0 ? tempo : 1;
+  const gewinn = etappenGewinn();
+  const geschafft = grund !== "insolvenz" && gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
+  const mittelUnlock = geschafft && S.schwierigkeit === "mittel" && !META.mittelGeschafft;
+  if (mittelUnlock){ META.mittelGeschafft = true; metaSpeichern(); }
+  S.ende = {grund:grund||"etappe", etappe:S.etappe||1, gewinn, ruf:Math.round(S.ruf), geschafft};
   tempoSetzen(0);
+
+  if (grund === "insolvenz"){
+    dialogZeigen({
+      art:"Insolvenz", titel:"Die Firma ist zahlungsunfähig",
+      text:`Deine Kasse ist unter −CHF 800’000 gefallen. Die laufende Reise endet an Tag ${S.tag}.`,
+      wahlen:[{text:"Neue Runde starten", klein:"Schwierigkeit neu wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }}]
+    });
+    return;
+  }
+
+  const freischaltText = mittelUnlock
+    ? `<br><br><b>🔥 Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
   dialogZeigen({
-    art: "Runde beendet",
-    titel: geschafft ? "Ziel erreicht" : "Ziel verfehlt",
-    text: `Gewinn: ${chf(gewinn)} (Ziel ${chf(ZIEL_GEWINN)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br><br>`
+    art:`Etappe ${S.etappe} · ${ZIEL_TAGE} Tage`,
+    titel: geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt",
+    text: `Etappengewinn: ${chf(gewinn)} (Ziel ${chf(ZIEL_GEWINN)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br>`
+        + `Schwierigkeit: ${schwierigkeitInfo().icon} <b>${schwierigkeitInfo().name}</b> · ${schwierigkeitInfo().effekt}.<br><br>`
         + (geschafft
-            ? "Du hast Geld verdient <b>und</b> den Ruf gehalten. Notiere dir: welche Entscheidung hat am meisten dazu beigetragen?"
+            ? "Du hast Geld verdient <b>und</b> den Ruf gehalten. Du kannst jetzt weiterbauen und dich der nächsten gleich langen Etappe stellen."
             : (gewinn >= ZIEL_GEWINN
-               ? "Der Gewinn stimmt, aber der Ruf nicht. Billige Löhne haben sich kurzfristig gelohnt und langfristig gerächt."
-               : "Der Gewinn reicht nicht. Wo ist die Lieferkette gerissen – zu wenig Erz, zu wenig Raffination oder zu wenig Nachfrage?")),
-    wahlen:[{text:"Neue Runde starten", klein:"Alles auf Anfang", tun:()=>{ zuruecksetzen(); }}]
+               ? "Der Gewinn stimmt, aber der Ruf nicht. Du darfst trotzdem weiterspielen und es in der nächsten Etappe erneut versuchen."
+               : "Der Gewinn reicht noch nicht. Du darfst trotzdem weiterspielen und deine Lieferkette in der nächsten Etappe verbessern."))
+        + freischaltText,
+    wahlen:[
+      {text:`Weiter · Etappe ${(S.etappe||1)+1}`, klein:`Nochmals ${ZIEL_TAGE} Tage mit derselben Firma`, tun:()=>{ etappeWeiter(vorherTempo); }},
+      {text:"Neue Runde starten", klein:"Schwierigkeit neu wählen · alles auf Anfang", tun:()=>{ setTimeout(zuruecksetzen,0); }}
+    ]
   });
 }
 
@@ -2105,6 +2156,17 @@ const $ = s => document.querySelector(s);
 const blatt = $("#blatt"), blattinhalt = $("#blattinhalt"), seite = $("#seite");
 let offenesBlatt = null, aktiveSeite = "karte", offeneLupe = null;
 let reglerAktiv = false, letzterTagGezeigt = 0, anstellMenge = 10;
+let wissenTempoVorher = null;
+
+function wissenPauseStarten(){
+  if (wissenTempoVorher === null) wissenTempoVorher = tempo;
+  if (tempo !== 0) tempoSetzen(0);
+}
+function wissenPauseBeenden(){
+  if (wissenTempoVorher === null) return;
+  const weiter = wissenTempoVorher; wissenTempoVorher = null;
+  if (!S.ende && !modalOffen && weiter > 0) tempoSetzen(weiter);
+}
 
 /* Dock-Höhe und HUD-Höhe messen – beides ändert sich mit der Schriftgrösse. */
 function masseMessen(){
@@ -2569,7 +2631,10 @@ function seiteFuellen(name){
       <button class="xzu" data-schliessen="seite" aria-label="Schliessen">${IK.x}</button></div>` + html;
 }
 function seiteWechseln(name){
+  const warWissen = aktiveSeite === "wissen";
   aktiveSeite = name; blattZu(); seitenStand = "";
+  if (name === "wissen" && !warWissen) wissenPauseStarten();
+  else if (warWissen && name !== "wissen") wissenPauseBeenden();
   seite.hidden = name === "karte";
   if (!seite.hidden){ seiteFuellen(name); seite.scrollTop = 0; einzug(seite); }
   zeichnen();
@@ -2690,16 +2755,22 @@ function seiteTeam(){
 }
 
 function seiteZiel(){
-  const gewinn = S.eingenommen - S.ausgegeben, ruf = Math.round(S.ruf);
-  return `<h1>Ziel der Runde</h1><div class="unter">Beides muss stimmen – Geld allein reicht nicht</div>
+  const gewinn = etappenGewinn(), ruf = Math.round(S.ruf), info = schwierigkeitInfo();
+  const rest = Math.max(0, etappenEnde() - S.tag + 1);
+  return `<h1>Ziel · Etappe ${S.etappe||1}</h1><div class="unter">Alle ${ZIEL_TAGE} Tage kommt eine Abrechnung – danach kannst du weiterspielen</div>
+    <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
+      <div class="zeile"><span>Schwierigkeit</span><b>${info.icon} ${info.name}</b></div>
+      <div class="ort">${info.effekt}${S.schwierigkeit==="schwer"?" · auf Mittel freigeschaltet":""}</div>
+      <div class="zeile" style="margin-top:10px"><span>Nächste Abrechnung</span><b>Tag ${etappenEnde()+1}</b></div>
+      <div class="zeile"><span>Verbleibende Tage</span><b>${rest}</b></div>
+    </div>
     <div class="karte">
-      <div class="zeile"><span>Gewinn</span><b>${chf(gewinn)}</b></div>
+      <div class="zeile"><span>Etappengewinn</span><b>${chf(gewinn)}</b></div>
       <div class="leiste"><i style="width:${klemm(gewinn/ZIEL_GEWINN*100,0,100)}%;background:var(--gold)"></i></div>
-      <div class="ort">Ziel ${chf(ZIEL_GEWINN)}</div>
+      <div class="ort">Ziel ${chf(ZIEL_GEWINN)} · Gesamtgewinn seit Start ${chf(gesamtGewinn())}</div>
       <div class="zeile" style="margin-top:12px"><span>Ruf</span><b style="color:${ruf<40?"var(--alarm)":ruf<60?"var(--warn)":"var(--gruen)"}">${ruf}</b></div>
       <div class="leiste"><i style="width:${klemm(ruf/ZIEL_RUF*100,0,100)}%;background:var(--gruen)"></i></div>
       <div class="ort">Ziel ${ZIEL_RUF} · Ein tiefer Ruf senkt die Nachfrage nach allen deinen Produkten</div>
-      <div class="zeile" style="margin-top:12px"><span>Verbleibende Tage</span><b>${Math.max(0, ZIEL_TAGE - S.tag)}</b></div>
     </div>
     <div class="karte"><h3>Lager</h3>
       ${Object.keys(MATERIAL).filter(k=>(S.mat[k]||0)>.5||(S.erz[k]||0)>.5).map(k=>
@@ -2731,7 +2802,7 @@ function seiteWissen(){
       <span class="spfeil">${IK.pfeil}</span></button>`;
   }).join("");
   const gesamt = WISSEN.reduce((a,s)=>a+s.perks.length, 0), hat = Object.keys(S.perks).length;
-  return `<h1>Wissen</h1><div class="unter">Acht Felder. Öffne eins, lies nach – und erwirb daraus einen dauerhaften Vorteil.</div>
+  return `<h1>Wissen</h1><div class="unter">⏸ Das Spiel pausiert hier automatisch. Beim Verlassen läuft es im vorherigen Tempo weiter.</div>
     <div class="karte" style="display:flex;align-items:center;gap:14px">
       <div style="width:52px;flex:none;color:var(--gold)">${IK.gluehbirne}</div>
       <div style="flex:1;min-width:0">
@@ -2840,6 +2911,34 @@ function einstFuellen(){
   fensterKlasse();
 }
 
+/* ---------- Schwierigkeit einer neuen Runde ---------- */
+function schwierigkeitZeigen(){
+  modalOffen = true; tempoSetzen(0);
+  $("#d-art").textContent = "Neue Runde";
+  $("#d-titel").textContent = "Wähle die Schwierigkeit";
+  $("#d-text").innerHTML = `Die Schwierigkeit verändert nur deine Verkaufserlöse. <b>Mittel</b> ist das bisherige Erzwelt-Balancing. Schwer wird nach einer erfolgreich abgeschlossenen Mittel-Etappe freigeschaltet.`;
+  const optionen = [
+    ["einfach","🌱","Einfach","Verkaufserlöse +20 %",false],
+    ["mittel","⚙️","Mittel","Standard-Balancing",false],
+    ["schwer","🔥","Schwer","Verkaufserlöse −30 %",!META.mittelGeschafft]
+  ];
+  $("#d-wahlen").innerHTML = "";
+  optionen.forEach(([id,icon,name,klein,gesperrt],i)=>{
+    const b=document.createElement("button");
+    b.className="wahl schwierigkeit"; b.disabled=gesperrt;
+    b.innerHTML=`<span class="schwierigkeitsicon">${icon}</span><span><b>${name}</b><small>${klein}</small></span><span class="schwierigkeitsstatus">${gesperrt?"🔒 Mittel schaffen":id==="mittel"?"Standard":""}</span>`;
+    if (!gesperrt) b.onclick=()=>{
+      S.schwierigkeit=id; S.etappe=1; S.etappeStartEingenommen=S.eingenommen; S.etappeStartAusgegeben=S.ausgegeben; S.ende=null;
+      modalOffen=false; $("#schleier").hidden=true;
+      notiz(`${icon} Schwierigkeit <b>${name}</b> gewählt · ${klein}.`,"gut");
+      speichern(); tempoSetzen(1); zeichnen();
+    };
+    $("#d-wahlen").appendChild(b);
+    if (id==="mittel") setTimeout(()=>b.focus(),60);
+  });
+  $("#schleier").hidden=false; zeichnen();
+}
+
 /* ---------- Ereignisdialog ---------- */
 function dialogZeigen(e){
   modalOffen = true;
@@ -2896,7 +2995,12 @@ document.addEventListener("click", e => {
   if (zo){ zoomUm(+zo.dataset.zoom > 0 ? 1.5 : 1/1.5); return; }
 
   const tm = e.target.closest("[data-tempo]");
-  if (tm){ tempoSetzen(+tm.dataset.tempo); return; }
+  if (tm){
+    const neu=+tm.dataset.tempo;
+    if (aktiveSeite === "wissen" || offeneLupe){ wissenTempoVorher=neu; tempoSetzen(0); }
+    else tempoSetzen(neu);
+    return;
+  }
 
   const sb = e.target.closest("[data-seite]");
   if (sb){ seiteWechseln(sb.dataset.seite); return; }
@@ -3081,6 +3185,11 @@ function laden(){
     const g = JSON.parse(roh); if (!g || typeof g.tag !== "number") return false;
     S = Object.assign(neuerZustand(), g);
     if (!S.perks || typeof S.perks !== "object") S.perks = {};
+    if (!SCHWIERIGKEIT[S.schwierigkeit]) S.schwierigkeit = "mittel";
+    if (!Number.isFinite(S.etappe) || S.etappe < 1) S.etappe = 1;
+    if (!Number.isFinite(S.etappeStartEingenommen)) S.etappeStartEingenommen = 0;
+    if (!Number.isFinite(S.etappeStartAusgegeben)) S.etappeStartAusgegeben = 0;
+    if (S.ende && S.ende.geschafft && S.schwierigkeit === "mittel" && !META.mittelGeschafft){ META.mittelGeschafft=true; metaSpeichern(); }
     // Ältere Spielstände kennen den Verkauf noch nicht: Wer schon eine
     // Fabrik hat, bekommt ein kleines Verkaufsteam, damit nichts stillsteht.
     if (g.verkaeufer === undefined){
@@ -3095,13 +3204,13 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && S) 
 
 function zuruecksetzen(){
   SPEICHER.loesch(SCHLUESSEL); SPEICHER.loesch("erzwelt_v1"); S = neuerZustand();
-  modalOffen = false; $("#schleier").hidden = true; $("#lupe").hidden = true;
-  blattZu(); seiteWechseln("karte");
-  notiz("Neue Runde. Tippe auf einen Pin und eröffne deine erste Mine.", "gut");
-  tempoSetzen(1); zeigeAuf("obuasi", 1.15); zeichnen();
+  wissenTempoVorher = null; modalOffen = false; $("#schleier").hidden = true; $("#lupe").hidden = true;
+  blattZu(); aktiveSeite="karte"; seite.hidden=true;
+  zeigeAuf("obuasi", 1.15); zeichnen(); schwierigkeitZeigen();
 }
 
 /* ---------- Start ---------- */
+metaLaden();
 optLaden();
 optAnwenden();
 $("#einstauf").innerHTML = IK.zahnrad;
@@ -3111,13 +3220,15 @@ $("#h-kasse-i").innerHTML = IK.muenze;
 $("#h-crew-i").innerHTML = IK.person;
 $("#h-tag-i").innerHTML = IK.kalender;
 weltZeichnen();
-if (!laden()){ S = neuerZustand();
-  notiz("Willkommen in der Erzwelt. Tippe auf einen Pin, um eine Mine zu eröffnen.", "gut"); }
+const frischeRunde = !laden();
+if (frischeRunde){ S = neuerZustand();
+  notiz("Willkommen in der Erzwelt. Wähle zuerst deine Schwierigkeit.", "gut"); }
 letzterTagGezeigt = S.tag;
 ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
 dockZeichnen();
-tempoSetzen(1);
+tempoSetzen(frischeRunde ? 0 : 1);
 zeichnen();
+if (frischeRunde) schwierigkeitZeigen();
 masseMessen();
 setTimeout(masseMessen, 300);
 window.addEventListener("load", masseMessen);
