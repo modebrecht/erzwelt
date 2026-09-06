@@ -10,7 +10,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
-- `erzwelt.html` — generierte Standalone-Datei nach dem Build. Nicht von Hand bearbeiten.
+- `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
 
 ## Standalone bauen
@@ -25,7 +25,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 node scripts/build-standalone.mjs
 ```
 
-Der Build erzeugt `erzwelt.html` aus `erzwelt-core.html` und allen Einträgen aus `patches.json`.
+Der Build erzeugt `index.html` aus `erzwelt-core.html` und allen Einträgen aus `patches.json`.
 
 Der Builder prüft dabei automatisch:
 
@@ -37,14 +37,14 @@ Der Builder prüft dabei automatisch:
 - keine lokalen externen JavaScript-Dateien in der Standalone-Ausgabe;
 - dass die geschriebene Datei dem erzeugten Inhalt entspricht.
 
-> Änderungen immer in den Quelldateien vornehmen und danach neu bauen. `erzwelt.html` nicht direkt pflegen.
+> Änderungen immer in den Quelldateien vornehmen und danach neu bauen. `index.html` nicht direkt pflegen.
 
 ## Release-Gates
 
 Vor einer finalen Freigabe:
 
 - [ ] Standalone-Build erfolgreich ausführen.
-- [ ] Generierte `erzwelt.html` direkt öffnen.
+- [ ] Generierte `index.html` direkt öffnen.
 - [ ] Mobile Zielgrösse 360×800 prüfen.
 - [ ] Tutorial Schritte 1–11 vollständig durchspielen.
 - [ ] Rohstoffquelle → Raffinerie → Fabrik → Verkauf prüfen.
@@ -62,4 +62,4 @@ Vor einer finalen Freigabe:
 
 ## Aktueller Hinweis
 
-Solange der Standalone-Builder nach einer Änderung noch nicht ausgeführt wurde, kann die eingecheckte `erzwelt.html` noch den vorherigen Loader-Stand enthalten. Für die Freigabe zählt deshalb immer ein frisch erzeugter und geprüfter Standalone-Build.
+Für die Freigabe zählt immer ein frisch erzeugter und geprüfter `index.html`-Standalone-Build. Die Entwicklungsquelle bleibt `erzwelt-core.html` zusammen mit der in `patches.json` definierten Patch-Reihenfolge.

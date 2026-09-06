@@ -23,7 +23,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo FERTIG: erzwelt.html ist als eigenstaendige Standalone-Datei erstellt und geprueft.
+echo FERTIG: index.html ist als eigenstaendige Standalone-Datei erstellt und geprueft.
 echo Die Datei kann danach direkt per Doppelklick geoeffnet werden.
 echo.
 pause
