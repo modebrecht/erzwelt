@@ -32,25 +32,7 @@ jobs:
           git diff --check
 
       - name: Harden temporary smoke driver
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('scripts/full-easy-e2e-smoke.py')
-          s=p.read_text()
-          old="""            if not open_pin('fab',f['land']):continue
-            for _ in range(target+2):
-"""
-          new="""            # The factory sheet itself is the interaction surface. Open it directly here;
-            # factory map-pin activation is covered independently by the navigation smoke.
-            page.evaluate(\"land=>blattFuellen('fab',land)\",f['land'])
-            if not page.evaluate(f\"()=>!!document.querySelector('[data-tun=\\\"fcrew\\\"][data-i=\\\"{f['i']}\\\"][data-n=\\\"1\\\"]')\"):
-                raise AssertionError(f\"factory staffing control missing for {f}\")
-            for _ in range(target+2):
-"""
-          if s.count(old)!=1:
-              raise SystemExit(f'expected factory staffing block once, got {s.count(old)}')
-          p.write_text(s.replace(old,new))
-          PY
+        run: python scripts/harden-full-easy-smoke.py
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -76,6 +58,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -- index.html scripts/full-easy-e2e-smoke.py
-          git rm .github/workflows/full-easy-e2e-smoke.yml scripts/full-easy-e2e-smoke.py
+          git rm .github/workflows/full-easy-e2e-smoke.yml scripts/full-easy-e2e-smoke.py scripts/harden-full-easy-smoke.py
           git commit -m "chore: remove temporary full easy smoke"
           git push origin HEAD:full-easy-e2e-smoke
