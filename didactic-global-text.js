@@ -67,7 +67,7 @@
       .replaceAll("Ohne Leute fördert keine Mine und läuft keine Fabrik","Ohne Personal stehen Rohstoffquellen und Fabriken still.")
       .replaceAll("Nicht eingeteilte Leute kosten CHF 200 pro Monat. Stell nur so viele an, wie du beschäftigen kannst.","Freies Personal kostet CHF 200 pro Monat. Stelle nur so viele Personen ein, wie du brauchst.")
       .replaceAll("Nicht eingeteilte Leute kosten CHF 200 pro Monat. Stelle nur so viele an, wie du beschäftigen kannst.","Freies Personal kostet CHF 200 pro Monat. Stelle nur so viele Personen ein, wie du brauchst.")
-      .replaceAll("Spielmodell: Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.","Spielmodell: Löhne sind vereinfachte Spielwerte.")
+      .replaceAll("Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.","Löhne sind vereinfachte Spielwerte.")
       /* Ziel / Etappe */
       .replace(/Alle (\d+) Tage kommt eine Abrechnung – danach kannst du weiterspielen/g,"Nach $1 Tagen wird abgerechnet. Danach kannst du weiterspielen.")
       .replace(/Ziel (\d+) · Ein niedriger Ruf senkt die Nachfrage nach allen deinen Produkten/g,"Ziel $1 · Niedriger Ruf senkt die Nachfrage.")
@@ -86,14 +86,16 @@
       .replaceAll("⏸ Das Spiel pausiert hier automatisch. Beim Verlassen läuft es im vorherigen Tempo weiter.","⏸ Das Spiel pausiert hier. Beim Verlassen läuft es weiter.")
       .replaceAll("Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist.","Wissen kostet nichts. Geld brauchst du nur für Verbesserungen.")
       .replaceAll("✓ Voraussetzung erfüllt. Die Verbesserung kann jetzt finanziert werden.","✓ Voraussetzung erfüllt.")
-      .replaceAll("Vereinfachte Rezepte: stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.","Vereinfachte Rezepte: keine echten Stücklisten.")
+      .replaceAll("stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.","keine echten Stücklisten.")
       /* Ausbau / Raffinerie */
       .replaceAll("Jede Stufe bringt +5 % und kostet mehr als die vorherige. Jede zehnte Stufe verdoppelt die Ausbringung.","Jede Stufe bringt +5 %. Jede zehnte Stufe verdoppelt die Leistung.")
       .replaceAll("Aus 1 Einheit Rohstoff wird je nach Material unterschiedlich viel nutzbares Material. Der Rest steht im Spielmodell für Abraum und Verluste.","Aus Rohstoff entsteht unterschiedlich viel Material. Der Rest steht im Spiel für Abraum und Verluste.")
-      .replaceAll("+25 % Durchsatz für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.","+25 % Durchsatz für diese Rohstoffe. Andere Rohstoffe werden normal verarbeitet.")
+      .replaceAll("Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden.","Andere Rohstoffe werden normal verarbeitet.")
+      .replaceAll("Die Spezialisierung ist eine Spielregel.","")
       /* Einstellungen */
       .replaceAll("Verschiebt die Grösse aller Texte. Die kleinste Schrift im Spiel wächst mit.","Ändert die Grösse aller Texte.")
       .replaceAll("Wie schnell ein Spieltag vergeht. Die Knöpfe 1× und 4× oben rechnen darauf auf.","Ändert die Dauer eines Spieltags.")
+      .replaceAll("Dein Spielstand wird nach jedem Tag automatisch im Browser gespeichert. Schliess das Fenster ruhig – beim nächsten Öffnen geht es weiter.","Der Spielstand wird automatisch gespeichert. Beim nächsten Öffnen geht es weiter.")
       /* Ereignisse / Meldungen */
       .replaceAll("Die Belegschaft streikt. Die Zufriedenheit ist wegen des Lohns sehr niedrig. Die Förderung steht still.","Die Zufriedenheit ist wegen des Lohns sehr niedrig. Deshalb streikt die Belegschaft und die Förderung steht still.")
       .replaceAll("<b>Erdbeben bei Taiwan</b> – andere Elektronikfirmen können weniger liefern. Einige Kunden wechseln zu deiner Firma. Die Nachfrage nach Smartphones und Konsolen steigt 70 Tage lang um 50 %.","<b>Erdbeben bei Taiwan</b> – andere Firmen können weniger Elektronik liefern. Einige Kunden wechseln zu dir; die Nachfrage steigt 70 Tage lang um 50 %.")
@@ -104,6 +106,19 @@
       .replaceAll("CHF 140'000 · Sicherheit verbessert · 10 Tage Stillstand","CHF 140'000 · Entschädigung · 10 Tage Stillstand")
       .replaceAll("Neu: Ware verkauft sich nicht mehr von allein. Du hast ein kleines Verkaufsteam bekommen – im Markt kannst du es vergrössern.","Neu: Fertige Produkte müssen verkauft werden. Du hast ein kleines Verkaufsteam erhalten.")
       .replaceAll("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.","Die Kasse ist im Minus. Bei −CHF 800'000 endet die Runde.");
+  }
+
+  /* Ereignisdaten selbst kürzen. So gilt der Pass auch ausserhalb der normalen Dialog-/Notizwege. */
+  for(const e of EREIGNISSE){
+    if(typeof e.bau!=="function") continue;
+    const original=e.bau;
+    e.bau=function(...args){
+      const d=original.apply(this,args);
+      if(!d||typeof d!=="object") return d;
+      const x={...d,text:kurz(d.text),titel:kurz(d.titel),art:kurz(d.art)};
+      if(Array.isArray(d.wahlen)) x.wahlen=d.wahlen.map(w=>({...w,text:kurz(w.text),klein:kurz(w.klein)}));
+      return x;
+    };
   }
 
   /* ---------- Häufige HTML-Flächen ---------- */
@@ -148,16 +163,30 @@
   }
 
   /* ---------- Schwierigkeit ---------- */
+  function schwierigkeitKurz(){
+    if(document.getElementById("d-titel")?.textContent?.trim()!=="Wähle die Schwierigkeit") return;
+    const text=document.getElementById("d-text");
+    if(text) text.innerHTML="Die Schwierigkeit verändert nur den Verkaufserlös. Schwer wird nach einer erfolgreichen Mittel-Etappe frei.";
+    document.querySelectorAll("#d-wahlen .wahl.schwierigkeit").forEach(b=>{
+      const name=b.querySelector("b")?.textContent?.trim();
+      const small=b.querySelector("small");
+      const status=b.querySelector(".schwierigkeitsstatus");
+      if(name==="Mittel"){
+        if(small) small.textContent="Standard";
+        if(status?.textContent?.trim()==="Standard") status.textContent="";
+      }
+    });
+  }
   if(typeof schwierigkeitZeigen==="function"){
     const original=schwierigkeitZeigen;
     schwierigkeitZeigen=function(...args){
       const out=original.apply(this,args);
-      const text=document.getElementById("d-text");
-      if(text) text.innerHTML="Die Schwierigkeit verändert nur den Verkaufserlös. Schwer wird nach einer erfolgreichen Mittel-Etappe frei.";
-      document.querySelectorAll("#d-wahlen .wahl small").forEach(el=>{ el.textContent=kurz(el.textContent).replace("Standard-Balancing","Standard"); });
+      schwierigkeitKurz();
       return out;
     };
   }
+  /* Beim ersten Seitenaufruf kann der Core den Dialog bereits vor den Patches geöffnet haben. */
+  schwierigkeitKurz();
 
   /* ---------- Ereignisdialoge und Meldungen ---------- */
   if(typeof dialogZeigen==="function"){
@@ -183,5 +212,5 @@
     };
   }
 
-  window.__erzweltGlobalTextAudit={version:1,target:"Sek B",rule:"1-2 short sentences"};
+  window.__erzweltGlobalTextAudit={version:2,target:"Sek B",rule:"1-2 short sentences"};
 })();
