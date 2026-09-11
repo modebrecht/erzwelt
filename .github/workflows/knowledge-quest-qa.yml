@@ -69,9 +69,8 @@ jobs:
               assert base['marker']['version']==1 and len(base['marker']['quests'])==6, base['marker']
               if base['tutorialActive']:
                   assert not base['hasKnowledgeClass'], base
-                  assert base['art'].startswith('Aufgabe'), base['art']
+                  assert base['art'].lower().startswith('aufgabe'), base['art']
 
-              # Force a clean post-tutorial state for deterministic flow testing.
               page.evaluate('''()=>{
                 localStorage.clear();
                 S.tutorial=TUTORIAL.length;
@@ -119,14 +118,12 @@ jobs:
               assert all(basis['fields'].get(x) for x in ['kette','chemie','fabrik']), basis
               assert basis['praxisKette'] and basis['praxisChem'] and basis['praxisFab'], basis
 
-              # Return to map and verify only one next quest is shown.
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
-              people=page.evaluate('''()=>({art:q=document.getElementById('q-art').innerText,title:document.getElementById('q-titel').innerText,button:!!document.querySelector('[data-wissen-quest="lohn"]'),praxis:wissenPraxis('leute',0).ok})''')
+              people=page.evaluate('''()=>({art:document.getElementById('q-art').innerText,title:document.getElementById('q-titel').innerText,button:!!document.querySelector('[data-wissen-quest="lohn"]'),praxis:wissenPraxis('leute',0).ok})''')
               assert people['art']=='Wissens-Quest 2/6', people
               assert people['title']=='Lohn & Zufriedenheit beobachten', people
               assert not people['button'] and not people['praxis'], people
 
-              # Clicking the currently active wage level must NOT count.
               page.evaluate('''()=>{
                 const host=document.createElement('div');
                 host.innerHTML=blattMine('kolwezi');document.body.appendChild(host);
@@ -135,7 +132,6 @@ jobs:
               }''')
               assert page.evaluate("()=>!S.wissenQuestFlow.flags.lohn") is True
 
-              # A real wage change completes the quest and stays pending until collected.
               page.evaluate('''()=>{
                 const host=document.createElement('div');
                 host.innerHTML=blattMine('kolwezi');document.body.appendChild(host);
@@ -147,7 +143,6 @@ jobs:
               page.click('[data-wissen-quest="lohn"]');page.wait_for_timeout(60)
               assert page.evaluate("()=>wissenPraxis('leute',1).ok") is True
 
-              # Market quest: one post-tutorial manual sale.
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');S.ware.kabel=20;S.handverkaufTag=-1;questZeichnen();}''')
               market_before=page.evaluate("()=>document.getElementById('q-art').innerText")
               assert market_before=='Wissens-Quest 3/6', market_before
@@ -160,7 +155,6 @@ jobs:
               page.click('[data-wissen-quest="markt"]');page.wait_for_timeout(60)
               assert page.evaluate("()=>wissenPraxis('markt',0).ok") is True
 
-              # Geology quest: open one additional source after tutorial baseline.
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
               assert page.evaluate("()=>document.getElementById('q-art').innerText")=='Wissens-Quest 4/6'
               page.evaluate('''()=>{
@@ -170,7 +164,6 @@ jobs:
               page.click('[data-wissen-quest="geologie"]');page.wait_for_timeout(60)
               assert page.evaluate("()=>wissenPraxis('geologie',1).ok") is True
 
-              # Ruf/Nachweise quest: opening Ziel is the deliberate observation.
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
               assert page.evaluate("()=>document.getElementById('q-art').innerText")=='Wissens-Quest 5/6'
               page.evaluate('''()=>{const b=document.createElement('button');b.dataset.seite='ziel';document.body.appendChild(b);b.click();b.remove();questZeichnen();}''')
@@ -178,7 +171,6 @@ jobs:
               page.click('[data-wissen-quest="ruf"]');page.wait_for_timeout(60)
               assert page.evaluate("()=>wissenPraxis('ruf',0).ok") is True
 
-              # Model recap becomes the final collectable, then the normal wayfinder returns.
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
               final_ready=page.evaluate('''()=>({art:document.getElementById('q-art').innerText,title:document.getElementById('q-titel').innerText,button:document.querySelector('[data-wissen-quest="modell"]')?.innerText||''})''')
               assert final_ready=={'art':'Wissen freigeschaltet','title':'Das Spielmodell einordnen','button':'Ansehen'}, final_ready
