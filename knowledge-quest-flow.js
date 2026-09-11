@@ -190,7 +190,7 @@
 
     if(tutorialLaeuft()) return;
     const t=e.target.closest("[data-tun]");
-    if(t?.dataset.tun==="lohn") markieren("lohn");
+    if(t?.dataset.tun==="lohn"&&t.getAttribute("aria-pressed")!=="true") markieren("lohn");
     if(t?.dataset.tun==="handverkauf") markieren("markt");
     const s=e.target.closest("[data-seite]");
     if(s?.dataset.seite==="ziel") markieren("ruf");
