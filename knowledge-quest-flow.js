@@ -11,7 +11,7 @@
    ============================================================ */
 
 (function(){
-  const FLOW_VERSION=1;
+  const FLOW_VERSION=2;
 
   const style=document.createElement("style");
   style.id="erzwelt-knowledge-quest-style";
@@ -35,9 +35,8 @@
     if(!q.flags||typeof q.flags!=="object") q.flags={};
     if(!q.collected||typeof q.collected!=="object") q.collected={};
     if(!q.fields||typeof q.fields!=="object") q.fields={};
-    if(q.startMinen===undefined) q.startMinen=null;
+    if(!Array.isArray(q.geologieBesucht)) q.geologieBesucht=[];
     q.version=FLOW_VERSION;
-    if(!tutorialLaeuft()&&q.startMinen===null) q.startMinen=offeneMinen().length;
     return q;
   }
 
@@ -65,10 +64,10 @@
     },
     {
       id:"geologie", seg:"geologie", fields:["geologie"],
-      titel:"Einen neuen Rohstoffstandort vergleichen",
-      aufgabe:"Eröffne nach dem Tutorial eine weitere Rohstoffquelle. Vergleiche ihren Standort mit deinen bisherigen Quellen.",
-      fertig:q=>offeneMinen().length>(q.startMinen??offeneMinen().length)||offeneMinen().length>=MINEN.length,
-      erfolg:"Du hast einen weiteren Rohstoffstandort erschlossen. Rohstoffe liegen nicht überall am selben Ort."
+      titel:"Rohstoffstandorte vergleichen",
+      aufgabe:q=>`Öffne zwei verschiedene Rohstoffstandorte auf der Karte. ${Math.min(2,q.geologieBesucht.length)}/2 angesehen.`,
+      fertig:q=>q.geologieBesucht.length>=2,
+      erfolg:"Du hast zwei Rohstoffstandorte angesehen. Rohstoffe liegen nicht überall am selben Ort."
     },
     {
       id:"ruf", seg:"ruf", fields:["ruf"],
@@ -93,6 +92,10 @@
   }
   function questFertig(def){ return !!(def&&def.fertig(flowState())); }
   function feldFrei(segId){ return !!flowState().fields[segId]; }
+  function aufgabeText(def){
+    const q=flowState();
+    return typeof def?.aufgabe==="function"?def.aufgabe(q):(def?.aufgabe||"");
+  }
 
   function praxisText(segId){
     const map={
@@ -101,7 +104,7 @@
       fabrik:"Schliesse das Tutorial ab und produziere das erste Produkt.",
       leute:"Ändere nach dem Tutorial einmal die Lohnstufe einer Rohstoffquelle.",
       markt:"Verkaufe nach dem Tutorial einmal selbst ein Produkt.",
-      geologie:"Eröffne nach dem Tutorial eine weitere Rohstoffquelle.",
+      geologie:"Öffne zwei verschiedene Rohstoffstandorte auf der Karte.",
       ruf:"Öffne «Ziel» und vergleiche Ruf mit Lieferketten-Nachweisen.",
       modell:"Schliesse die vorherigen Wissens-Quests ab."
     };
@@ -120,7 +123,7 @@
     const def=aktiveQuest();
     if(def){
       if(questFertig(def)) return [def.titel,def.erfolg];
-      return [def.titel,def.aufgabe];
+      return [def.titel,aufgabeText(def)];
     }
     return originalNaechsterSchritt();
   };
@@ -173,6 +176,22 @@
     if(typeof questZeichnen==="function") questZeichnen();
   }
 
+  function geologieBesuch(id){
+    if(aktiveQuest()?.id!=="geologie"||!id) return;
+    const q=flowState();
+    if(q.geologieBesucht.includes(id)) return;
+    q.geologieBesucht.push(id);
+    if(typeof speichern==="function") speichern();
+    if(typeof questZeichnen==="function") questZeichnen();
+  }
+
+  function naechsterGeologieStandort(){
+    const seen=flowState().geologieBesucht;
+    const preferred=["kolwezi","greenbushes","atacama","bangka","boke","mountainpass"];
+    const ids=[...preferred,...MINEN.map(m=>m.id)].filter((id,i,a)=>a.indexOf(id)===i);
+    return ids.find(id=>!seen.includes(id))||null;
+  }
+
   document.addEventListener("click",e=>{
     const collect=e.target.closest("[data-wissen-quest]");
     if(collect){
@@ -189,19 +208,16 @@
     }
 
     if(tutorialLaeuft()) return;
+
+    const mineButton=e.target.closest('#welt .pin[data-pin="mine"] .knopf');
+    const minePin=mineButton?.closest('#welt .pin[data-pin="mine"]');
+    if(minePin?.dataset.id) geologieBesuch(minePin.dataset.id);
+
     const t=e.target.closest("[data-tun]");
     if(t?.dataset.tun==="lohn"&&t.getAttribute("aria-pressed")!=="true") markieren("lohn");
     if(t?.dataset.tun==="handverkauf") markieren("markt");
     const s=e.target.closest("[data-seite]");
     if(s?.dataset.seite==="ziel") markieren("ruf");
-
-    if(t?.dataset.tun==="mine-auf"){
-      const q=flowState();
-      if(offeneMinen().length>(q.startMinen??offeneMinen().length)){
-        if(typeof speichern==="function") speichern();
-        if(typeof questZeichnen==="function") questZeichnen();
-      }
-    }
   });
 
   /* Bestehende Post-Tutorial-Spielstände starten ab ihrem aktuellen Stand.
@@ -209,5 +225,10 @@
      schaltet die drei dort direkt erlebten Grundlagen frei, sobald es abgeholt wird. */
   flowState();
   if(typeof questZeichnen==="function") questZeichnen();
-  window.__erzweltKnowledgeQuestFlow={version:FLOW_VERSION,quests:QUESTS.map(q=>q.id)};
+  window.__erzweltKnowledgeQuestFlow={
+    version:FLOW_VERSION,
+    quests:QUESTS.map(q=>q.id),
+    active:()=>aktiveQuest()?.id||null,
+    nextGeologyTarget:naechsterGeologieStandort
+  };
 })();
