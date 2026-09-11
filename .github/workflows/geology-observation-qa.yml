@@ -1,0 +1,99 @@
+name: Geology observation QA
+
+on:
+  push:
+    branches: [didactic-complexity-sekb]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: didactic-complexity-sekb
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build
+        run: |
+          node --check knowledge-quest-flow.js
+          node --check objective-guide.js
+          node scripts/build-standalone.mjs
+          git diff --check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Chromium
+        run: |
+          pip install playwright
+          python -m playwright install chromium
+      - name: Browser geology flow
+        run: |
+          python -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          sleep 1
+          cat >/tmp/geology.py <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              b=p.chromium.launch(headless=True)
+              page=b.new_page(viewport={'width':360,'height':800})
+              errors=[]
+              page.on('pageerror',lambda e:errors.append(str(e)))
+              page.goto('http://127.0.0.1:8000/index.html',wait_until='networkidle')
+              page.evaluate('''()=>{
+                document.getElementById('schleier').style.display='none';
+                S.tutorial=TUTORIAL.length;
+                S.kasse=3000000; S.arbeiterGesamt=100;
+                S.minen={
+                  kolwezi:{arbeiter:10,stufe:1,zufriedenheit:60,stillBis:0,malus:1,malusBis:0,ausbau:0,sicherheit:false,nachweis:false},
+                  bangka:{arbeiter:10,stufe:1,zufriedenheit:60,stillBis:0,malus:1,malusBis:0,ausbau:0,sicherheit:false,nachweis:false},
+                  boke:{arbeiter:10,stufe:1,zufriedenheit:60,stillBis:0,malus:1,malusBis:0,ausbau:0,sicherheit:false,nachweis:false}
+                };
+                S.raff={r_china:{arbeiter:10,ausbau:0}};
+                S.fabriken=[{produkt:'kabel',land:'deutschland',arbeiter:10,restbau:0}];
+                S.erz={kupfer:50,alu:50,zinn:50}; S.mat={kupfer:50,alu:50,zinn:50}; S.ware={kabel:20}; S.verkaeufer=2;
+                S.wissenQuestFlow={version:2,flags:{lohn:true,markt:true},collected:{basis:true,lohn:true,markt:true},fields:{kette:true,chemie:true,fabrik:true,leute:true,markt:true},geologieBesucht:[]};
+                aktiveSeite='karte'; offenesBlatt=null; offeneLupe=null;
+                document.getElementById('seite').hidden=true;document.getElementById('blatt').hidden=true;document.getElementById('lupe').hidden=true;
+                questZeichnen();
+              }''')
+              before=page.evaluate('()=>Object.keys(S.minen).length')
+              assert '0/2 angesehen' in page.locator('#q-text').inner_text()
+              assert page.locator('.objective-guide-action').inner_text()=='Ziel zeigen'
+              page.click('.objective-guide-action')
+              page.wait_for_timeout(180)
+              first=page.evaluate('()=>({seen:[...S.wissenQuestFlow.geologieBesucht],mines:Object.keys(S.minen).length,blatt:!!offenesBlatt})')
+              assert len(first['seen'])==1,first
+              assert first['mines']==before,first
+              assert first['blatt'],first
+              page.evaluate('()=>{blattZu();questZeichnen();}')
+              page.wait_for_timeout(80)
+              assert '1/2 angesehen' in page.locator('#q-text').inner_text()
+              page.click('.objective-guide-action')
+              page.wait_for_timeout(180)
+              second=page.evaluate('()=>({seen:[...S.wissenQuestFlow.geologieBesucht],mines:Object.keys(S.minen).length,unique:new Set(S.wissenQuestFlow.geologieBesucht).size})')
+              assert len(second['seen'])==2 and second['unique']==2,second
+              assert second['mines']==before,second
+              page.evaluate('()=>{blattZu();questZeichnen();}')
+              page.wait_for_timeout(80)
+              assert page.locator('.wissen-quest-action').inner_text()=='Ansehen'
+              assert page.locator('.objective-guide-action').count()==0
+              assert 'Rohstoffe liegen nicht überall am selben Ort' in page.locator('#q-text').inner_text()
+              assert not errors,errors
+              print({'before_mines':before,'first':first,'second':second})
+              b.close()
+          PY
+          python /tmp/geology.py
+      - name: Publish verified standalone and remove QA
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+modebrecht@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/geology-observation-qa.yml
+          git commit -m "build: publish verified geology observation quest"
+          git push origin HEAD:didactic-complexity-sekb
