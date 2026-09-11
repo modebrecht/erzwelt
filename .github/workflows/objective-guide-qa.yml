@@ -1,0 +1,134 @@
+name: Objective guide QA
+
+on:
+  push:
+    branches:
+      - didactic-complexity-sekb
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: didactic-complexity-sekb
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build
+        run: |
+          node --check objective-guide.js
+          node scripts/build-standalone.mjs
+          git diff --check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Chromium
+        run: |
+          pip install playwright
+          python -m playwright install chromium
+      - name: Browser objective flow
+        run: |
+          python -m http.server 8000 --bind 127.0.0.1 >/tmp/erzwelt-http.log 2>&1 &
+          sleep 1
+          cat >/tmp/objective-guide-qa.py <<'PY'
+          from playwright.sync_api import sync_playwright
+
+          errors=[]
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True)
+              page=browser.new_page(viewport={"width":360,"height":800})
+              page.on("pageerror", lambda e: errors.append("page:"+str(e)))
+              page.on("console", lambda m: errors.append("console:"+m.type+":"+m.text) if m.type=="error" else None)
+              page.goto("http://127.0.0.1:8000/index.html", wait_until="networkidle", timeout=30000)
+              page.wait_for_timeout(120)
+
+              base=page.evaluate('''()=>({
+                patches:document.querySelectorAll('script[data-erzwelt-patch]').length,
+                marker:window.__erzweltObjectiveGuide,
+                map:window.__erzweltMapFocusNavigation
+              })''')
+              assert base['patches']==26, base
+              assert base['marker']['version']==1 and base['marker']['label']=='Ziel zeigen', base
+              assert base['map'], base
+
+              # Tutorial: clean first-step state, no startup overlay.
+              page.evaluate('''()=>{
+                localStorage.clear();
+                S.tutorial=0;
+                S.minen={};S.raff={};S.fabriken=[];
+                aktiveSeite='karte';offenesBlatt=null;offeneLupe=null;
+                const veil=document.getElementById('schleier');if(veil)veil.hidden=true;
+                document.getElementById('seite').hidden=true;
+                document.getElementById('blatt').hidden=true;
+                document.getElementById('lupe').hidden=true;
+                questZeichnen();
+              }''')
+              assert page.locator('[data-objective-guide="1"]').count()==1
+              assert page.locator('[data-objective-guide="1"]').inner_text().strip().endswith('Ziel zeigen')
+              page.click('[data-objective-guide="1"]')
+              page.wait_for_timeout(180)
+              tutorial_focus=page.evaluate('''()=>({
+                page:aktiveSeite,
+                rings:document.querySelectorAll('.map-focus-ring,.map-focus-suggestion').length
+              })''')
+              assert tutorial_focus['page']=='karte' and tutorial_focus['rings']>0, tutorial_focus
+
+              # Knowledge quest: Lohn -> existing mine focus.
+              page.evaluate('''()=>{
+                S.tutorial=TUTORIAL.length;
+                S.minen={kolwezi:{arbeiter:10,stufe:1,zufriedenheit:60,stillBis:0,malus:1,malusBis:0,ausbau:0,sicherheit:false,nachweis:false}};
+                S.wissenQuestFlow={version:1,startMinen:1,flags:{},fields:{kette:true,chemie:true,fabrik:true},collected:{basis:true}};
+                aktiveSeite='karte';offenesBlatt=null;offeneLupe=null;
+                document.getElementById('seite').hidden=true;
+                questZeichnen();
+              }''')
+              assert page.evaluate("()=>document.getElementById('q-art').innerText.toLowerCase()")=='wissens-quest 2/6'
+              assert page.locator('[data-objective-guide="1"]').count()==1
+              page.click('[data-objective-guide="1"]')
+              page.wait_for_timeout(180)
+              assert page.evaluate("()=>document.querySelectorAll('.map-focus-ring').length>0") is True
+
+              # Ruf/Nachweise -> Ziel page.
+              page.evaluate('''()=>{
+                S.wissenQuestFlow.collected={basis:true,lohn:true,markt:true,geologie:true};
+                S.wissenQuestFlow.fields={kette:true,chemie:true,fabrik:true,leute:true,markt:true,geologie:true};
+                S.wissenQuestFlow.flags={lohn:true,markt:true};
+                aktiveSeite='karte';document.getElementById('seite').hidden=true;
+                questZeichnen();
+              }''')
+              assert page.evaluate("()=>document.getElementById('q-art').innerText.toLowerCase()")=='wissens-quest 5/6'
+              assert page.locator('[data-objective-guide="1"]').count()==1
+              page.click('[data-objective-guide="1"]')
+              page.wait_for_timeout(80)
+              assert page.evaluate("()=>aktiveSeite")=='ziel'
+
+              # Once fulfilled, only Ansehen remains; no competing Ziel zeigen button.
+              page.evaluate('''()=>{
+                S.wissenQuestFlow.flags.ruf=true;
+                aktiveSeite='karte';document.getElementById('seite').hidden=true;
+                questZeichnen();
+              }''')
+              assert page.locator('[data-wissen-quest="ruf"]').count()==1
+              assert page.locator('[data-objective-guide="1"]').count()==0
+
+              assert not errors, errors
+              print('OBJECTIVE GUIDE QA PASS')
+              browser.close()
+          PY
+          python /tmp/objective-guide-qa.py
+      - name: Publish and remove temporary QA
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/objective-guide-qa.yml
+          git commit -m "build: publish verified objective guide"
+          git push origin HEAD:didactic-complexity-sekb
