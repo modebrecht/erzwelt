@@ -1,0 +1,98 @@
+name: Global visible text audit
+
+on:
+  push:
+    branches:
+      - didactic-complexity-sekb
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: didactic-complexity-sekb
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build standalone
+        run: node scripts/build-standalone.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Chromium
+        run: |
+          pip install playwright
+          python -m playwright install chromium
+      - name: Dump visible surfaces
+        run: |
+          python -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          sleep 1
+          cat >/tmp/audit.py <<'PY'
+          from playwright.sync_api import sync_playwright
+          import json
+
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True)
+              page=browser.new_page(viewport={"width":360,"height":800})
+              errors=[]
+              page.on("pageerror", lambda e: errors.append(str(e)))
+              page.goto("http://127.0.0.1:8000/index.html", wait_until="networkidle")
+              page.wait_for_timeout(150)
+
+              data=page.evaluate('''()=>{
+                const strip=html=>{const d=document.createElement('div');d.innerHTML=html||'';return (d.innerText||d.textContent||'').replace(/\\n{3,}/g,'\\n\\n').trim();};
+                const out={};
+                out.difficulty={title:document.getElementById('d-titel')?.innerText||'',text:document.getElementById('d-text')?.innerText||'',options:[...document.querySelectorAll('#d-wahlen .wahl')].map(x=>x.innerText.trim())};
+
+                S.schwierigkeit='einfach'; S.kasse=2500000; S.arbeiterGesamt=100; S.tutorial=TUTORIAL.length; modalOffen=false;
+                S.minen={kolwezi:{arbeiter:10,stufe:1,zufriedenheit:62,stillBis:0,malus:1,malusBis:0,ausbau:1,sicherheit:true,nachweis:true},bangka:{arbeiter:8,stufe:1,zufriedenheit:60,stillBis:0,malus:1,malusBis:0,ausbau:0,sicherheit:false,nachweis:false}};
+                S.raff={r_china:{arbeiter:10,ausbau:1}};
+                S.fabriken=[{produkt:'kabel',land:'deutschland',arbeiter:10,restbau:0}];
+                S.erz={kupfer:120,zinn:80,alu:90}; S.mat={kupfer:70,zinn:40,alu:60}; S.ware={kabel:25}; S.verkaeufer=3;
+                S.eingenommen=500000; S.ausgegeben=250000; S.etappeStartEingenommen=0; S.etappeStartAusgegeben=0; S.ruf=62;
+                if(typeof didaktikMigration==='function') didaktikMigration();
+
+                for(const [name,fn] of Object.entries({market:seiteMarkt,team:seiteTeam,goal:seiteZiel,knowledge:seiteWissen})){
+                  try{out[name]=strip(fn());}catch(e){out[name]='ERROR '+e.message;}
+                }
+                try{out.mine=strip(blattMine('kolwezi'));}catch(e){out.mine='ERROR '+e.message;}
+                try{out.refinery=strip(blattRaff('r_china'));}catch(e){out.refinery='ERROR '+e.message;}
+                try{out.factory=strip(blattFab('deutschland'));}catch(e){out.factory='ERROR '+e.message;}
+
+                out.knowledgeDetails={};
+                for(const seg of WISSEN){
+                  try{lupeFuellen(seg.id);out.knowledgeDetails[seg.id]=document.getElementById('lupeinhalt')?.innerText?.replace(/\\n{3,}/g,'\\n\\n').trim()||'';}catch(e){out.knowledgeDetails[seg.id]='ERROR '+e.message;}
+                }
+
+                out.events={};
+                for(const id of ['dollar','buschfeuer','regenzeit','hafen','konkurrenz','gewerkschaft','recycling','taiwan','lieferkettengesetz','protest','unglueck','kinderarbeit']){
+                  const e=EREIGNISSE.find(x=>x.id===id); if(!e) continue;
+                  try{
+                    if(id==='protest') S.minen.kolwezi.zufriedenheit=10;
+                    if(id==='unglueck'){S.minen.bangka.arbeiter=25;S.minen.bangka.sicherheit=false;}
+                    if(id==='kinderarbeit'){S.tag=100;S.minen.bangka.nachweis=false;}
+                    if(id==='lieferkettengesetz'){S.tag=220;S.minen.kolwezi.nachweis=true;S.minen.bangka.nachweis=true;}
+                    const d=e.bau(); out.events[id]={text:strip(d.text),options:(d.wahlen||[]).map(w=>`${w.text} — ${w.klein||''}`)};
+                  }catch(err){out.events[id]={error:err.message};}
+                }
+
+                const oldS=JSON.parse(JSON.stringify(S));
+                try{
+                  S.ende=null;S.tag=ZIEL_TAGE+1;S.eingenommen=ZIEL_GEWINN+1000000;S.ausgegeben=0;S.etappe=1;S.etappeStartEingenommen=0;S.etappeStartAusgegeben=0;S.ruf=70;modalOffen=false;
+                  rundeBeenden('etappe');
+                  out.stageSuccess={title:document.getElementById('d-titel')?.innerText||'',text:document.getElementById('d-text')?.innerText||'',options:[...document.querySelectorAll('#d-wahlen .wahl')].map(x=>x.innerText.trim())};
+                }catch(e){out.stageSuccess={error:e.message};}
+                return out;
+              }''')
+              print('VISIBLE_TEXT_AUDIT_BEGIN')
+              print(json.dumps(data,ensure_ascii=False,indent=2))
+              print('VISIBLE_TEXT_AUDIT_END')
+              print('PAGE_ERRORS',json.dumps(errors,ensure_ascii=False))
+              browser.close()
+          PY
+          python /tmp/audit.py
