@@ -56,7 +56,8 @@
     {
       "name": "final-didactic-copy",
       "files": [
-        "didactic-complexity.js"
+        "didactic-complexity.js",
+        "didactic-global-text.js"
       ]
     }
   ]
