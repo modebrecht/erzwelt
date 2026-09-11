@@ -28,9 +28,9 @@ jobs:
       - name: Syntax and standalone build
         run: |
           node --check didactic-complexity.js
+          node -e "const p=require('./patches.json'); const f=p.groups.flatMap(g=>g.files); if(f.length!==23||f.at(-1)!=='didactic-complexity.js') process.exit(1)"
           node scripts/build-standalone.mjs
           git diff --check
-          grep -q 'didactic-complexity.js' index.html
 
       - name: Set up Python
         uses: actions/setup-python@v5
