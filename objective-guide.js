@@ -9,14 +9,14 @@
    Keine Progression und keine Wirtschaft werden veraendert.
    ============================================================ */
 (function(){
-  const VERSION=1;
+  const VERSION=2;
 
   const style=document.createElement("style");
   style.id="erzwelt-objective-guide-style";
   style.textContent=`
     #quest .objective-guide-action{
-      width:100%;margin-top:8px;padding:7px 10px;border-radius:10px;
-      display:flex;align-items:center;justify-content:center;gap:6px;
+      width:100%;min-height:42px;margin-top:8px;padding:8px 12px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
       background:#fff7df;color:#704d0b;border:1.5px solid #e5ba55;
       font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f1);
       box-shadow:0 2px 0 #d6a438;
@@ -25,6 +25,9 @@
     #quest .objective-guide-action svg{width:15px;height:15px;flex:none}
     #quest.wissen-quest .objective-guide-action{background:#edf8f1;color:#276548;border-color:#83c69f;box-shadow:0 2px 0 #5aa77d}
     #quest.wissen-quest .objective-guide-action:active{box-shadow:0 1px 0 #5aa77d}
+    @media(max-width:560px){
+      #quest.wissen-quest:not(.breit){width:min(64%,300px)}
+    }
   `;
   document.head.appendChild(style);
 
