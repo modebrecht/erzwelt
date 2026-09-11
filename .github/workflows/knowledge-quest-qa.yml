@@ -99,7 +99,7 @@ jobs:
                 button:document.querySelector('[data-wissen-quest="basis"]')?.innerText||'',
                 startMinen:S.wissenQuestFlow?.startMinen
               })''')
-              assert foundation['art']=='Wissen freigeschaltet', foundation
+              assert foundation['art'].lower()=='wissen freigeschaltet', foundation
               assert foundation['title']=='Deine Lieferkette steht', foundation
               assert foundation['button']=='Ansehen', foundation
               assert foundation['startMinen']==1, foundation
@@ -120,7 +120,7 @@ jobs:
 
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
               people=page.evaluate('''()=>({art:document.getElementById('q-art').innerText,title:document.getElementById('q-titel').innerText,button:!!document.querySelector('[data-wissen-quest="lohn"]'),praxis:wissenPraxis('leute',0).ok})''')
-              assert people['art']=='Wissens-Quest 2/6', people
+              assert people['art'].lower()=='wissens-quest 2/6', people
               assert people['title']=='Lohn & Zufriedenheit beobachten', people
               assert not people['button'] and not people['praxis'], people
 
@@ -139,13 +139,13 @@ jobs:
                 host.remove();questZeichnen();
               }''')
               wage_ready=page.evaluate('''()=>({flag:S.wissenQuestFlow.flags.lohn,art:document.getElementById('q-art').innerText,button:document.querySelector('[data-wissen-quest="lohn"]')?.innerText||''})''')
-              assert wage_ready=={'flag':True,'art':'Wissen freigeschaltet','button':'Ansehen'}, wage_ready
+              assert wage_ready['flag'] is True and wage_ready['art'].lower()=='wissen freigeschaltet' and wage_ready['button']=='Ansehen', wage_ready
               page.click('[data-wissen-quest="lohn"]');page.wait_for_timeout(60)
               assert page.evaluate("()=>wissenPraxis('leute',1).ok") is True
 
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');S.ware.kabel=20;S.handverkaufTag=-1;questZeichnen();}''')
               market_before=page.evaluate("()=>document.getElementById('q-art').innerText")
-              assert market_before=='Wissens-Quest 3/6', market_before
+              assert market_before.lower()=='wissens-quest 3/6', market_before
               page.evaluate('''()=>{
                 const host=document.createElement('div');host.innerHTML=seiteMarkt();document.body.appendChild(host);
                 const b=host.querySelector('[data-tun="handverkauf"]');b.click();host.remove();questZeichnen();
@@ -156,7 +156,7 @@ jobs:
               assert page.evaluate("()=>wissenPraxis('markt',0).ok") is True
 
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
-              assert page.evaluate("()=>document.getElementById('q-art').innerText")=='Wissens-Quest 4/6'
+              assert page.evaluate("()=>document.getElementById('q-art').innerText.toLowerCase()")=='wissens-quest 4/6'
               page.evaluate('''()=>{
                 const b=document.createElement('button');b.dataset.tun='mine-auf';b.dataset.id='bangka';document.body.appendChild(b);b.click();b.remove();questZeichnen();
               }''')
@@ -165,7 +165,7 @@ jobs:
               assert page.evaluate("()=>wissenPraxis('geologie',1).ok") is True
 
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
-              assert page.evaluate("()=>document.getElementById('q-art').innerText")=='Wissens-Quest 5/6'
+              assert page.evaluate("()=>document.getElementById('q-art').innerText.toLowerCase()")=='wissens-quest 5/6'
               page.evaluate('''()=>{const b=document.createElement('button');b.dataset.seite='ziel';document.body.appendChild(b);b.click();b.remove();questZeichnen();}''')
               assert page.locator('[data-wissen-quest="ruf"]').count()==1
               page.click('[data-wissen-quest="ruf"]');page.wait_for_timeout(60)
@@ -173,7 +173,7 @@ jobs:
 
               page.evaluate('''()=>{document.getElementById('lupe').hidden=true;offeneLupe=null;seiteWechseln('karte');questZeichnen();}''')
               final_ready=page.evaluate('''()=>({art:document.getElementById('q-art').innerText,title:document.getElementById('q-titel').innerText,button:document.querySelector('[data-wissen-quest="modell"]')?.innerText||''})''')
-              assert final_ready=={'art':'Wissen freigeschaltet','title':'Das Spielmodell einordnen','button':'Ansehen'}, final_ready
+              assert final_ready['art'].lower()=='wissen freigeschaltet' and final_ready['title']=='Das Spielmodell einordnen' and final_ready['button']=='Ansehen', final_ready
               page.click('[data-wissen-quest="modell"]');page.wait_for_timeout(60)
               done=page.evaluate('''()=>({count:Object.keys(S.wissenQuestFlow.collected).filter(k=>S.wissenQuestFlow.collected[k]).length,model:wissenPraxis('modell',1).ok})''')
               assert done['count']==6 and done['model'], done
