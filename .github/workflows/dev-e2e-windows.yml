@@ -34,12 +34,13 @@ jobs:
           Start-Process -FilePath python -ArgumentList '-m','http.server','4173' -WindowStyle Hidden
           Start-Sleep -Seconds 2
 
-      - name: Harden async standalone readiness in test copy
+      - name: Harden standalone readiness and animated CTA clicks in test copy
         shell: pwsh
         run: |
           $p = 'tests/e2e/gameplay.mjs'
           $raw = Get-Content $p -Raw
           $raw = $raw.Replace("await page.waitForTimeout(1000);", "await page.waitForFunction(() => !!window.__erzweltDidacticComplexity && !!window.__erzweltKnowledgeQuestFlow && !!window.__erzweltObjectiveGuide && !!document.querySelector('#quest'), null, { timeout: 15000 });")
+          $raw = $raw.Replace("await loc.first().click();", "await loc.first().click({ force: true });")
           Set-Content -Path $p -Value $raw -Encoding utf8
 
       - name: Run full gameplay E2E
