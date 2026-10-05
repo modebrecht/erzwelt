@@ -59,7 +59,8 @@
         "didactic-complexity.js",
         "didactic-global-text.js",
         "knowledge-quest-flow.js",
-        "objective-guide.js"
+        "objective-guide.js",
+        "didactic-integration-fixes.js"
       ]
     }
   ]
