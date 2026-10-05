@@ -1,5 +1,6 @@
 name: Dev standalone build
 
+# Keeps the generated standalone entry in sync with dev sources.
 on:
   push:
     branches:
