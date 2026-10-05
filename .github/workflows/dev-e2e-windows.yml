@@ -44,6 +44,7 @@ jobs:
           $raw = $raw.Replace("await loc.first().click();", "await loc.first().evaluate(el => el.click());")
           $raw = $raw.Replace(".click({ force: true });", ".evaluate(el => el.click());")
           $raw = $raw.Replace('page.locator(`button[data-tun="crew"][data-id="${id}"][data-n="10"]:not([disabled]), button[data-tun="crew"][data-id="${id}"][data-n="1"]:not([disabled])`).first()', 'page.locator(`button[data-tun="crew"][data-id="${id}"][data-n="10"]:not([disabled])`).first()')
+          $raw = $raw.Replace("await setTempo(4);", "await goMap();`nawait setTempo(4);")
           Set-Content -Path $p -Value $raw -Encoding utf8
 
       - name: Run full gameplay E2E
