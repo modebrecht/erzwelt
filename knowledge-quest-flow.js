@@ -11,7 +11,7 @@
    ============================================================ */
 
 (function(){
-  const FLOW_VERSION=2;
+  const FLOW_VERSION=3;
 
   const style=document.createElement("style");
   style.id="erzwelt-knowledge-quest-style";
@@ -111,11 +111,21 @@
     return map[segId]||"Erlebe diesen Zusammenhang einmal im Spiel.";
   }
 
-  /* Eine konkrete Erfahrung pro Wissensfeld. Die zweite Verbesserung braucht
-     nur noch die erste Verbesserung desselben Feldes; das prüft die bestehende UI. */
+  /* Erlebnis statt Grind. Ein Feld muss aber ausdrücklich über «Ansehen»
+     abgeholt worden sein; höhere Stufen verlangen die vorherige Verbesserung. */
   wissenPraxis=function(segId,stufe){
     flowState();
-    return {ok:feldFrei(segId),text:praxisText(segId)};
+    if(!feldFrei(segId)) return {ok:false,text:praxisText(segId)};
+
+    const level=Number.isInteger(stufe)?stufe:Number(stufe)||0;
+    if(level>0){
+      const seg=WISSEN.find(s=>s.id===segId);
+      const previous=seg?.perks?.[level-1];
+      if(previous&&!S?.perks?.[previous.id]){
+        return {ok:false,text:"Setze zuerst die vorherige Verbesserung in diesem Wissensfeld um."};
+      }
+    }
+    return {ok:true,text:praxisText(segId)};
   };
 
   const originalNaechsterSchritt=naechsterSchritt;
@@ -220,9 +230,6 @@
     if(s?.dataset.seite==="ziel") markieren("ruf");
   });
 
-  /* Bestehende Post-Tutorial-Spielstände starten ab ihrem aktuellen Stand.
-     Es wird nichts rückwirkend als erledigt erfunden; nur das Tutorial selbst
-     schaltet die drei dort direkt erlebten Grundlagen frei, sobald es abgeholt wird. */
   flowState();
   if(typeof questZeichnen==="function") questZeichnen();
   window.__erzweltKnowledgeQuestFlow={
