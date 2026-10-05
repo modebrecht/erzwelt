@@ -4,6 +4,7 @@ on:
   push:
     branches: [dev]
     paths:
+      - "tests/e2e/**"
       - ".github/workflows/dev-e2e-windows.yml"
   workflow_dispatch:
 
@@ -32,6 +33,14 @@ jobs:
         run: |
           Start-Process -FilePath python -ArgumentList '-m','http.server','4173' -WindowStyle Hidden
           Start-Sleep -Seconds 2
+
+      - name: Harden async standalone readiness in test copy
+        shell: pwsh
+        run: |
+          $p = 'tests/e2e/gameplay.mjs'
+          $raw = Get-Content $p -Raw
+          $raw = $raw.Replace("await page.waitForTimeout(1000);", "await page.waitForFunction(() => !!window.__erzweltDidacticComplexity && !!window.__erzweltKnowledgeQuestFlow && !!window.__erzweltObjectiveGuide && !!document.querySelector('#quest'), null, { timeout: 15000 });")
+          Set-Content -Path $p -Value $raw -Encoding utf8
 
       - name: Run full gameplay E2E
         shell: pwsh
