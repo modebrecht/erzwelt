@@ -52,6 +52,15 @@
       "files": [
         "reduced-motion-final.js"
       ]
+    },
+    {
+      "name": "final-didactic-copy",
+      "files": [
+        "didactic-complexity.js",
+        "didactic-global-text.js",
+        "knowledge-quest-flow.js",
+        "objective-guide.js"
+      ]
     }
   ]
 }
