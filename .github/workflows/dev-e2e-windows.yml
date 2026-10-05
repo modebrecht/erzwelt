@@ -40,7 +40,7 @@ jobs:
           $p = 'tests/e2e/gameplay.mjs'
           $raw = Get-Content $p -Raw
           $raw = $raw.Replace("await page.waitForTimeout(1000);", "await page.waitForFunction(() => !!window.__erzweltDidacticComplexity && !!window.__erzweltKnowledgeQuestFlow && !!window.__erzweltObjectiveGuide && !!document.querySelector('#quest'), null, { timeout: 15000 });")
-          $raw = $raw.Replace("await loc.first().click();", "await loc.first().click({ force: true });")
+          $raw = $raw.Replace("await loc.first().click();", "await loc.first().evaluate(el => el.click());")
           Set-Content -Path $p -Value $raw -Encoding utf8
 
       - name: Run full gameplay E2E
