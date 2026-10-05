@@ -11,7 +11,7 @@
    ============================================================ */
 
 (function(){
-  const FLOW_VERSION=3;
+  const FLOW_VERSION=4;
 
   const style=document.createElement("style");
   style.id="erzwelt-knowledge-quest-style";
@@ -219,8 +219,9 @@
 
     if(tutorialLaeuft()) return;
 
-    const mineButton=e.target.closest('#welt .pin[data-pin="mine"] .knopf');
-    const minePin=mineButton?.closest('#welt .pin[data-pin="mine"]');
+    /* Der gesamte Minen-Pin ist ein Button. Ein Besuch muss unabhängig davon
+       zählen, ob die Person Symbol, Label oder den Button-Rand antippt. */
+    const minePin=e.target.closest('#welt .pin[data-pin="mine"]');
     if(minePin?.dataset.id) geologieBesuch(minePin.dataset.id);
 
     const t=e.target.closest("[data-tun]");
