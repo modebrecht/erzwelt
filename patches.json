@@ -54,13 +54,11 @@
       ]
     },
     {
-      "name": "final-didactic-copy",
+      "name": "sek-b-guidance",
       "files": [
         "didactic-complexity.js",
-        "didactic-global-text.js",
         "knowledge-quest-flow.js",
-        "objective-guide.js",
-        "didactic-integration-fixes.js"
+        "objective-guide.js"
       ]
     }
   ]
