@@ -1,0 +1,46 @@
+name: Dev E2E audit Windows
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/dev-e2e-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gameplay-windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Install Playwright
+        shell: pwsh
+        run: |
+          npm init -y | Out-Null
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Serve standalone
+        shell: pwsh
+        run: |
+          Start-Process -FilePath python -ArgumentList '-m','http.server','4173' -WindowStyle Hidden
+          Start-Sleep -Seconds 2
+
+      - name: Run full gameplay E2E
+        shell: pwsh
+        run: node tests/e2e/gameplay.mjs
+
+      - name: Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: erzwelt-e2e-windows
+          path: artifacts/
+          if-no-files-found: warn
