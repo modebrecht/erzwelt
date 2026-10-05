@@ -69,3 +69,5 @@ jobs:
           name: erzwelt-e2e-windows
           path: artifacts/
           if-no-files-found: warn
+
+# Triggered after rebuilding the geology click fix into the dev standalone.
