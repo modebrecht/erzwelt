@@ -2477,7 +2477,6 @@ function blattMine(id){
       <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohnkosten</small><b>${chf(m.arbeiter*land.lohn*st.faktor)}</b></span></div>
     </div>
 
-    ${spezialKarte}
     <div class="karte">
       <h3>Belegschaft</h3>
       <div class="ort">${m.arbeiter} von ${def.plaetze} Plätzen · ${freieArbeiter()} Personen frei im Team</div>
@@ -2550,6 +2549,7 @@ function blattRaff(id){
       <div class="wert"><span class="wi">${IK.kolben}</span><span class="wt"><small>Durchsatz</small><b>${Math.round(def.kapazitaet*ausbauFaktor(r.ausbau)*(r.arbeiter/def.plaetze)*globalWert("hafen")*perkMult("durchsatz"))}/Tag</b></span></div>
       <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Rohstoff im Lager</small><b>${Math.round(erzda)}</b></span></div>
     </div>
+    ${spezialKarte}
     <div class="karte">
       <h3>Belegschaft</h3>
       <div class="ort">${freieArbeiter()} Personen frei im Team</div>
