@@ -227,41 +227,8 @@
     };
   }
 
-  function rewriteRohstoffText(node){
-    if(!node)return;
-    const scan=el=>{
-      if(el.nodeType===Node.TEXT_NODE){
-        const text=el.nodeValue||"";
-        if(/\+\d+ Erz$/.test(text.trim()))el.nodeValue=text.replace(/ Erz$/, " Rohstoff");
-        return;
-      }
-      if(el.nodeType!==Node.ELEMENT_NODE)return;
-      for(const child of el.childNodes)scan(child);
-    };
-    scan(node);
-  }
-  const observedRoots=[document.getElementById("toasts"),document.getElementById("seite"),document.getElementById("blattinhalt")].filter(Boolean);
-  const textObserver=new MutationObserver(records=>{
-    for(const record of records)for(const node of record.addedNodes)rewriteRohstoffText(node);
-  });
-  observedRoots.forEach(root=>{rewriteRohstoffText(root);textObserver.observe(root,{childList:true,subtree:true});});
-
-  // The older didactic layer performs a full descendant scan after every draw only to
-  // rewrite "+N Erz" labels. MutationObserver above handles the same correction on
-  // actual DOM changes, so suppress that exact synchronous scan during draw.
-  const drawWithPerf=zeichnen;
-  zeichnen=function(){
-    const nativeQsa=document.querySelectorAll;
-    document.querySelectorAll=function(selector){
-      if(selector==="#toasts .toast, #seite, #blattinhalt")return [];
-      return nativeQsa.call(this,selector);
-    };
-    try{return drawWithPerf();}
-    finally{document.querySelectorAll=nativeQsa;}
-  };
-
   window.__erzweltPerf={
-    version:4,
-    note:"Memoized map UI/migrations; rAF-batched pan/zoom; synchronous saves coalesced; fast-tick panels capped near 2 Hz; full-tree scan replaced by mutation tracking; quiet-mode continuous effects reduced."
+    version:5,
+    note:"Memoized map UI/migrations; rAF-batched pan/zoom; synchronous saves coalesced; fast-tick panels capped near 2 Hz; quiet-mode continuous effects reduced."
   };
 })();
