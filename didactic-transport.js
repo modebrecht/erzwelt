@@ -2,6 +2,14 @@
 /* Sichtbare, illustrative Transportkette auf der Weltkarte.
    Keine Kosten, keine Lieferzeiten, kein zusätzliches Gameplay. */
 
+
+const transportMobileStyle=document.createElement("style");
+transportMobileStyle.id="didaktik-transport-mobile-style";
+transportMobileStyle.textContent=`@media(max-width:560px){
+  #didaktik-route-note{bottom:calc(var(--dockh) + 92px)!important;max-width:calc(100vw - 20px)!important}
+  #didaktik-transport-legende{display:none!important}
+}`;
+document.head.appendChild(transportMobileStyle);
 let transportRouteCache="";
 let transportReducedCache=null;
 
@@ -126,9 +134,7 @@ function updateRouteNote(r){
   if(!note||note.hidden||!r)return;
   const mineDef=MINEN.find(x=>x.id===r.mineId),raffDef=RAFF_ORTE.find(x=>x.id===r.raffId);
   if(!mineDef||!raffDef)return;
-  note.innerHTML=note.innerHTML
-    .replace("<b>Beispielweg auf der Karte</b>","<b>Beispiel einer Lieferkette</b>")
-    .replace(`${mineDef.ort} → ${raffDef.ort} → ${LAND[r.fabrik.land].name}`,`LKW ${mineDef.ort} → Schiff ${raffDef.ort} → LKW ${LAND[r.fabrik.land].name}`);
+  note.innerHTML=`<b>Beispiel einer Lieferkette</b><br>LKW ${mineDef.ort} → Schiff ${raffDef.ort} → LKW ${LAND[r.fabrik.land].name}<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
 }
 
 function lieferwegTransportZeichnen(){
