@@ -2460,6 +2460,15 @@ function blattMine(id){
                              * (m.malusBis>S.tag ? m.malus : 1) * perkMult("foerderung")
                              * ausbauFaktor(m.ausbau);
   const leuteBild = ikonTeam(Math.max(1, Math.ceil(m.arbeiter / Math.max(1, def.plaetze/5))), 60, .34);
+  const sicher = !!m.sicherheit;
+  const sicherKosten = Math.max(20000, Math.round(SICHERHEIT_BASIS_KOSTEN * perkMult("sicherheit") / 1000) * 1000);
+  const sicherheitsKarte = tutorialLaeuft() ? "" : `<div class="karte sicherheitskarte ${sicher?"sicher":"offen"}">
+      <h3>Sicherheit</h3>
+      <div class="ort">Sicherheitsmassnahmen senken das Unfallrisiko – unabhängig vom Lohn.</div>
+      <div class="zeile"><span>Status</span><b style="color:${sicher?"var(--gruen)":"var(--warn)"}">${sicher?"verbessert":"nicht verbessert"}</b></div>
+      ${sicher?"":`<button class="cta gruen" data-didaktik="sicherheit" data-id="${id}" ${S.kasse>=sicherKosten?"":"disabled"}>${IK.schild}${S.kasse>=sicherKosten?"Sicherheit verbessern · "+chf(sicherKosten):"Zu wenig Geld · "+chf(sicherKosten)}</button>`}
+    </div>`;
+  const modellHinweis = tutorialLaeuft() ? "" : `<div class="notiz blau"><b>Spielmodell:</b> Mengen und Löhne sind vereinfachte Spielwerte.</div>`;
 
   return kopf + band + szeneMine(def, m)
     + (still ? `<div class="notiz rot"><b>Die Rohstoffquelle steht still.</b>${m.stillBis-S.tag<900?" Noch "+(m.stillBis-S.tag)+" Tage.":""}</div>` : "")
@@ -2468,6 +2477,7 @@ function blattMine(id){
       <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohnkosten</small><b>${chf(m.arbeiter*land.lohn*st.faktor)}</b></span></div>
     </div>
 
+    ${spezialKarte}
     <div class="karte">
       <h3>Belegschaft</h3>
       <div class="ort">${m.arbeiter} von ${def.plaetze} Plätzen · ${freieArbeiter()} Personen frei im Team</div>
@@ -2494,6 +2504,8 @@ function blattMine(id){
       <div class="zeile"><span>Zielwert Zufriedenheit</span><b>${Math.round(st.ziel - (land.risiko-1)*8 + perkPlus("zufrieden"))} %</b></div>
     </div>
 
+    ${sicherheitsKarte}
+
     <div class="karte">
       <h3>Zufriedenheit</h3>
       <div style="display:flex;align-items:center;gap:14px">
@@ -2505,7 +2517,8 @@ function blattMine(id){
       </div>
     </div>
 
-    <div class="notiz">${def.info}</div>`;
+    <div class="notiz">${def.info}</div>
+    ${modellHinweis}`;
 }
 
 /* ---------- Blatt: Raffinerie ---------- */
@@ -2513,6 +2526,8 @@ function blattRaff(id){
   const def = RAFF_ORTE.find(x=>x.id===id), r = S.raff[id], land = LAND[def.land];
   const kopf = `<div class="titelzeile">${flagge(def.land,"gross")}
     <div><h2>${def.ort}</h2><div class="ort">${land.name} · Raffinerie</div></div></div>`;
+  const spezial = (def.spezial||[]).map(k=>MATERIAL[k]?.name).filter(Boolean);
+  const spezialKarte = `<div class="karte"><h3>Spezialisierung im Spiel</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.</div></div>`;
   if (!r){
     const zu = gesperrt("raff");
     const geht = S.kasse >= def.bau && !zu;
@@ -2524,6 +2539,7 @@ function blattRaff(id){
         <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohn</small><b>${chf(land.lohn)}</b></span></div>
         <div class="wert"><span class="wi">${IK.kalender}</span><span class="wt"><small>Betrieb</small><b>${chf(9000)}/Mt.</b></span></div>
       </div>
+      ${spezialKarte}
       <div class="notiz">${def.info}</div>
       <button class="cta ${geht?"puls":""}" data-tun="raff-bau" data-id="${id}" ${geht?"":"disabled"}>
         ${geht?IK.kolben:""}${zu ? SPERRTEXT : geht ? "Raffinerie bauen · " + chf(def.bau) : "Zu wenig Geld · " + chf(def.bau)}</button>`;
@@ -2569,6 +2585,7 @@ function blattFab(land){
     return `<div class="karte"><h3>${def.name}</h3>
       <div class="ort">Verkauf ${chf(warenPreis(f.produkt))} · Nachfrage ${Math.round(nachfrage(f.produkt))}/Tag</div>
       ${szeneFabrik(f, def)}
+      <div class="ort" style="margin-top:7px">Vereinfachtes Rezept · Spielmodell</div>
       <div class="stueck">${Object.keys(def.rezept).map(k =>
         `<span class="${fehlt.includes(k)?"fehlt":""}" style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")}</div>
       <div class="crewzeile">
@@ -2593,6 +2610,7 @@ function blattFab(land){
     const tage = Math.max(3, Math.round(def.bauzeit * bauzeitF));
     return `<div class="karte"><h3>${def.name}</h3>
       <div class="ort">Verkaufspreis ${chf(def.preis)} · Bauzeit ${tage} Tage · ${def.plaetze} Plätze</div>
+      <div class="ort" style="margin-top:7px">Vereinfachtes Rezept · Spielmodell</div>
       <div class="stueck">${Object.keys(def.rezept).map(k =>
         `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")}</div>
       <div class="notiz">${def.info}</div>
@@ -2764,7 +2782,8 @@ function seiteTeam(){
       ${rows.length ? `<table><tr><th>Ort</th><th class="n">Leute</th><th class="n">Lohn</th></tr>
         ${rows.map(r=>`<tr><td><span class="flz">${r[0]?flagge(r[0]):`<span style="width:1.7em;display:inline-block">${IK.muenze}</span>`}<span>${r[1]}</span></span></td>
           <td class="n">${r[2]}</td><td class="n">${Math.round(r[3]).toLocaleString("de-CH")}</td></tr>`).join("")}</table>`
-      : `<p style="color:var(--grau)">Noch niemand eingeteilt.</p>`}</div>`;
+      : `<p style="color:var(--grau)">Noch niemand eingeteilt.</p>`}</div>
+    ${tutorialLaeuft()?"":`<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`}`;
 }
 
 function seiteZiel(){
@@ -2794,6 +2813,9 @@ function seiteZiel(){
       ${Object.keys(S.perks).length ? Object.keys(S.perks).map(id => { const e = PERK_INDEX[id]; return e
         ? `<div class="zeile"><span>${e.perk.titel}</span><b style="font-size:var(--f0);color:var(--grau)">${e.seg.titel}</b></div>` : ""; }).join("")
         : `<p style="color:var(--grau)">Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.</p>`}</div>
+    <div class="karte"><h3>Lieferkettennachweise</h3>
+      <div class="zeile"><span>Status</span><b style="color:${nachweisStatus().stufe?"var(--gruen)":"var(--warn)"}">${nachweisStatus().text}</b></div>
+      <div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div></div>
     <div class="karte"><h3>Meldungen</h3>
       ${S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:var(--f0)">${e.text}</span><b style="font-size:var(--f0);color:var(--grau)">T${e.tag}</b></div>`).join("")
         || `<p style="color:var(--grau)">Noch nichts passiert.</p>`}</div>
@@ -2846,7 +2868,7 @@ function lupeFuellen(segId){
       <span class="marke">Anwendung</span>
       <h3>${naechst.titel}</h3><p>${naechst.text}</p>
       <div class="wirkung">${naechst.wirkung.map(w=>`<span>${w}</span>`).join("")}</div>
-      ${gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» erforschen.</div>` : ""}
+      ${gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» finanzieren.</div>` : ""}
       <button class="cta ${geht?"puls":""}" data-tun="perk" data-p="${naechst.id}" ${geht?"":"disabled"}>
         ${geht?IK.gluehbirne:""}${gesperrtDurch ? "Noch gesperrt" : geht ? "Verbesserung finanzieren · " + chf(naechst.kosten) : "Zu wenig Geld · " + chf(naechst.kosten)}</button>
     </div>`
@@ -2857,7 +2879,7 @@ function lupeFuellen(segId){
     seg.formeln.map(f=>`<tr><td>${f[0]}</td><td><code>${f[1]}</code></td></tr>`).join("")}</table></div>` : "";
 
   const materialTabelle = seg.id === "geologie" ? `<div class="karte"><h3>Woher die Rohstoffe kommen</h3>
-    <table><tr><th>Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>
+    <table><tr><th>Rohstoff → Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>
     ${Object.keys(MATERIAL).map(k => {
       const laender = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>m.land))];
       return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${MATERIAL[k].name}</b><br>
@@ -2867,7 +2889,7 @@ function lupeFuellen(segId){
     }).join("")}</table></div>` : "";
 
   const rezepte = seg.id === "fabrik" ? `<div class="karte"><h3>Was in einem Gerät steckt</h3>
-    ${Object.keys(PRODUKT).map(p=>`<div style="margin-bottom:10px"><b>${PRODUKT[p].name}</b>
+    <div class="notiz blau"><b>Vereinfachte Rezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>${Object.keys(PRODUKT).map(p=>`<div style="margin-bottom:10px"><b>${PRODUKT[p].name}</b>
       <div class="stueck">${Object.keys(PRODUKT[p].rezept).map(k=>
         `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${PRODUKT[p].rezept[k]}</span>`).join("")}</div></div>`).join("")}</div>` : "";
 
@@ -2875,7 +2897,7 @@ function lupeFuellen(segId){
     <table>${Object.keys(LAND).sort((a,b)=>LAND[a].lohn-LAND[b].lohn).map(l =>
       `<tr><td><span class="flz">${flagge(l)}<span>${LAND[l].name}</span></span></td>
         <td class="n">${LAND[l].lohn.toLocaleString("de-CH")}</td></tr>`).join("")}</table>
-    <div class="notiz">Alle Werte sind gerundete Grössenordnungen für einfache Arbeit im Bergbau.</div></div>` : "";
+    <div class="notiz"><b>Spielmodell:</b> Diese Lohnwerte sind vereinfachte Spielwerte und keine aktuelle Statistik.</div></div>` : "";
 
   $("#lupeinhalt").innerHTML = `
     <div class="titelzeile" style="padding-right:52px">
