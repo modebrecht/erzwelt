@@ -117,7 +117,7 @@ function ensureTransportLegend(sichtbar){
     document.getElementById("sicht")?.appendChild(legend);
   }
   legend.hidden=!sichtbar;
-  if(sichtbar) legend.innerHTML="<b>Transportfluss</b><br><span style='font-weight:700'>LKW → Schiff → LKW</span><br><span style='font-weight:600;opacity:.78'>rein visuell · keine Transportkosten oder Lieferzeiten</span>";
+  if(sichtbar) legend.innerHTML="<b>Transportweg</b><br><span style='font-weight:700'>LKW → Schiff → LKW</span><br><span style='font-weight:600;opacity:.78'>Darstellung ohne Transportkosten und Lieferzeiten</span>";
   return legend;
 }
 
@@ -127,7 +127,7 @@ function updateRouteNote(r){
   const mineDef=MINEN.find(x=>x.id===r.mineId),raffDef=RAFF_ORTE.find(x=>x.id===r.raffId);
   if(!mineDef||!raffDef)return;
   note.innerHTML=note.innerHTML
-    .replace("<b>Beispielweg auf der Karte</b>","<b>Sichtbare Lieferkette</b>")
+    .replace("<b>Beispielweg auf der Karte</b>","<b>Beispiel einer Lieferkette</b>")
     .replace(`${mineDef.ort} → ${raffDef.ort} → ${LAND[r.fabrik.land].name}`,`LKW ${mineDef.ort} → Schiff ${raffDef.ort} → LKW ${LAND[r.fabrik.land].name}`);
 }
 
