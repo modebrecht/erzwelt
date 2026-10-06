@@ -8,9 +8,7 @@
         "didactic-events.js",
         "didactic-ui.js",
         "didactic-should.js",
-        "didactic-transport.js",
-        "language-pass.js",
-        "language-pass-2.js"
+        "didactic-transport.js"
       ]
     },
     {
