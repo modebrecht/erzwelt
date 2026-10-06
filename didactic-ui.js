@@ -49,7 +49,7 @@ const originalBlattFab = blattFab;
 blattFab = function(land){
   let html = originalBlattFab(land);
   html = html.replace(/Zukaufen geht nicht – eröffne dafür eine Mine\./g, "Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.");
-  if (!tutorialLaeuft()) html = html.replace(/(<div class="stueck">)/g, `<div class="ort" style="margin-top:7px">Spielrezept · stark vereinfacht</div>$1`);
+  if (!tutorialLaeuft()) html = html.replace(/(<div class="stueck">)/g, `<div class="ort" style="margin-top:7px">Vereinfachtes Rezept · Spielmodell</div>$1`);
   return html;
 };
 
@@ -71,19 +71,19 @@ seiteMarkt = function(){
   }).join("");
   const eff = S.globalMod.filter(m => m.bis > S.tag);
 
-  return `<h1>Markt &amp; Verkauf</h1><div class="unter">Fertige Ware verkauft sich nicht von allein</div>
+  return `<h1>Markt &amp; Verkauf</h1><div class="unter">Fertige Produkte müssen verkauft werden</div>
     <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
       <h3>Verkauf</h3><div class="ort">Im Lager liegen <b>${lager}</b> Stück</div>
-      <button class="cta riesig ${(!heuteSchon&&handStueck>0)?"puls":""}" data-tun="handverkauf" ${(heuteSchon||handStueck<=0)?"disabled":""}>${IK.muenze}${handStueck<=0?"Nichts zu verkaufen":heuteSchon?"Heute schon verkauft":"SELBER VERKAUFEN · "+handStueck+" Stück"}</button>
-      <div class="notiz">Einmal pro Tag kannst du selber verkaufen. Für den täglichen Verkauf setzt du Leute im Verkaufsteam ein.</div>
-      <h3 style="margin-top:14px">Dein Verkaufsteam</h3><div class="ort">${frei} Leute frei · Lohn ${chf(VERKAUF_LOHN)} pro Person und Monat</div>
+      <button class="cta riesig ${(!heuteSchon&&handStueck>0)?"puls":""}" data-tun="handverkauf" ${(heuteSchon||handStueck<=0)?"disabled":""}>${IK.muenze}${handStueck<=0?"Nichts zu verkaufen":heuteSchon?"Heute schon verkauft":"SELBST VERKAUFEN · "+handStueck+" Stück"}</button>
+      <div class="notiz">Einmal pro Tag kannst du selbst verkaufen. Für den täglichen Verkauf setzt du Leute im Verkaufsteam ein.</div>
+      <h3 style="margin-top:14px">Dein Verkaufsteam</h3><div class="ort">${frei} Personen frei · Lohn ${chf(VERKAUF_LOHN)} pro Person und Monat</div>
       <div class="crewzeile"><button data-tun="vcrew" data-n="-5" ${(S.verkaeufer||0)<=0?"disabled":""}>−5</button><button data-tun="vcrew" data-n="-1" ${(S.verkaeufer||0)<=0?"disabled":""}>−</button><div class="zahl"><b>${S.verkaeufer||0}</b><small>Verkauf</small></div><button data-tun="vcrew" data-n="1" ${(frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""}>+</button><button data-tun="vcrew" data-n="5" ${(frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""}>+5</button></div>
-      <div class="zeile"><span>Setzen ab</span><b>${kraft} Stück/Tag</b></div><div class="zeile"><span>Lohnkosten</span><b>${chf((S.verkaeufer||0)*VERKAUF_LOHN)}/Mt.</b></div>
-      ${frei<=0?`<div class="notiz rot">Niemand ist frei. Stell im Team neue Leute an.<button class="cta" data-tun="zumteam">${IK.person}Zum Team</button></div>`:""}
+      <div class="zeile"><span>Verkaufskapazität</span><b>${kraft} Stück/Tag</b></div><div class="zeile"><span>Lohnkosten</span><b>${chf((S.verkaeufer||0)*VERKAUF_LOHN)}/Mt.</b></div>
+      ${frei<=0?`<div class="notiz rot">Niemand ist frei. Stelle im Team weitere Personen ein.<button class="cta" data-tun="zumteam">${IK.person}Zum Team</button></div>`:""}
     </div>
     <div class="karte"><h3>Deine Produkte</h3><table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>${prod}</table><div class="notiz">Produzierst du deutlich mehr als nachgefragt wird, füllt sich das Lager und der Verkaufspreis sinkt.</div></div>
-    <div class="karte"><h3>Deine Rohstoffquellen</h3><table><tr><th>Material</th><th>Quelle</th><th class="n">Bereit</th><th class="n">Rohstoff</th></tr>${roh}</table><div class="notiz">Kein Weltpreis-Spielsystem: Primärrohstoffe kommen aus deinen eigenen Quellen und werden raffiniert. Recycling kann später einen Teil ersetzen.</div></div>
-    ${eff.length?`<div class="karte"><h3>Aktuelle Sondereffekte</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"Dollar / Fertigwaren":"Hafen-Durchsatz"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
+    <div class="karte"><h3>Deine Rohstoffquellen</h3><table><tr><th>Material</th><th>Quelle</th><th class="n">Bereit</th><th class="n">Rohstoff</th></tr>${roh}</table><div class="notiz">Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.</div></div>
+    ${eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
 };
 
 const originalSeiteTeam = seiteTeam;
@@ -98,7 +98,7 @@ const originalSeiteZiel = seiteZiel;
 seiteZiel = function(){
   let html = originalSeiteZiel();
   const status = nachweisStatus();
-  const nachweisKarte = `<div class="karte"><h3>Lieferketten-Nachweise</h3><div class="zeile"><span>Status</span><b style="color:${status.stufe?"var(--gruen)":"var(--warn)"}">${status.text}</b></div><div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div></div>`;
+  const nachweisKarte = `<div class="karte"><h3>Lieferkettennachweise</h3><div class="zeile"><span>Status</span><b style="color:${status.stufe?"var(--gruen)":"var(--warn)"}">${status.text}</b></div><div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div></div>`;
   const meldungen = `<div class="karte"><h3>Meldungen</h3>`;
   if (html.includes(meldungen)) html = html.replace(meldungen, nachweisKarte + meldungen);
   return html.replace(/ Erz<\/small>/g, " Rohstoff</small>");
@@ -130,7 +130,7 @@ lupeFuellen = function(segId){
   }
   if (segId === "fabrik"){
     const card = [...root.querySelectorAll(".karte")].find(k=>k.querySelector("h3")?.textContent.includes("Was in einem Gerät steckt"));
-    if (card && !card.textContent.includes("Spielrezepte")) card.insertAdjacentHTML("beforeend", `<div class="notiz blau"><b>Spielrezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>`);
+    if (card && !card.textContent.includes("Spielrezepte")) card.insertAdjacentHTML("beforeend", `<div class="notiz blau"><b>Vereinfachte Rezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>`);
   }
 };
 
