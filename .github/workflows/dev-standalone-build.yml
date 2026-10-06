@@ -1,5 +1,7 @@
 name: Standalone build verify
 
+# Source-owned copy gate: committed index.html must match the declarative sources.
+
 on:
   push:
     branches: [dev, main]
