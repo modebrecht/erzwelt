@@ -1,3 +1,4 @@
+// Source-owned copy cleanup regression gate.
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 
