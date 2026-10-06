@@ -1,42 +1,42 @@
-name: Dev standalone build
+name: Standalone build verify
 
-# Keeps the generated standalone entry in sync with dev sources.
 on:
   push:
-    branches:
-      - dev
+    branches: [dev, main]
     paths:
       - "erzwelt-core.html"
       - "patches.json"
       - "*.js"
+      - "index.html"
       - "scripts/build-standalone.mjs"
       - ".github/workflows/dev-standalone-build.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
+      - "scripts/build-standalone.mjs"
+      - ".github/workflows/dev-standalone-build.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Checkout dev
+      - name: Checkout tested commit
         uses: actions/checkout@v4
-        with:
-          ref: dev
-          fetch-depth: 0
 
       - name: Build standalone
         run: node scripts/build-standalone.mjs
 
-      - name: Commit generated index
+      - name: Verify generated index is committed
         shell: bash
         run: |
-          if git diff --quiet -- index.html; then
-            echo "index.html already up to date"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "build: refresh dev standalone"
-          git push origin HEAD:dev
+          git diff --check
+          git diff --exit-code -- index.html
