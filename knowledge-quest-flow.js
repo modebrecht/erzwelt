@@ -72,7 +72,7 @@
     {
       id:"ruf", seg:"ruf", fields:["ruf"],
       titel:"Ruf und Nachweise unterscheiden",
-      aufgabe:"Öffne «Ziel». Vergleiche dort Ruf und Lieferketten-Nachweise.",
+      aufgabe:"Öffne «Ziel». Vergleiche dort Ruf und Lieferkettennachweise.",
       fertig:q=>!!q.flags.ruf,
       erfolg:"Du hast Ruf und Nachweise verglichen. Sie haben im Spiel unterschiedliche Aufgaben."
     },
@@ -105,7 +105,7 @@
       leute:"Ändere nach dem Tutorial einmal die Lohnstufe einer Rohstoffquelle.",
       markt:"Verkaufe nach dem Tutorial einmal selbst ein Produkt.",
       geologie:"Öffne zwei verschiedene Rohstoffstandorte auf der Karte.",
-      ruf:"Öffne «Ziel» und vergleiche Ruf mit Lieferketten-Nachweisen.",
+      ruf:"Öffne «Ziel» und vergleiche Ruf mit Lieferkettennachweisen.",
       modell:"Schliesse die vorherigen Wissens-Quests ab."
     };
     return map[segId]||"Erlebe diesen Zusammenhang einmal im Spiel.";
