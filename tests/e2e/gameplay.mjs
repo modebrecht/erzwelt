@@ -71,6 +71,7 @@ const clickMineById = async id => {
 
 await page.goto('http://127.0.0.1:4173/index.html', { waitUntil: 'load' });
 await page.waitForFunction(() => window.__erzweltDidacticComplexity?.declarativeCopy && window.__erzweltKnowledgeQuestFlow && window.__erzweltObjectiveGuide, null, { timeout: 15000 });
+await page.addStyleTag({ content: '*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}' });
 
 // Initial mobile + module smoke.
 const initial = await page.evaluate(() => ({
@@ -107,7 +108,7 @@ await page.locator('button[data-seite="team"]').first().click();
 for (let i=0;i<10 && (await state()).workers < 40;i++) {
   const hire = page.locator('button[data-tun="anstellen"]:not([disabled])');
   if (!await hire.count()) throw new Error('Hire button missing before 40 workers');
-  await hire.first().click();
+  await hire.first().click({ force: true });
   await page.waitForTimeout(100);
 }
 if ((await state()).workers < 40) throw new Error('Could not hire 40 workers');
