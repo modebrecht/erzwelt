@@ -37,9 +37,11 @@ const currentTutorial = () => page.evaluate(() => TUTORIAL[S.tutorial]?.id || nu
 const clickVisible = async selector => {
   const loc = page.locator(selector).filter({ visible: true });
   await loc.first().waitFor({ state: 'visible', timeout: 10000 });
-  await loc.first().evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  await loc.first().evaluate(el => {
+    el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    el.click();
+  });
   await page.waitForTimeout(60);
-  await loc.first().click({ force: true });
 };
 const closeLupe = async () => {
   const b = page.locator('button[data-schliessen="lupe"]:visible');
@@ -108,7 +110,7 @@ await page.locator('button[data-seite="team"]').first().click();
 for (let i=0;i<10 && (await state()).workers < 40;i++) {
   const hire = page.locator('button[data-tun="anstellen"]:not([disabled])');
   if (!await hire.count()) throw new Error('Hire button missing before 40 workers');
-  await hire.first().click({ force: true });
+  await hire.first().evaluate(el => el.click());
   await page.waitForTimeout(100);
 }
 if ((await state()).workers < 40) throw new Error('Could not hire 40 workers');
@@ -133,7 +135,7 @@ for (let i=0;i<5 && (await currentTutorial()) === 'crew3';i++) {
   const id = Object.entries(s.minen).find(([,m]) => m.arbeiter < 5)?.[0];
   if (!id) break;
   await clickMineById(id);
-  const plus = page.locator(`button[data-tun="crew"][data-id="${id}"][data-n="10"]:not([disabled]), button[data-tun="crew"][data-id="${id}"][data-n="1"]:not([disabled])`).first();
+  const plus = page.locator(`button[data-tun="crew"][data-id="${id}"][data-n="10"]:not([disabled])`).first();
   await plus.click();
   await page.waitForTimeout(120);
 }
@@ -142,7 +144,7 @@ await checkpoint('three-mines-staffed');
 
 // 6: refinery.
 await goMap();
-await page.locator('.pin.wink .knopf').first().click({ force: true });
+await page.locator('.pin.wink .knopf').first().evaluate(el => el.click());
 await clickVisible('button[data-tun="raff-bau"]');
 await waitTutorial('raffcrew');
 await checkpoint('refinery-built');
@@ -154,12 +156,13 @@ await checkpoint('refinery-staffed');
 
 // 8: cable factory.
 await goMap();
-await page.locator('.pin.wink .knopf').first().click({ force: true });
+await page.locator('.pin.wink .knopf').first().evaluate(el => el.click());
 await clickVisible('button[data-tun="fab-bau"]:not([disabled])');
 await waitTutorial('fabcrew');
 await checkpoint('factory-started');
 
 // 9: wait for construction at 4x, then staff.
+await goMap();
 await setTempo(4);
 await page.waitForFunction(() => S.fabriken.length && S.fabriken[0].restbau === 0, null, { timeout: 30000 });
 await setTempo(0);
@@ -175,6 +178,7 @@ await waitTutorial('verkauf');
 await checkpoint('factory-staffed');
 
 // Produce at least one cable.
+await goMap();
 await setTempo(4);
 await page.waitForFunction(() => (S.ware?.kabel || 0) > 0, null, { timeout: 30000 });
 await setTempo(0);
@@ -213,13 +217,14 @@ s = await state();
 const firstMine = Object.keys(s.minen)[0];
 await clickMineById(firstMine);
 await clickVisible('button[data-tun="lohn"][aria-pressed="false"]');
+await goMap();
 await collectKnowledge('lohn');
 await checkpoint('knowledge-lohn');
 
 // Save/reload exactly here and assert progression survives.
 const beforeReload = await state();
 await page.reload({ waitUntil: 'load' });
-await page.waitForTimeout(800);
+await page.waitForFunction(() => !!window.__erzweltKnowledgeQuestFlow && !!document.querySelector('#quest'), null, { timeout: 15000 });
 const afterReload = await state();
 for (const key of ['tutorial','difficulty']) {
   if (JSON.stringify(beforeReload[key]) !== JSON.stringify(afterReload[key])) throw new Error(`Reload mismatch ${key}`);
@@ -254,8 +259,9 @@ if (mineIds.length < 2) throw new Error('Need two mines for geology quest');
 for (const id of mineIds) {
   await clickMineById(id);
   const close = page.locator('#zu:visible');
-  if (await close.count()) await close.click();
+  if (await close.count()) await close.evaluate(el => el.click());
 }
+await goMap();
 await collectKnowledge('geologie');
 await checkpoint('knowledge-geology');
 
