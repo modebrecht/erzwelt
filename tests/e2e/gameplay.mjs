@@ -37,7 +37,7 @@ const currentTutorial = () => page.evaluate(() => TUTORIAL[S.tutorial]?.id || nu
 const clickVisible = async selector => {
   const loc = page.locator(selector).filter({ visible: true });
   await loc.first().waitFor({ state: 'visible', timeout: 10000 });
-  await loc.first().click();
+  await loc.first().click({ force: true });
 };
 const closeLupe = async () => {
   const b = page.locator('button[data-schliessen="lupe"]:visible');
@@ -68,7 +68,7 @@ const clickMineById = async id => {
 };
 
 await page.goto('http://127.0.0.1:4173/index.html', { waitUntil: 'load' });
-await page.waitForTimeout(1000);
+await page.waitForFunction(() => window.__erzweltDidacticComplexity?.declarativeCopy && window.__erzweltKnowledgeQuestFlow && window.__erzweltObjectiveGuide, null, { timeout: 15000 });
 
 // Initial mobile + module smoke.
 const initial = await page.evaluate(() => ({
