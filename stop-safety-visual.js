@@ -196,7 +196,7 @@
 
     let relations=root.querySelector(".mine-ursachen");
     if(!relations){
-      const satisfaction=[...root.querySelectorAll(".karte")].find(card=>card.querySelector("h3")?.textContent==="Zufriedenheit");
+      const satisfaction=root.querySelector(".zufriedenheitskarte");
       relations=document.createElement("div");
       relations.className="mine-ursachen";
       relations.setAttribute("aria-label","Getrennte Zusammenhänge");

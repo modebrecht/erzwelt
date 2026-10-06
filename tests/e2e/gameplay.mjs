@@ -277,6 +277,25 @@ await closeLupe();
 await collectKnowledge('modell');
 await checkpoint('knowledge-model');
 
+// Source-owned copy regression: knowledge views must render final copy once,
+// without didactic-ui post-render text/HTML patching.
+const sourceOwnedCopy = await page.evaluate(() => {
+  lupeFuellen('fabrik');
+  const recipeNotes = [...document.querySelectorAll('#lupeinhalt .notiz')]
+    .filter(el => el.textContent.includes('Vereinfachte Rezepte:')).length;
+
+  lupeFuellen('geologie');
+  const firstGeoCell = document.querySelector('#lupeinhalt table tr:nth-child(2) td')?.textContent.replace(/\s+/g, ' ').trim() || '';
+  const geoModelNotes = [...document.querySelectorAll('#lupeinhalt .notiz')]
+    .filter(el => el.textContent.includes('Ergiebigkeit und Mengen sind vereinfachte Werte.')).length;
+
+  return { recipeNotes, firstGeoCell, geoModelNotes };
+});
+if (sourceOwnedCopy.recipeNotes !== 1) throw new Error(`Recipe disclaimer rendered ${sourceOwnedCopy.recipeNotes} times`);
+if (!sourceOwnedCopy.firstGeoCell.includes('→')) throw new Error(`Geology source-to-material copy missing: ${sourceOwnedCopy.firstGeoCell}`);
+if (sourceOwnedCopy.geoModelNotes !== 1) throw new Error(`Geology model disclaimer rendered ${sourceOwnedCopy.geoModelNotes} times`);
+await closeLupe();
+
 // Perk-gate hardening: collected field yes; tier 2 requires tier 1 perk.
 const perkGate = await page.evaluate(() => ({
   tier1: wissenPraxis('kette',0),

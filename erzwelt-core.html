@@ -2505,7 +2505,7 @@ function blattMine(id){
 
     ${sicherheitsKarte}
 
-    <div class="karte">
+    <div class="karte zufriedenheitskarte">
       <h3>Zufriedenheit</h3>
       <div style="display:flex;align-items:center;gap:14px">
         <div style="width:64px;flex:none">${ikonZufrieden(zuf)}</div>
@@ -2882,11 +2882,13 @@ function lupeFuellen(segId){
     <table><tr><th>Rohstoff → Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>
     ${Object.keys(MATERIAL).map(k => {
       const laender = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>m.land))];
-      return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${MATERIAL[k].name}</b><br>
+      const quellen = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>rohstoffDerMine(m)))];
+      return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${quellen.join(" / ")} → ${MATERIAL[k].name}</b><br>
         <small style="color:var(--grau);font-weight:600">${MATERIAL[k].wofuer}</small></td>
         <td>${laender.map(l=>`<span class="flz" style="margin-right:6px">${flagge(l,"mini")}<span style="font-size:var(--f0)">${LAND[l].name}</span></span>`).join("")}</td>
         <td class="n">${(MATERIAL[k].ausbeute*100).toFixed(0)} %</td></tr>`;
-    }).join("")}</table></div>` : "";
+    }).join("")}</table>
+    <div class="notiz blau"><b>Spielmodell:</b> Ergiebigkeit und Mengen sind vereinfachte Werte.</div></div>` : "";
 
   const rezepte = seg.id === "fabrik" ? `<div class="karte"><h3>Was in einem Gerät steckt</h3>
     <div class="notiz blau"><b>Vereinfachte Rezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>${Object.keys(PRODUKT).map(p=>`<div style="margin-bottom:10px"><b>${PRODUKT[p].name}</b>

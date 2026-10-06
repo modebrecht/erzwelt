@@ -34,36 +34,6 @@ seiteMarkt = function(){
     ${eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
 };
 
-const originalLupeFuellen = lupeFuellen;
-lupeFuellen = function(segId){
-  originalLupeFuellen(segId);
-  const root = document.getElementById("lupeinhalt");
-  if (!root) return;
-  if (segId === "geologie"){
-    const table = [...root.querySelectorAll("table")].find(t=>t.textContent.includes("Wichtige Förderländer"));
-    if (table){
-      const th = table.querySelector("th"); if (th) th.textContent = "Rohstoff → Material";
-      const rows = table.querySelectorAll("tr");
-      Object.keys(MATERIAL).forEach((k,i)=>{
-        const cell = rows[i+1]?.querySelector("td");
-        if (!cell) return;
-        const quellen = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>rohstoffDerMine(m)))];
-        const usage = MATERIAL[k].wofuer;
-        cell.innerHTML = `<i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${quellen.join(" / ")} → ${MATERIAL[k].name}</b><br><small style="color:var(--grau);font-weight:600">${usage}</small>`;
-      });
-      table.insertAdjacentHTML("afterend", `<div class="notiz blau"><b>Spielmodell:</b> Ergiebigkeit und Mengen sind vereinfachte Werte.</div>`);
-    }
-  }
-  if (segId === "leute"){
-    const notes = root.querySelectorAll(".notiz");
-    notes.forEach(n=>{ if (n.textContent.includes("gerundete Grössenordnungen")) n.innerHTML = "<b>Spielmodell:</b> Diese Lohnwerte sind vereinfachte Spielwerte und keine aktuelle Statistik."; });
-  }
-  if (segId === "fabrik"){
-    const card = [...root.querySelectorAll(".karte")].find(k=>k.querySelector("h3")?.textContent.includes("Was in einem Gerät steckt"));
-    if (card && !card.textContent.includes("Spielrezepte")) card.insertAdjacentHTML("beforeend", `<div class="notiz blau"><b>Vereinfachte Rezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>`);
-  }
-};
-
 const tut = Object.fromEntries(TUTORIAL.map(t=>[t.id,t]));
 if (tut.mine1) tut.mine1.text = "Dein Ladekabel braucht Kupfer, Aluminium und Zinn. Sichere zuerst eine eigene Rohstoffquelle.";
 if (tut.minen3) tut.minen3.text = "Kupfererz → Kupfer, Bauxit → Aluminium, Zinnerz → Zinn. Öffne für alle drei eine Rohstoffquelle.";
