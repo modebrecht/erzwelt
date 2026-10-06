@@ -37,6 +37,8 @@ const currentTutorial = () => page.evaluate(() => TUTORIAL[S.tutorial]?.id || nu
 const clickVisible = async selector => {
   const loc = page.locator(selector).filter({ visible: true });
   await loc.first().waitFor({ state: 'visible', timeout: 10000 });
+  await loc.first().evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  await page.waitForTimeout(60);
   await loc.first().click({ force: true });
 };
 const closeLupe = async () => {
