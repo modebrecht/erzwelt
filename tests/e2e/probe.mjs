@@ -1,4 +1,5 @@
 // Source-owned copy cleanup regression gate.
+// Final cleanup release gate: this file change intentionally retriggers Gameplay E2E.
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 
