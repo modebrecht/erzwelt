@@ -29,12 +29,6 @@ const modellShould=WISSEN.find(s=>s.id==="modell");
 if(modellShould&&modellShould.text){
   modellShould.text[1]="Der Kern des Modells steht in <code>erzwelt-core.html</code>. Die didaktischen Korrekturen sind bewusst in <code>didactic-model.js</code>, <code>didactic-events.js</code>, <code>didactic-ui.js</code> und <code>didactic-should.js</code> getrennt. Vergleiche: Welche Regeln wurden vereinfacht, damit Ursache und Wirkung klar bleiben?";
 }
-const originalNotizShould=notiz;
-notiz=function(text,art){
-  if(typeof text==="string") text=text.replace(/^Neues Wissen:/,"Verbesserung finanziert:");
-  return originalNotizShould(text,art);
-};
-
 function shouldMigration(){
   if(!S||typeof S!=="object")return;
   if(!S.wissenGesehen||typeof S.wissenGesehen!=="object")S.wissenGesehen={};
@@ -87,16 +81,6 @@ function wissenPraxis(segId,stufe){
   const r=regeln[segId]?.[stufe]||[true,"Voraussetzung erfüllt."];
   return {ok:!!r[0],text:r[1]};
 }
-const originalSeiteWissenShould=seiteWissen;
-seiteWissen=function(){
-  shouldMigration();
-  return originalSeiteWissenShould()
-    .replace("Acht Felder. Öffne eins, lies nach – und erwirb daraus einen dauerhaften Vorteil.","Die acht Wissensbereiche können jederzeit gelesen werden. Eine Verbesserung kann finanziert werden, sobald ihre Voraussetzung im Spiel erfüllt ist.")
-    .replace(/(\d+) von (\d+) erforscht/g,"$1 von $2 Verbesserungen finanziert")
-    .replace("Jeder Perk kostet Geld und wirkt sofort im ganzen Spiel.","Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist.")
-    .replace(/Nächstes Wissen:/g,"Nächste Verbesserung:")
-    .replace(/Alles erforscht/g,"Alle Verbesserungen finanziert");
-};
 const originalLupeFuellenShould=lupeFuellen;
 lupeFuellen=function(segId){
   shouldMigration();
@@ -122,19 +106,7 @@ lupeFuellen=function(segId){
     button.classList.toggle("puls",geht);
     button.innerHTML=vorherGesperrt?"Vorherige Verbesserung fehlt":!praxis.ok?"Voraussetzung noch nicht erfüllt":!genug?"Zu wenig Geld · "+chf(next.kosten):IK.gluehbirne+"Verbesserung finanzieren · "+chf(next.kosten);
   }
-  const root=document.getElementById("lupeinhalt");
-  if(root){
-    root.innerHTML=root.innerHTML.replace("Dieses Feld ist ausgeforscht","Alle Verbesserungen finanziert").replace(/Du hast alles Wissen aus/g,"Du hast alle Verbesserungen aus");
-  }
-  document.querySelectorAll("#lupeinhalt .marke").forEach(m=>{
-    if(m.textContent==="Neues Wissen")m.textContent="Anwendung";
-    if(m.textContent==="Erforscht")m.textContent="Finanziert";
-  });
   speichern();
-};
-const originalSeiteZielShould=seiteZiel;
-seiteZiel=function(){
-  return originalSeiteZielShould().replace("Erforschtes Wissen","Finanzierte Verbesserungen").replace("Noch kein Wissen erworben. Schau im Reiter Wissen vorbei.","Noch keine Verbesserung umgesetzt. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.");
 };
 naechsterSchritt=function(){
   const minen=offeneMinen();
@@ -173,16 +145,6 @@ questZeichnen=function(){
     const q=document.getElementById("quest");
     if(q&&!q.hidden){const art=document.getElementById("q-art");if(art)art.textContent="Hinweis";}
   }
-};
-function spezialNamen(def){return(def.spezial||[]).map(k=>MATERIAL[k]?.name).filter(Boolean);}
-const originalBlattRaffShould=blattRaff;
-blattRaff=function(id){
-  let html=originalBlattRaffShould(id);
-  const def=RAFF_ORTE.find(x=>x.id===id);
-  if(!def)return html;
-  const card=`<div class="karte"><h3>Spezialisierung im Spiel</h3><div class="ort">${spezialNamen(def).join(" · ")||"keine Spezialisierung"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.</div></div>`;
-  const marker=`<div class="karte">\n      <h3>Personal</h3>`;
-  return html.includes(marker)?html.replace(marker,card+"\n\n    "+marker):html+card;
 };
 tagVor=function(){
   if(S.ende||modalOffen)return;
