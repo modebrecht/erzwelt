@@ -52,6 +52,14 @@
       "files": [
         "reduced-motion-final.js"
       ]
+    },
+    {
+      "name": "sek-b-guidance",
+      "files": [
+        "didactic-complexity.js",
+        "knowledge-quest-flow.js",
+        "objective-guide.js"
+      ]
     }
   ]
 }

@@ -1,0 +1,59 @@
+name: Gameplay E2E
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
+      - "tests/e2e/**"
+      - ".github/workflows/dev-e2e-audit.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
+      - "tests/e2e/**"
+      - ".github/workflows/dev-e2e-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gameplay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Serve standalone
+        run: |
+          python3 -m http.server 4173 >/tmp/erzwelt-http.log 2>&1 &
+          echo $! >/tmp/erzwelt-http.pid
+          sleep 1
+
+      - name: Run mobile probe
+        run: node tests/e2e/probe.mjs
+
+      - name: Run full gameplay E2E
+        run: node tests/e2e/gameplay.mjs
+
+      - name: Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: erzwelt-e2e-audit
+          path: artifacts/
+          if-no-files-found: warn

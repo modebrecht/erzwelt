@@ -1,0 +1,42 @@
+name: Standalone build verify
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
+      - "scripts/build-standalone.mjs"
+      - ".github/workflows/dev-standalone-build.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
+      - "scripts/build-standalone.mjs"
+      - ".github/workflows/dev-standalone-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+
+      - name: Build standalone
+        run: node scripts/build-standalone.mjs
+
+      - name: Verify generated index is committed
+        shell: bash
+        run: |
+          git diff --check
+          git diff --exit-code -- index.html
