@@ -271,15 +271,7 @@
     };
   }
 
-  if(typeof seiteMarkt==="function"){
-    const originalSeiteMarkt=seiteMarkt;
-    seiteMarkt=function(){
-      const html=originalSeiteMarkt();
-      if(html.includes("verkauf-kette-mini"))return html;
-      return html.replace(/(<div class="karte"[^>]*>\s*<h3>Verkauf<\/h3>)/,
-        `<div class="verkauf-kette-mini"><span>Produkt</span><b>→</b><span>Verkauf</span><b>→</b><span>Geld</span></div>$1`);
-    };
-  }
+
 
   updateTransformationScenes();
   window.__erzweltProcessAnimations={version:1,features:["raffination","fertigung","verkauf"]};
