@@ -1,9 +1,22 @@
-name: Dev E2E audit
+name: Gameplay E2E
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, main]
     paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
+      - "tests/e2e/**"
+      - ".github/workflows/dev-e2e-audit.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "erzwelt-core.html"
+      - "patches.json"
+      - "*.js"
+      - "index.html"
       - "tests/e2e/**"
       - ".github/workflows/dev-e2e-audit.yml"
   workflow_dispatch:
@@ -16,10 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout dev
+      - name: Checkout tested commit
         uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Install Playwright
         run: |
