@@ -550,7 +550,7 @@ body[data-anim="0"] *{animation:none!important}
   <div id="toasts"></div>
 
   <div id="ebenen" role="group" aria-label="Kartenebenen">
-    <button data-ebene="mine" aria-pressed="true"><i style="background:#e8b923"></i>Minen</button>
+    <button data-ebene="mine" aria-pressed="true"><i style="background:#e8b923"></i>Rohstoffquellen</button>
     <button data-ebene="raff" aria-pressed="true"><i style="background:#5b8f7a"></i>Werke</button>
     <button data-ebene="fab" aria-pressed="true"><i style="background:#b5703c"></i>Fabriken</button>
   </div>
@@ -1051,7 +1051,7 @@ function szeneMine(def, m){
   const brocken = laeuft ? [...Array(4)].map((_,i) =>
     `<circle class="funkeln" style="animation-delay:${(i*.3).toFixed(2)}s" cx="${34+i*7}" cy="${58+ (i%2)*6}" r="${2.6-i*.3}" fill="${mat.farbe}"/>`).join("") : "";
   return `<div class="szene" data-szene="${def.id}|${arbeiter}|${laeuft?1:0}">
-    <svg class="buehne" viewBox="0 0 240 110" aria-label="Mine ${def.ort}">
+    <svg class="buehne" viewBox="0 0 240 110" aria-label="Rohstoffquelle ${def.ort}">
       <defs><linearGradient id="mg${def.id}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="#8f7c5c"/><stop offset="1" stop-color="#6d5c40"/></linearGradient></defs>
       <circle cx="212" cy="20" r="11" fill="#ffe9a0"/>
@@ -1076,7 +1076,7 @@ function szeneMine(def, m){
       ${arbeiter === 0 ? `<text x="120" y="46" text-anchor="middle" font-family="Baloo 2,sans-serif" font-size="15"
         fill="#ffffff" stroke="#00000055" stroke-width="3" paint-order="stroke">Noch niemand hier</text>` : ""}
       ${still ? `<rect width="240" height="110" fill="#00000055"/>
-        <text x="120" y="58" text-anchor="middle" font-family="Baloo 2,sans-serif" font-size="17" fill="#fff">Mine steht still</text>` : ""}
+        <text x="120" y="58" text-anchor="middle" font-family="Baloo 2,sans-serif" font-size="17" fill="#fff">Rohstoffquelle steht still</text>` : ""}
     </svg><div class="schweber"></div></div>`;
 }
 
@@ -1279,7 +1279,7 @@ const WISSEN = [
       "Such im Quelltext die Funktion <code>tagVor()</code>. Sie ist der Herzschlag des Spiels. In welcher Reihenfolge passiert was – und warum ist die Reihenfolge wichtig?"],
     formeln:[
       ["Förderung / Tag","Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)"],
-      ["Material aus Erz","Erz × Ausbeute"],
+      ["Material aus Rohstoff","Rohstoff × Ausbeute"],
       ["Fabrik-Ausstoss","Arbeiter × Ausstoss, begrenzt vom knappsten Material"],
       ["Nachfrage","Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)"],
       ["Verkaufspreis","Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs"]
@@ -2024,7 +2024,7 @@ function pinsZeichnen(){
     const streik = m && m.stillBis > S.tag;
     const foerdert = m && m.arbeiter > 0 && !streik;
     teile.push(`<button class="pin ${m?"":"zu"} ${streik?"alarm":""} ${foerdert?"foerdert":""} ${winkt("minen", !!m, mineErlaubt(def.id))} ${frisch(def.id)}"
-      data-pin="mine" data-id="${def.id}" style="left:${x}px;top:${y}px" aria-label="Mine ${def.ort}, ${LAND[def.land].name}">
+      data-pin="mine" data-id="${def.id}" style="left:${x}px;top:${y}px" aria-label="Rohstoffquelle ${def.ort}, ${LAND[def.land].name}">
       <span class="knopf" style="${m?`background:${mat.farbe};color:#fff`:""}">
         ${m?`<span class="sym">${mat.sym}</span>`:IK.hacke}
         ${foerdert?staub:""}
@@ -2087,7 +2087,7 @@ const TUTORIAL = [
     text:"Ohne Arbeiter wird nichts gefördert. Tippe die Mine an und drück auf +10.",
     ziel:()=>"meine-minen",
     fertig:()=> Object.values(S.minen).some(m => m.arbeiter >= 8) },
-  { id:"team", ikon:"person", titel:"Stell mehr Leute an",
+  { id:"team", ikon:"person", titel:"Stelle mehr Personen ein",
     text:"Für die weiteren Minen brauchst du mehr Personal. Tippe unten auf den grossen goldenen Knopf und stell auf mindestens 40 Leute auf.",
     ziel:()=>"dock:team",
     fertig:()=> S.arbeiterGesamt >= 40 },
@@ -2199,7 +2199,7 @@ const DOCK = [
 function dockZeichnen(){
   const frei = freieArbeiter();
   $("#dock").innerHTML = DOCK.map(d => d.orb
-    ? `<button class="orb" role="tab" data-seite="team" aria-selected="${aktiveSeite==="team"}" aria-label="Team – Leute anstellen">
+    ? `<button class="orb" role="tab" data-seite="team" aria-selected="${aktiveSeite==="team"}" aria-label="Team – Personal einstellen">
          <span class="orbring">${ikonTeam(3, 34, .40)}
            <span class="orbzahl ${frei===0?"leer":""}">${frei}</span></span>Team</button>`
     : `<button role="tab" data-seite="${d.s}" aria-selected="${aktiveSeite===d.s}">${d.ik()}${d.t}</button>`
@@ -2387,7 +2387,7 @@ function zeichnen(){
   if (S.tag !== letzterTagGezeigt){
     if (offenesBlatt && offenesBlatt.art === "mine"){
       const menge = letzteFoerderung[offenesBlatt.id];
-      if (menge > 0.5) flieger("+" + Math.round(menge) + " Erz", MATERIAL[MINEN.find(x=>x.id===offenesBlatt.id).mat].farbe);
+      if (menge > 0.5) flieger("+" + Math.round(menge) + " Rohstoff", MATERIAL[MINEN.find(x=>x.id===offenesBlatt.id).mat].farbe);
     }
     letzterTagGezeigt = S.tag;
   }
@@ -2432,8 +2432,8 @@ function blattMine(id){
   const def = MINEN.find(x=>x.id===id), m = S.minen[id];
   const mat = MATERIAL[def.mat], land = LAND[def.land];
   const kopf = `<div class="titelzeile">${flagge(def.land,"gross")}
-    <div><h2>${def.ort}</h2><div class="ort">${land.name} · Mine</div></div></div>`;
-  const band = `<div class="erzband" style="background:${mat.farbe}"><span class="kugel">${mat.sym}</span>${mat.name}</div>`;
+    <div><h2>${def.ort}</h2><div class="ort">${land.name} · Rohstoffquelle</div></div></div>`;
+  const band = `<div class="erzband" style="background:${mat.farbe}"><span class="kugel">${mat.sym}</span>${rohstoffDerMine(def)} → ${mat.name}</div>`;
 
   if (!m){
     const zu = gesperrt("mine", id);
@@ -2443,14 +2443,14 @@ function blattMine(id){
             ? `Für <b>${mat.name}</b> hast du bereits eine Mine. Im Tutorial genügt eine pro Material.`
             : `Im Tutorial eröffnest du zuerst die Minen für <b>Kupfer, Aluminium und Zinn</b> – die drei Rohstoffe deines Ladekabels. Danach werden alle Standorte frei.`}</div>` : "")
       + `<div class="werte">
-        <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Ergiebigkeit</small><b>${def.ergiebigkeit} Erz</b></span></div>
+        <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Ergiebigkeit</small><b>${def.ergiebigkeit} Rohstoff</b></span></div>
         <div class="wert"><span class="wi">${IK.person}</span><span class="wt"><small>Plätze</small><b>${def.plaetze}</b></span></div>
         <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Üblicher Lohn</small><b>${chf(land.lohn)}</b></span></div>
         <div class="wert"><span class="wi">${IK.gluehbirne}</span><span class="wt"><small>Wofür</small><b style="font-size:var(--f0)">${mat.wofuer}</b></span></div>
       </div>
       <div class="notiz">${def.info}</div>
       <button class="cta ${geht?"puls":""}" data-tun="mine-auf" data-id="${id}" ${geht?"":"disabled"}>
-        ${geht?IK.hacke:""}${zu ? SPERRTEXT : geht ? "Mine eröffnen · " + chf(def.erschliessung) : "Zu wenig Geld · " + chf(def.erschliessung)}</button>`;
+        ${geht?IK.hacke:""}${zu ? SPERRTEXT : geht ? "Rohstoffquelle eröffnen · " + chf(def.erschliessung) : "Zu wenig Geld · " + chf(def.erschliessung)}</button>`;
   }
 
   const st = LOHNSTUFE[m.stufe], zuf = Math.round(m.zufriedenheit);
@@ -2462,7 +2462,7 @@ function blattMine(id){
   const leuteBild = ikonTeam(Math.max(1, Math.ceil(m.arbeiter / Math.max(1, def.plaetze/5))), 60, .34);
 
   return kopf + band + szeneMine(def, m)
-    + (still ? `<div class="notiz rot"><b>Die Mine steht still.</b>${m.stillBis-S.tag<900?" Noch "+(m.stillBis-S.tag)+" Tage.":""}</div>` : "")
+    + (still ? `<div class="notiz rot"><b>Die Rohstoffquelle steht still.</b>${m.stillBis-S.tag<900?" Noch "+(m.stillBis-S.tag)+" Tage.":""}</div>` : "")
     + `<div class="werte">
       <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Förderung</small><b>${ertrag.toFixed(1)}/Tag</b></span></div>
       <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohnkosten</small><b>${chf(m.arbeiter*land.lohn*st.faktor)}</b></span></div>
@@ -2486,7 +2486,7 @@ function blattMine(id){
 
     <div class="karte">
       <h3>Lohnstufe</h3>
-      <div class="ort">Was du zahlst, entscheidet über Zufriedenheit und Ruf</div>
+      <div class="ort">Der Lohn beeinflusst die Zufriedenheit</div>
       <div class="segment">${LOHNSTUFE.map((s,i)=>
         `<button data-tun="lohn" data-id="${id}" data-stufe="${i}" aria-pressed="${i===m.stufe}">
            ${ikonLohn(i, i===m.stufe)}${s.label}</button>`).join("")}</div>
@@ -2532,7 +2532,7 @@ function blattRaff(id){
   return kopf + szeneRaff(def, r) + `
     <div class="werte">
       <div class="wert"><span class="wi">${IK.kolben}</span><span class="wt"><small>Durchsatz</small><b>${Math.round(def.kapazitaet*ausbauFaktor(r.ausbau)*(r.arbeiter/def.plaetze)*globalWert("hafen")*perkMult("durchsatz"))}/Tag</b></span></div>
-      <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Roherz im Lager</small><b>${Math.round(erzda)}</b></span></div>
+      <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Rohstoff im Lager</small><b>${Math.round(erzda)}</b></span></div>
     </div>
     <div class="karte">
       <h3>Belegschaft</h3>
@@ -2547,7 +2547,7 @@ function blattRaff(id){
       <div class="leiste"><i style="width:${(r.arbeiter/def.plaetze*100).toFixed(0)}%;background:#5b8f7a"></i></div>
     </div>
     ${tutorialLaeuft() ? "" : ausbauKarte("raff", id, r.ausbau, def.bau, "Durchsatz")}
-    <div class="notiz">Aus 1 Erz wird je nach Material unterschiedlich viel: Silizium 70 %, Gold nur 8 %. Der Rest ist Abraum.</div>
+    <div class="notiz">Aus 1 Einheit Rohstoff wird je nach Material unterschiedlich viel nutzbares Material. Der Rest steht im Spielmodell für Abraum und Verluste.</div>
     <div class="notiz blau">${def.info}</div>`;
 }
 
@@ -2581,7 +2581,7 @@ function blattFab(land){
       <div class="zeile"><span>Produktion heute</span><b>${stueck} Stück</b></div>
       <div class="zeile"><span>Lager</span><b>${S.ware[f.produkt]||0} Stück</b></div>
       ${fehlt.length ? `<div class="notiz rot">Es fehlt: ${fehlt.map(k=>MATERIAL[k].name).join(", ")}.
-        Zukaufen geht nicht – eröffne dafür eine Mine.</div>` : ""}</div>`;
+        Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.</div>` : ""}</div>`;
   }).join("");
 
   const zu = gesperrt("fab");
@@ -2726,7 +2726,7 @@ function seiteMarkt(){
 function seiteTeam(){
   const rows = [];
   for (const id in S.minen){ const d = MINEN.find(x=>x.id===id);
-    if (S.minen[id].arbeiter) rows.push([d.land, "Mine " + d.ort, S.minen[id].arbeiter, LAND[d.land].lohn*LOHNSTUFE[S.minen[id].stufe].faktor]); }
+    if (S.minen[id].arbeiter) rows.push([d.land, "Rohstoffquelle " + d.ort, S.minen[id].arbeiter, LAND[d.land].lohn*LOHNSTUFE[S.minen[id].stufe].faktor]); }
   for (const id in S.raff){ const d = RAFF_ORTE.find(x=>x.id===id);
     if (S.raff[id].arbeiter) rows.push([d.land, "Raffinerie " + d.ort, S.raff[id].arbeiter, LAND[d.land].lohn]); }
   S.fabriken.forEach(f => { if (f.arbeiter) rows.push([f.land, "Fabrik " + PRODUKT[f.produkt].name, f.arbeiter, LAND[f.land].lohn]); });
@@ -2736,17 +2736,17 @@ function seiteTeam(){
   const geht = menge > 0 && S.kasse >= kosten;
   const frei = freieArbeiter();
 
-  return `<h1>Dein Team</h1><div class="unter">Jeder Mensch kostet Lohn – auch ohne Aufgabe</div>
+  return `<h1>Dein Team</h1><div class="unter">Lohnkosten im Spielmodell</div>
 
     <div class="karte" style="text-align:center;background:linear-gradient(#fffdf6,#fdf3dd)">
       <div style="display:flex;justify-content:center"><div style="width:min(300px,80%)">${ikonTeam(5, 96, .62)}</div></div>
-      <h3 style="font-size:var(--f4);margin-top:6px">Stell mehr Leute an</h3>
-      <div class="ort">Ohne Leute fördert keine Mine und läuft keine Fabrik</div>
+      <h3 style="font-size:var(--f4);margin-top:6px">Stelle mehr Personen ein</h3>
+      <div class="ort">Ohne Personal fördert keine Rohstoffquelle und läuft keine Fabrik</div>
       ${regler("anstell", "Wie viele?", "Einmalige Einstellungskosten: CHF " + LOHN_PRO_KOPF.toLocaleString("de-CH") + " pro Person.",
-               5, 50, 5, anstellMenge, anstellMenge + " Leute")}
+               5, 50, 5, anstellMenge, anstellMenge + " Personen")}
       <button class="cta riesig ${geht?"puls":""}" data-tun="anstellen" ${geht?"":"disabled"}>
         ${IK.person}${menge <= 0 ? "Im Tutorial genügen " + TUTORIAL_MAX_LEUTE + " Leute"
-          : geht ? "STELL " + menge + " LEUTE AN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>
+          : geht ? "STELLE " + menge + " PERSONEN EIN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>
       <button class="cta still" data-tun="entlassen" ${frei<5?"disabled":""}>−5 entlassen · nur freie Leute</button>
     </div>
 
@@ -2788,12 +2788,12 @@ function seiteZiel(){
     <div class="karte"><h3>Lager</h3>
       ${Object.keys(MATERIAL).filter(k=>(S.mat[k]||0)>.5||(S.erz[k]||0)>.5).map(k=>
         `<div class="zeile"><span><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}</span>
-         <b>${Math.round(S.mat[k]||0)} <small style="color:var(--grau);font-weight:600">+ ${Math.round(S.erz[k]||0)} Erz</small></b></div>`).join("")
+         <b>${Math.round(S.mat[k]||0)} <small style="color:var(--grau);font-weight:600">+ ${Math.round(S.erz[k]||0)} Rohstoff</small></b></div>`).join("")
         || `<p style="color:var(--grau)">Noch nichts gefördert.</p>`}</div>
-    <div class="karte"><h3>Erforschtes Wissen</h3>
+    <div class="karte"><h3>Finanzierte Verbesserungen</h3>
       ${Object.keys(S.perks).length ? Object.keys(S.perks).map(id => { const e = PERK_INDEX[id]; return e
         ? `<div class="zeile"><span>${e.perk.titel}</span><b style="font-size:var(--f0);color:var(--grau)">${e.seg.titel}</b></div>` : ""; }).join("")
-        : `<p style="color:var(--grau)">Noch kein Wissen erworben. Schau im Reiter Wissen vorbei.</p>`}</div>
+        : `<p style="color:var(--grau)">Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.</p>`}</div>
     <div class="karte"><h3>Meldungen</h3>
       ${S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:var(--f0)">${e.text}</span><b style="font-size:var(--f0);color:var(--grau)">T${e.tag}</b></div>`).join("")
         || `<p style="color:var(--grau)">Noch nichts passiert.</p>`}</div>
@@ -2810,7 +2810,7 @@ function seiteWissen(){
         <h3>${seg.titel}</h3>
         <small>${seg.kurz}</small>
         <span class="perkleiste">${seg.perks.map((p,i)=>`<i class="${S.perks[p.id]?"ok":""}"></i>`).join("")}</span>
-        <small style="margin-top:4px">${naechst ? "Nächstes Wissen: " + naechst.titel + " · " + chf(naechst.kosten) : "Alles erforscht"}</small>
+        <small style="margin-top:4px">${naechst ? "Nächste Verbesserung: " + naechst.titel + " · " + chf(naechst.kosten) : "Alle Verbesserungen finanziert"}</small>
       </span>
       <span class="spfeil">${IK.pfeil}</span></button>`;
   }).join("");
@@ -2819,9 +2819,9 @@ function seiteWissen(){
     <div class="karte" style="display:flex;align-items:center;gap:14px">
       <div style="width:52px;flex:none;color:var(--gold)">${IK.gluehbirne}</div>
       <div style="flex:1;min-width:0">
-        <b style="font-family:'Baloo 2',sans-serif;font-size:var(--f3)">${hat} von ${gesamt} erforscht</b>
+        <b style="font-family:'Baloo 2',sans-serif;font-size:var(--f3)">${hat} von ${gesamt} Verbesserungen finanziert</b>
         <div class="leiste"><i style="width:${(hat/gesamt*100).toFixed(0)}%;background:var(--gold)"></i></div>
-        <small style="color:var(--grau);font-size:var(--f0)">Jeder Perk kostet Geld und wirkt sofort im ganzen Spiel.</small>
+        <small style="color:var(--grau);font-size:var(--f0)">Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist.</small>
       </div>
     </div>
     ${karten}`;
@@ -2838,20 +2838,20 @@ function lupeFuellen(segId){
   const geht = naechst && !gesperrtDurch && S.kasse >= naechst.kosten;
 
   const erforscht = seg.perks.filter(p => S.perks[p.id]).map(p =>
-    `<div class="perkkarte fertig"><span class="marke">Erforscht</span>
+    `<div class="perkkarte fertig"><span class="marke">Finanziert</span>
       <h3>${p.titel}</h3><p>${p.text}</p>
       <div class="wirkung">${p.wirkung.map(w=>`<span>${w}</span>`).join("")}</div></div>`).join("");
 
   const angebot = naechst ? `<div class="perkkarte">
-      <span class="marke">Neues Wissen</span>
+      <span class="marke">Anwendung</span>
       <h3>${naechst.titel}</h3><p>${naechst.text}</p>
       <div class="wirkung">${naechst.wirkung.map(w=>`<span>${w}</span>`).join("")}</div>
       ${gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» erforschen.</div>` : ""}
       <button class="cta ${geht?"puls":""}" data-tun="perk" data-p="${naechst.id}" ${geht?"":"disabled"}>
-        ${geht?IK.gluehbirne:""}${gesperrtDurch ? "Noch gesperrt" : geht ? "Wissen erwerben · " + chf(naechst.kosten) : "Zu wenig Geld · " + chf(naechst.kosten)}</button>
+        ${geht?IK.gluehbirne:""}${gesperrtDurch ? "Noch gesperrt" : geht ? "Verbesserung finanzieren · " + chf(naechst.kosten) : "Zu wenig Geld · " + chf(naechst.kosten)}</button>
     </div>`
     : `<div class="perkkarte fertig"><span class="marke">Vollständig</span>
-        <h3>Dieses Feld ist ausgeforscht</h3><p>Du hast alles Wissen aus «${seg.titel}» erworben.</p></div>`;
+        <h3>Alle Verbesserungen finanziert</h3><p>Du hast alle Verbesserungen aus «${seg.titel}» finanziert.</p></div>`;
 
   const formeln = seg.formeln ? `<div class="karte"><h3>Formeln</h3><table>${
     seg.formeln.map(f=>`<tr><td>${f[0]}</td><td><code>${f[1]}</code></td></tr>`).join("")}</table></div>` : "";
@@ -3135,7 +3135,7 @@ document.addEventListener("click", e => {
       S.kasse -= e2.perk.kosten; S.ausgegeben += e2.perk.kosten;
       S.perks[e2.perk.id] = true;
       if (e2.perk.sofort && e2.perk.sofort.ruf) rufAendern(e2.perk.sofort.ruf);
-      notiz(`Neues Wissen: <b>${e2.perk.titel}</b> · ${e2.perk.wirkung.join(" · ")}`, "gut");
+      notiz(`Verbesserung finanziert: <b>${e2.perk.titel}</b> · ${e2.perk.wirkung.join(" · ")}`, "gut");
       funkenAn(t, ["#f5b73d","#2fbe7e","#ffe9a8","#fff"], 28);
       speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
       return; }
@@ -3164,7 +3164,7 @@ document.addEventListener("input", e => {
         const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF, geht = menge > 0 && S.kasse >= kosten;
         if (knopf){ knopf.disabled = !geht;
           knopf.innerHTML = (geht?IK.person:"") + (menge <= 0 ? "Im Tutorial genügen " + TUTORIAL_MAX_LEUTE + " Leute"
-            : geht ? "STELL " + menge + " LEUTE AN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)); } }
+            : geht ? "STELLE " + menge + " PERSONEN EIN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)); } }
       break;
   }
 });
