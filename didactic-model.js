@@ -106,7 +106,7 @@ const marktSeg = WISSEN.find(s => s.id === "markt");
 if (marktSeg){
   marktSeg.kurz = "Nachfrage, Lager und Dollarkurs bei Fertigwaren.";
   marktSeg.text = [
-    "Ware verkauft sich nicht von allein. Entweder du verkaufst selber, oder dein Verkaufsteam erledigt das jeden Tag.",
+    "Fertige Produkte müssen verkauft werden. Entweder du verkaufst selber, oder dein Verkaufsteam erledigt das jeden Tag.",
     "Das Spiel simuliert Preis und Nachfrage deiner <b>Fertigwaren</b>. Weltmarktpreise der Rohstoffe sind Hintergrundwissen – du kaufst und verkaufst im Spiel keine Rohstoffe am Markt."
   ];
 }
@@ -116,7 +116,7 @@ if (rufSeg){
   rufSeg.titel = "Ruf & Nachweise";
   rufSeg.kurz = "Ruf beeinflusst Nachfrage. Nachweise belegen deine Lieferkette.";
   rufSeg.text = [
-    "Dein <b>Ruf</b> zeigt, wie Kundinnen und Kunden deine Firma wahrnehmen. Ein tiefer Ruf senkt die Nachfrage nach deinen Produkten.",
+    "Dein <b>Ruf</b> zeigt, wie Kundinnen und Kunden deine Firma wahrnehmen. Ein niedriger Ruf senkt die Nachfrage nach deinen Produkten.",
     "<b>Nachweise</b> sind etwas anderes: Sie zeigen, ob du die Herkunft deiner Rohstoffe dokumentieren kannst. Ein Lieferkettengesetz prüft diese Nachweise – nicht deinen Ruf."
   ];
 }
@@ -128,13 +128,17 @@ if (modellSeg){
     "Das Modell zeigt nur ausgewählte Zusammenhänge. Vergleiche beim Spielen: Welche Faktoren sind sichtbar dargestellt, und welche zusätzlichen Einflüsse gäbe es in einer realen Lieferkette?"
   ];
   modellSeg.fakten = [
-    "Spielwerte sind gerundet und vereinfacht; reale Lieferketten haben deutlich mehr Faktoren.",
+    "Die Werte sind gerundet und vereinfacht. Reale Lieferketten umfassen weitere Einflussfaktoren.",
     "Ein Spieltag folgt der Reihenfolge: fördern, raffinieren, produzieren, verkaufen.",
     "Rohstoffpreise am Weltmarkt werden im Spiel nicht berechnet."
   ];
-  if (modellSeg.formeln){
-    modellSeg.formeln = modellSeg.formeln.map(f => [f[0].replace("Material aus Erz", "Material aus Rohstoff"), f[1].replace("Erz ×", "Rohstoff ×")]);
-  }
+  modellSeg.formeln = [
+    ["Förderung / Tag","Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)"],
+    ["Material aus Rohstoff","Rohstoff × Ausbeute"],
+    ["Fabrik-Ausstoss","Arbeiter × Ausstoss, begrenzt vom knappsten Material"],
+    ["Nachfrage","Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)"],
+    ["Verkaufspreis","Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs"]
+  ];
 }
 
 const ketteSeg = WISSEN.find(s => s.id === "kette");

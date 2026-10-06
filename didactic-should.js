@@ -14,14 +14,14 @@ if(ketteShould){
   ketteShould.kurz="Rohstoff → Raffinerie → Fabrik → Markt – und wo diese Orte liegen.";
   ketteShould.text=[
     "Eine Lieferkette verbindet mehrere Orte. Auf der Karte siehst du nach dem Tutorial einen <b>Beispielweg</b> zwischen einer eigenen Rohstoffquelle, einer Raffinerie und einer Fabrik.",
-    "Die Entfernung ist geografische Orientierung. <b>Transportkosten und Lieferzeiten werden in Erzwelt bewusst nicht berechnet.</b> So bleibt klar, was das Spiel wirklich simuliert."
+    "Die Entfernung ist geografische Orientierung. <b>Transportkosten und Lieferzeiten werden in Erzwelt nicht berechnet.</b> So bleibt klar, was das Spiel wirklich simuliert."
   ];
 }
 const chemShould=WISSEN.find(s=>s.id==="chemie");
 if(chemShould){
   chemShould.text=[
     "Die <b>Ausbeute</b> ist ein vereinfachter Spielwert dafür, wie viel nutzbares Material aus einer Einheit Rohstoff entsteht.",
-    "Jede Raffinerie kann im Spiel alle Rohstoffe verarbeiten. Sie hat zusätzlich einen sichtbaren <b>Spiel-Schwerpunkt</b>: passende Rohstoffe werden dort 25 % schneller verarbeitet. Das ist eine Spielregel, keine Behauptung über die reale Anlage."
+    "Jede Raffinerie kann im Spiel alle Rohstoffe verarbeiten. Sie hat zusätzlich einen sichtbaren <b>Spezialisierung im Spiel</b>: passende Rohstoffe werden dort 25 % schneller verarbeitet. Diese Spezialisierung ist eine Spielregel und beschreibt keine reale Anlage."
   ];
 }
 
@@ -29,12 +29,6 @@ const modellShould=WISSEN.find(s=>s.id==="modell");
 if(modellShould&&modellShould.text){
   modellShould.text[1]="Der Kern des Modells steht in <code>erzwelt-core.html</code>. Die didaktischen Korrekturen sind bewusst in <code>didactic-model.js</code>, <code>didactic-events.js</code>, <code>didactic-ui.js</code> und <code>didactic-should.js</code> getrennt. Vergleiche: Welche Regeln wurden vereinfacht, damit Ursache und Wirkung klar bleiben?";
 }
-const originalNotizShould=notiz;
-notiz=function(text,art){
-  if(typeof text==="string") text=text.replace(/^Neues Wissen:/,"Verbesserung umgesetzt:");
-  return originalNotizShould(text,art);
-};
-
 function shouldMigration(){
   if(!S||typeof S!=="object")return;
   if(!S.wissenGesehen||typeof S.wissenGesehen!=="object")S.wissenGesehen={};
@@ -84,19 +78,9 @@ function wissenPraxis(segId,stufe){
       [ausbauIrgendwo&&Object.keys(S.perks).length>=2,"Nutze mindestens einen Ausbau und zwei bereits umgesetzte Verbesserungen."]
     ]
   };
-  const r=regeln[segId]?.[stufe]||[true,"Praxisbezug erfüllt."];
+  const r=regeln[segId]?.[stufe]||[true,"Voraussetzung erfüllt."];
   return {ok:!!r[0],text:r[1]};
 }
-const originalSeiteWissenShould=seiteWissen;
-seiteWissen=function(){
-  shouldMigration();
-  return originalSeiteWissenShould()
-    .replace("Acht Felder. Öffne eins, lies nach – und erwirb daraus einen dauerhaften Vorteil.","Acht Felder. Wissen kostet nichts: Lies nach, beobachte das Prinzip im Spiel und finanziere danach eine passende Verbesserung.")
-    .replace(/(\d+) von (\d+) erforscht/g,"$1 von $2 Verbesserungen umgesetzt")
-    .replace("Jeder Perk kostet Geld und wirkt sofort im ganzen Spiel.","Geld kauft nicht das Wissen. Es finanziert die konkrete Verbesserung, nachdem du den Zusammenhang im Spiel erlebt hast.")
-    .replace(/Nächstes Wissen:/g,"Nächste Verbesserung:")
-    .replace(/Alles erforscht/g,"Alle Verbesserungen umgesetzt");
-};
 const originalLupeFuellenShould=lupeFuellen;
 lupeFuellen=function(segId){
   shouldMigration();
@@ -111,7 +95,7 @@ lupeFuellen=function(segId){
     card.querySelector(".didaktik-praxis")?.remove();
     const note=document.createElement("div");
     note.className="notiz didaktik-praxis";
-    note.innerHTML=`<b>Praxisbezug:</b> ${praxis.text}<br>${praxis.ok?"✓ Erlebt – du kannst die Verbesserung jetzt finanzieren.":"Noch nicht erfüllt."}`;
+    note.innerHTML=`<b>Voraussetzung:</b> ${praxis.text}<br>${praxis.ok?"✓ Voraussetzung erfüllt. Die Verbesserung kann jetzt finanziert werden.":"Voraussetzung noch nicht erfüllt."}`;
     button?.before(note);
   }
   if(button){
@@ -120,21 +104,9 @@ lupeFuellen=function(segId){
     const geht=praxis.ok&&!vorherGesperrt&&genug;
     button.disabled=!geht;
     button.classList.toggle("puls",geht);
-    button.innerHTML=vorherGesperrt?"Vorherige Verbesserung fehlt":!praxis.ok?"Erst im Spiel beobachten":!genug?"Zu wenig Geld · "+chf(next.kosten):IK.gluehbirne+"Verbesserung umsetzen · "+chf(next.kosten);
+    button.innerHTML=vorherGesperrt?"Vorherige Verbesserung fehlt":!praxis.ok?"Voraussetzung noch nicht erfüllt":!genug?"Zu wenig Geld · "+chf(next.kosten):IK.gluehbirne+"Verbesserung finanzieren · "+chf(next.kosten);
   }
-  const root=document.getElementById("lupeinhalt");
-  if(root){
-    root.innerHTML=root.innerHTML.replace("Dieses Feld ist ausgeforscht","Alle Verbesserungen umgesetzt").replace(/Du hast alles Wissen aus/g,"Du hast alle Verbesserungen aus");
-  }
-  document.querySelectorAll("#lupeinhalt .marke").forEach(m=>{
-    if(m.textContent==="Neues Wissen")m.textContent="Anwendung";
-    if(m.textContent==="Erforscht")m.textContent="Umgesetzt";
-  });
   speichern();
-};
-const originalSeiteZielShould=seiteZiel;
-seiteZiel=function(){
-  return originalSeiteZielShould().replace("Erforschtes Wissen","Umgesetzte Verbesserungen").replace("Noch kein Wissen erworben. Schau im Reiter Wissen vorbei.","Noch keine Wissens-Verbesserung umgesetzt. Im Reiter Wissen siehst du, welche Praxisbezüge noch fehlen.");
 };
 naechsterSchritt=function(){
   const minen=offeneMinen();
@@ -142,13 +114,13 @@ naechsterSchritt=function(){
   const ohne=minen.find(id=>S.minen[id].arbeiter===0);
   if(ohne)return["Eine Rohstoffquelle steht still",`${MINEN.find(x=>x.id===ohne).ort} hat kein Personal. Prüfe deine Personalverteilung.`];
   const gefahr=minen.find(id=>S.minen[id].zufriedenheit<35&&S.minen[id].arbeiter>0);
-  if(gefahr)return["Unruhe in "+MINEN.find(x=>x.id===gefahr).ort,"Die Zufriedenheit ist tief. Prüfe dort die Lohnentscheidung."];
-  if(!Object.keys(S.raff).length)return["Rohstoff wird noch nicht zu Material","In deiner Lieferkette fehlt die Verarbeitung zwischen Rohstoffquelle und Fabrik."];
+  if(gefahr)return["Niedrige Zufriedenheit in "+MINEN.find(x=>x.id===gefahr).ort,"Die Zufriedenheit ist niedrig. Prüfe dort die Lohnentscheidung."];
+  if(!Object.keys(S.raff).length)return["Noch keine Raffinerie vorhanden","In deiner Lieferkette fehlt die Verarbeitung zwischen Rohstoffquelle und Fabrik."];
   const aktiveRaff=Object.keys(S.raff).filter(id=>S.raff[id].arbeiter>0);
   if(!aktiveRaff.length)return["Die Verarbeitung steht still","Du hast eine Raffinerie, aber aktuell keinen aktiven Durchsatz. Prüfe Personal und Rohstofflager."];
   const kapa=aktiveRaff.reduce((a,id)=>{const d=RAFF_ORTE.find(x=>x.id===id);return a+d.kapazitaet*ausbauFaktor(S.raff[id].ausbau)*(S.raff[id].arbeiter/d.plaetze);},0);
-  if(Object.values(S.erz).reduce((a,b)=>a+(+b||0),0)>kapa*5)return["Rohstofflager wächst","Vergleiche Förderung und Raffinerie-Durchsatz. Wo liegt der Engpass?"];
-  if(!S.fabriken.length)return["Material hat noch kein Ziel","Welche Produkte passen zu den Materialien, die deine Lieferkette bereits bereitstellt?"];
+  if(Object.values(S.erz).reduce((a,b)=>a+(+b||0),0)>kapa*5)return["Rohstoffbestand ist hoch","Vergleiche Förderung und Raffineriedurchsatz. Wo liegt der Engpass?"];
+  if(!S.fabriken.length)return["Noch keine Fabrik vorhanden","Welche Produkte passen zu den Materialien, die deine Lieferkette bereits bereitstellt?"];
   const leer=S.fabriken.find(f=>f.restbau===0&&f.arbeiter===0);
   if(leer)return["Eine Fabrik steht still","Die Anlage ist fertig. Prüfe, ob Personal oder Material fehlt."];
   for(const f of S.fabriken){
@@ -157,13 +129,13 @@ naechsterSchritt=function(){
     if(fehlt.length)return["Produktion stockt: "+fehlt.map(k=>MATERIAL[k].name).join(", "),"Finde heraus, ob Rohstoffquelle, Raffination oder Lagerbestand den Engpass verursacht."];
   }
   if(warenLager()>0&&verkaufsKraft()===0)return["Fertige Ware liegt im Lager","Vergleiche Lager, Nachfrage und deine Verkaufskapazität."];
-  if(warenLager()>verkaufsKraft()*12&&verkaufsKraft()>0)return["Das Warenlager wächst","Produktion und Verkauf sind nicht im Gleichgewicht. Entscheide, welche Seite du anpassen willst."];
-  if(freieArbeiter()>15)return[freieArbeiter()+" Leute ohne Aufgabe","Prüfe, ob du dieses Personal noch brauchst oder an einem Engpass einsetzen kannst."];
-  if(S.ruf<55)return["Die Nachfrage leidet unter deinem Ruf","Prüfe Meldungen und frühere Entscheidungen. Ruf und Lieferketten-Nachweise sind dabei zwei verschiedene Dinge."];
+  if(warenLager()>verkaufsKraft()*12&&verkaufsKraft()>0)return["Warenbestand ist hoch","Produktion und Verkauf sind nicht im Gleichgewicht. Entscheide, welche Seite du anpassen willst."];
+  if(freieArbeiter()>15)return[freieArbeiter()+" Personen ohne Aufgabe","Prüfe, ob du dieses Personal noch brauchst oder an einem Engpass einsetzen kannst."];
+  if(S.ruf<55)return["Ein niedriger Ruf senkt die Nachfrage","Prüfe Meldungen und frühere Entscheidungen. Ruf und Lieferkettennachweise sind dabei zwei verschiedene Dinge."];
   const praxisOffen=WISSEN.filter(seg=>{const p=naechsterPerk(seg);return p&&wissenPraxis(seg.id,seg.perks.indexOf(p)).ok;});
-  if(praxisOffen.length)return["Ein Wissensfeld passt zu deiner Erfahrung","Im Reiter Wissen findest du Verbesserungen, deren Praxisbezug du bereits erfüllt hast."];
+  if(praxisOffen.length)return["Voraussetzung für eine Verbesserung erfüllt","Im Reiter Wissen findest du Verbesserungen, deren Praxisbezug du bereits erfüllt hast."];
   const nahe=minen.find(id=>ausbauVerdoppelt(S.minen[id].ausbau||0));
-  if(nahe)return["Ein Ausbau steht vor einem Sprung","Vergleiche Kosten und Wirkung deiner Ausbauten. Nicht jeder Engpass braucht dieselbe Lösung."];
+  if(nahe)return["Nächste Ausbaustufe mit grösserer Wirkung","Vergleiche Kosten und Wirkung deiner Ausbauten. Nicht jeder Engpass braucht dieselbe Lösung."];
   return null;
 };
 const originalQuestZeichnenShould=questZeichnen;
@@ -171,18 +143,8 @@ questZeichnen=function(){
   originalQuestZeichnenShould();
   if(!tutorialLaeuft()){
     const q=document.getElementById("quest");
-    if(q&&!q.hidden){const art=document.getElementById("q-art");if(art)art.textContent="Wegweiser";}
+    if(q&&!q.hidden){const art=document.getElementById("q-art");if(art)art.textContent="Hinweis";}
   }
-};
-function spezialNamen(def){return(def.spezial||[]).map(k=>MATERIAL[k]?.name).filter(Boolean);}
-const originalBlattRaffShould=blattRaff;
-blattRaff=function(id){
-  let html=originalBlattRaffShould(id);
-  const def=RAFF_ORTE.find(x=>x.id===id);
-  if(!def)return html;
-  const card=`<div class="karte"><h3>Spiel-Schwerpunkt</h3><div class="ort">${spezialNamen(def).join(" · ")||"kein Schwerpunkt"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Der Schwerpunkt ist eine Spielregel.</div></div>`;
-  const marker=`<div class="karte">\n      <h3>Personal</h3>`;
-  return html.includes(marker)?html.replace(marker,card+"\n\n    "+marker):html+card;
 };
 tagVor=function(){
   if(S.ende||modalOffen)return;
@@ -258,7 +220,7 @@ function lieferwegZeichnen(){
   const line=(a,b,c,d)=>{const l=document.createElementNS(ns,"line");l.setAttribute("x1",a);l.setAttribute("y1",b);l.setAttribute("x2",c);l.setAttribute("y2",d);l.setAttribute("stroke","#f08c2e");l.setAttribute("stroke-width","4");l.setAttribute("stroke-dasharray","9 7");l.setAttribute("opacity",".72");return l;};
   g.appendChild(line(x1,y1,x2,y2));g.appendChild(line(x2,y2,x3,y3));svg.appendChild(g);
   const mine=MINEN.find(x=>x.id===r.mineId),raff=RAFF_ORTE.find(x=>x.id===r.raffId),km=(Math.round((r.d1+r.d2)/100)*100).toLocaleString("de-CH");
-  note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Orientierung: Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
+  note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
 }
 const originalZeichnenShould=zeichnen;
 zeichnen=function(){shouldMigration();originalZeichnenShould();lieferwegZeichnen();};

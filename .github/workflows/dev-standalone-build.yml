@@ -1,5 +1,8 @@
 name: Standalone build verify
 
+# Source-owned copy gate: committed index.html must match the declarative sources.
+# Final cleanup release gate: run this on the exact dev HEAD before PR.
+
 on:
   push:
     branches: [dev, main]

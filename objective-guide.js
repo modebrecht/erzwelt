@@ -3,7 +3,7 @@
    OBJECTIVE GUIDE
 
    Sichtbarer Hilfeweg fuer Lernende, die nicht wissen, wo sie als
-   Naechstes klicken sollen. Der bestehende Wegweiser bleibt als Ganzes
+   Naechstes klicken sollen. Der bestehende Hinweis bleibt als Ganzes
    anklickbar; zusaetzlich zeigt ein eindeutiger Button das aktuelle Ziel.
 
    Keine Progression und keine Wirtschaft werden veraendert.
@@ -79,7 +79,7 @@
 
     /* map-focus-navigation hat den eigentlichen Kontext bereits ermittelt.
        Ein programmatischer Klick auf die Karte selbst nutzt genau denselben
-       Weg wie ein Klick der lernenden Person auf den Wegweiser. */
+       Weg wie ein Klick der lernenden Person auf den Hinweis. */
     q.click();
   }
 
@@ -116,7 +116,7 @@
     };
   }
 
-  /* Falls ein Klick ausserhalb des Wegweisers den Kontext aendert, ist der
+  /* Falls ein Klick ausserhalb des Hinweiss den Kontext aendert, ist der
      Button nach dem naechsten Render ebenfalls korrekt. */
   document.addEventListener("click",e=>{
     if(e.target.closest("#quest")) return;

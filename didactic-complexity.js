@@ -50,6 +50,18 @@
   };
   for(const [id,text] of Object.entries(produktInfo)){ if(PRODUKT[id]) PRODUKT[id].info=text; }
 
+  const materialVerwendung={
+    zinn:"Lötverbindungen auf Leiterplatten",
+    lithium:"Lithium-Ionen-Akkus",
+    kobalt:"Kathodenmaterial in Akkus",
+    silber:"Elektrische Kontakte und Lötpasten",
+    seltene:"Permanentmagnete in Lautsprechern und Motoren",
+    tantal:"Kondensatoren in elektronischen Geräten",
+    indium:"Transparente leitfähige Schichten in Displays (ITO)",
+    gold:"Korrosionsbeständige elektrische Kontakte"
+  };
+  for(const [id,text] of Object.entries(materialVerwendung)){ if(MATERIAL[id]) MATERIAL[id].wofuer=text; }
+
   const wissen={
     kette:{
       kurz:"Rohstoffquelle → Raffinerie → Fabrik → Markt.",

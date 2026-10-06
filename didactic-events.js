@@ -21,7 +21,7 @@ if (taiwanEv){
   taiwanEv.bau = function(){
     S.nachfrageMod.phone = {faktor:1.5, bis:S.tag+70};
     S.nachfrageMod.konsole = {faktor:1.5, bis:S.tag+70};
-    return {passiv:true, text:"<b>Erdbeben bei Taiwan</b> – Elektroniklieferungen stocken. Die Nachfrage nach Phones und Konsolen steigt 70 Tage lang um 50 %.", art:"warn"};
+    return {passiv:true, text:"<b>Erdbeben bei Taiwan</b> – Elektroniklieferungen stocken. Die Nachfrage nach Smartphones und Konsolen steigt 70 Tage lang um 50 %.", art:"warn"};
   };
 }
 

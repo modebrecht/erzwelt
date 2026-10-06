@@ -173,34 +173,63 @@
     return `<div class="karte mine-stillstand-card ${cause}"><div class="mine-stillstand-head"><span class="mine-stillstand-icon">${icon}</span><div><h3>${title}</h3><small>Förderung gestoppt${rest?" · "+rest:""}</small></div></div><div class="ort">${body}</div></div>`;
   }
 
-  if(typeof blattMine==="function"){
-    const original=blattMine;
-    blattMine=function(id){
-      let html=original(id);
-      if(typeof tutorialLaeuft==="function"&&tutorialLaeuft())return html;
-      const def=MINEN.find(x=>x.id===id),m=S.minen?.[id];
-      if(!def||!m)return html;
+  function decorateMineDetail(){
+    const root=document.getElementById("blattinhalt");
+    if(!root||typeof offenesBlatt==="undefined"||offenesBlatt?.art!=="mine")return;
+    if(typeof tutorialLaeuft==="function"&&tutorialLaeuft())return;
+    const def=MINEN.find(x=>x.id===offenesBlatt.id),m=S.minen?.[offenesBlatt.id];
+    if(!def||!m)return;
 
+    const safety=root.querySelector(".sicherheitskarte");
+    if(safety){
       const sicher=!!m.sicherheit;
-      html=html.replace(/<div class="karte">\s*<h3>Sicherheit<\/h3>/,
-        `<div class="karte sicherheitskarte ${sicher?"sicher":"offen"}"><div class="sicherheitskopf"><span class="sicherheits-symbol">${sicher?safeShieldSvg():shieldSvg()}</span><div><h3>Sicherheit</h3><small>${sicher?"Sicherheitsmassnahmen verbessert":"Sicherheitsmassnahmen nicht verbessert"}</small></div></div>`);
-
-      const relations=`<div class="mine-ursachen" aria-label="Getrennte Zusammenhänge"><div class="mine-ursache lohn"><b>Lohn → Zufriedenheit → Streik</b><span>Lohn beeinflusst die Zufriedenheit.</span></div><div class="mine-ursache sicherheit"><b>Sicherheit → Unfallrisiko</b><span>Sicherheitsmassnahmen beeinflussen das Unfallrisiko.</span></div></div>`;
-      if(!html.includes("Getrennte Zusammenhänge")){
-        const satisfaction=/<div class="karte">\s*<h3>Zufriedenheit<\/h3>/;
-        if(satisfaction.test(html))html=html.replace(satisfaction,relations+`<div class="karte"><h3>Zufriedenheit</h3>`);
-        else html+=relations;
+      safety.classList.toggle("sicher",sicher);
+      safety.classList.toggle("offen",!sicher);
+      if(!safety.querySelector(".sicherheitskopf")){
+        const h3=safety.querySelector("h3");
+        const head=document.createElement("div");
+        head.className="sicherheitskopf";
+        head.innerHTML=`<span class="sicherheits-symbol">${sicher?safeShieldSvg():shieldSvg()}</span><div><h3>Sicherheit</h3><small>${sicher?"Sicherheitsmassnahmen verbessert":"Sicherheitsmassnahmen nicht verbessert"}</small></div>`;
+        if(h3)h3.replaceWith(head);else safety.prepend(head);
       }
+    }
 
-      const stop=stopCard(def,m);
-      if(stop)html=stop+html;
-      return html;
+    let relations=root.querySelector(".mine-ursachen");
+    if(!relations){
+      const satisfaction=root.querySelector(".zufriedenheitskarte");
+      relations=document.createElement("div");
+      relations.className="mine-ursachen";
+      relations.setAttribute("aria-label","Getrennte Zusammenhänge");
+      relations.innerHTML='<div class="mine-ursache lohn"><b>Lohn → Zufriedenheit → Streik</b><span>Lohn beeinflusst die Zufriedenheit.</span></div><div class="mine-ursache sicherheit"><b>Sicherheit → Unfallrisiko</b><span>Sicherheitsmassnahmen beeinflussen das Unfallrisiko.</span></div>';
+      if(satisfaction)satisfaction.before(relations);else root.appendChild(relations);
+    }
+
+    root.querySelector(".mine-stillstand-card")?.remove();
+    const stop=stopCard(def,m);
+    if(stop){
+      const holder=document.createElement("div");
+      holder.innerHTML=stop;
+      if(holder.firstElementChild)root.prepend(holder.firstElementChild);
+    }
+  }
+
+  if(typeof blattFuellen==="function"){
+    const originalBlattFuellen=blattFuellen;
+    blattFuellen=function(...args){
+      const out=originalBlattFuellen.apply(this,args);
+      decorateMineDetail();
+      return out;
     };
   }
 
   if(typeof zeichnen==="function"){
     const original=zeichnen;
-    zeichnen=function(){const out=original();decorateWorld();return out;};
+    zeichnen=function(){
+      const out=original();
+      decorateWorld();
+      decorateMineDetail();
+      return out;
+    };
   }
   decorateWorld();
 
