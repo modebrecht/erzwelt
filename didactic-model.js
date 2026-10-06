@@ -132,9 +132,13 @@ if (modellSeg){
     "Ein Spieltag folgt der Reihenfolge: fördern, raffinieren, produzieren, verkaufen.",
     "Rohstoffpreise am Weltmarkt werden im Spiel nicht berechnet."
   ];
-  if (modellSeg.formeln){
-    modellSeg.formeln = modellSeg.formeln.map(f => [f[0].replace("Material aus Erz", "Material aus Rohstoff"), f[1].replace("Erz ×", "Rohstoff ×")]);
-  }
+  modellSeg.formeln = [
+    ["Förderung / Tag","Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)"],
+    ["Material aus Rohstoff","Rohstoff × Ausbeute"],
+    ["Fabrik-Ausstoss","Arbeiter × Ausstoss, begrenzt vom knappsten Material"],
+    ["Nachfrage","Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)"],
+    ["Verkaufspreis","Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs"]
+  ];
 }
 
 const ketteSeg = WISSEN.find(s => s.id === "kette");
