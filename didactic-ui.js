@@ -1,58 +1,5 @@
 "use strict";
 /* ---------- Sichtbare Oberflächen ---------- */
-const originalBlattMine = blattMine;
-blattMine = function(id){
-  let html = originalBlattMine(id);
-  const def = MINEN.find(x=>x.id===id);
-  const m = S.minen[id];
-  const mat = MATERIAL[def.mat];
-  const roh = rohstoffDerMine(def);
-
-  html = html.replace(`${LAND[def.land].name} · Mine`, `${LAND[def.land].name} · Rohstoffquelle`);
-  html = html.replace(/<div class="erzband"([^>]*)><span class="kugel">([^<]+)<\/span>[^<]+<\/div>/,
-    `<div class="erzband"$1><span class="kugel">$2</span>${roh} → ${mat.name}</div>`);
-  html = html.replace(/<small>Ergiebigkeit<\/small><b>([^<]+) Erz<\/b>/g, `<small>Ergiebigkeit</small><b>$1 Rohstoff</b>`);
-  html = html.replace(/<div class="ort">Was du zahlst, entscheidet über Zufriedenheit und Ruf<\/div>/,
-    `<div class="ort">Der Lohn beeinflusst die Zufriedenheit</div>`);
-  html = html.replace(/<div class="zeile"><span>Zielwert Zufriedenheit<\/span><b>[^<]+<\/b><\/div>/,
-    `<div class="zeile"><span>Zielwert Zufriedenheit</span><b>${m?Math.round(LOHNSTUFE[m.stufe].ziel + perkPlus("zufrieden")):0} %</b></div>`);
-
-  const modellHinweis = `<div class="notiz blau"><b>Spielmodell:</b> Mengen und Löhne sind vereinfachte Spielwerte.</div>`;
-  if (!tutorialLaeuft() && !html.includes("Spielmodell:")) html += modellHinweis;
-
-  if (m && !tutorialLaeuft()){
-    const sicher = !!m.sicherheit;
-    const kosten = Math.max(20000, Math.round(SICHERHEIT_BASIS_KOSTEN * perkMult("sicherheit") / 1000) * 1000);
-    const karte = `<div class="karte">
-      <h3>Sicherheit</h3>
-      <div class="ort">Sicherheit senkt das Unfallrisiko – unabhängig vom Lohn.</div>
-      <div class="zeile"><span>Status</span><b style="color:${sicher?"var(--gruen)":"var(--warn)"}">${sicher?"verbessert":"nicht verbessert"}</b></div>
-      ${sicher?"":`<button class="cta gruen" data-didaktik="sicherheit" data-id="${id}" ${S.kasse>=kosten?"":"disabled"}>${IK.schild}${S.kasse>=kosten?"Sicherheit verbessern · "+chf(kosten):"Zu wenig Geld · "+chf(kosten)}</button>`}
-    </div>`;
-    const marker = `<div class="karte">\n      <h3>Zufriedenheit</h3>`;
-    if (html.includes(marker)) html = html.replace(marker, karte + "\n\n    " + marker);
-    else html += karte;
-  }
-  return html;
-};
-
-const originalBlattRaff = blattRaff;
-blattRaff = function(id){
-  let html = originalBlattRaff(id);
-  html = html.replace(/Roherz im Lager/g, "Rohstoff im Lager");
-  html = html.replace(/Aus 1 Erz wird je nach Material unterschiedlich viel:[^<]*<\/div>/,
-    "Aus 1 Einheit Rohstoff wird je nach Material unterschiedlich viel nutzbares Material. Der Rest steht im Spielmodell für Abraum und Verluste.</div>");
-  return html;
-};
-
-const originalBlattFab = blattFab;
-blattFab = function(land){
-  let html = originalBlattFab(land);
-  html = html.replace(/Zukaufen geht nicht – eröffne dafür eine Mine\./g, "Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.");
-  if (!tutorialLaeuft()) html = html.replace(/(<div class="stueck">)/g, `<div class="ort" style="margin-top:7px">Vereinfachtes Rezept · Spielmodell</div>$1`);
-  return html;
-};
-
 seiteMarkt = function(){
   const kraft = verkaufsKraft(), lager = warenLager();
   const heuteSchon = S.handverkaufTag === S.tag;
@@ -72,6 +19,7 @@ seiteMarkt = function(){
   const eff = S.globalMod.filter(m => m.bis > S.tag);
 
   return `<h1>Markt &amp; Verkauf</h1><div class="unter">Fertige Produkte müssen verkauft werden</div>
+    <div class="verkauf-kette-mini"><span>Produkt</span><b>→</b><span>Verkauf</span><b>→</b><span>Geld</span></div>
     <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
       <h3>Verkauf</h3><div class="ort">Im Lager liegen <b>${lager}</b> Stück</div>
       <button class="cta riesig ${(!heuteSchon&&handStueck>0)?"puls":""}" data-tun="handverkauf" ${(heuteSchon||handStueck<=0)?"disabled":""}>${IK.muenze}${handStueck<=0?"Nichts zu verkaufen":heuteSchon?"Heute schon verkauft":"SELBST VERKAUFEN · "+handStueck+" Stück"}</button>
@@ -84,24 +32,6 @@ seiteMarkt = function(){
     <div class="karte"><h3>Deine Produkte</h3><table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>${prod}</table><div class="notiz">Produzierst du deutlich mehr als nachgefragt wird, füllt sich das Lager und der Verkaufspreis sinkt.</div></div>
     <div class="karte"><h3>Deine Rohstoffquellen</h3><table><tr><th>Material</th><th>Quelle</th><th class="n">Bereit</th><th class="n">Rohstoff</th></tr>${roh}</table><div class="notiz">Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.</div></div>
     ${eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
-};
-
-const originalSeiteTeam = seiteTeam;
-seiteTeam = function(){
-  let html = originalSeiteTeam();
-  html = html.replace("Jeder Mensch kostet Lohn – auch ohne Aufgabe", "Lohnkosten im Spielmodell");
-  if (!tutorialLaeuft()) html += `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`;
-  return html;
-};
-
-const originalSeiteZiel = seiteZiel;
-seiteZiel = function(){
-  let html = originalSeiteZiel();
-  const status = nachweisStatus();
-  const nachweisKarte = `<div class="karte"><h3>Lieferkettennachweise</h3><div class="zeile"><span>Status</span><b style="color:${status.stufe?"var(--gruen)":"var(--warn)"}">${status.text}</b></div><div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div></div>`;
-  const meldungen = `<div class="karte"><h3>Meldungen</h3>`;
-  if (html.includes(meldungen)) html = html.replace(meldungen, nachweisKarte + meldungen);
-  return html.replace(/ Erz<\/small>/g, " Rohstoff</small>");
 };
 
 const originalLupeFuellen = lupeFuellen;
@@ -134,14 +64,6 @@ lupeFuellen = function(segId){
   }
 };
 
-const originalNaechsterSchritt = naechsterSchritt;
-naechsterSchritt = function(){
-  const w = originalNaechsterSchritt();
-  if (w && w[0] === "Dein Ruf ist tief") return [w[0], "Das senkt die Nachfrage. Prüfe Meldungen und Entscheidungen, die Ruf gekostet haben."];
-  if (w && w[1]) w[1] = w[1].replace(/Rohstoffe kannst du nicht zukaufen\. Eröffne dafür eine eigene Mine\./g, "Primärrohstoffe kommen aus eigenen Rohstoffquellen.");
-  return w;
-};
-
 const tut = Object.fromEntries(TUTORIAL.map(t=>[t.id,t]));
 if (tut.mine1) tut.mine1.text = "Dein Ladekabel braucht Kupfer, Aluminium und Zinn. Sichere zuerst eine eigene Rohstoffquelle.";
 if (tut.minen3) tut.minen3.text = "Kupfererz → Kupfer, Bauxit → Aluminium, Zinnerz → Zinn. Öffne für alle drei eine Rohstoffquelle.";
@@ -150,15 +72,8 @@ if (tut.raff) tut.raff.text = "Rohstoffe lassen sich nicht direkt verbauen. Erst
 const originalZeichnen = zeichnen;
 zeichnen = function(){
   didaktikMigration();
-  originalZeichnen();
-  document.querySelectorAll("#toasts .toast, #seite, #blattinhalt").forEach(root=>{
-    if (!root || !root.innerHTML) return;
-    root.querySelectorAll("*").forEach(el=>{
-      if (el.children.length===0 && el.textContent && /\+\d+ Erz$/.test(el.textContent.trim())) el.textContent = el.textContent.replace(/ Erz$/, " Rohstoff");
-    });
-  });
+  return originalZeichnen();
 };
-
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-didaktik='sicherheit']");
   if (!b) return;
