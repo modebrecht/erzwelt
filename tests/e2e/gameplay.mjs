@@ -65,7 +65,7 @@ const collectKnowledge = async expectedId => {
 const clickMineById = async id => {
   await goMap();
   const pin = page.locator(`.pin[data-pin="mine"][data-id="${id}"] .knopf, button[data-pin="mine"][data-id="${id}"]`).first();
-  await pin.click({ force: true });
+  await pin.evaluate(el => el.click());
   await page.waitForTimeout(120);
 };
 
@@ -93,7 +93,7 @@ await checkpoint('difficulty-selected');
 
 // 1: first mine.
 await waitTutorial('mine1');
-await page.locator('.pin.wink .knopf').first().click({ force: true });
+await page.locator('.pin.wink .knopf').first().evaluate(el => el.click());
 await clickVisible('button[data-tun="mine-auf"]');
 await waitTutorial('minecrew');
 await checkpoint('mine1');
@@ -119,7 +119,7 @@ await checkpoint('team40');
 await goMap();
 for (let i=0;i<5 && (await currentTutorial()) === 'minen3';i++) {
   const target = page.locator('.pin.wink .knopf').first();
-  await target.click({ force: true });
+  await target.evaluate(el => el.click());
   await clickVisible('button[data-tun="mine-auf"]');
   await page.waitForTimeout(150);
   if ((await currentTutorial()) === 'minen3') await goMap();
@@ -169,7 +169,7 @@ if (!fs.fabriken.length) throw new Error('Factory disappeared');
 await goMap();
 const fLand = fs.fabriken[0].land;
 const fabPin = page.locator(`.pin[data-pin="fab"][data-id="${fLand}"] .knopf, button[data-pin="fab"][data-id="${fLand}"]`).first();
-await fabPin.click({ force: true });
+await fabPin.evaluate(el => el.click());
 await clickVisible('button[data-tun="fcrew"][data-n="5"]');
 await waitTutorial('verkauf');
 await checkpoint('factory-staffed');
