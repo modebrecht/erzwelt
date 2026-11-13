@@ -203,7 +203,7 @@
   };
   const style=document.createElement("style");
   style.textContent=`
-    body:has(#seite:not([hidden]) .zertifikat-karte) #quest{display:none!important}
+    body:has(#erzwelt-zertifikat-form:focus-within) #quest{display:none!important}
     .zertifikat-karte{border:2px solid #75aa93}
     .zertifikat-karte p{overflow-wrap:anywhere}
     .zertifikat-karte label{display:block;font-weight:700;margin:12px 0 5px}
