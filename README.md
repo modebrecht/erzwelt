@@ -39,6 +39,35 @@ Der Builder prüft dabei automatisch:
 
 > Änderungen immer in den Quelldateien vornehmen und danach neu bauen. `index.html` nicht direkt pflegen.
 
+## PDF-Leistungsnachweis
+
+Im Reiter **Ziel** können Lernende Name und Klasse eintragen und einen
+PDF-Zwischenstand herunterladen. Nach Etappenende oder Insolvenz führt
+**PDF-Abschluss erstellen** direkt zum Abschlusszertifikat.
+
+Das PDF enthält pro Produkt hergestellte und verkaufte Stück, den aktuellen
+Lagerbestand und den tatsächlich erzielten Gesamterlös. Hinzu kommen Einnahmen,
+Ausgaben, Gewinn/Verlust, Schlusskasse inklusive Startkapital, Schwierigkeit,
+Hilfsbonus, Ruf, Betriebe, Team und Wissensfortschritt. Alle Geldwerte sind CHF
+mit zwei Nachkommastellen. Die Finanzbilanz umfasst den gesamten Spielverlauf;
+ab der zweiten Etappe wird auch der aktuelle Etappengewinn ausgewiesen.
+
+Produktbuchungen werden im Spielstand gespeichert und über Etappen hinweg
+fortgeführt. Bei älteren Spielständen beginnt die Erfassung am Tag des ersten
+Ladens mit dieser Version. Fehlende historische Produktzahlen werden im PDF
+gekennzeichnet; sie werden nicht aus Lagerbestand oder heutigen Preisen geschätzt.
+
+Der Export funktioniert ohne Netzwerk mit der eingebetteten MIT-Bibliothek
+`vendor/pdf-lib-1.17.1.min.js` (Lizenz daneben).
+
+```bash
+node tests/unit/certificate.mjs
+```
+
+Prüft echte Tagesschritte, manuelle und automatische Verkäufe, Erlöse,
+Save/Reload, Etappenwechsel, Neustart, Altdatenmigration sowie die PDF-Erzeugung.
+Test-PDFs entstehen unter `artifacts/certificate/`.
+
 ## Release-Gates
 
 Vor einer finalen Freigabe:

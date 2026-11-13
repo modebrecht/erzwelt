@@ -179,6 +179,7 @@ tagVor=function(){
     const def=PRODUKT[f.produkt];let stueck=Math.floor(f.arbeiter*def.proArbeiter*fabrikBonus);
     for(const k in def.rezept)stueck=Math.min(stueck,Math.floor((S.mat[k]||0)/def.rezept[k]));
     if(stueck<=0)continue;for(const k in def.rezept)S.mat[k]-=stueck*def.rezept[k];S.ware[f.produkt]=(S.ware[f.produkt]||0)+stueck;
+    produktBuchen(f.produkt,stueck);
   }
   const kraft=verkaufsKraft();if(kraft>0)wareVerkaufen(kraft);
   if((S.tag-1)%30===0){

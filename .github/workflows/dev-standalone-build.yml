@@ -12,6 +12,8 @@ on:
       - "*.js"
       - "index.html"
       - "scripts/build-standalone.mjs"
+      - "tests/unit/**"
+      - "vendor/**"
       - ".github/workflows/dev-standalone-build.yml"
   pull_request:
     branches: [main]
@@ -21,6 +23,8 @@ on:
       - "*.js"
       - "index.html"
       - "scripts/build-standalone.mjs"
+      - "tests/unit/**"
+      - "vendor/**"
       - ".github/workflows/dev-standalone-build.yml"
   workflow_dispatch:
 
@@ -37,6 +41,9 @@ jobs:
 
       - name: Build standalone
         run: node scripts/build-standalone.mjs
+
+      - name: Verify product accounting and PDF export
+        run: node tests/unit/certificate.mjs
 
       - name: Verify generated index is committed
         shell: bash

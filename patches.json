@@ -58,6 +58,10 @@
         "knowledge-quest-flow.js",
         "objective-guide.js"
       ]
+    },
+    {
+      "name": "certificate",
+      "files": ["vendor/pdf-lib-1.17.1.min.js", "abschluss-zertifikat.js"]
     }
   ]
 }

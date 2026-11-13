@@ -1373,7 +1373,8 @@ function neuerZustand(){
     perks:{},        // perkId -> true
     preisMod:{}, nachfrageMod:{},   // material/produkt -> {faktor, bis}
     globalMod:[],                   // {art, wert, bis, text}
-    log:[], erledigt:{}, ende:null
+    log:[], erledigt:{}, ende:null,
+    leistungsdaten:{version:1, abTag:1, vollstaendig:true, produkte:{}}
   };
 }
 
@@ -1389,6 +1390,22 @@ const verkaufsEffektText = () => S.hilfsBonus ? "✨ Bonus aktiv · Verkaufserl�
 const etappenEnde = () => Math.max(1,S.etappe||1) * ZIEL_TAGE;
 const etappenGewinn = () => (S.eingenommen-(S.etappeStartEingenommen||0)) - (S.ausgegeben-(S.etappeStartAusgegeben||0));
 const gesamtGewinn = () => S.eingenommen - S.ausgegeben;
+
+/* Dauerhafte Produktbuchungen: tatsächliche Mengen und Erlöse statt
+   Rückrechnung aus heutigen Preisen oder dem begrenzten Meldungsverlauf. */
+function leistungsdatenSichern(){
+  if (!S.leistungsdaten || S.leistungsdaten.version !== 1){
+    S.leistungsdaten = {version:1, abTag:S.tag, vollstaendig:false, produkte:{}};
+  }
+  return S.leistungsdaten;
+}
+function produktBuchen(produkt, hergestellt, verkauft=0, erloes=0){
+  const daten = leistungsdatenSichern();
+  const zeile = daten.produkte[produkt] || (daten.produkte[produkt] = {hergestellt:0, verkauft:0, erloes:0});
+  zeile.hergestellt += hergestellt;
+  zeile.verkauft += verkauft;
+  zeile.erloes += erloes;
+}
 
 function notiz(text, art){
   S.log.unshift({tag:S.tag, text, art:art||""});
@@ -1477,6 +1494,7 @@ function wareVerkaufen(grenze){
     const geld = menge * warenPreis(p);
     S.ware[p] = lager - menge;
     S.kasse += geld; S.eingenommen += geld;
+    produktBuchen(p, 0, menge, geld);
     rest -= menge; stueck += menge; erloes += geld;
   }
   return {stueck, erloes};
@@ -1587,6 +1605,7 @@ function tagVor(){
     if (stueck <= 0) continue;
     for (const k in def.rezept) S.mat[k] -= stueck * def.rezept[k];
     S.ware[f.produkt] = (S.ware[f.produkt] || 0) + stueck;
+    produktBuchen(f.produkt, stueck);
   }
 
   // 5) Verkauf: nur so viel, wie deine Verkäuferinnen schaffen –
@@ -3221,6 +3240,7 @@ function laden(){
     if (!roh) return false;
     const g = JSON.parse(roh); if (!g || typeof g.tag !== "number") return false;
     S = Object.assign(neuerZustand(), g);
+    if (!g.leistungsdaten){ S.leistungsdaten = null; leistungsdatenSichern(); }
     if (!S.perks || typeof S.perks !== "object") S.perks = {};
     if (g.schwierigkeit === undefined) S.schwierigkeit = "mittel";
     else if (g.schwierigkeit !== null && !SCHWIERIGKEIT[g.schwierigkeit]) S.schwierigkeit = "mittel";
