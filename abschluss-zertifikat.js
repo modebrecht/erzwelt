@@ -16,7 +16,7 @@
     const minen = Object.values(S.minen);
     const profile = S.zertifikatProfil || {};
     return {
-      name:String(profile.name || "").trim(), klasse:String(profile.klasse || "").trim(),
+      name:String(profile.vorname ?? String(profile.name || "").trim().split(/\s+/)[0]).trim(),
       datum:new Date().toLocaleDateString("de-CH"), tag:S.tag, etappe:S.etappe || 1,
       abschluss:!!S.ende, status:S.ende ? (S.ende.grund === "insolvenz" ? "Insolvenz" :
         S.ende.geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt") : "Zwischenstand",
@@ -102,7 +102,7 @@
     y=117;
     const nameLines=wrap(r.name,width,17,bold);
     nameLines.forEach(line=>{space(22);text(line,margin,y,17,bold);y+=22;});
-    paragraph(`Klasse: ${r.klasse || "keine Angabe"}   ·   Datum: ${r.datum}   ·   Spieltag ${number(r.tag)}`,9);
+    paragraph(`Datum: ${r.datum}   ·   Spieltag ${number(r.tag)}`,9);
     paragraph(`${r.schwierigkeit}${r.bonus?" · Hilfsbonus +50 % aktiv":""}   ·   Etappe ${r.etappe}   ·   ${r.status}`,9);
     y+=7;
     const metrics=[["HERGESTELLT",number(r.hergestellt)+" Stück"],["VERKAUFT",number(r.verkauft)+" Stück"],["VERKAUFSERLÖS",money(r.erloes)]];
@@ -172,10 +172,8 @@
       <p class="ort">${number(r.hergestellt)} hergestellt · ${number(r.verkauft)} verkauft · ${number(r.lager)} im Lager</p>
       <p class="ort">${escape(zeitraum(r))}${r.vollstaendig?"":". Frühere Produktzahlen fehlen."}</p>
       <form id="erzwelt-zertifikat-form">
-        <label for="zertifikat-name">Vorname und Nachname</label>
-        <input id="zertifikat-name" name="name" autocomplete="name" maxlength="120" required value="${escape(r.name)}" placeholder="Dein Name">
-        <label for="zertifikat-klasse">Klasse (optional)</label>
-        <input id="zertifikat-klasse" name="klasse" autocomplete="off" maxlength="60" value="${escape(r.klasse)}" placeholder="z. B. B24">
+        <label for="zertifikat-name">Vorname</label>
+        <input id="zertifikat-name" name="vorname" autocomplete="given-name" maxlength="120" required value="${escape(r.name)}" placeholder="Dein Vorname">
         <button type="submit" class="cta gruen">${r.abschluss?"PDF-Abschluss herunterladen":"PDF-Zwischenstand herunterladen"}</button>
         <p id="zertifikat-status" role="status" aria-live="polite"></p>
       </form>
@@ -225,7 +223,7 @@
   },true);
   document.addEventListener("input",e=>{
     if(!e.target.closest("#erzwelt-zertifikat-form"))return;
-    S.zertifikatProfil={name:document.getElementById("zertifikat-name").value,klasse:document.getElementById("zertifikat-klasse").value};
+    S.zertifikatProfil={vorname:document.getElementById("zertifikat-name").value};
     speichern();
   });
   let exporting=false;
@@ -234,8 +232,8 @@
     e.preventDefault();
     if(exporting)return;
     const name=document.getElementById("zertifikat-name");
-    if(!name.value.trim()){name.setCustomValidity("Bitte gib deinen Namen ein.");name.reportValidity();name.setCustomValidity("");return;}
-    S.zertifikatProfil={name:name.value.trim(),klasse:document.getElementById("zertifikat-klasse").value.trim()};speichern();
+    if(!name.value.trim()){name.setCustomValidity("Bitte gib deinen Vornamen ein.");name.reportValidity();name.setCustomValidity("");return;}
+    S.zertifikatProfil={vorname:name.value.trim()};speichern();
     const snapshot=report(); // Alle Werte vor dem ersten await festhalten.
     const status=document.getElementById("zertifikat-status");
     exporting=true;status.textContent="PDF wird erstellt …";
@@ -247,7 +245,7 @@
       link.download=`Erzwelt_${snapshot.abschluss?"Abschluss":"Zwischenstand"}_${filename}_Tag${snapshot.tag}.pdf`;
       document.body.appendChild(link);link.click();link.remove();
       setTimeout(()=>URL.revokeObjectURL(url),60000);
-      status.textContent="PDF erstellt. Du findest es in deinen Downloads.";
+      status.textContent="";
     }catch(error){status.textContent="Das PDF konnte nicht erstellt werden. Bitte versuche es erneut.";console.error("Erzwelt PDF:",error);}
     finally{exporting=false;}
   });

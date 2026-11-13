@@ -103,7 +103,7 @@ assert.equal(run('seiteFuellen("ziel")'),'redrawn');
 // Generate actual PDFs with the same offline library used in the standalone.
 await mkdir('artifacts/certificate',{recursive:true});
 run(`S=neuerZustand();S.schwierigkeit='mittel';S.tag=721;
- S.ende={grund:'etappe',geschafft:false};S.zertifikatProfil={name:'Zoë Müller-Groß',klasse:'B24'};
+ S.ende={grund:'etappe',geschafft:false};S.zertifikatProfil={vorname:'Zoë'};
  S.leistungsdaten.produkte={kabel:{hergestellt:50,verkauft:33,erloes:9000},phone:{hergestellt:24,verkauft:20,erloes:2000}};
  S.ware={kabel:17,phone:4};S.eingenommen=11000;S.ausgegeben=10099.50;S.kasse=STARTKAPITAL+900.50;`);
 const sample=get();
@@ -117,7 +117,7 @@ const api=context.window.__erzweltCertificate;
 for(const [name,r] of [
   ['standard',sample],
   ['loss-legacy',{...sample,bilanz:-987654.32,kasse:262345.68,ausgaben:998654.32,vollstaendig:false,abTag:550,status:'Insolvenz'}],
-  ['long-full',{...sample,name:'Änne-Luise Müller-Überraschung '.repeat(4),klasse:'Sekundarschule B24 '.repeat(3),
+  ['long-full',{...sample,name:'Änne-Luise '.repeat(12),
     produkte:run('Object.entries(PRODUKT).map(([id,p])=>({id,name:p.name,hergestellt:123456,verkauft:100000,lager:23456,erloes:123456789.12}))'),
     bilanz:987654321.12,kasse:988904321.12,etappe:20,weitereKasse:10000}],
   ['empty',{...sample,abschluss:false,status:'Zwischenstand',produkte:[],hergestellt:0,verkauft:0,erloes:0,lager:0}]

@@ -41,7 +41,7 @@ Der Builder prüft dabei automatisch:
 
 ## PDF-Leistungsnachweis
 
-Im Reiter **Ziel** können Lernende Name und Klasse eintragen und einen
+Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
 PDF-Zwischenstand herunterladen. Nach Etappenende oder Insolvenz führt
 **PDF-Abschluss erstellen** direkt zum Abschlusszertifikat.
 
