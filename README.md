@@ -75,7 +75,8 @@ Der Builder prüft dabei automatisch:
 - Kauf-Entscheide in Ruhe: Solange das Blatt eines noch nicht gekauften
   Standorts offen ist, steht die Zeit; nach Kauf oder Schliessen läuft sie weiter.
   Im Kaufblatt klebt der Kaufknopf unten und ist ohne Scrollen sichtbar; das
-  Blatt ist etwas länger, das Bild flacher.
+  Bild ist flacher. Auf dem Handy reicht jedes Blatt über die Leiste unten bis
+  an den Rand; oben bleiben Kasse, Team und Tag sichtbar.
 - «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
   Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
 

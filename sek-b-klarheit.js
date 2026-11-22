@@ -240,7 +240,13 @@
     questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); return out; };
   }
   const vorherZeichnen = zeichnen;
-  zeichnen = function(){ const out = vorherZeichnen(); materiallisteKlaeren(); return out; };
+  /* Zeigt das Tutorial auf einen Knopf der Leiste unten (z. B. Team),
+     endet das Blatt über der Leiste, damit der Knopf antippbar bleibt. */
+  const dockHinweis = () => document.body.classList.toggle("dock-hinweis",
+    tutorialLaeuft() && !!document.querySelector("#dock button.wink"));
+  const dockEl = document.getElementById("dock");
+  if (dockEl) new MutationObserver(dockHinweis).observe(dockEl, {subtree:true, attributes:true, attributeFilter:["class"]});
+  zeichnen = function(){ const out = vorherZeichnen(); materiallisteKlaeren(); dockHinweis(); return out; };
 
   /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte ----------
      map-focus-navigation rechnet mit der Ecke des Pins statt mit seinem
@@ -410,6 +416,12 @@
     #quest .engpass-kasten{display:block;width:100%;margin-top:8px;padding:7px 9px;border-radius:10px;text-align:left;
       background:#fff4e5;border:1.5px solid #e6a23c;color:#6b4206;font-size:var(--f0);line-height:1.25;cursor:pointer}
     #blatt{bottom:calc(var(--dockh) + 14px);max-height:calc(76% + 16px)}
+    @media (max-width:819px){
+      /* Handy: Blatt reicht über die Leiste unten bis an den Rand.
+         Oben bleiben Kasse, Team und Tag sichtbar. */
+      #blatt{bottom:0;max-height:calc(100% - 64px - env(safe-area-inset-top));padding-bottom:calc(env(safe-area-inset-bottom) + 4px)}
+      body.dock-hinweis #blatt{bottom:calc(var(--dockh) + 14px);max-height:calc(100% - var(--dockh) - 78px - env(safe-area-inset-top));padding-bottom:10px}
+    }
     #blattinhalt .kaufpause{margin:6px 0 4px;padding:7px 12px;border-radius:12px;background:#eef4fb;color:#24506f;font-size:var(--f0);font-weight:700;line-height:1.3}
     #blattinhalt.kaufblatt .szene svg.buehne{height:clamp(84px,15vh,118px)}
     #blattinhalt .kaufleiste{position:sticky;bottom:-14px;z-index:5;margin:12px -16px -14px;padding:8px 16px 14px;

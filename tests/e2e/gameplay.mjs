@@ -47,8 +47,20 @@ const closeLupe = async () => {
   const b = page.locator('button[data-schliessen="lupe"]:visible');
   if (await b.count()) await b.first().click();
 };
+// On phones an open sheet covers the dock; close it like a player would.
+const closeBlatt = async () => {
+  if (await page.locator('#blatt.auf').count()) {
+    await page.locator('#blatt.auf #zu').click();
+    await page.waitForTimeout(350);
+  }
+};
+const dock = async seite => {
+  await closeBlatt();
+  await page.locator(`button[data-seite="${seite}"]`).first().click();
+};
 const goMap = async () => {
   await closeLupe();
+  await closeBlatt();
   const b = page.locator('button[data-seite="karte"]');
   if (await b.count()) await b.first().click();
   await page.waitForTimeout(120);
@@ -106,6 +118,7 @@ await waitTutorial('team');
 await checkpoint('minecrew');
 
 // 3: hire to >= 40.
+// Tutorial points at the Team orb: the open sheet must leave the dock tappable.
 await page.locator('button[data-seite="team"]').first().click();
 for (let i=0;i<10 && (await state()).workers < 40;i++) {
   const hire = page.locator('button[data-tun="anstellen"]:not([disabled])');
@@ -184,7 +197,7 @@ await page.waitForFunction(() => (S.ware?.kabel || 0) > 0, null, { timeout: 3000
 await setTempo(0);
 
 // 10: manual sale.
-await page.locator('button[data-seite="markt"]').first().click();
+await dock('markt');
 await clickVisible('button[data-tun="handverkauf"]:not([disabled])');
 await waitTutorial('verkaeufer');
 await checkpoint('manual-sale');
@@ -192,12 +205,12 @@ await checkpoint('manual-sale');
 // Ensure free workers, then hire 2 sellers.
 let s = await state();
 if (s.free < 2) {
-  await page.locator('button[data-seite="team"]').first().click();
+  await dock('team');
   const hire = page.locator('button[data-tun="anstellen"]:not([disabled])');
   await hire.first().click();
   await page.waitForTimeout(100);
 }
-await page.locator('button[data-seite="markt"]').first().click();
+await dock('markt');
 for (let i=0;i<3 && (await state()).verkaeufer < 2;i++) {
   const plus = page.locator('button[data-tun="vcrew"][data-n="1"]:not([disabled]), button[data-tun="vcrew"][data-n="5"]:not([disabled])').first();
   await plus.click();
@@ -235,7 +248,7 @@ await checkpoint('reload-ok');
 
 // Knowledge 3: post-tutorial manual market experience. Remove sellers, make stock, sell.
 await closeLupe();
-await page.locator('button[data-seite="markt"]').first().click();
+await dock('markt');
 while ((await state()).verkaeufer > 0) {
   const minus = page.locator('button[data-tun="vcrew"][data-n="-1"]:not([disabled])').first();
   if (!await minus.count()) break;
@@ -246,7 +259,7 @@ await goMap();
 await setTempo(4);
 await page.waitForFunction(() => (S.ware?.kabel || 0) > 0 && S.handverkaufTag !== S.tag, null, { timeout: 30000 });
 await setTempo(0);
-await page.locator('button[data-seite="markt"]').first().click();
+await dock('markt');
 await clickVisible('button[data-tun="handverkauf"]:not([disabled])');
 await collectKnowledge('markt');
 await checkpoint('knowledge-market');
@@ -267,7 +280,7 @@ await checkpoint('knowledge-geology');
 
 // Knowledge 5: open Ziel.
 await closeLupe();
-await page.locator('button[data-seite="ziel"]').first().click();
+await dock('ziel');
 await page.waitForTimeout(150);
 await collectKnowledge('ruf');
 await checkpoint('knowledge-reputation');
