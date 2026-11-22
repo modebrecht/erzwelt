@@ -42,8 +42,11 @@ Der Builder prüft dabei automatisch:
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 
 - **Etappenziel nach Schwierigkeit:** Einfach CHF 500'000, Mittel und Schwer
-  CHF 5'000'000 (Ruf jeweils mindestens 60). Einfach ist mit einer
-  ausbalancierten Ladekabel-Lieferkette erreichbar.
+  CHF 3'000'000 (Ruf jeweils mindestens 60). Durchgerechnet mit dem Spielcode
+  (zufällige Ereignisse, mehrere Durchläufe): Einfach schafft, wer die
+  Ladekabel-Kette ausbaut. Mit Ladekabeln allein sind höchstens rund 1.6 Mio
+  (Etappe 1) bzw. 2.5 Mio (Etappe 2) möglich – Mittel und Schwer verlangen
+  also ein zweites Produkt (z. B. Mainboard), aber kein perfektes Timing.
 - **Investitionen getrennt ausgewiesen:** Der Reiter **Ziel** zeigt unter dem
   Etappengewinn, wie viel davon Investitionen sind (Standorte, Ausbau,
   Einstellungen, Verbesserungen) und wie das laufende Geschäft dasteht.
@@ -71,6 +74,8 @@ Der Builder prüft dabei automatisch:
 - «Spielmodell»-Vorbehalte nur noch im Reiter Wissen, nicht mehr in jedem Blatt.
 - Kauf-Entscheide in Ruhe: Solange das Blatt eines noch nicht gekauften
   Standorts offen ist, steht die Zeit; nach Kauf oder Schliessen läuft sie weiter.
+  Im Kaufblatt klebt der Kaufknopf unten und ist ohne Scrollen sichtbar; das
+  Blatt ist etwas länger, das Bild flacher.
 - «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
   Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
 

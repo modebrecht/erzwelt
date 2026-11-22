@@ -16,7 +16,7 @@
    ============================================================ */
 
 (function(){
-  const ziele = (window.__erzweltLogikFixes && window.__erzweltLogikFixes.ziele) || {einfach:500000, mittel:ZIEL_GEWINN, schwer:ZIEL_GEWINN};
+  const ziele = (window.__erzweltLogikFixes && window.__erzweltLogikFixes.ziele) || {einfach:500000, mittel:3000000, schwer:3000000};
   const kurzChf = n => (n >= 1e6 ? `CHF ${(n/1e6).toLocaleString("de-CH")} Mio` : chf(n)).replace(/ /g, "&nbsp;");
   const ersetze = (html, alt, neu) => html.split(alt).join(neu);
 
@@ -343,17 +343,41 @@
     const v = kaufPauseVon; kaufPauseVon = null;
     if (!S.ende && !modalOffen && tempo === 0) tempoIntern(v);
   };
-  function kaufHinweis(an){
+  /* Kaufblatt: Bild flacher, Kaufknopf klebt unten im Blatt und ist ohne
+     Scrollen sichtbar. Der Pause-Hinweis steht direkt über dem Knopf. */
+  const PAUSE_TEXT = "❚❚ Die Zeit steht, solange du dich entscheidest.";
+  function kaufLayout(kauf, pausiert){
     const inhalt = document.getElementById("blattinhalt");
     if (!inhalt) return;
-    const alt = inhalt.querySelector(".kaufpause");
-    if (!an){ alt?.remove(); return; }
-    if (alt) return;
-    const n = document.createElement("div");
-    n.className = "notiz kaufpause";
-    n.textContent = "❚❚ Die Zeit steht, solange du dich entscheidest.";
-    const titel = inhalt.querySelector(".titelzeile");
-    if (titel) titel.after(n); else inhalt.prepend(n);
+    inhalt.classList.toggle("kaufblatt", !!kauf);
+    inhalt.querySelectorAll(":scope > .kaufpause").forEach(n => n.remove());
+    if (!kauf) return;
+    const svg = inhalt.querySelector(":scope > .szene svg.buehne");
+    if (svg){
+      svg.setAttribute("preserveAspectRatio", "xMidYMax slice");
+      const leer = [...svg.querySelectorAll("text")].find(t => /Noch niemand/.test(t.textContent));
+      if (leer) leer.setAttribute("y", "68");
+    }
+    let leiste = inhalt.querySelector(":scope > .kaufleiste");
+    const cta = inhalt.querySelector(':scope > .cta[data-tun="mine-auf"], :scope > .cta[data-tun="raff-bau"]');
+    if (cta && !leiste){
+      leiste = document.createElement("div");
+      leiste.className = "kaufleiste";
+      cta.before(leiste); leiste.appendChild(cta);
+      // Betrag nie trennen: «CHF» und Zahl bleiben auf derselben Zeile
+      for (const n of [...cta.childNodes]) if (n.nodeType === 3) n.textContent = n.textContent.replace(/CHF (?=\d)/g, "CHF\u00a0");
+    }
+    if (leiste){
+      let h = leiste.querySelector(".kaufpause-text");
+      if (pausiert && !h){
+        h = document.createElement("div"); h.className = "kaufpause-text"; h.textContent = PAUSE_TEXT; leiste.prepend(h);
+      } else if (!pausiert && h) h.remove();
+    } else if (pausiert){
+      const n = document.createElement("div");
+      n.className = "kaufpause"; n.textContent = PAUSE_TEXT;
+      const titel = inhalt.querySelector(".titelzeile");
+      if (titel) titel.after(n); else inhalt.prepend(n);
+    }
   }
   const vorherBlattFuellen = blattFuellen;
   blattFuellen = function(art, id){
@@ -361,7 +385,7 @@
     const kauf = kaufBlatt(art, id) && !S.ende && !modalOffen && S.schwierigkeit;
     if (kauf && kaufPauseVon === null && tempo > 0){ kaufPauseVon = tempo; tempoIntern(0); }
     else if (!kauf) fortsetzen();
-    kaufHinweis(!!kauf && kaufPauseVon !== null);
+    kaufLayout(kauf, !!kauf && kaufPauseVon !== null);
     return out;
   };
   const vorherBlattZu = blattZu;
@@ -385,7 +409,13 @@
     .prozess-materialliste span b{font-weight:900}
     #quest .engpass-kasten{display:block;width:100%;margin-top:8px;padding:7px 9px;border-radius:10px;text-align:left;
       background:#fff4e5;border:1.5px solid #e6a23c;color:#6b4206;font-size:var(--f0);line-height:1.25;cursor:pointer}
-    #blattinhalt .kaufpause{margin:8px 0 10px;background:#eef4fb;border-color:#9cc3e6;color:#24506f;font-weight:700}
+    #blatt{bottom:calc(var(--dockh) + 14px);max-height:calc(76% + 16px)}
+    #blattinhalt .kaufpause{margin:6px 0 4px;padding:7px 12px;border-radius:12px;background:#eef4fb;color:#24506f;font-size:var(--f0);font-weight:700;line-height:1.3}
+    #blattinhalt.kaufblatt .szene svg.buehne{height:clamp(84px,15vh,118px)}
+    #blattinhalt .kaufleiste{position:sticky;bottom:-14px;z-index:5;margin:12px -16px -14px;padding:8px 16px 14px;
+      background:var(--papier);box-shadow:0 -12px 14px -10px rgba(0,0,0,.22)}
+    #blattinhalt .kaufleiste .cta{margin-top:0}
+    #blattinhalt .kaufpause-text{text-align:center;color:#24506f;font-size:var(--f0);font-weight:700;margin:0 0 7px;line-height:1.3}
     .modell-regeln td{vertical-align:top;padding:6px 6px 6px 0}
     .modell-regeln td:first-child{white-space:nowrap}
     #quest .engpass-kasten b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f1);color:#8a4b00;margin-bottom:2px}

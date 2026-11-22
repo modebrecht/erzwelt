@@ -2,8 +2,8 @@
 /* ============================================================
    LOGIK-FIXES (Sek B)
 
-   1. Etappenziel passend zur Schwierigkeit. Einfach ist mit einer gut
-      ausbalancierten Lieferkette erreichbar. Investitionen werden im
+   1. Etappenziel passend zur Schwierigkeit: Einfach CHF 500'000,
+      Mittel und Schwer CHF 3 Mio. Investitionen werden im
       Ziel-Reiter getrennt ausgewiesen, damit das Minus nach dem Bau
       nachvollziehbar ist.
    2. Herkunftsnachweise sind eine sichtbare Entscheidung pro
@@ -16,7 +16,11 @@
 
 (function(){
   /* ---------- 1. Etappenziel und Investitionen ---------- */
-  const ZIEL_NACH_STUFE = {einfach:500000, mittel:ZIEL_GEWINN, schwer:ZIEL_GEWINN};
+  /* Durchgerechnet mit dem Spielcode (Nov. 2026): Mit Ladekabeln allein
+     sind höchstens rund 1.6 Mio (Etappe 1) bzw. 2.5 Mio (Etappe 2) möglich.
+     Mittel/Schwer verlangen deshalb ein zweites Produkt, aber kein
+     perfektes Timing mit hohen Schulden. */
+  const ZIEL_NACH_STUFE = {einfach:500000, mittel:3000000, schwer:3000000};
   const zielGewinn = () => ZIEL_NACH_STUFE[S && S.schwierigkeit] ?? ZIEL_GEWINN;
   const START_TEAM = 10;
 
