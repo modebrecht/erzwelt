@@ -69,6 +69,10 @@ Der Builder prüft dabei automatisch:
   setze in San Rafael mehr Personal ein (jetzt 5 von 45)». Während einer
   Wissens-Quest erscheint der Engpass als Kasten in der Aufgabenkarte.
 - «Spielmodell»-Vorbehalte nur noch im Reiter Wissen, nicht mehr in jedem Blatt.
+- Kauf-Entscheide in Ruhe: Solange das Blatt eines noch nicht gekauften
+  Standorts offen ist, steht die Zeit; nach Kauf oder Schliessen läuft sie weiter.
+- «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
+  Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
 
 ## PDF-Leistungsnachweis
 

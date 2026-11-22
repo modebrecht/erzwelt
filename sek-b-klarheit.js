@@ -11,6 +11,8 @@
    6. Tutorial-Raffinerie zeigt die Kabel-Rohstoffe statt Seltener Erden.
    7. Konkrete Engpass-Hinweise: welcher Ort braucht was.
    8. Weniger «Spielmodell»-Vorbehalte in Blättern und Seiten.
+   Gelb: Tutorial-Prüfung = Text, «Das Spielmodell» ohne Formeln,
+   Zeit steht bei Kauf-Entscheiden.
    ============================================================ */
 
 (function(){
@@ -290,6 +292,85 @@
     };
   }
 
+  /* ---------- Gelb: kleine Unstimmigkeiten ---------- */
+  /* Tutorial-Prüfung passt zum Text «mindestens 10 Personen». */
+  if (tut.minecrew) tut.minecrew.fertig = () => Object.values(S.minen).some(m => m.arbeiter >= 10);
+
+  /* «Das Modell im Code» → «Das Spielmodell», Zusammenhänge in Worten statt Formeln. */
+  const modellSeg = WISSEN.find(seg => seg.id === "modell");
+  if (modellSeg){
+    modellSeg.titel = "Das Spielmodell";
+    modellSeg.formeln = null;
+    modellSeg.fakten = ["Ortsinfos sind für den Unterricht gekürzt und vereinfacht.", "Die Hintergrundinfos wurden 2026 geprüft."];
+    const REGELN = [
+      ["Förderung", "Mehr Personal und zufriedenere Leute holen mehr Rohstoff aus der Quelle."],
+      ["Raffination", "Aus Rohstoff wird Material. Ein Teil bleibt als Abraum zurück."],
+      ["Fabrik", "Das knappste Material bestimmt, wie viele Produkte entstehen."],
+      ["Nachfrage", "Saison, Ereignisse und dein Ruf verändern, wie viel gekauft wird."],
+      ["Preis", "Ein volles Lager senkt den Preis. Der Dollarkurs kann ihn heben oder senken."]
+    ];
+    const vorherLupe = lupeFuellen;
+    lupeFuellen = function(segId){
+      const out = vorherLupe(segId);
+      if (segId === "modell"){
+        const merken = [...document.querySelectorAll("#lupeinhalt .karte > h3")].find(h => h.textContent.trim() === "Zum Merken");
+        const karte = document.createElement("div");
+        karte.className = "karte modell-regeln";
+        karte.innerHTML = `<h3>So hängt es zusammen</h3><table>${REGELN.map(([a, t]) => `<tr><td><b>${a}</b></td><td>${t}</td></tr>`).join("")}</table>`;
+        if (merken) merken.closest(".karte").before(karte);
+        else document.getElementById("lupeinhalt")?.appendChild(karte);
+      }
+      return out;
+    };
+  }
+
+  /* Kauf-Entscheide in Ruhe: Solange ein Blatt für einen noch nicht gekauften
+     Standort offen ist, steht die Zeit. Nach dem Kauf oder Schliessen läuft
+     sie im vorherigen Tempo weiter. Eigene Standorte laufen weiter, damit
+     Bau und Produktion sichtbar bleiben. */
+  let kaufPauseVon = null, eigenerAufruf = false;
+  const kaufBlatt = (art, id) => art === "mine" ? !S.minen[id]
+    : art === "raff" ? !S.raff[id]
+    : art === "fab" ? !(S.fabriken || []).some(f => f.land === id) : false;
+  const vorherTempoSetzen = tempoSetzen;
+  tempoSetzen = function(v){
+    if (!eigenerAufruf) kaufPauseVon = null;   // jemand anderes bestimmt das Tempo
+    return vorherTempoSetzen(v);
+  };
+  const tempoIntern = v => { eigenerAufruf = true; try { tempoSetzen(v); } finally { eigenerAufruf = false; } };
+  const fortsetzen = () => {
+    if (kaufPauseVon === null) return;
+    const v = kaufPauseVon; kaufPauseVon = null;
+    if (!S.ende && !modalOffen && tempo === 0) tempoIntern(v);
+  };
+  function kaufHinweis(an){
+    const inhalt = document.getElementById("blattinhalt");
+    if (!inhalt) return;
+    const alt = inhalt.querySelector(".kaufpause");
+    if (!an){ alt?.remove(); return; }
+    if (alt) return;
+    const n = document.createElement("div");
+    n.className = "notiz kaufpause";
+    n.textContent = "❚❚ Die Zeit steht, solange du dich entscheidest.";
+    const titel = inhalt.querySelector(".titelzeile");
+    if (titel) titel.after(n); else inhalt.prepend(n);
+  }
+  const vorherBlattFuellen = blattFuellen;
+  blattFuellen = function(art, id){
+    const out = vorherBlattFuellen(art, id);
+    const kauf = kaufBlatt(art, id) && !S.ende && !modalOffen && S.schwierigkeit;
+    if (kauf && kaufPauseVon === null && tempo > 0){ kaufPauseVon = tempo; tempoIntern(0); }
+    else if (!kauf) fortsetzen();
+    kaufHinweis(!!kauf && kaufPauseVon !== null);
+    return out;
+  };
+  const vorherBlattZu = blattZu;
+  blattZu = function(){
+    const out = vorherBlattZu();
+    fortsetzen();
+    return out;
+  };
+
   /* ---------- 2./4. Stil ---------- */
   const style = document.createElement("style");
   style.id = "erzwelt-sek-b-klarheit-style";
@@ -304,6 +385,9 @@
     .prozess-materialliste span b{font-weight:900}
     #quest .engpass-kasten{display:block;width:100%;margin-top:8px;padding:7px 9px;border-radius:10px;text-align:left;
       background:#fff4e5;border:1.5px solid #e6a23c;color:#6b4206;font-size:var(--f0);line-height:1.25;cursor:pointer}
+    #blattinhalt .kaufpause{margin:8px 0 10px;background:#eef4fb;border-color:#9cc3e6;color:#24506f;font-weight:700}
+    .modell-regeln td{vertical-align:top;padding:6px 6px 6px 0}
+    .modell-regeln td:first-child{white-space:nowrap}
     #quest .engpass-kasten b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f1);color:#8a4b00;margin-bottom:2px}
   `;
   document.head.appendChild(style);
