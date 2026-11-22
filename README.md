@@ -39,6 +39,22 @@ Der Builder prüft dabei automatisch:
 
 > Änderungen immer in den Quelldateien vornehmen und danach neu bauen. `index.html` nicht direkt pflegen.
 
+## Etappenziel und Nachweise (`logik-fixes.js`)
+
+- **Etappenziel nach Schwierigkeit:** Einfach CHF 500'000, Mittel und Schwer
+  CHF 5'000'000 (Ruf jeweils mindestens 60). Einfach ist mit einer
+  ausbalancierten Ladekabel-Lieferkette erreichbar.
+- **Investitionen getrennt ausgewiesen:** Der Reiter **Ziel** zeigt unter dem
+  Etappengewinn, wie viel davon Investitionen sind (Standorte, Ausbau,
+  Einstellungen, Verbesserungen) und wie das laufende Geschäft dasteht.
+- **Herkunftsnachweise:** Jede Rohstoffquelle hat nach dem Tutorial die Karte
+  «Herkunftsnachweis» (Prüfung CHF 30'000). Das Lieferkettengesetz verlangt
+  Nachweise für alle Quellen; der Transparenzbericht deckt alle Quellen ab und
+  sagt das jetzt auch.
+- **Ereignisse:** Das Taiwan-Ereignis verändert nur die Nachfrage (Rohstoffpreise
+  werden nicht simuliert). Die Recherche wirkt über den Ruf statt über die
+  Smartphone-Nachfrage.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen

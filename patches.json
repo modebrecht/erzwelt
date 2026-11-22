@@ -62,6 +62,10 @@
     {
       "name": "certificate",
       "files": ["vendor/pdf-lib-1.17.1.min.js", "abschluss-zertifikat.js"]
+    },
+    {
+      "name": "logic-fixes",
+      "files": ["logik-fixes.js"]
     }
   ]
 }

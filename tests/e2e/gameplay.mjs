@@ -305,9 +305,11 @@ const perkGate = await page.evaluate(() => ({
 if (!perkGate.field || !perkGate.tier1?.ok) throw new Error('Collected knowledge field does not unlock first perk');
 if (perkGate.tier2Before?.ok) throw new Error('Second perk unlocked without first perk');
 
-// Event regression: Taiwan must keep silicon shock + demand effects.
+// Event regression: Taiwan keeps its demand effects. Raw-material prices are
+// not simulated, so the event must not claim or set a silicon price shock.
 const eventCheck = await page.evaluate(() => {
   const e = EREIGNISSE.find(x => x.id === 'taiwan');
+  delete S.preisMod.silizium;
   const d = e.bau();
   return {
     text: d?.text || '',
@@ -316,7 +318,7 @@ const eventCheck = await page.evaluate(() => {
     console: S.nachfrageMod?.konsole
   };
 });
-if (eventCheck.silicon?.faktor !== 2.4 || eventCheck.phone?.faktor !== 1.5 || eventCheck.console?.faktor !== 1.5) {
+if (eventCheck.silicon !== undefined || /Silizium/.test(eventCheck.text) || eventCheck.phone?.faktor !== 1.5 || eventCheck.console?.faktor !== 1.5) {
   throw new Error(`Taiwan event regression: ${JSON.stringify(eventCheck)}`);
 }
 
