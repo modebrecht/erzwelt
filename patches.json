@@ -65,7 +65,7 @@
     },
     {
       "name": "logic-fixes",
-      "files": ["logik-fixes.js"]
+      "files": ["logik-fixes.js", "sek-b-klarheit.js"]
     }
   ]
 }

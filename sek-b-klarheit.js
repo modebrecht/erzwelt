@@ -1,0 +1,317 @@
+"use strict";
+/* ============================================================
+   SEK-B-KLARHEIT
+
+   Verständlichkeit und Bedienung auf dem Handy. Keine neue Wirtschaft.
+   1. Schwierigkeitsdialog ohne Fachjargon, Einfach empfohlen.
+   2. Tutorial-Karte: eine Fortschrittsanzeige weniger.
+   3. «Ziel zeigen»: Ziel landet unter der Aufgabenkarte, nicht dahinter.
+   4. «Schritt abgeschlossen» überdeckt kein offenes Blatt mehr.
+   5. Einheiten: pro Person, pro Tag, pro Monat, pro Stück.
+   6. Tutorial-Raffinerie zeigt die Kabel-Rohstoffe statt Seltener Erden.
+   7. Konkrete Engpass-Hinweise: welcher Ort braucht was.
+   8. Weniger «Spielmodell»-Vorbehalte in Blättern und Seiten.
+   ============================================================ */
+
+(function(){
+  const ziele = (window.__erzweltLogikFixes && window.__erzweltLogikFixes.ziele) || {einfach:500000, mittel:ZIEL_GEWINN, schwer:ZIEL_GEWINN};
+  const kurzChf = n => (n >= 1e6 ? `CHF ${(n/1e6).toLocaleString("de-CH")} Mio` : chf(n)).replace(/ /g, "&nbsp;");
+  const ersetze = (html, alt, neu) => html.split(alt).join(neu);
+
+  /* ---------- 1. Schwierigkeit ---------- */
+  SCHWIERIGKEIT.einfach.effekt = "Verkauf bringt 20 % mehr";
+  SCHWIERIGKEIT.mittel.effekt  = "normale Verkaufspreise";
+  SCHWIERIGKEIT.schwer.effekt  = "Verkauf bringt 30 % weniger";
+
+  schwierigkeitZeigen = function(){
+    modalOffen = true; tempoSetzen(0);
+    $("#d-art").textContent = "Neue Runde";
+    $("#d-titel").textContent = "Wähle die Schwierigkeit";
+    $("#d-text").innerHTML = `Die Schwierigkeit bestimmt, wie viel dir ein Verkauf einbringt und wie hoch dein Ziel ist. Für den Start empfehlen wir <b>Einfach</b>.`;
+    const optionen = [
+      ["einfach","🌱","Einfach",`Verkauf bringt 20&nbsp;% mehr<br>Ziel: ${kurzChf(ziele.einfach)}`,false,"Empfohlen"],
+      ["mittel","⚙️","Mittel",`Normale Verkaufspreise<br>Ziel: ${kurzChf(ziele.mittel)}`,false,""],
+      ["schwer","🔥","Schwer",`Verkauf bringt 30&nbsp;% weniger<br>Ziel: ${kurzChf(ziele.schwer)}`,!META.mittelGeschafft,"🔒 Erst Mittel schaffen"]
+    ];
+    $("#d-wahlen").innerHTML = "";
+    optionen.forEach(([id,icon,name,klein,gesperrt,status])=>{
+      const b = document.createElement("button");
+      b.className = "wahl schwierigkeit"; b.disabled = gesperrt;
+      const badge = id === "einfach" ? ` <span class="empfohlen">${status}</span>` : "";
+      const sperre = gesperrt ? `<br><span class="sperre">${status}</span>` : "";
+      b.innerHTML = `<span class="schwierigkeitsicon">${icon}</span><span><b>${name}${badge}</b><small>${klein}${sperre}</small></span>`;
+      if (!gesperrt) b.onclick = () => {
+        S.schwierigkeit = id; S.etappe = 1; S.etappeStartEingenommen = S.eingenommen; S.etappeStartAusgegeben = S.ausgegeben; S.ende = null;
+        modalOffen = false; $("#schleier").hidden = true;
+        notiz(`${icon} Schwierigkeit <b>${name}</b> gewählt · ${SCHWIERIGKEIT[id].effekt}.`, "gut");
+        speichern(); tempoSetzen(1); zeichnen();
+      };
+      $("#d-wahlen").appendChild(b);
+      if (id === "einfach") setTimeout(()=>b.focus(), 60);
+    });
+    $("#schleier").hidden = false; zeichnen();
+  };
+
+  /* ---------- Tutorial-Texte ---------- */
+  const tut = Object.fromEntries(TUTORIAL.map(t => [t.id, t]));
+  if (tut.team) tut.team.text = "Mehrere Stationen brauchen gleichzeitig Personal. Stelle weitere Personen ein, bis du mindestens 40 hast. Tipp: Schieb den Regler auf 30.";
+
+  /* ---------- 5. Einheiten und 8. weniger Vorbehalte ---------- */
+  const proTag = v => v >= 10 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toLocaleString("de-CH");
+
+  const vorherBlattMine = blattMine;
+  blattMine = function(id){
+    let html = vorherBlattMine(id);
+    const def = MINEN.find(x => x.id === id);
+    if (!def) return html;
+    const land = LAND[def.land];
+    html = ersetze(html, `<small>Ergiebigkeit</small><b>${def.ergiebigkeit} Rohstoff</b>`,
+      `<small>Förderung pro Person</small><b>≈ ${proTag(def.ergiebigkeit)} pro Tag</b>`);
+    html = ersetze(html, `<small>Plätze</small><b>${def.plaetze}</b>`, `<small>Arbeitsplätze</small><b>${def.plaetze}</b>`);
+    html = ersetze(html, `<small>Üblicher Lohn</small><b>${chf(land.lohn)}</b>`,
+      `<small>Üblicher Lohn</small><b>${chf(land.lohn)}</b><small class="einheit">pro Person und Monat</small>`);
+    html = html.replace(/(<small>Förderung<\/small><b>[^<]*)\/Tag<\/b>/, "$1 pro Tag</b>");
+    html = html.replace(/(<small>Lohnkosten<\/small><b>[^<]*)<\/b>/, `$1</b><small class="einheit">pro Monat</small>`);
+    html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Mengen und Löhne sind vereinfachte Spielwerte.</div>`, "");
+    return html;
+  };
+
+  const vorherBlattRaff = blattRaff;
+  blattRaff = function(id){
+    let html = vorherBlattRaff(id);
+    const def = RAFF_ORTE.find(x => x.id === id);
+    if (!def) return html;
+    const land = LAND[def.land];
+    const spezial = (def.spezial||[]).map(k => MATERIAL[k] && MATERIAL[k].name).filter(Boolean);
+    const alteKarte = `<div class="karte"><h3>Spezialisierung im Spiel</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.</div></div>`;
+    const neueKarte = tutorialLaeuft() ? "" : `<div class="karte"><h3>Spezialisierung</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz">Diese Rohstoffe verarbeitet die Raffinerie <b>25 % schneller</b>. Alle anderen Rohstoffe verarbeitet sie normal.</div></div>`;
+    html = ersetze(html, alteKarte, neueKarte);
+    html = ersetze(html, `<small>Kapazität</small><b>${def.kapazitaet}/Tag</b>`,
+      `<small>Verarbeitet bis zu</small><b>${def.kapazitaet}</b><small class="einheit">Rohstoff pro Tag, voll besetzt</small>`);
+    html = ersetze(html, `<small>Plätze</small><b>${def.plaetze}</b>`, `<small>Arbeitsplätze</small><b>${def.plaetze}</b>`);
+    html = ersetze(html, `<small>Lohn</small><b>${chf(land.lohn)}</b>`,
+      `<small>Lohn</small><b>${chf(land.lohn)}</b><small class="einheit">pro Person und Monat</small>`);
+    html = ersetze(html, `<small>Betrieb</small><b>${chf(9000)}/Mt.</b>`,
+      `<small>Betriebskosten</small><b>${chf(9000)}</b><small class="einheit">pro Monat</small>`);
+    html = html.replace(/<small>Durchsatz<\/small><b>(\d+)\/Tag<\/b>/, `<small>Verarbeitet</small><b>$1</b><small class="einheit">Rohstoff pro Tag</small>`);
+    html = ersetze(html, "Der Rest steht im Spielmodell für Abraum und Verluste.", "Der Rest ist Abraum: Gestein und Abfall.");
+    return html;
+  };
+
+  if (typeof szeneRaff === "function"){
+    const vorherSzeneRaff = szeneRaff;
+    szeneRaff = function(def, r){
+      if (tutorialLaeuft() && def) return vorherSzeneRaff({...def, spezial:[START_MATERIALIEN[0]]}, r);
+      return vorherSzeneRaff(def, r);
+    };
+  }
+
+  const vorherBlattFab = blattFab;
+  blattFab = function(land){
+    let html = vorherBlattFab(land);
+    html = ersetze(html, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat`, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)} pro Person und Monat`);
+    html = ersetze(html, "Vereinfachtes Rezept · Spielmodell", "Rezept: Material pro Stück");
+    const e = engpass();
+    const tipp = e && e.fab === land ? e.text : "Sichere dafür eine eigene Rohstoffquelle oder setze dort mehr Personal ein.";
+    html = ersetze(html, "Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.", tipp);
+    return html;
+  };
+
+  const vorherTeam = seiteTeam;
+  seiteTeam = function(){
+    let html = vorherTeam();
+    html = ersetze(html, `<div class="unter">Lohnkosten im Spielmodell</div>`, `<div class="unter">Personal einstellen und auf die Stationen verteilen</div>`);
+    html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`, "");
+    html = ersetze(html, "<small>pro Tag</small>", "<small>Löhne pro Tag</small>");
+    return html;
+  };
+
+  const vorherMarkt = seiteMarkt;
+  seiteMarkt = function(){
+    let html = vorherMarkt();
+    html = ersetze(html, "Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.",
+      "Deine Rohstoffe kommen aus deinen eigenen Quellen. Die Raffinerie macht daraus Material.");
+    return html;
+  };
+
+  /* HUD: «Frei» heisst freies Personal. */
+  const hudLabel = document.querySelector("#hud .pille.crew small");
+  if (hudLabel){ hudLabel.textContent = "Team frei"; hudLabel.parentElement.parentElement.title = "Freies Personal im Team / Personal insgesamt"; }
+
+  /* Fabrik-Materialliste: «Kupfer 303/2» → «Kupfer: 303 da · 2 pro Stück». */
+  function materiallisteKlaeren(){
+    document.querySelectorAll(".prozess-materialliste span:not([data-klar])").forEach(sp => {
+      const m = sp.textContent.match(/^(.+?) (\d+)\/(\d+)$/);
+      if (!m) return;
+      sp.dataset.klar = "1";
+      sp.innerHTML = `${m[1]}: <b>${m[2]}</b> da · ${m[3]} pro Stück`;
+    });
+  }
+
+  /* ---------- 7. Engpass erkennen ---------- */
+  function freieQuelleFuer(k){
+    const d = MINEN.find(x => x.mat === k && !S.minen[x.id]);
+    return d ? d.id : null;
+  }
+  function engpass(){
+    if (typeof tutorialLaeuft === "function" && tutorialLaeuft()) return null;
+    let produktion = 0;
+    for (const f of S.fabriken || []){
+      if (f.restbau > 0 || f.arbeiter <= 0) continue;
+      const def = PRODUKT[f.produkt];
+      const cap = Math.max(1, Math.floor(f.arbeiter * def.proArbeiter * perkMult("fabrik")));
+      produktion += cap;
+      let knapp = null, quote = Infinity;
+      for (const k in def.rezept){
+        const q = (S.mat[k]||0) / (def.rezept[k] * cap);
+        if (q < quote){ quote = q; knapp = k; }
+      }
+      if (!knapp || quote >= 1) continue;
+      const mat = MATERIAL[knapp];
+      const titel = `${mat.name} fehlt für ${def.name}`;
+      const mineId = materialMine(knapp);
+      if (!mineId){
+        const frei = freieQuelleFuer(knapp);
+        const d = frei && MINEN.find(x => x.id === frei);
+        return {titel, text: d ? `Du hast noch keine Quelle für ${mat.name}. Eröffne zum Beispiel ${d.ort}.` : `Du hast noch keine Quelle für ${mat.name}.`,
+                ziel: frei ? {art:"mine", id:frei} : null, fab:f.land};
+      }
+      const m = S.minen[mineId], d = MINEN.find(x => x.id === mineId);
+      if (m.stillBis > S.tag)
+        return {titel, text:`${d.ort} steht gerade still. Öffne die Rohstoffquelle und schau nach dem Grund.`, ziel:{art:"mine", id:mineId}, fab:f.land};
+      const raffIds = Object.keys(S.raff || {});
+      if ((S.erz[knapp]||0) > 150 && raffIds.length){
+        const rid = raffIds.find(id => S.raff[id].arbeiter < RAFF_ORTE.find(x => x.id === id).plaetze) || raffIds[0];
+        const rd = RAFF_ORTE.find(x => x.id === rid);
+        return {titel, text:`Es liegt viel Rohstoff bereit, aber die Raffinerie ${rd.ort} schafft zu wenig. Setze dort mehr Personal ein (jetzt ${S.raff[rid].arbeiter} von ${rd.plaetze}).`, ziel:{art:"raff", id:rid}, fab:f.land};
+      }
+      if (m.arbeiter < d.plaetze)
+        return {titel, text:`Setze in ${d.ort} mehr Personal ein (jetzt ${m.arbeiter} von ${d.plaetze}).`, ziel:{art:"mine", id:mineId}, fab:f.land};
+      return {titel, text:`${d.ort} ist voll besetzt. Baue die Rohstoffquelle aus oder eröffne eine zweite Quelle für ${mat.name}.`, ziel:{art:"mine", id:mineId}, fab:f.land};
+    }
+    const kraft = verkaufsKraft(), lager = warenLager();
+    if (produktion > 0 && lager > Math.max(40, kraft * 6) && kraft < produktion * 0.9){
+      return {titel:"Dein Lager wird voll",
+              text:`Deine Fabriken schaffen etwa ${produktion} Stück pro Tag, dein Verkaufsteam verkauft ${kraft}. Setze im Markt mehr Leute in den Verkauf.`,
+              ziel:{art:"seite", id:"markt"}};
+    }
+    return null;
+  }
+
+  function engpassOeffnen(e){
+    if (!e || !e.ziel) return;
+    if (e.ziel.art === "seite"){ seiteWechseln(e.ziel.id); return; }
+    if (aktiveSeite !== "karte") seiteWechseln("karte");
+    blattFuellen(e.ziel.art, e.ziel.id);
+  }
+
+  const vorherNaechster = naechsterSchritt;
+  naechsterSchritt = function(){
+    const api = window.__erzweltKnowledgeQuestFlow;
+    const quest = api && typeof api.active === "function" ? api.active() : null;
+    if (!quest){
+      const e = engpass();
+      if (e) return [e.titel, e.text];
+    }
+    return vorherNaechster();
+  };
+
+  /* Während einer Wissens-Quest erscheint der Engpass als kleiner Kasten in der Karte. */
+  function engpassKasten(){
+    const q = document.getElementById("quest");
+    if (!q) return;
+    q.querySelector(".engpass-kasten")?.remove();
+    if (q.hidden || !q.classList.contains("wissen-quest")) return;
+    const e = engpass();
+    if (!e) return;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "engpass-kasten";
+    b.innerHTML = `<b>⚠ ${e.titel}</b><span>${e.text}</span>`;
+    b.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); engpassOeffnen(e); });
+    const vor = q.querySelector(".objective-guide-action") || document.getElementById("q-punkte");
+    if (vor) vor.insertAdjacentElement("beforebegin", b); else q.appendChild(b);
+    if (typeof questHoeheMessen === "function") questHoeheMessen();
+  }
+
+  if (typeof questZeichnen === "function"){
+    const vorherQuest = questZeichnen;
+    questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); return out; };
+  }
+  const vorherZeichnen = zeichnen;
+  zeichnen = function(){ const out = vorherZeichnen(); materiallisteKlaeren(); return out; };
+
+  /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte ----------
+     map-focus-navigation rechnet mit der Ecke des Pins statt mit seinem
+     sichtbaren Kopf. Hier wird der Ziel-Pin berechnet und so platziert,
+     dass er mittig und unterhalb der Aufgabenkarte erscheint. */
+  if (typeof ansichtAnwenden === "function"){
+    const vorherAnsicht = ansichtAnwenden;
+    let zuletzt = 0;
+    ansichtAnwenden = function(){
+      const fokus = welt.classList.contains("map-focus-moving");
+      if (!fokus || Date.now() - zuletzt < 700 || aktiveSeite !== "karte") return vorherAnsicht();
+      zuletzt = Date.now();
+      const W = sicht.clientWidth;
+      const hud = document.getElementById("hud")?.offsetHeight || 56;
+      const dock = document.getElementById("dock")?.offsetHeight || 86;
+      const oben = hud + 8, unten = Math.max(oben + 80, sicht.clientHeight - dock - 8);
+      const alt = oben + (unten - oben) * .48;
+      // Ziel-Pin aus der Kamera-Formel zurückrechnen.
+      const px = (W * .5 - ansicht.x) / ansicht.z, py = (alt - ansicht.y) / ansicht.z;
+      const pin = [...document.querySelectorAll("#welt .pin")].find(p =>
+        Math.abs(p.offsetLeft + p.offsetWidth / 2 - px) < 3 && Math.abs(p.offsetTop + Math.min(28, p.offsetHeight / 2) - py) < 3);
+      const kopf = pin && (pin.querySelector(".knopf") || pin);
+      if (!kopf) return vorherAnsicht();
+
+      let zielY = alt;
+      const q = document.getElementById("quest");
+      const s = sicht.getBoundingClientRect();
+      if (q && !q.hidden && !q.classList.contains("breit")){
+        const r = q.getBoundingClientRect();
+        const kartenUnten = r.bottom - s.top;
+        const deckt = r.left - s.left < W / 2 + 40 && r.right - s.left > W / 2 - 40 && kartenUnten > alt - 50;
+        if (deckt && kartenUnten + 70 < unten) zielY = kartenUnten + (unten - kartenUnten) * .42;
+      }
+      // Sichtbaren Pin-Kopf berechnen: Der Pin hängt an seinem unteren
+      // Mittelpunkt (offsetLeft/offsetTop) und wird mit s = k/z skaliert.
+      const zmin = Math.max(W / KARTE_B, 0.95);
+      const z = Math.min(4.5, Math.max(zmin, ansicht.z));
+      const sk = Math.max(0.62, Math.min(1, 0.45 + z * 0.55)) / z;
+      const kopfX = (kopf === pin ? 0 : kopf.offsetLeft + kopf.offsetWidth / 2 - pin.offsetWidth / 2) * sk;
+      const kopfY = (pin.offsetHeight - (kopf === pin ? pin.offsetHeight / 2 : kopf.offsetTop + kopf.offsetHeight / 2)) * sk;
+      const weltX = pin.offsetLeft + kopfX, weltY = pin.offsetTop - kopfY;
+      ansicht.z = z;
+      ansicht.x = W / 2 - weltX * z;
+      ansicht.y = zielY - weltY * z;
+      document.body.classList.add("ziel-fokus");
+      clearTimeout(window.__zielFokusTimer);
+      window.__zielFokusTimer = setTimeout(() => document.body.classList.remove("ziel-fokus"), 2600);
+      return vorherAnsicht();
+    };
+  }
+
+  /* ---------- 2./4. Stil ---------- */
+  const style = document.createElement("style");
+  style.id = "erzwelt-sek-b-klarheit-style";
+  style.textContent = `
+    #quest.tutorial-aktiv #q-punkte{display:none}
+    #quest .tutorial-phase span{display:none}
+    body.ziel-fokus #toasts{opacity:.12;transition:opacity .2s}
+    body.fensterauf #tutorial-lernfeedback{top:calc(env(safe-area-inset-top) + 4px);padding:6px 12px;font-size:var(--f0)}
+    .wahl.schwierigkeit .empfohlen{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;background:#e0f2e8;color:#1f6b4e;font-size:var(--f0);vertical-align:middle}
+    .wahl.schwierigkeit .sperre{font-weight:800}
+    .wert small.einheit{display:block;font-size:var(--f0);opacity:.7;margin-top:2px;font-weight:700;line-height:1.1}
+    .prozess-materialliste span b{font-weight:900}
+    #quest .engpass-kasten{display:block;width:100%;margin-top:8px;padding:7px 9px;border-radius:10px;text-align:left;
+      background:#fff4e5;border:1.5px solid #e6a23c;color:#6b4206;font-size:var(--f0);line-height:1.25;cursor:pointer}
+    #quest .engpass-kasten b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f1);color:#8a4b00;margin-bottom:2px}
+  `;
+  document.head.appendChild(style);
+
+  /* Der Startdialog wurde schon vom Kern gezeigt: mit der neuen Fassung ersetzen. */
+  if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
+
+  window.__erzweltSekBKlarheit = {version:1, engpass};
+  seitenStand = ""; blattStand = "";
+  if (typeof questZeichnen === "function") questZeichnen();
+})();

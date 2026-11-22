@@ -55,6 +55,21 @@ Der Builder prüft dabei automatisch:
   werden nicht simuliert). Die Recherche wirkt über den Ruf statt über die
   Smartphone-Nachfrage.
 
+## Verständlichkeit für Sek B (`sek-b-klarheit.js`)
+
+- Schwierigkeitsdialog ohne Fachjargon; **Einfach** ist vorausgewählt und als
+  «Empfohlen» markiert, jede Stufe nennt ihr Ziel.
+- Tutorial-Karte ohne doppelte Punkte-Leiste; «Schritt abgeschlossen» liegt bei
+  offenem Blatt über der Kopfzeile statt über dem Blatt.
+- «Ziel zeigen» setzt den Ziel-Pin mittig unter die Aufgabenkarte und blendet
+  Meldungen kurz ab.
+- Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück; HUD «Team frei».
+- Tutorial-Raffinerie zeigt Kupfer statt Seltener Erden, ohne Spezialisierungskarte.
+- Konkrete Engpass-Hinweise nach dem Tutorial, z. B. «Zinn fehlt für Ladekabel –
+  setze in San Rafael mehr Personal ein (jetzt 5 von 45)». Während einer
+  Wissens-Quest erscheint der Engpass als Kasten in der Aufgabenkarte.
+- «Spielmodell»-Vorbehalte nur noch im Reiter Wissen, nicht mehr in jedem Blatt.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
