@@ -124,7 +124,7 @@
         get text(){
           const o = ortName("mine", quelle(k));
           const erst = k === START_MATERIALIEN[0] && !S.arbeiterGesamt
-            ? `Du hast noch kein Personal. Öffne ${fett(o)} und schieb den Regler auf ${n} – die Leute werden dabei eingestellt.${warum ? " " + warum : ""}`
+            ? `Öffne ${fett(o)} und schieb den Regler auf ${n}. Die Leute werden dabei eingestellt.`
             : `Öffne ${fett(o)} und schieb den Regler auf ${n} Personen.${warum ? " " + warum : ""}`;
           return besetzen("mine", quelle(k), n, erst).text;
         },
@@ -143,7 +143,7 @@
 
   const SCHRITTE = [
     ...quellenSchritte(CU, "hacke", "Das Ladekabel braucht Kupfer, Aluminium und Zinn. Jede Rohstoffquelle liefert einen Rohstoff.",
-      "Ein Ladekabel braucht doppelt so viel Kupfer wie Aluminium oder Zinn."),
+      "Kabel brauchen doppelt so viel Kupfer wie Aluminium."),
     ...quellenSchritte(AL, "berg", "Bauxit wird später zu Aluminium."),
     ...quellenSchritte(SN, "berg", "Zinnerz wird später zu Zinn. Jetzt hast du alle drei Rohstoffe.",
       "Zinnerz enthält wenig Zinn – darum braucht es hier mehr Leute als in Boké."),

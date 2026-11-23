@@ -252,7 +252,8 @@
   function questGehoertZuSeite(q){
     const t = tutorialSchritt();
     if (t) return t.ziel() === "dock:" + aktiveSeite;
-    if (q.classList.contains("wissen-bereit")) return true;   // «Ansehen» geht überall
+    // «Ansehen» geht überall; ausserhalb von Wissen als schmale Zeile mit Knopf (aufgabe-kompakt.js)
+    if (q.classList.contains("wissen-bereit")) return aktiveSeite === "wissen";
     return q.classList.contains("wissen-quest") && aktiveSeite === "wissen";
   }
   function questKompakt(){

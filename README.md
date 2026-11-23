@@ -178,6 +178,33 @@ Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine 
 - Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»;
   darunter steht der monatliche Lohn (je nach Land, Verkauf, ohne Aufgabe).
 
+## Aufgabe kompakt (`aufgabe-kompakt.js`)
+
+Auf dem Handy mehr Platz für die Karte (nur Darstellung):
+
+- Tutorial-Aufgabe ohne «Zusammenhang» (kommt als Rückmeldung nach dem Schritt),
+  Phase nur als Balken, «Ziel zeigen» niedriger – rund 30 % kleiner.
+- «Neues Wissen» (vorher «Wissen freigeschaltet») mit höchstens zwei Zeilen Text;
+  ein Engpass erscheint als einzeiliger Hinweis, Antippen führt hin.
+- Auf Markt, Team und Ziel ist «Neues Wissen» eine schmale Zeile mit «Ansehen».
+- Meldungen unten: auf dem Handy nur die neueste.
+
+## Ziel positiv (`ziel-positiv.js`)
+
+Der Ziel-Reiter beginnt mit dem **laufenden Geschäft pro Monat** (Einnahmen minus
+Löhne und Betrieb) als grosser Zahl, mit Trend und Balken der letzten Monate
+(`S.monatsVerlauf`). Darunter eine Prognose: «Bei diesem Tempo erreichst du das
+Ziel in etwa 17 Monaten – du hast noch 20» oder was noch fehlt und was hilft.
+Investitionen sind als Aufbau erklärt, nicht als Verlust.
+
+## Feinschliff (`feinschliff.js`)
+
+- Verkaufsbetrag ersetzt kurz das Wort «Kasse» («+2'845») statt darüberzuliegen.
+- «Schritt abgeschlossen» erscheint auf der Karte unten über der Leiste statt über
+  Kopfzeile und Aufgabe.
+- Fabrik-Szene: ganzer Produktname im Karton, Materialnamen nicht abgeschnitten.
+- Fehlendes Material im Rezept rot mit «· fehlt» statt grau durchgestrichen.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
