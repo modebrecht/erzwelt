@@ -324,7 +324,7 @@
     if (!sichtbar){ lwKnopf.classList.remove("offen"); return; }
     const mine = MINEN.find(x => x.id === r.mineId), raff = RAFF_ORTE.find(x => x.id === r.raffId);
     const km = Math.round(((r.d1 || 0) + (r.d2 || 0)) / 100) * 100;
-    const inhalt = `<span class="lw-ikon" aria-hidden="true">🚚</span><span>Lieferweg<small>≈ ${km.toLocaleString("de-CH")} km</small>`
+    const inhalt = `<span class="lw-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M2.6 6.6h10.9v9H2.6z"/><path d="M13.5 9.4h4.1l3 3.3v2.9h-7.1"/><circle cx="6.8" cy="17.3" r="1.8"/><circle cx="17" cy="17.3" r="1.8"/></svg></span><span>Lieferweg<small>≈ ${km.toLocaleString("de-CH")} km</small>`
       + `<span class="lw-mehr">${mine?.ort || ""} → ${raff?.ort || ""} → ${LAND[r.fabrik.land]?.name || ""}. LKW, Schiff, LKW. `
       + `Nur zur Orientierung: Transportkosten und Lieferzeiten rechnet das Spiel nicht.</span></span>`;
     if (lwKnopf.dataset.inhalt !== inhalt){ lwKnopf.innerHTML = inhalt; lwKnopf.dataset.inhalt = inhalt; }

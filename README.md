@@ -205,6 +205,26 @@ Investitionen sind als Aufbau erklärt, nicht als Verlust.
 - Fabrik-Szene: ganzer Produktname im Karton, Materialnamen nicht abgeschnitten.
 - Fehlendes Material im Rezept rot mit «· fehlt» statt grau durchgestrichen.
 
+## Ein Stil (`stil.js`)
+
+Erzwelt behält seine Identität (Tiefsee-Karte, Papier-Blätter, Baloo 2 und Nunito),
+aber jede Farbe hat eine feste Rolle:
+
+- **Gold** = tun: kaufen, bauen, einstellen, verkaufen, ausbauen (vorher teils grün).
+- **Weiss mit Rand** = zweitrangig: Ziel zeigen, Zum Team, − / +, Neue Runde, Entlassen.
+- **Grün** = Wissen und Erfolg (Ansehen, Gewinn), nie für Käufe.
+- **Rot** = Schliessen und Warnungen.
+
+Knöpfe mit drei Radien (12 / 14 / 18) und gleicher Kante. Keine gesperrten
+Grossbuchstaben mehr (vorher 34 Stellen); Knopftexte als Verb
+(«22 Personen einstellen», «Selbst verkaufen»). Keine Emojis mehr: Schwierigkeit als
+1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole.
+
+**«Al» statt «AI»:** In Baloo 2 sehen grosses I und kleines l gleich aus. Das l in
+«Al» wird darum als eigenes Zeichen mit Bogen gezeichnet (steht auf der Grundlinie,
+unabhängig von der Schrift). Das Symbol bleibt chemisch korrekt «Al»; Screenreader
+lesen weiterhin «Al».
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen

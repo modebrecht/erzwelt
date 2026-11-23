@@ -232,7 +232,8 @@
     if (!e) return;
     const b = document.createElement("button");
     b.type = "button"; b.className = "engpass-kasten";
-    b.innerHTML = `<b>⚠ ${e.titel}</b><span>${e.text}</span>`;
+    const warn = window.__erzweltStil ? window.__erzweltStil.ikon.warnung : "⚠";
+    b.innerHTML = `<b>${warn} ${e.titel}</b><span>${e.text}</span>`;
     b.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); engpassOeffnen(e); });
     const vor = q.querySelector(".objective-guide-action") || document.getElementById("q-punkte");
     if (vor) vor.insertAdjacentElement("beforebegin", b); else q.appendChild(b);

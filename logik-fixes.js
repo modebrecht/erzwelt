@@ -82,7 +82,7 @@
     }
 
     const freischaltText = mittelUnlock
-      ? `<br><br><b>🔥 Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
+      ? `<br><br><b>Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
     const bonusAngebot = !geschafft && S.schwierigkeit === "einfach" && !S.hilfsBonus;
     const wahlen = [
       {text:`Weiter · Etappe ${(S.etappe||1)+1}`, klein:`Nochmals ${ZIEL_TAGE} Tage mit derselben Firma`, tun:()=>{ etappeWeiter(vorherTempo); }}
