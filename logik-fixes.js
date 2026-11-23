@@ -142,14 +142,7 @@
     </div>`;
   }
 
-  const originalBlattMine = blattMine;
-  blattMine = function(id){
-    const html = originalBlattMine(id);
-    const karte = nachweisKarte(id);
-    if (!karte) return html;
-    const marke = '<div class="karte zufriedenheitskarte">';
-    return html.includes(marke) ? html.replace(marke, karte + marke) : html + karte;
-  };
+  /* Die Karte steht im Blatt der Rohstoffquelle vor der Zufriedenheit (module/blaetter.js). */
 
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-didaktik='nachweis']");
@@ -232,6 +225,6 @@
     };
   }
 
-  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN};
+  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN, nachweisKarte};
   seitenStand = ""; blattStand = "";
 })();

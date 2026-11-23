@@ -261,29 +261,9 @@
     return m ? {art:m[1], id:m[2]} : null;
   }
 
-  const ALTE_NOTIZEN = [
-    /<div class="notiz">(?:Für <b>[^<]*<\/b> hast du bereits eine Mine\. Im Tutorial genügt eine pro Material\.|Im Tutorial eröffnest du zuerst[\s\S]*?Danach werden alle Standorte frei\.)<\/div>/,
-    /<div class="notiz">Im Tutorial baust du zuerst nur <b>eine<\/b> Raffinerie\.<\/div>/,
-    /<div class="notiz">Im Tutorial baust du zuerst nur <b>eine<\/b> Fabrik\. Danach stehen alle Produkte offen\.<\/div>/
-  ];
-  const KAUF_KNOPF = /<button class="cta[^"]*"\s+data-tun="(mine-auf|raff-bau|fab-bau)"([^>]*)>[\s\S]*?<\/button>/g;
-
-  function kaufSperren(html, art, id){
-    if (!tutorialLaeuft() || erlaubtKauf(art, id)) return html;
-    let ersetzt = false;
-    for (const re of ALTE_NOTIZEN) html = html.replace(re, () => { ersetzt = true; return sperrHinweis(); });
-    html = html.replace(KAUF_KNOPF, (_, tun, attrs) =>
-      `<button class="cta" data-tun="${tun}"${attrs.replace(/\sdisabled\b/g, "")} disabled>Noch nicht dran</button>`);
-    if (!ersetzt) html = html.replace(/(<div class="titelzeile">[\s\S]*?<\/div><\/div><\/div>)/, `$1${sperrHinweis()}`);
-    return html;
-  }
-
-  const vorherMine = blattMine;
-  blattMine = function(id){ const h = vorherMine(id); return S.minen[id] ? h : kaufSperren(h, "mine", id); };
-  const vorherRaff = blattRaff;
-  blattRaff = function(id){ const h = vorherRaff(id); return S.raff[id] ? h : kaufSperren(h, "raff", id); };
-  const vorherFab = blattFab;
-  blattFab = function(land){ const h = vorherFab(land); return S.fabriken.some(f => f.land === land) ? h : kaufSperren(h, "fab", land); };
+  /* Gesperrtes Kaufblatt: module/blaetter.js zeigt den Sperrhinweis und
+     «Noch nicht dran», wenn kaufSperre(art, id) gilt. */
+  const kaufSperre = (art, id) => tutorialLaeuft() && !erlaubtKauf(art, id);
 
   /* Sicherheitsnetz, falls ein Knopf trotzdem erreicht wird */
   document.addEventListener("click", e => {
@@ -375,7 +355,7 @@
     return v && v.art === art && String(v.id) === String(ref) ? v.brauch : null;
   }
 
-  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf};
+  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf, kaufSperre, sperrHinweis};
   blattStand = ""; seitenStand = "";
   if (typeof zeichnen === "function") zeichnen();
 })();

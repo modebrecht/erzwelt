@@ -14,6 +14,9 @@
    Übernommen wird beim Loslassen, über die bestehende Spiellogik
    (data-tun crew/rcrew/fcrew/vcrew). Keine neue Wirtschaft: Einstellen
    kostet dasselbe wie im Team-Reiter.
+   Den Regler baut regler(tun, ref, wert, plaetze) (exportiert, von
+   module/blaetter.js aufgerufen); im Markt ersetzt er vorerst noch die
+   alte Crewzeile des Verkaufsteams.
    ============================================================ */
 (function(){
   const VERSION = 1;
@@ -61,14 +64,17 @@
         <div class="kachel monatlich"><small>Jeden Monat</small><b>${chf(wert * lohn)}</b><span>Lohn hier · ${chf(lohn)} pro Person</span></div>`;
   }
 
-  function bauen(tun, attrs, wert, klein){
-    const id = attr(attrs, "id"), i = attr(attrs, "i");
-    const ref = id !== null ? `data-id="${id}"` : i !== null ? `data-i="${i}"` : "";
-    const vonMatch = klein.match(/von\s+(\d+)/);
-    let max = vonMatch ? +vonMatch[1] : (typeof VERKAUF_PLAETZE === "number" ? VERKAUF_PLAETZE : 40);
-    const plaetze = max;
+  /* Der Regler für eine Station. ref: Id der Quelle/Raffinerie, Index der
+     Fabrik in S.fabriken, beim Verkauf null. plaetze: Höchstzahl der Station. */
+  function regler(tun, ref, wert, plaetze){
+    const attr = tun === "fcrew" ? `data-i="${ref}"` : tun === "vcrew" || ref === null || ref === undefined ? "" : `data-id="${ref}"`;
+    const r = tun === "fcrew" ? +ref : tun === "vcrew" ? null : ref;
+    return reglerHtml(tun, attr, r, wert, plaetze);
+  }
+
+  function reglerHtml(tun, ref, r, wert, plaetze){
+    let max = plaetze;
     const frei = Math.max(0, freieArbeiter());
-    const r = id !== null ? id : i !== null ? +i : null;
     const lohn = lohnProKopf(tun, r);
     // Mehr Leute als frei sind werden beim Loslassen eingestellt, soweit das Geld reicht.
     let erreichbar = Math.min(max, wert + frei + kannEinstellen());
@@ -101,15 +107,20 @@
     </div>`;
   }
 
+  /* Markt (Verkaufsteam): alte Crewzeile vorerst noch ersetzen. Die Blätter
+     rufen regler() direkt auf (module/blaetter.js). */
+  function bauen(tun, attrs, wert, klein){
+    const id = attr(attrs, "id"), i = attr(attrs, "i");
+    const ref = id !== null ? `data-id="${id}"` : i !== null ? `data-i="${i}"` : "";
+    const vonMatch = klein.match(/von\s+(\d+)/);
+    const plaetze = vonMatch ? +vonMatch[1] : (typeof VERKAUF_PLAETZE === "number" ? VERKAUF_PLAETZE : 40);
+    return reglerHtml(tun, ref, id !== null ? id : i !== null ? +i : null, wert, plaetze);
+  }
   const umbauen = html => typeof html === "string"
     ? html.replace(ALT, (_, tun, attrs, wert, klein) => bauen(tun, attrs, +wert, klein))
     : html;
-
-  const mitRegler = vorher => function(){ return umbauen(vorher.apply(this, arguments)); };
-  blattMine = mitRegler(blattMine);
-  blattRaff = mitRegler(blattRaff);
-  blattFab = mitRegler(blattFab);
-  seiteMarkt = mitRegler(seiteMarkt);
+  const vorherMarkt = seiteMarkt;
+  seiteMarkt = function(){ return umbauen(vorherMarkt.apply(this, arguments)); };
 
   /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
   const lohnSpanne = () => {
@@ -230,5 +241,5 @@
   }
 
   blattStand = ""; seitenStand = "";
-  window.__erzweltBelegschaftRegler = {version:VERSION};
+  window.__erzweltBelegschaftRegler = {version:VERSION, regler};
 })();

@@ -9,7 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
-- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile).
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/blaetter.js` (Blätter) lädt nach `einfuehrung.js`.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -72,6 +72,25 @@ Der Builder prüft dabei automatisch:
   Regel mit gleicher oder höherer Spezifität, Animationen); es wird nur dort entfernt,
   wo das nachweislich nichts ändert.
 
+## Blätter (`module/blaetter.js`)
+
+- **Einziger Besitzer** von `blattMine` (Rohstoffquelle), `blattRaff` (Raffinerie)
+  und `blattFab` (Fabrikstandort). Jede Funktion schreibt das endgültige HTML
+  direkt; kein Patch umhüllt sie danach oder ersetzt Text darin. Die Ausbau-Karte
+  (Quelle und Raffinerie) gehört mit dazu.
+- **Bausteine, die anderswo leben** und beim Zeichnen abgefragt werden:
+  `__erzweltBelegschaftRegler.regler(tun, ref, wert, plaetze)` (Regler und
+  Kostenkacheln), `__erzweltEinfuehrung.kaufSperre(art, id)` und `.sperrHinweis()`
+  (Kaufsperre in der Einführung), `__erzweltLogikFixes.nachweisKarte(id)`
+  (Herkunftsnachweis), `__erzweltSekBKlarheit.engpass()` (Tipp bei fehlendem Material).
+- **Bedienung bleibt, wo sie ist:** Regler ziehen und Einstellen beim Loslassen
+  (`belegschaft-regler.js`), Kauf-Abfangen und «Zu …» (`einfuehrung.js`), Nachweis
+  kaufen (`logik-fixes.js`). Nach dem Einsetzen bearbeiten `kurztexte.js`,
+  `stop-safety-visual.js`, `sek-b-klarheit.js` (Kaufblatt-Leiste, Pause-Hinweis)
+  und `stil.js` («Al») den Blattinhalt weiter – über `blattFuellen`, nicht über die
+  Blatt-Funktionen.
+- Lädt nach `einfuehrung.js` (Gruppe `logic-fixes`).
+
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 
 - **Etappenziel nach Schwierigkeit:** Einfach CHF 500'000, Mittel und Schwer
@@ -86,7 +105,8 @@ Der Builder prüft dabei automatisch:
 - **Herkunftsnachweise:** Jede Rohstoffquelle hat nach dem Tutorial die Karte
   «Herkunftsnachweis» (Prüfung CHF 30'000). Das Lieferkettengesetz verlangt
   Nachweise für alle Quellen; der Transparenzbericht deckt alle Quellen ab und
-  sagt das jetzt auch.
+  sagt das jetzt auch. Die Karte selbst (`nachweisKarte`) setzt `module/blaetter.js`
+  ins Blatt.
 - **Ereignisse:** Das Taiwan-Ereignis verändert nur die Nachfrage (Rohstoffpreise
   werden nicht simuliert). Die Recherche wirkt über den Ruf statt über die
   Smartphone-Nachfrage.
@@ -99,7 +119,8 @@ Der Builder prüft dabei automatisch:
   offenem Blatt über der Kopfzeile statt über dem Blatt.
 - «Ziel zeigen» setzt den Ziel-Pin mittig unter die Aufgabenkarte und blendet
   Meldungen kurz ab.
-- Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück; HUD «Team frei».
+- Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück (die Blatt-Texte
+  stehen jetzt direkt in `module/blaetter.js`); HUD «Team frei».
 - Tutorial-Raffinerie zeigt Kupfer statt Seltener Erden, ohne Spezialisierungskarte.
 - Konkrete Engpass-Hinweise nach dem Tutorial (nur wenn ein Material die Produktion
   wirklich gebremst hat, nicht schon bei knappem Lager), z. B. «Zinn fehlt für Ladekabel –
@@ -189,7 +210,8 @@ und mit 10 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
 - Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
   passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
 - Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
-  «Noch nicht dran» und einen Knopf zum richtigen Ort. Verbesserungen im Wissen
+  «Noch nicht dran» und einen Knopf zum richtigen Ort (`kaufSperre`/`sperrHinweis`,
+  geschrieben von `module/blaetter.js`). Verbesserungen im Wissen
   gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
   dann feststecken (am Ende der Einführung bleiben rund CHF 0.67 Mio).
 - Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe zuerst
@@ -208,6 +230,9 @@ Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine 
 - Zwei Kacheln zeigen live beim Ziehen, was das kostet: **Einmalig** (CHF 1'800
   pro neue Person) und **Jeden Monat** (Lohn am Standort, je nach Land und Lohnstufe).
 - In der Einführung zeigt eine Marke («Ziel 10») die verlangte Zahl.
+- Den Regler baut `regler(tun, ref, wert, plaetze)` (exportiert über
+  `__erzweltBelegschaftRegler`); die Blätter rufen ihn direkt auf. Nur im Markt
+  ersetzt der Patch die alte Crewzeile des Verkaufsteams noch per Ersetzung.
 - Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»;
   darunter steht der monatliche Lohn (je nach Land, Verkauf, ohne Aufgabe).
 
@@ -250,7 +275,8 @@ aber jede Farbe hat eine feste Rolle:
 
 Knöpfe mit drei Radien (12 / 14 / 18) und gleicher Kante. Keine gesperrten
 Grossbuchstaben mehr (vorher 34 Stellen); Knopftexte als Verb
-(«22 Personen einstellen», «Selbst verkaufen»). Keine Emojis mehr: Schwierigkeit als
+(«22 Personen einstellen», «Selbst verkaufen»; «Verdoppeln» im Ausbau schreibt
+`module/blaetter.js` selbst). Keine Emojis mehr: Schwierigkeit als
 1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole.
 
 **«Al» statt «AI»:** In Baloo 2 sehen grosses I und kleines l gleich aus. Das l in

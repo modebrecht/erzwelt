@@ -55,48 +55,9 @@
     $("#schleier").hidden = false; zeichnen();
   };
 
-  /* ---------- 5. Einheiten und 8. weniger Vorbehalte ---------- */
-  const proTag = v => v >= 10 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toLocaleString("de-CH");
-
-  const vorherBlattMine = blattMine;
-  blattMine = function(id){
-    let html = vorherBlattMine(id);
-    const def = MINEN.find(x => x.id === id);
-    if (!def) return html;
-    const land = LAND[def.land];
-    html = ersetze(html, `<small>Ergiebigkeit</small><b>${def.ergiebigkeit} Rohstoff</b>`,
-      `<small>Förderung pro Person</small><b>≈ ${proTag(def.ergiebigkeit)} pro Tag</b>`);
-    html = ersetze(html, `<small>Plätze</small><b>${def.plaetze}</b>`, `<small>Arbeitsplätze</small><b>${def.plaetze}</b>`);
-    html = ersetze(html, `<small>Üblicher Lohn</small><b>${chf(land.lohn)}</b>`,
-      `<small>Üblicher Lohn</small><b>${chf(land.lohn)}</b><small class="einheit">pro Person und Monat</small>`);
-    html = html.replace(/(<small>Förderung<\/small><b>[^<]*)\/Tag<\/b>/, "$1 pro Tag</b>");
-    html = html.replace(/(<small>Lohnkosten<\/small><b>[^<]*)<\/b>/, `$1</b><small class="einheit">pro Monat</small>`);
-    html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Mengen und Löhne sind vereinfachte Spielwerte.</div>`, "");
-    return html;
-  };
-
-  const vorherBlattRaff = blattRaff;
-  blattRaff = function(id){
-    let html = vorherBlattRaff(id);
-    const def = RAFF_ORTE.find(x => x.id === id);
-    if (!def) return html;
-    const land = LAND[def.land];
-    const spezial = (def.spezial||[]).map(k => MATERIAL[k] && MATERIAL[k].name).filter(Boolean);
-    const alteKarte = `<div class="karte"><h3>Spezialisierung im Spiel</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.</div></div>`;
-    const neueKarte = tutorialLaeuft() ? "" : `<div class="karte"><h3>Spezialisierung</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz">Diese Rohstoffe verarbeitet die Raffinerie <b>25 % schneller</b>. Alle anderen Rohstoffe verarbeitet sie normal.</div></div>`;
-    html = ersetze(html, alteKarte, neueKarte);
-    html = ersetze(html, `<small>Kapazität</small><b>${def.kapazitaet}/Tag</b>`,
-      `<small>Verarbeitet bis zu</small><b>${def.kapazitaet}</b><small class="einheit">Rohstoff pro Tag, voll besetzt</small>`);
-    html = ersetze(html, `<small>Plätze</small><b>${def.plaetze}</b>`, `<small>Arbeitsplätze</small><b>${def.plaetze}</b>`);
-    html = ersetze(html, `<small>Lohn</small><b>${chf(land.lohn)}</b>`,
-      `<small>Lohn</small><b>${chf(land.lohn)}</b><small class="einheit">pro Person und Monat</small>`);
-    html = ersetze(html, `<small>Betrieb</small><b>${chf(9000)}/Mt.</b>`,
-      `<small>Betriebskosten</small><b>${chf(9000)}</b><small class="einheit">pro Monat</small>`);
-    html = html.replace(/<small>Durchsatz<\/small><b>(\d+)\/Tag<\/b>/, `<small>Verarbeitet</small><b>$1</b><small class="einheit">Rohstoff pro Tag</small>`);
-    html = ersetze(html, "Der Rest steht im Spielmodell für Abraum und Verluste.", "Der Rest ist Abraum: Gestein und Abfall.");
-    return html;
-  };
-
+  /* ---------- 5. Einheiten und 8. weniger Vorbehalte ----------
+     Blätter: direkt in module/blaetter.js. Die Tutorial-Raffinerie zeigt
+     die Kabel-Rohstoffe (6.). */
   if (typeof szeneRaff === "function"){
     const vorherSzeneRaff = szeneRaff;
     szeneRaff = function(def, r){
@@ -104,17 +65,6 @@
       return vorherSzeneRaff(def, r);
     };
   }
-
-  const vorherBlattFab = blattFab;
-  blattFab = function(land){
-    let html = vorherBlattFab(land);
-    html = ersetze(html, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat`, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)} pro Person und Monat`);
-    html = ersetze(html, "Vereinfachtes Rezept · Spielmodell", "Rezept: Material pro Stück");
-    const e = engpass();
-    const tipp = e && e.fab === land ? e.text : "Sichere dafür eine eigene Rohstoffquelle oder setze dort mehr Personal ein.";
-    html = ersetze(html, "Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.", tipp);
-    return html;
-  };
 
   const vorherTeam = seiteTeam;
   seiteTeam = function(){

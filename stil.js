@@ -76,7 +76,8 @@
   const vorherWissen = seiteWissen;
   seiteWissen = function(){ return vorherWissen.apply(this, arguments).replace("⏸", IKON.pause); };
 
-  /* ---------- Knopftexte als Verb, normale Schreibweise ---------- */
+  /* ---------- Knopftexte als Verb, normale Schreibweise ----------
+     Die Blätter (module/blaetter.js) schreiben «Verdoppeln · » selbst. */
   const knopfText = html => html
     .replace(/STELLE (\d+) PERSONEN EIN/g, "$1 Personen einstellen")
     .replace(/SELBST VERKAUFEN/g, "Selbst verkaufen")
@@ -84,8 +85,6 @@
   const mitText = vorher => function(){ return knopfText(vorher.apply(this, arguments)); };
   seiteTeam = mitText(seiteTeam);
   seiteMarkt = mitText(seiteMarkt);
-  blattMine = mitText(blattMine);
-  blattRaff = mitText(blattRaff);
   document.addEventListener("input", e => {
     if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
     const k = document.querySelector('[data-tun="anstellen"]');
