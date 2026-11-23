@@ -6,7 +6,8 @@
       Karte oder unter dem Aufgabenkasten zu schweben.
    3. Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken in einem
       Filter-Knopf über + und −.
-   4. Aufgabenkasten auf der Karte kürzer: Phase als schmale Leiste mit Text
+   4. Aufgabe auf allen Seiten rechts (wie auf der Karte).
+   5. Aufgabenkasten auf der Karte kürzer: Phase als schmale Leiste mit Text
       in einer Zeile (statt Kästchen 1–4 plus «Phase 1/4»), Zusammenhang ohne
       Kasten, und nur ein Weg zum Ziel: «Ziel zeigen».
    Nur Darstellung: keine Änderung an Spielstand oder Wirtschaft. */
@@ -49,6 +50,11 @@
     #ebenen button[aria-pressed="true"]::after{border-color:#2f8a5f;background-color:#3aa56f;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
     #ebenen button[aria-pressed="false"]{color:var(--grau)!important}
+
+    /* Aufgabe auch auf Markt, Team, Ziel und Wissen rechts – wie auf der Karte */
+    @media (max-width:819px){
+      #quest.breit{left:auto;right:10px;width:min(68%,300px)}
+    }
 
     /* 4. Aufgabenkasten kürzer */
     #quest .phase-zeile{display:flex;align-items:center;gap:8px;margin:8px 0 0}
