@@ -29,6 +29,13 @@ Die kurzen Orts- und Rohstoffinfos im Spiel dienen der Orientierung. Zeitabhäng
 - Responsible Minerals Initiative (RMI), **Conflict Minerals Compliance Tools**  
   https://www.responsiblemineralsinitiative.org/reporting-templates/conflict-minerals-compliance-tools/
 
+## Weltkarte
+
+Die Landflächen und Küsten im SVG stammen aus **Natural Earth, 1:50 Mio.**, Version 4.1.0. Die Linien sind für die Spielkarte vereinfacht und verwenden das gleiche geografische Raster wie die Standortmarker.
+
+- [Landflächen](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-land/)
+- [Nutzungsbedingungen (Public Domain)](https://www.naturalearthdata.com/about/terms-of-use/)
+
 ## Didaktische Abgrenzung
 
 Folgende Dinge sind **bewusst keine Realwelt-Aussagen**, sondern Spielregeln:
