@@ -220,6 +220,131 @@ const ZUSTAND = () => {
   await aufnahme(p, "quelle-regler-ziehen-weniger");
   await p.close();
 
+  // ---------- Seiten: weitere Zustände ----------
+  // Wie bei den Blättern: Grundzustand merken, pro Szenario setzen, Seite neu öffnen.
+  const seiteSzene = async (p, name, s, setzen) => {
+    await p.evaluate(([s, setzen]) => {
+      S = JSON.parse(window.__vergleichGrund);
+      if (setzen) (0, eval)("(" + setzen + ")")();
+      blattZu(); blattStand = ""; seitenStand = "";
+      seiteWechseln(s); zeichnen();
+    }, [s, setzen ? String(setzen) : null]);
+    await aufnahme(p, name);
+  };
+  const ziehen = (p, sel, wert) => p.evaluate(([sel, wert]) => {
+    const r = document.querySelector(sel); r.value = wert; r.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [sel, wert]);
+
+  // Einführung: Team-Reiter mit Bedarfsliste
+  p = await neueSeite();
+  await knopf(p, "#einstieg .es-los");
+  await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][0].click());
+  await p.evaluate(() => {
+    const m = n => ({ arbeiter: n, stufe: 1, zufriedenheit: 60, stillBis: 0, malus: 1, malusBis: 0, ausbau: 0 });
+    S.minen = { katanga: m(15), boke: m(2), bangka: m(0) };
+    S.arbeiterGesamt = 17; S.kasse = 600000;
+    tutorialPruefen(); zeichnen();
+  });
+  await merken(p);
+  await seiteSzene(p, "seite-team-einf-bedarf", "team");
+  await seiteSzene(p, "seite-markt-einf", "markt");
+  await seiteSzene(p, "seite-ziel-einf", "ziel");
+  await p.close();
+
+  // Nach der Einführung: eigene Kette, Ware im Lager
+  p = await neueSeite({ tag: 100, kasse: 2000000, tutorial: 12, einfuehrung: 3, schwierigkeit: "einfach", startTeam: 0,
+    arbeiterGesamt: 60, verkaeufer: 4, verkauftSelber: true, etappe: 1,
+    minen: { katanga: quelle(15), boke: quelle(5), bangka: quelle(10) },
+    raff: { r_china: { arbeiter: 5, ausbau: 0 } },
+    fabriken: [{ produkt: "kabel", land: "china", arbeiter: 5, restbau: 0 }],
+    erz: { kupfer: 40, alu: 20, zinn: 20 }, mat: { kupfer: 60, alu: 30, zinn: 30 }, ware: { kabel: 12 } });
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+  await merken(p);
+  // Markt
+  await seiteSzene(p, "markt-selbst-verkaufen", "markt");
+  await seiteSzene(p, "markt-heute-verkauft", "markt", () => { S.handverkaufTag = S.tag; });
+  await seiteSzene(p, "markt-nichts-zu-verkaufen", "markt", () => { S.ware = {}; });
+  await seiteSzene(p, "markt-niemand-frei", "markt", () => { S.arbeiterGesamt -= freieArbeiter(); });
+  await seiteSzene(p, "markt-niemand-frei-kein-geld", "markt", () => { S.arbeiterGesamt -= freieArbeiter(); S.kasse = 500; });
+  await seiteSzene(p, "markt-einfluesse", "markt", () => {
+    S.globalMod = [{ art: "dollar", wert: 1.12, bis: S.tag + 20 }, { art: "hafen", wert: 0.65, bis: S.tag + 4 }, { art: "dollar", wert: 0.9, bis: S.tag - 1 }];
+  });
+  await seiteSzene(p, "markt-mehrere-produkte", "markt", () => {
+    S.fabriken.push({ produkt: "phone", land: "vietnam", arbeiter: 4, restbau: 0 }, { produkt: "board", land: "china", arbeiter: 3, restbau: 0 });
+    S.arbeiterGesamt += 7; S.ware = { kabel: 12, phone: 30, board: 5 }; S.minen.escondida = { arbeiter: 8, stufe: 1, zufriedenheit: 70, stillBis: 0, malus: 1, malusBis: 0, ausbau: 0 }; S.arbeiterGesamt += 8;
+  });
+  await seiteSzene(p, "markt-volle-kapazitaet", "markt", () => { S.arbeiterGesamt += VERKAUF_PLAETZE - S.verkaeufer; S.verkaeufer = VERKAUF_PLAETZE; S.ware = { kabel: 900 }; });
+  await seiteSzene(p, "markt-ohne-verkaufsteam", "markt", () => { S.verkaeufer = 0; S.ware = { kabel: 300 }; });
+  await seiteSzene(p, "markt-regler", "markt");
+  await ziehen(p, "#seite .besetzung-regler", 12); await aufnahme(p, "markt-regler-gezogen-mehr");
+  await ziehen(p, "#seite .besetzung-regler", 1); await aufnahme(p, "markt-regler-gezogen-weniger");
+  await p.evaluate(() => { reglerAktiv = false; });
+  // Team
+  await seiteSzene(p, "team-untaetig", "team");
+  await seiteSzene(p, "team-regler", "team");
+  await ziehen(p, '#seite [data-regler="anstell"]', 25); await aufnahme(p, "team-regler-25");
+  await p.evaluate(() => { reglerAktiv = false; });
+  await seiteSzene(p, "team-nach-regler-25", "team");
+  await seiteSzene(p, "team-zu-wenig-geld", "team", () => { S.kasse = 20000; });
+  await ziehen(p, '#seite [data-regler="anstell"]', 5); await aufnahme(p, "team-zu-wenig-geld-regler-5");
+  await p.evaluate(() => { reglerAktiv = false; anstellMenge = 7; });
+  await seiteSzene(p, "team-menge-ungerade", "team");
+  await seiteSzene(p, "team-niemand-frei", "team", () => { S.arbeiterGesamt -= freieArbeiter(); });
+  await seiteSzene(p, "team-entlassen-moeglich", "team", () => { S.arbeiterGesamt += 3; });
+  await seiteSzene(p, "team-niemand-eingeteilt", "team", () => {
+    for (const id in S.minen) S.minen[id].arbeiter = 0; S.raff.r_china.arbeiter = 0; S.fabriken[0].arbeiter = 0; S.verkaeufer = 0;
+  });
+  // Ziel
+  await seiteSzene(p, "ziel-vor-abrechnung", "ziel", () => { delete S.monatsBilanz; delete S.monatsVerlauf; });
+  await seiteSzene(p, "ziel-ein-monat", "ziel", () => {
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: 84000 }; S.monatsVerlauf = [{ tag: 91, wert: 84000, ein: S.eingenommen }];
+  });
+  await seiteSzene(p, "ziel-trend-hoch", "ziel", () => {
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: 150000 };
+    S.monatsVerlauf = [{ tag: 31, wert: -40000, ein: 1 }, { tag: 61, wert: 30000, ein: 2 }, { tag: 91, wert: 150000, ein: S.eingenommen }];
+  });
+  await seiteSzene(p, "ziel-trend-runter", "ziel", () => {
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: -25000 };
+    S.monatsVerlauf = [{ tag: 31, wert: 60000, ein: 1 }, { tag: 61, wert: 20000, ein: 2 }, { tag: 91, wert: -25000, ein: S.eingenommen }];
+  });
+  await seiteSzene(p, "ziel-trend-gleich", "ziel", () => {
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: 50000 };
+    S.monatsVerlauf = [{ tag: 61, wert: 50000, ein: 2 }, { tag: 91, wert: 50000, ein: S.eingenommen }];
+  });
+  await seiteSzene(p, "ziel-laufend-negativ", "ziel", () => {
+    S.eingenommen = (S.etappeStartEingenommen || 0) + 10000; S.ausgegeben = (S.etappeStartAusgegeben || 0) + 900000;
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: -60000 };
+  });
+  await seiteSzene(p, "ziel-erreicht", "ziel", () => {
+    S.eingenommen = (S.etappeStartEingenommen || 0) + 3000000; S.ruf = 75;
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: 220000 };
+  });
+  await seiteSzene(p, "ziel-prognose-reicht", "ziel", () => {
+    S.eingenommen = (S.etappeStartEingenommen || 0) + 900000; S.ausgegeben = (S.etappeStartAusgegeben || 0) + 700000;
+    S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: 120000 };
+  });
+  await seiteSzene(p, "ziel-prognose-reicht-nicht", "ziel", () => {
+    S.schwierigkeit = "mittel"; S.monatsBilanz = { ein: S.eingenommen, aus: S.ausgegeben, letzt: 9000 };
+  });
+  await seiteSzene(p, "ziel-perks", "ziel", () => { S.perks = { kette1: true, geo1: true, markt1: true }; });
+  await seiteSzene(p, "ziel-nachweise-teils", "ziel", () => { S.minen.katanga.nachweis = true; });
+  await seiteSzene(p, "ziel-nachweise-alle", "ziel", () => { for (const id in S.minen) S.minen[id].nachweis = true; });
+  await seiteSzene(p, "ziel-transparenzbericht", "ziel", () => { S.perks = { ruf1: true }; });
+  await seiteSzene(p, "ziel-zertifiziert", "ziel", () => { S.perks = { ruf1: true, ruf2: true }; });
+  await seiteSzene(p, "ziel-etappe-2", "ziel", () => {
+    S.etappe = 2; S.tag = 800; S.etappeStartEingenommen = S.eingenommen; S.etappeStartAusgegeben = S.ausgegeben; delete S.investStartWert;
+  });
+  await seiteSzene(p, "ziel-runde-beendet", "ziel", () => {
+    S.ende = { grund: "etappe", etappe: 1, gewinn: etappenGewinn(), ruf: Math.round(S.ruf), geschafft: false };
+    S.zertifikatProfil = { vorname: "Mia" };
+  });
+  await seiteSzene(p, "ziel-schwer", "ziel", () => { S.schwierigkeit = "schwer"; S.ruf = 35; });
+  // Wissen
+  await seiteSzene(p, "wissen-ohne-perks", "wissen");
+  await seiteSzene(p, "wissen-mit-perks", "wissen", () => { S.perks = { kette1: true, geo1: true, ruf1: true }; });
+  await seiteSzene(p, "wissen-bereich-voll", "wissen", () => { S.perks = { markt1: true, markt2: true, leute1: true }; });
+  await p.close();
+
   fs.writeFileSync(path.join(AUS, "zustaende.json"), JSON.stringify({ fehler, ergebnis }, null, 1));
   await browser.close();
   console.log(`${Object.keys(ergebnis).length} Zustände aufgenommen nach ${AUS}` + (fehler.length ? ` · ${fehler.length} Seitenfehler` : ""));
