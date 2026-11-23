@@ -104,8 +104,11 @@ Nur Darstellung, keine Änderung an Spielstand oder Wirtschaft.
 
 Ist ein Tutorial-Schritt oder eine Wissens-Quest erledigt, gibt es einen kurzen,
 leisen Erfolgston (Web Audio, keine Datei) und Funken; beim Abschluss des
-Tutorials etwas grösser. Ton in den Einstellungen unter «Töne» abschaltbar,
-Funken über «Animationen: aus».
+Tutorials etwas grösser. Kaufen und selbst verkaufen haben je einen eigenen
+kurzen Ton (der tägliche Verkauf durch das Team bleibt still). Auf Android
+vibriert das Handy kurz bei Kauf, eigenem Verkauf und Erfolg. In den
+Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
+«Animationen: aus».
 
 ## Premium-Spielgefühl (`premium-spielgefuehl.js`)
 
