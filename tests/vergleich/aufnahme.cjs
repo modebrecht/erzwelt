@@ -140,6 +140,86 @@ const ZUSTAND = () => {
   await aufnahme(p, "alter-spielstand");
   await p.close();
 
+  // ---------- Blätter: weitere Zustände ----------
+  // Zustand direkt setzen und das Blatt neu zeichnen. Jedes Szenario beginnt
+  // beim gemerkten Grundzustand (S aus der Momentaufnahme).
+  const merken = p => p.evaluate(() => { window.__vergleichGrund = JSON.stringify(S); });
+  const blattSzene = async (p, name, art, id, setzen) => {
+    await p.evaluate(([art, id, setzen]) => {
+      S = JSON.parse(window.__vergleichGrund);
+      if (setzen) (0, eval)("(" + setzen + ")")();
+      blattZu(); blattStand = ""; seitenStand = "";
+      if (aktiveSeite !== "karte") seiteWechseln("karte");
+      blattFuellen(art, id); zeichnen();
+    }, [art, id, setzen ? String(setzen) : null]);
+    await aufnahme(p, name);
+  };
+
+  // Einführung: gesperrte Orte
+  p = await neueSeite();
+  await knopf(p, "#einstieg .es-los");
+  await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][0].click());
+  await merken(p);
+  await blattSzene(p, "einf-raff-gesperrt", "raff", "r_malay");
+  await blattSzene(p, "einf-fab-gesperrt", "fab", "vietnam");
+  await blattSzene(p, "einf-quelle-gold", "mine", "obuasi");
+  // Einführung beim Raffinerie-Schritt: alle drei Quellen offen und besetzt
+  await p.evaluate(() => {
+    const m = n => ({ arbeiter: n, stufe: 1, zufriedenheit: 60, stillBis: 0, malus: 1, malusBis: 0, ausbau: 0 });
+    S.minen = { katanga: m(15), boke: m(5), bangka: m(10) };
+    S.arbeiterGesamt = 30; S.kasse = 400000;
+    tutorialPruefen(); zeichnen();
+  });
+  await merken(p);
+  await blattSzene(p, "einf-raff-nicht-ziel", "raff", "r_chile");
+  await blattSzene(p, "einf-quelle-zu-viele", "mine", "katanga", () => { S.minen.katanga.arbeiter = 20; S.arbeiterGesamt = 35; });
+  // Einführung beim Fabrik-Schritt
+  await p.evaluate(() => { S = JSON.parse(window.__vergleichGrund); S.raff = { r_china: { arbeiter: 5, ausbau: 0 } }; S.arbeiterGesamt = 35; tutorialPruefen(); zeichnen(); });
+  await merken(p);
+  await blattSzene(p, "einf-fab-nicht-ziel", "fab", "mexiko");
+  await blattSzene(p, "einf-raff-zu-viele", "raff", "r_china", () => { S.raff.r_china.arbeiter = 8; S.arbeiterGesamt = 38; });
+  await p.close();
+
+  // Nach der Einführung: eigene Kette, alles besetzt
+  const quelle = (n, mehr) => Object.assign({ arbeiter: n, stufe: 1, zufriedenheit: 70, stillBis: 0, malus: 1, malusBis: 0, ausbau: 0 }, mehr || {});
+  p = await neueSeite({ tag: 100, kasse: 2000000, tutorial: 12, einfuehrung: 3, schwierigkeit: "einfach", startTeam: 0,
+    arbeiterGesamt: 60, verkaeufer: 4, verkauftSelber: true, etappe: 1,
+    minen: { katanga: quelle(15), boke: quelle(5), bangka: quelle(10) },
+    raff: { r_china: { arbeiter: 5, ausbau: 0 } },
+    fabriken: [{ produkt: "kabel", land: "china", arbeiter: 5, restbau: 0 }],
+    erz: { kupfer: 40, alu: 20, zinn: 20 }, mat: { kupfer: 60, alu: 30, zinn: 30 }, ware: { kabel: 12 } });
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+  await merken(p);
+  await blattSzene(p, "quelle-streik", "mine", "katanga", () => { const m = S.minen.katanga; m.stillBis = S.tag + 6; m.zufriedenheit = 18; });
+  await blattSzene(p, "quelle-stillstand-lang", "mine", "katanga", () => { S.minen.katanga.stillBis = S.tag + 1200; });
+  await blattSzene(p, "quelle-sicher-geprueft", "mine", "katanga", () => { S.minen.katanga.sicherheit = true; S.minen.katanga.nachweis = true; });
+  await blattSzene(p, "quelle-ausbau-3", "mine", "katanga", () => { S.minen.katanga.ausbau = 3; });
+  await blattSzene(p, "quelle-ausbau-9", "mine", "katanga", () => { S.minen.katanga.ausbau = 9; });
+  await blattSzene(p, "quelle-lohn-knapp", "mine", "boke", () => { S.minen.boke.stufe = 0; S.minen.boke.zufriedenheit = 30; });
+  await blattSzene(p, "quelle-lohn-fair", "mine", "bangka", () => { S.minen.bangka.stufe = 2; S.minen.bangka.zufriedenheit = 88; });
+  await blattSzene(p, "quelle-zufriedenheit-tief", "mine", "boke", () => { S.minen.boke.zufriedenheit = 7; });
+  await blattSzene(p, "quelle-wenig-geld", "mine", "katanga", () => { S.kasse = 1000; });
+  await blattSzene(p, "quelle-niemand-frei-kein-geld", "mine", "boke", () => { S.arbeiterGesamt -= freieArbeiter(); S.kasse = 900; });
+  await blattSzene(p, "quelle-niemand-frei-geld", "mine", "boke", () => { S.arbeiterGesamt -= freieArbeiter(); });
+  await blattSzene(p, "quelle-kaufen-wenig-geld", "mine", "obuasi", () => { S.kasse = 1000; });
+  await blattSzene(p, "raff-viel-rohstoff", "raff", "r_china", () => { S.erz = { kupfer: 900, alu: 420, zinn: 300 }; });
+  await blattSzene(p, "raff-ausbau-9", "raff", "r_china", () => { S.raff.r_china.ausbau = 9; });
+  await blattSzene(p, "raff-mehr-personal", "raff", "r_china", () => { S.raff.r_china.arbeiter = 26; S.arbeiterGesamt += 21; });
+  await blattSzene(p, "raff-kaufen-wenig-geld", "raff", "r_de", () => { S.kasse = 1000; });
+  await blattSzene(p, "fab-im-bau", "fab", "china", () => { S.fabriken[0].restbau = 5; });
+  await blattSzene(p, "fab-ohne-personal", "fab", "china", () => { S.fabriken[0].arbeiter = 0; S.arbeiterGesamt -= 5; });
+  await blattSzene(p, "fab-zinn-fehlt", "fab", "china", () => { S.mat.zinn = 0; });
+  await blattSzene(p, "fab-zweite-linie", "fab", "china", () => { S.fabriken.push({ produkt: "board", land: "china", arbeiter: 3, restbau: 0 }); S.arbeiterGesamt += 3; });
+  await blattSzene(p, "fab-produktwahl", "fab", "mexiko");
+  await blattSzene(p, "fab-produktwahl-wenig-geld", "fab", "deutschland", () => { S.kasse = 100000; });
+  // Regler ziehen, ohne loszulassen: nur «input», die Kacheln rechnen mit
+  await blattSzene(p, "quelle-regler-ziehen-mehr", "mine", "katanga");
+  await p.evaluate(() => { const r = document.querySelector("#blattinhalt .besetzung-regler"); r.value = 40; r.dispatchEvent(new Event("input", { bubbles: true })); });
+  await aufnahme(p, "quelle-regler-ziehen-mehr-gezogen");
+  await p.evaluate(() => { const r = document.querySelector("#blattinhalt .besetzung-regler"); r.value = 9; r.dispatchEvent(new Event("input", { bubbles: true })); });
+  await aufnahme(p, "quelle-regler-ziehen-weniger");
+  await p.close();
+
   fs.writeFileSync(path.join(AUS, "zustaende.json"), JSON.stringify({ fehler, ergebnis }, null, 1));
   await browser.close();
   console.log(`${Object.keys(ergebnis).length} Zustände aufgenommen nach ${AUS}` + (fehler.length ? ` · ${fehler.length} Seitenfehler` : ""));
