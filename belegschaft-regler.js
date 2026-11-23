@@ -81,6 +81,27 @@
   blattFab = mitRegler(blattFab);
   seiteMarkt = mitRegler(seiteMarkt);
 
+  /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
+  const lohnSpanne = () => {
+    const l = Object.values(LAND).map(x => x.lohn);
+    return `${chf(Math.min(...l))}–${chf(Math.max(...l)).replace(/^CHF\s*/, "")}`;
+  };
+  const EINMALIG = /(STELLE \d+ PERSONEN EIN · CHF[^<]*?)(?=\s*<\/button>)/;
+  const vorherTeam = seiteTeam;
+  seiteTeam = function(){
+    let html = vorherTeam.apply(this, arguments);
+    html = html.replace(EINMALIG, "$1 einmalig");
+    const monat = `<div class="notiz monatskosten"><b>Danach jeden Monat Lohn:</b> je nach Land ${lohnSpanne()} pro Person,
+      im Verkauf ${chf(VERKAUF_LOHN)}. Wer keine Aufgabe hat, kostet ${chf(200)}.</div>`;
+    return html.replace(/(<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>)/, `$1${monat}`);
+  };
+  /* Der Kern schreibt den Knopf beim Ziehen des Reglers neu – «einmalig» wieder anhängen. */
+  document.addEventListener("input", e => {
+    if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
+    const k = document.querySelector('[data-tun="anstellen"]');
+    if (k && /PERSONEN EIN · CHF/.test(k.textContent) && !/einmalig/.test(k.textContent)) k.insertAdjacentText("beforeend", " einmalig");
+  });
+
   /* ---------- Bedienung ---------- */
   let gezogen = null;          // Regler, der gerade gezogen wird
 
@@ -186,6 +207,7 @@
     .besetzung-ziel.ok b{background:#e0f2e8}
     .besetzung-skala{display:flex;justify-content:space-between;gap:8px;color:var(--grau);font-size:var(--f0);font-weight:700;margin-top:2px}
     .besetzung-skala span:nth-child(2){text-align:center}
+    #seite .monatskosten{margin-top:10px;text-align:left}
     .besetzung-anwenden{position:absolute;top:70px;left:50%;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none}
   `;
   document.head.appendChild(style);

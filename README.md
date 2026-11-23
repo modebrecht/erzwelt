@@ -164,6 +164,9 @@ freie Team nicht füllen kann, ist schraffiert; weiter geht der Regler nicht.
 Übernommen wird beim Loslassen über die bestehende Spiellogik. In der Einführung
 zeigt eine Marke («Ziel 10») die verlangte Zahl.
 
+Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»; darunter
+steht, was danach jeden Monat an Lohn anfällt (je nach Land, Verkauf, ohne Aufgabe).
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
