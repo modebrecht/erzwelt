@@ -108,12 +108,7 @@
   if(typeof ansichtAnwenden==="function"){
     let raf=0,lastPinZoom=NaN;
     ansichtAnwenden=function(){
-      const b=sicht.clientWidth,hh=sicht.clientHeight;
-      const zmin=Math.max(b/KARTE_B,0.95),zmax=4.5;
-      ansicht.z=Math.min(zmax,Math.max(zmin,ansicht.z));
-      const bb=KARTE_B*ansicht.z,bh=KARTE_H*ansicht.z;
-      ansicht.x=bb<=b?(b-bb)/2:Math.min(0,Math.max(b-bb,ansicht.x));
-      ansicht.y=bh<=hh?(hh-bh)/2:Math.min(0,Math.max(hh-bh,ansicht.y));
+      ansichtBegrenzen();
       if(raf)return;
       raf=requestAnimationFrame(()=>{
         raf=0;

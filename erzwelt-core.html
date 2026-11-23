@@ -3124,13 +3124,21 @@ function weltZeichnen(){
   </svg>`;
 }
 
-function ansichtAnwenden(){
-  const b = sicht.clientWidth, hh = sicht.clientHeight;
-  const zmin = Math.max(b/KARTE_B, 0.95), zmax = 4.5;
+function kartenSichthoehe(){
+  return Math.max(1, sicht.clientHeight - document.getElementById("dock").offsetHeight);
+}
+function ansichtBegrenzen(){
+  const b = sicht.clientWidth, hh = kartenSichthoehe();
+  const zmin = Math.max(Math.min(b/KARTE_B, hh/KARTE_H), 0.95), zmax = 4.5;
   ansicht.z = Math.min(zmax, Math.max(zmin, ansicht.z));
   const bb = KARTE_B*ansicht.z, bh = KARTE_H*ansicht.z;
-  ansicht.x = bb <= b ? (b-bb)/2 : Math.min(0, Math.max(b-bb, ansicht.x));
+  // Am Kartenrand muss auch Platz neben den rechts liegenden Zoomknöpfen sein.
+  const randRechts = document.getElementById("zoom").offsetWidth + 16;
+  ansicht.x = bb <= b ? (b-bb)/2 : Math.min(0, Math.max(b-bb-randRechts, ansicht.x));
   ansicht.y = bh <= hh ? (hh-bh)/2 : Math.min(0, Math.max(hh-bh, ansicht.y));
+}
+function ansichtAnwenden(){
+  ansichtBegrenzen();
   welt.style.transform = `translate(${ansicht.x}px,${ansicht.y}px) scale(${ansicht.z})`;
   pinGroesse();
 }
@@ -3144,7 +3152,7 @@ function pinGroesse(){
 }
 
 function zoomUm(f, mx, my){
-  const b = sicht.clientWidth, hh = sicht.clientHeight;
+  const b = sicht.clientWidth, hh = kartenSichthoehe();
   mx = mx ?? b/2; my = my ?? hh/2;
   const alt = ansicht.z, neu = alt*f;
   ansicht.x = mx - (mx-ansicht.x)*(neu/alt);
@@ -3251,7 +3259,7 @@ function zeigeAuf(id, z){
   const [mx,my] = px(id);
   ansicht.z = z || Math.max(ansicht.z, 1.6);
   ansicht.x = sicht.clientWidth/2 - mx*ansicht.z;
-  ansicht.y = sicht.clientHeight/2 - my*ansicht.z;
+  ansicht.y = kartenSichthoehe()/2 - my*ansicht.z;
   ansichtAnwenden();
 }
 /* Bildschirmposition eines Pins – für die Funken beim Kauf */
@@ -4453,8 +4461,8 @@ if (!geladen){ S = neuerZustand();
   notiz("Willkommen in der Erzwelt. Wähle zuerst deine Schwierigkeit.", "gut"); }
 const brauchtSchwierigkeit = !SCHWIERIGKEIT[S.schwierigkeit];
 letzterTagGezeigt = S.tag;
-ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
 dockZeichnen();
+ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
 tempoSetzen(brauchtSchwierigkeit ? 0 : 1);
 zeichnen();
 if (brauchtSchwierigkeit) schwierigkeitZeigen();
