@@ -3,45 +3,6 @@
    Pure presentation: uses existing build/staff/material state and does not add build time. */
 
 (function(){
-  const style=document.createElement("style");
-  style.id="erzwelt-construction-visibility-style";
-  style.textContent=`
-    .pin .knopf{overflow:visible}
-    .pin-status-ring{position:absolute!important;inset:-8px auto auto -8px;width:58px!important;height:58px!important;
-      overflow:visible;pointer-events:none;z-index:-1;transform:rotate(-90deg)}
-    .pin-status-ring .ring-bg{fill:none;stroke:#ffffff38;stroke-width:4}
-    .pin-status-ring .ring-fg{fill:none;stroke:var(--pin-status,#f5b73d);stroke-width:4;stroke-linecap:round;
-      transition:stroke-dasharray .28s ease}
-    .pin-state-badge{position:absolute;left:-13px;top:-10px;z-index:5;min-width:24px;height:20px;padding:0 5px;
-      display:grid;place-items:center;border-radius:999px;background:#fff;color:#4f4437;border:2px solid #fff;
-      box-shadow:0 2px 5px #0004;font-family:"Baloo 2",sans-serif;font-weight:900;font-size:9.5px;line-height:1;white-space:nowrap}
-    .pin-state-badge.status-bau{background:#f5b73d;color:#533600}
-    .pin-state-badge.status-warn{background:#e0504a;color:#fff}
-    .pin-state-badge.status-inaktiv{background:#ece5d6;color:#5f5547}
-    .pin-state-badge.status-aktiv{left:-9px;top:-7px;min-width:13px;width:13px;height:13px;padding:0;background:#2fbe7e;border-width:2px;color:transparent}
-    .pin-build-tool{position:absolute;right:-12px;bottom:-9px;z-index:6;width:25px;height:25px;border-radius:50%;
-      display:grid;place-items:center;background:#fff8e8;border:2px solid #f5b73d;box-shadow:0 2px 5px #0004;color:#7a5208;pointer-events:none}
-    .pin-build-tool svg{width:15px!important;height:15px!important;transform-origin:70% 75%}
-    .pin.bau-status .pin-build-tool svg,.pin.neu-status .pin-build-tool svg{animation:pinHammer 1.12s ease-in-out infinite}
-    @keyframes pinHammer{0%,100%{transform:rotate(-20deg)}45%{transform:rotate(18deg)}62%{transform:rotate(10deg)}}
-    .pin.bau-status .knopf{box-shadow:0 0 0 3px #f5b73d30,0 3px 5px rgba(0,0,0,.32)}
-    .pin.bau-status .bez{background:#795713}
-    .pin.inaktiv-status .knopf{filter:saturate(.62);opacity:.9}
-    .pin.aktiv-status .knopf{box-shadow:0 0 0 2px #2fbe7e2e,0 3px 5px rgba(0,0,0,.32)}
-    .pin.neu-status .knopf{box-shadow:0 0 0 3px #f5b73d38,0 3px 5px rgba(0,0,0,.32)}
-    .pin.neu-status .pin-state-badge{background:#fff2c8;color:#674708}
-    .pin-status-hint{position:absolute;left:50%;top:calc(100% + 31px);transform:translateX(-50%);z-index:0;
-      padding:1px 6px;border-radius:999px;background:#0b3648e8;color:#fff;font-size:9px;font-weight:800;
-      font-family:"Baloo 2",sans-serif;white-space:nowrap;pointer-events:none;box-shadow:0 2px 4px #0003}
-    #welt.weit .pin-status-hint{display:none}
-    body[data-anim="1"] .pin.bau-status .pin-build-tool svg,body[data-anim="1"] .pin.neu-status .pin-build-tool svg{animation-duration:1.55s}
-    @media(prefers-reduced-motion:reduce){
-      .pin .pin-build-tool svg{animation:none!important}
-      .pin-status-ring .ring-fg{transition:none!important}
-    }
-  `;
-  document.head.appendChild(style);
-
   const C=2*Math.PI*21;
   const buildTotals=new WeakMap();
   const RECENT_MS=1800;

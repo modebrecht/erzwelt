@@ -232,11 +232,6 @@
     };
   }
 
-  const style = document.createElement("style");
-  style.id = "erzwelt-logik-fixes-style";
-  style.textContent = `.nachweiskarte.offen{border:2px solid #e6b450}.nachweiskarte.sicher{border:2px solid #75aa93}`;
-  document.head.appendChild(style);
-
   window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN};
   seitenStand = ""; blattStand = "";
 })();

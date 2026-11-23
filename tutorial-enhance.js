@@ -3,34 +3,6 @@
    Keine neuen Lernziele: Aufgabe + Begründung + sichtbarer Platz in der Lieferkette. */
 
 (function(){
-  const style=document.createElement("style");
-  style.id="erzwelt-tutorial-enhance-style";
-  style.textContent=`
-    #quest.tutorial-aktiv:not(.breit){width:min(64%,300px)}
-    #quest .tutorial-kette{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:8px 0 6px}
-    #quest .tutorial-phase{min-width:0;padding:4px 3px;border-radius:8px;background:#e8deca;color:#78684e;
-      text-align:center;font-size:9px;font-weight:800;line-height:1.1;border:1px solid transparent}
-    #quest .tutorial-phase b{display:block;font-family:"Baloo 2",sans-serif;font-size:11px;line-height:1}
-    #quest .tutorial-phase.erledigt{background:#e0f2e8;color:#276b4d}
-    #quest .tutorial-phase.aktiv{background:#fff0c9;color:#71500e;border-color:#edc766;box-shadow:0 0 0 2px #f5b73d20}
-    #quest .tutorial-phase-name{font-size:10px;color:var(--grau);font-weight:800;text-align:center;margin:-1px 0 5px}
-    #quest .tutorial-zusammenhang{margin-top:6px;padding:6px 8px;border-radius:9px;background:#eef6f3;color:#31594a;
-      font-size:10.5px;line-height:1.25;font-weight:700}
-    #quest .tutorial-zusammenhang b{display:inline;font-family:inherit;font-size:inherit;color:#1f6b4e;margin:0}
-    #quest:not(.breit) .tutorial-phase span{display:none}
-    #quest:not(.breit) .tutorial-phase{padding:4px 2px}
-
-    #tutorial-lernfeedback{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 68px);z-index:90;
-      width:min(92vw,480px);transform:translateX(-50%);pointer-events:none;padding:10px 13px;border-radius:14px;
-      background:#f5fff9;color:#214f3c;border:2px solid #69bf91;box-shadow:0 7px 22px #0003;
-      font-size:var(--f1);font-weight:700;text-align:center}
-    #tutorial-lernfeedback b{font-family:"Baloo 2",sans-serif;color:#17613f}
-    #tutorial-lernfeedback.rein{animation:tutorialFeedback 2.8s ease both}
-    @keyframes tutorialFeedback{0%{opacity:0;transform:translate(-50%,-12px) scale(.96)}10%,78%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-7px) scale(.98)}}
-    @media(prefers-reduced-motion:reduce){#tutorial-lernfeedback.rein{animation:none}}
-  `;
-  document.head.appendChild(style);
-
   const PHASEN=[
     // Schritt-IDs aus einfuehrung.js.
     {id:"rohstoff",nr:1,label:"Rohstoffe",steps:["kupfer-auf","kupfer-crew","alu-auf","alu-crew","zinn-auf","zinn-crew"]},

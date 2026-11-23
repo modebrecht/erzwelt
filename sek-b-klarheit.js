@@ -426,46 +426,6 @@
     return out;
   };
 
-  /* ---------- 2./4. Stil ---------- */
-  const style = document.createElement("style");
-  style.id = "erzwelt-sek-b-klarheit-style";
-  style.textContent = `
-    #quest.tutorial-aktiv #q-punkte{display:none}
-    #quest.breit.kompakt{padding:7px 46px 8px 12px!important;cursor:pointer}
-    #quest.kompakt > :not(.kopf):not(#q-titel):not(.quest-map-cue){display:none!important}
-    #quest.kompakt .kopf{font-size:11px}
-    #quest.kompakt #q-titel{font-size:var(--f1);margin:1px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #quest.kompakt .quest-map-cue{top:50%;transform:translateY(-50%)}
-    #quest.kompakt:not(.map-link)::after{content:"";position:absolute;right:16px;top:50%;width:9px;height:9px;
-      border:solid var(--grau);border-width:0 2.5px 2.5px 0;transform:translateY(-70%) rotate(45deg)}
-    #quest .tutorial-phase span{display:none}
-    body.ziel-fokus #toasts{opacity:.12;transition:opacity .2s}
-    body.fensterauf #tutorial-lernfeedback{top:calc(env(safe-area-inset-top) + 4px);padding:6px 12px;font-size:var(--f0)}
-    .wahl.schwierigkeit .empfohlen{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;background:#e0f2e8;color:#1f6b4e;font-size:var(--f0);vertical-align:middle}
-    .wahl.schwierigkeit .sperre{font-weight:800}
-    .wert small.einheit{display:block;font-size:var(--f0);opacity:.7;margin-top:2px;font-weight:700;line-height:1.1}
-    .prozess-materialliste span b{font-weight:900}
-    #quest .engpass-kasten{display:block;width:100%;margin-top:8px;padding:7px 9px;border-radius:10px;text-align:left;
-      background:#fff4e5;border:1.5px solid #e6a23c;color:#6b4206;font-size:var(--f0);line-height:1.25;cursor:pointer}
-    #blatt{bottom:calc(var(--dockh) + 14px);max-height:calc(76% + 16px)}
-    @media (max-width:819px){
-      /* Handy: Blatt reicht über die Leiste unten bis an den Rand.
-         Oben bleiben Kasse, Team und Tag sichtbar. */
-      #blatt{bottom:0;max-height:calc(100% - 64px - env(safe-area-inset-top));padding-bottom:calc(env(safe-area-inset-bottom) + 4px)}
-      body.dock-hinweis #blatt{bottom:calc(var(--dockh) + 14px);max-height:calc(100% - var(--dockh) - 78px - env(safe-area-inset-top));padding-bottom:10px}
-    }
-    #blattinhalt .kaufpause{margin:6px 0 4px;padding:7px 12px;border-radius:12px;background:#eef4fb;color:#24506f;font-size:var(--f0);font-weight:700;line-height:1.3}
-    #blattinhalt.kaufblatt .szene svg.buehne{height:clamp(84px,15vh,118px)}
-    #blattinhalt .kaufleiste{position:sticky;bottom:-14px;z-index:5;margin:12px -16px -14px;padding:8px 16px 14px;
-      background:var(--papier);box-shadow:0 -12px 14px -10px rgba(0,0,0,.22)}
-    #blattinhalt .kaufleiste .cta{margin-top:0}
-    #blattinhalt .kaufpause-text{text-align:center;color:#24506f;font-size:var(--f0);font-weight:700;margin:0 0 7px;line-height:1.3}
-    .modell-regeln td{vertical-align:top;padding:6px 6px 6px 0}
-    .modell-regeln td:first-child{white-space:nowrap}
-    #quest .engpass-kasten b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f1);color:#8a4b00;margin-bottom:2px}
-  `;
-  document.head.appendChild(style);
-
   /* Der Startdialog wurde schon vom Kern gezeigt: mit der neuen Fassung ersetzen. */
   if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 

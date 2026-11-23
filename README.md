@@ -9,7 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
-- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei.
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile).
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -52,6 +52,25 @@ Der Builder prüft dabei automatisch:
   nur die bis dahin angemeldeten Hooks.
 - Hooks als `() => name()` anmelden, damit spätere Ersetzungen von `name` (z. B. in
   `performance-pass.js`) wirksam bleiben. Der Rückgabewert von `zeichnen` bleibt erhalten.
+
+## Ein Stylesheet (`module/stil.js`)
+
+- **Eine Datei für alle Stile:** `module/stil.js` lädt direkt nach `module/basis.js`
+  und fügt genau einen `<style>`-Block (`#erzwelt-stil`) in den `<head>` ein, nach
+  dem `<style>` des Kerns. Patches und Module erzeugen keine eigenen `<style>`-Blöcke
+  mehr; neues CSS kommt in den Abschnitt des zuständigen Bereichs.
+- **Abschnitte nach Herkunft:** Jeder Abschnitt beginnt mit
+  `/* ===== aus <datei>.js: … ===== */` und steht in der früheren Ladereihenfolge
+  der Patches. Die Kaskade hängt davon ab (bei gleicher Spezifität gewinnt der
+  spätere Abschnitt); Reihenfolge nur ändern, wenn keine Regel eine spätere überstimmt.
+- **Farbrollen** (aus `stil.js`): Gold `#f5b73d` = tun (kaufen, bauen, einstellen,
+  verkaufen, ausbauen; eine Hauptaktion pro Blatt) · Grün `#2fbe7e` = Wissen und
+  Erfolg, nie für Käufe · Papier `#ffffff` mit Linie `#e3d7bf` = Zweitaktionen
+  (Ziel zeigen, Zum Team, − / +, Neue Runde, Entlassen) · Rot `#e0504a` =
+  Schliessen und Warnungen.
+- `!important` steht nur noch, wo es wirkt (Inline-Stil des Kerns, konkurrierende
+  Regel mit gleicher oder höherer Spezifität, Animationen); es wird nur dort entfernt,
+  wo das nachweislich nichts ändert.
 
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 

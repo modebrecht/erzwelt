@@ -26,6 +26,8 @@
      l in «Al» wird gezeichnet: senkrecht nach unten, unten ein runder Bogen
      nach rechts oben (wie in der Schulschrift).
      Das Symbol bleibt chemisch korrekt «Al».
+
+   Das CSS dazu steht in module/stil.js (Abschnitt «aus stil.js»).
    ============================================================ */
 (function(){
   const VERSION = 1;
@@ -126,57 +128,6 @@
     }).observe(document.body, {childList:true, subtree:true, characterData:true});
   }
   alMarkieren(document.body);
-
-  /* ---------- Stil ---------- */
-  const style = document.createElement("style");
-  style.id = "erzwelt-stil-style";
-  style.textContent = `
-    :root{--kante-gold:#c48d1c;--kante-papier:#ddd0b4}
-    /* Fremde Regeln wie «.stueck span» dürfen die Hülle nicht als Chip gestalten */
-    span.al-text.al-text,span.al-l.al-l,span.al-sr.al-sr{all:unset}
-    span.al-text.al-text{white-space:pre-wrap}
-    span.al-l.al-l{display:inline-block;position:relative}
-    span.al-l.al-l svg{display:inline-block;width:.34em;height:.72em;vertical-align:baseline;margin:0 .01em}
-    span.al-sr.al-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-    /* Der Kern setzt svg auf display:block – Symbole im Text bleiben in der Zeile */
-    svg.stil-ikon{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.18em;flex:none}
-    svg.stil-stufe{display:inline-block;width:28px;height:28px;flex:none}
-    #quest .engpass-kasten b svg.stil-ikon{margin-right:3px}
-    .zeile b svg.stil-stufe{width:24px;height:24px;vertical-align:-6px;margin-right:4px}
-    .wahl.schwierigkeit .schwierigkeitsicon svg.stil-stufe{width:38px;height:38px}
-    #lieferweg-knopf .lw-ikon{display:grid;place-items:center;font-size:20px}
-
-    /* Grosse Knöpfe: Gold = tun, Papier = zweitrangig */
-    .cta{border-radius:18px}
-    .cta.gruen:not(:disabled){background:var(--gold);color:#4a3000;box-shadow:0 4px 0 var(--kante-gold)}
-    .cta.gruen:not(:disabled):active{box-shadow:0 1px 0 var(--kante-gold)}
-    .cta.still:not(:disabled),.cta[data-tun="zumteam"]{background:#fff;color:var(--tinte);
-      box-shadow:inset 0 0 0 2px var(--linie),0 4px 0 var(--kante-papier)}
-    .cta.still:not(:disabled):active,.cta[data-tun="zumteam"]:active{box-shadow:inset 0 0 0 2px var(--linie),0 1px 0 var(--kante-papier)}
-    .cta[data-tun="reset"]{color:var(--alarm)}
-    .cta:disabled{box-shadow:0 4px 0 #d6c9b0}
-    .cta.riesig{border-radius:18px;padding:17px;box-shadow:0 4px 0 var(--kante-gold)}
-    .cta.riesig:disabled{box-shadow:0 4px 0 #d6c9b0}
-
-    /* Kleine Knöpfe: gleiche Form, Papier für Zweitaktionen */
-    #quest .objective-guide-action,#blattinhalt .einfuehrung-hin,.besetzung-schritt{
-      background:#fff;color:var(--tinte);border:0;border-radius:12px;
-      box-shadow:inset 0 0 0 2px var(--linie),0 3px 0 var(--kante-papier)}
-    #quest .objective-guide-action:active,#blattinhalt .einfuehrung-hin:active,.besetzung-schritt:active{
-      box-shadow:inset 0 0 0 2px var(--linie),0 1px 0 var(--kante-papier)}
-    .besetzung-schritt{border-radius:14px}
-    #quest .wissen-quest-action{border-radius:12px}
-    .xzu,.seitenknopf{border-width:2px}
-
-    /* Beschriftungen: normale Schreibweise statt gesperrter Grossbuchstaben */
-    .wert small,th,#quest .kopf,.besetzung-kosten .kachel small,.ziel-held > small,
-    #ebenen .filter-titel,.dialog .art,.perkkarte .marke,.wert small.einheit{
-      text-transform:none!important;letter-spacing:normal!important}
-    .wert small,th,.besetzung-kosten .kachel small,.ziel-held > small{font-weight:700}
-    .besetzung-kosten .kachel small,.ziel-held > small{font-size:var(--f0)}
-    #quest .kopf{font-weight:800}
-  `;
-  document.head.appendChild(style);
 
   window.__erzweltStil = {version: VERSION, ikon: IKON, stufe};
   blattStand = ""; seitenStand = "";

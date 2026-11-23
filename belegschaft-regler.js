@@ -229,51 +229,6 @@
     };
   }
 
-  const style = document.createElement("style");
-  style.id = "erzwelt-belegschaft-regler-style";
-  style.textContent = `
-    .besetzung{position:relative;margin:12px 0 4px}
-    .besetzung-zeile{display:flex;align-items:center;justify-content:center;gap:14px}
-    .besetzung-zeile .zahl{min-width:96px;text-align:center}
-    .besetzung-zeile .zahl b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f6);line-height:1;font-variant-numeric:tabular-nums}
-    .besetzung-zeile .zahl small{color:var(--grau);font-size:var(--f0);font-weight:700}
-    .besetzung-schritt{width:56px;height:56px;border-radius:16px;border:0;background:#f3e8d2;color:var(--tinte,#2b2116);
-      font-family:"Baloo 2",sans-serif;font-size:30px;font-weight:800;line-height:1;box-shadow:0 4px 0 #e0d3b8;cursor:pointer}
-    .besetzung-schritt:active{transform:translateY(2px);box-shadow:0 1px 0 #e0d3b8}
-    .besetzung-schritt:disabled{opacity:.35}
-    .besetzung-bahn{position:relative;margin:6px 0 0}
-    .besetzung-bahn.mit-ziel{padding-bottom:20px}
-    .besetzung-regler{display:block;height:44px}
-    .besetzung-regler::-webkit-slider-runnable-track{
-      background:linear-gradient(90deg,var(--c) 0 var(--p),#e3d7bf var(--p) var(--f),#f6dc94 var(--f) var(--g),transparent var(--g)),
-        repeating-linear-gradient(135deg,#efe7d7 0 5px,#d9ccb2 5px 10px)}
-    .besetzung-regler::-webkit-slider-thumb{border-color:var(--c)}
-    .besetzung-regler::-moz-range-track{
-      background:linear-gradient(90deg,#e3d7bf 0 var(--f),#f6dc94 var(--f) var(--g),transparent var(--g)),
-        repeating-linear-gradient(135deg,#efe7d7 0 5px,#d9ccb2 5px 10px)}
-    .besetzung-regler::-moz-range-progress{background:var(--c)}
-    .besetzung-regler::-moz-range-thumb{border-color:var(--c)}
-    .besetzung-ziel{position:absolute;top:32px;left:calc(17px + (100% - 34px) * var(--z));transform:translateX(-50%);
-      display:flex;flex-direction:column;align-items:center;pointer-events:none;color:#8a5a00}
-    .besetzung-ziel i{width:3px;height:9px;border-radius:2px;background:currentColor}
-    .besetzung-ziel b{font-size:11px;font-weight:800;white-space:nowrap;background:#fff2c9;border-radius:99px;padding:0 7px;line-height:16px}
-    .besetzung-ziel.ok{color:#1f7a4f}
-    .besetzung-ziel.ok b{background:#e0f2e8}
-    .besetzung-skala{display:flex;justify-content:space-between;gap:8px;color:var(--grau);font-size:var(--f0);font-weight:700;margin-top:2px}
-    .besetzung-skala span:nth-child(2){text-align:center}
-    #seite .monatskosten{margin-top:10px;text-align:left}
-    .besetzung-kosten{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-    .besetzung-kosten .kachel{border-radius:12px;padding:7px 10px;line-height:1.2;min-width:0}
-    .besetzung-kosten .kachel small{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;opacity:.75}
-    .besetzung-kosten .kachel b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f2);font-variant-numeric:tabular-nums;white-space:nowrap}
-    .besetzung-kosten .kachel span{display:block;font-size:11px;font-weight:700;opacity:.8}
-    .besetzung-kosten .einmalig{background:#fff2c9;color:#6b4a0a}
-    .besetzung-kosten .einmalig.leer{background:#f4efe4;color:#7a6f5c}
-    .besetzung-kosten .monatlich{background:#e6f1f8;color:#1f4f6b}
-    .besetzung-anwenden{position:absolute;top:70px;left:50%;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none}
-  `;
-  document.head.appendChild(style);
-
   blattStand = ""; seitenStand = "";
   window.__erzweltBelegschaftRegler = {version:VERSION};
 })();

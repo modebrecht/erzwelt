@@ -13,22 +13,6 @@
 (function(){
   const FLOW_VERSION=4;
 
-  const style=document.createElement("style");
-  style.id="erzwelt-knowledge-quest-style";
-  style.textContent=`
-    #quest.wissen-quest{border-top-color:#4aa978}
-    #quest.wissen-quest #q-punkte{margin-top:7px}
-    #quest.wissen-bereit{border-top-color:var(--gruen)}
-    #quest.wissen-bereit:not(.breit){animation:wissenQuestPulse .8s ease 3}
-    #quest .wissen-quest-action{width:100%;margin-top:8px;padding:8px 10px;border-radius:10px;
-      background:var(--gruen);color:#fff;font-family:"Baloo 2",sans-serif;font-weight:800;
-      box-shadow:0 3px 0 #18734a;font-size:var(--f1)}
-    #quest .wissen-quest-action:active{transform:translateY(2px);box-shadow:0 1px 0 #18734a}
-    @keyframes wissenQuestPulse{0%,100%{box-shadow:var(--sh)}50%{box-shadow:0 0 0 5px #2fbe7e45,var(--sh)}}
-    @media(prefers-reduced-motion:reduce){#quest.wissen-bereit:not(.breit){animation:none}}
-  `;
-  document.head.appendChild(style);
-
   function flowState(){
     if(!S.wissenQuestFlow||typeof S.wissenQuestFlow!=="object") S.wissenQuestFlow={};
     const q=S.wissenQuestFlow;

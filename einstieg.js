@@ -102,47 +102,5 @@
   };
   if (brauchtEinstieg() && !$("#schleier").hidden) zeigen();
 
-  const style = document.createElement("style");
-  style.id = "erzwelt-einstieg-style";
-  style.textContent = `
-    #einstieg{position:fixed;inset:0;z-index:120;overflow:auto;color:#fff;
-      background:radial-gradient(120% 80% at 50% 0%,#14587a 0%,#0b3648 55%,#082a39 100%)}
-    #einstieg .es-innen{max-width:440px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;justify-content:center;
-      padding:calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 22px)}
-    #einstieg .es-marke{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f1);color:var(--gold);opacity:.9}
-    #einstieg h1{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(30px,8.6vw,40px);line-height:1.02;margin:6px 0 4px;letter-spacing:-.01em}
-    #einstieg .es-bild{position:relative;margin:12px -6px 4px;aspect-ratio:340/250}
-    #einstieg .es-kabel{display:block;width:100%;height:auto;margin-top:6%}
-    #einstieg .es-chip{position:absolute;display:flex;align-items:flex-start;gap:7px;max-width:52%}
-    #einstieg .es-chip.es-rechts{flex-direction:row-reverse;text-align:right}
-    #einstieg .es-chip.es-rechts .es-txt{align-items:flex-end}
-    #einstieg .es-sym{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
-      font-family:"Baloo 2",sans-serif;font-weight:800;font-size:16px;color:#fff;box-shadow:inset 0 0 0 2px #ffffff40}
-    #einstieg .es-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0}
-    #einstieg .es-txt b{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f2)}
-    #einstieg .es-txt small{font-size:var(--f0);font-weight:700;color:#cfe4ef}
-    #einstieg .es-txt small.es-ort{color:var(--gold);font-weight:800}
-    #einstieg .es-text{font-size:var(--f2);font-weight:600;line-height:1.45;color:#e2eef5;margin:8px 0 14px;max-width:34ch}
-    #einstieg .es-kette{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:0;padding:0}
-    #einstieg .es-kette li{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
-      font-size:var(--f0);font-weight:800;color:#cfe4ef;text-align:center}
-    #einstieg .es-kette li + li::before{content:"";position:absolute;top:21px;right:calc(50% + 24px);width:calc(100% - 48px);
-      border-top:2px dashed #ffffff40}
-    #einstieg .es-ik{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#ffffff14;color:#fff}
-    #einstieg .es-ik svg{width:24px;height:24px}
-    #einstieg .es-los{margin-top:28px;font-size:var(--f4)}
-    #einstieg.es-weg{opacity:0;transition:opacity .25s ease}
-
-    /* Ein Ablauf: Kabel zeichnen, dann Kupfer, Aluminium, Zinn */
-    #einstieg.es-ablauf .es-mantel{stroke-dasharray:330;stroke-dashoffset:330;animation:esZeichnen .9s .15s ease-out forwards}
-    #einstieg.es-ablauf .es-kern,#einstieg.es-ablauf .es-loet,#einstieg.es-ablauf .es-zeiger,
-    #einstieg.es-ablauf .es-chip{opacity:0;animation:esRein .45s ease-out forwards}
-    #einstieg.es-ablauf .es-kern,#einstieg.es-ablauf .z1,#einstieg.es-ablauf .es-chip:nth-of-type(1){animation-delay:1s}
-    #einstieg.es-ablauf .z2,#einstieg.es-ablauf .es-chip:nth-of-type(2){animation-delay:1.35s}
-    #einstieg.es-ablauf .es-loet,#einstieg.es-ablauf .z3,#einstieg.es-ablauf .es-chip:nth-of-type(3){animation-delay:1.7s}
-    @keyframes esZeichnen{to{stroke-dashoffset:0}}
-    @keyframes esRein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-  `;
-  document.head.appendChild(style);
   window.__erzweltEinstieg = {version: VERSION, zeigen};
 })();

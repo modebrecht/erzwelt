@@ -199,21 +199,6 @@
     button.innerHTML="<b>PDF-Abschluss erstellen</b><small>Produkte, Verkäufe und Schlussbilanz für die Abgabe</small>";
     document.getElementById("d-wahlen").prepend(button);
   };
-  const style=document.createElement("style");
-  style.textContent=`
-    body:has(#erzwelt-zertifikat-form:focus-within) #quest{display:none!important}
-    .zertifikat-karte{border:2px solid #75aa93}
-    .zertifikat-karte p{overflow-wrap:anywhere}
-    .zertifikat-karte label{display:block;font-weight:700;margin:12px 0 5px}
-    .zertifikat-karte input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #9aaca8;border-radius:9px;background:#fff;color:#163c42;font:inherit}
-    .zertifikat-karte input:focus-visible{outline:3px solid #2584ac;outline-offset:2px}
-    .zertifikat-karte .cta{margin-top:16px;white-space:normal}
-    .zertifikat-summe{display:flex;flex-direction:column;gap:3px;padding:14px;background:#eef5f0;border-radius:10px;color:#163c42}
-    .zertifikat-summe b{font-size:var(--f3);overflow-wrap:anywhere}
-    .zertifikat-summe span{font-size:var(--f0)}
-    #zertifikat-status:empty{display:none}
-  `;
-  document.head.appendChild(style);
   document.addEventListener("click",e=>{
     if(!e.target.closest("[data-certificate-open]"))return;
     e.preventDefault();e.stopImmediatePropagation();

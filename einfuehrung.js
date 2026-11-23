@@ -375,21 +375,6 @@
     return v && v.art === art && String(v.id) === String(ref) ? v.brauch : null;
   }
 
-  const style = document.createElement("style");
-  style.id = "erzwelt-einfuehrung-style";
-  style.textContent = `
-    #blattinhalt .einfuehrung-sperre{background:#fff4e0;border:1.5px solid #ecc06a;color:#6b4a0a}
-    #blattinhalt .einfuehrung-hin{display:flex;align-items:center;justify-content:center;width:100%;min-height:42px;margin-top:8px;
-      border-radius:10px;border:1.5px solid #e5ba55;background:#fff7df;color:#704d0b;
-      font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f1);box-shadow:0 2px 0 #d6a438;cursor:pointer}
-    .einfuehrung-bedarf{margin:14px 0 12px}
-    .einfuehrung-bedarf > b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f3)}
-    .einfuehrung-bedarf .bedarf-liste{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0}
-    .einfuehrung-bedarf .bedarf-liste span{padding:3px 10px;border-radius:99px;background:#f3e8d2;font-size:var(--f0);font-weight:700}
-    .einfuehrung-bedarf small{display:block;color:var(--grau);font-size:var(--f0);font-weight:600;line-height:1.35}
-  `;
-  document.head.appendChild(style);
-
   window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf};
   blattStand = ""; seitenStand = "";
   if (typeof zeichnen === "function") zeichnen();

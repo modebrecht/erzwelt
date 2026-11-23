@@ -86,29 +86,6 @@
     return html;
   };
 
-  const style = document.createElement("style");
-  style.id = "erzwelt-ziel-positiv-style";
-  style.textContent = `
-    .ziel-held{background:linear-gradient(160deg,#fffdf6,#eef7f1);border:2px solid #cfe6d8}
-    .ziel-held > small{display:block;font-size:var(--f0);font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--grau)}
-    .ziel-held-zahl{display:block;font-family:"Baloo 2",sans-serif;font-size:clamp(30px,9vw,40px);line-height:1.1;margin:2px 0 0;font-variant-numeric:tabular-nums}
-    .ziel-held-zahl.plus{color:#1f7a4f}
-    .ziel-held-zahl.minus{color:var(--alarm)}
-    .ziel-held-zahl.leer{color:var(--grau);font-size:var(--f4)}
-    .ziel-held-zahl .ziel-trend{font-style:normal;font-size:.55em;vertical-align:middle}
-    .ziel-held > span{display:block;color:var(--grau);font-size:var(--f0);font-weight:700}
-    .ziel-verlauf{display:flex;align-items:flex-end;gap:5px;height:42px;margin:10px 0 2px}
-    .ziel-verlauf span{flex:1;height:var(--h);border-radius:5px 5px 2px 2px;background:#9fd3b6}
-    .ziel-verlauf span.minus{background:#f0a9a4}
-    .ziel-verlauf span.jetzt.plus{background:#2fa36b}
-    .ziel-verlauf span.jetzt.minus{background:var(--alarm)}
-    .ziel-prognose{margin-top:10px;padding:8px 10px;border-radius:10px;background:#fff;color:var(--tinte,#2b2116);font-size:var(--f0);font-weight:600;line-height:1.35}
-    .ziel-prognose.gut{background:#e3f4ea;color:#1d5d40}
-    .ziel-prognose.warn{background:#fff1e0;color:#6b4206}
-    .ziel-klein{color:var(--grau);font-weight:700;font-size:11px}
-  `;
-  document.head.appendChild(style);
-
   seitenStand = "";
   window.__erzweltZielPositiv = {version: VERSION};
 })();

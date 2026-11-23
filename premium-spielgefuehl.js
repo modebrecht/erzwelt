@@ -18,57 +18,6 @@
   const reduziert = () => (typeof OPT !== "undefined" && OPT.anim === 0)
     || !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-  const style = document.createElement("style");
-  style.id = "erzwelt-premium-spielgefuehl-style";
-  style.textContent = `
-    /* 1. Rohstoff-Pins */
-    .pin.mat-pin.zu .knopf{color:#6d5e46;color:color-mix(in srgb,var(--mat) 60%,#1d1408)}
-    .pin.mat-pin.zu:not(.wink):not(.alarm) .knopf{border-color:var(--mat);border-width:3px}
-    .pin.mat-pin.zu:not(.wink) .knopf::after{border-top-color:var(--mat)}
-    .pin.mat-pin .knopf .sym{font-size:15px;letter-spacing:-.01em}
-
-    /* 3. Münzen */
-    #muenz-ebene{position:fixed;inset:0;z-index:72;pointer-events:none;overflow:hidden}
-    .muenz-flug{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
-      background:radial-gradient(circle at 35% 30%,#fff3c4 0 22%,#f8c84a 23% 62%,#d99a17 63%);
-      border:1.5px solid #b07a0e;box-shadow:0 1px 2px #0005}
-    .muenz-flug::after{content:"";position:absolute;inset:3px;border-radius:50%;border:1px solid #fff5}
-    .pille.kasse.muenz-glanz i{animation:muenzGlanz .45s ease}
-    @keyframes muenzGlanz{0%{box-shadow:0 0 0 0 #f5b73d00}40%{box-shadow:0 0 0 6px #f5b73d66;transform:scale(1.12)}100%{box-shadow:0 0 0 10px #f5b73d00;transform:scale(1)}}
-    .verkauf-geld{display:none!important}
-    body.fensterauf .verkauf-paket{display:none!important}
-    .pille.kasse > div{position:relative}
-    .pille.kasse .kasse-plus{position:absolute;left:0;top:0;white-space:nowrap;color:#7fe0a8;font-size:var(--f0);
-      font-weight:800;line-height:1;letter-spacing:.02em;background:#0b3648;border-radius:4px;padding-right:3px;
-      animation:kassePlus 1.5s ease both}
-    @keyframes kassePlus{0%{opacity:0;transform:translateY(4px)}12%,78%{opacity:1;transform:none}100%{opacity:0}}
-
-    /* 6. Beispiel-Lieferweg */
-    #didaktik-route-note{display:none!important}
-    #lieferweg-knopf{position:absolute;left:10px;top:calc(var(--hudh) - 1px);z-index:26;max-width:calc(100% - 20px);
-      display:flex;align-items:center;gap:7px;padding:6px 11px 6px 8px;border-radius:13px;
-      background:#0b3648ee;color:#fff;border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;
-      font-family:"Baloo 2",sans-serif;font-size:var(--f0);font-weight:800;line-height:1.15;text-align:left}
-    #lieferweg-knopf[hidden]{display:none}
-    #lieferweg-knopf .lw-ikon{font-size:16px}
-    #lieferweg-knopf small{display:block;font-weight:700;opacity:.75}
-    #lieferweg-knopf .lw-mehr{display:none;font-family:system-ui,sans-serif;font-weight:600;font-size:var(--f0);
-      opacity:.85;margin-top:4px;max-width:270px}
-    #lieferweg-knopf.offen{z-index:47;box-shadow:0 10px 26px #0006}
-    #lieferweg-knopf.offen .lw-mehr{display:block}
-    body.fensterauf #lieferweg-knopf{display:none}
-
-    /* 4. Monatsbilanz */
-    .toast .mb-kopf{display:block}
-    .toast .mb-plus{color:#7fe0a8}
-    .toast .mb-minus{color:#ff9a95}
-    .toast .mb-trend{font-size:.95em;margin-left:2px}
-    .toast .mb-zeile{display:block;font-weight:700;margin-top:2px}
-    .toast .mb-klein{display:block;font-weight:600;opacity:.75;font-size:.92em;margin-top:1px}
-    .toast .mb-zahl{white-space:nowrap}
-  `;
-  document.head.appendChild(style);
-
   /* ---------- 1. Rohstoff auf einen Blick ---------- */
   function pinsMitRohstoff(){
     for (const pin of document.querySelectorAll('#welt .pin[data-pin="mine"]')){

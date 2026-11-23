@@ -2,42 +2,6 @@
 /* Context navigation for notifications and quest/tutorial cards.
    View/navigation only: no economy, progression or save-state changes. */
 (function(){
-  const style=document.createElement("style");
-  style.id="erzwelt-map-focus-navigation-style";
-  style.textContent=`
-    #welt.map-focus-moving{transition:transform .58s cubic-bezier(.2,.82,.22,1)!important}
-    .map-focus-ring{position:absolute;inset:-10px;border-radius:50%;z-index:20;pointer-events:none;
-      border:3px solid #fff3b0;box-shadow:0 0 0 2px #f5b73dcc,0 0 18px #f5b73d99;
-      animation:mapFocusRing .92s cubic-bezier(.16,.9,.25,1) both}
-    .pin.werk .map-focus-ring{border-radius:17px}
-    @keyframes mapFocusRing{0%{opacity:0;transform:scale(.55)}28%{opacity:1}72%{opacity:.95;transform:scale(1.18)}100%{opacity:0;transform:scale(1.42)}}
-    .map-focus-suggestion{position:absolute;left:50%;top:-38px;z-index:22;transform:translateX(-50%);
-      padding:3px 8px;border-radius:999px;background:#f5b73d;color:#503300;border:2px solid #fff7d7;
-      box-shadow:0 3px 8px #0004;font-family:"Baloo 2",sans-serif;font-size:10px;font-weight:900;white-space:nowrap;
-      animation:mapSuggestion .32s cubic-bezier(.18,1.15,.3,1) both;pointer-events:none}
-    @keyframes mapSuggestion{0%{opacity:0;transform:translate(-50%,6px) scale(.88)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
-
-    #toasts .toast.map-link{pointer-events:auto;cursor:pointer;padding-right:39px!important}
-    #toasts .toast.map-link:hover::after{background-color:#ffffff18}
-    .toast-map-cue{position:absolute;right:9px;top:50%;transform:translateY(-50%);z-index:3;width:25px;height:25px;
-      border-radius:50%;display:grid;place-items:center;background:#ffffff12;border:1px solid #ffffff2e;color:#fff;pointer-events:none}
-    .toast-map-cue svg{width:14px;height:14px}
-
-    #quest.map-link{cursor:pointer;padding-right:43px!important;transition:transform .18s ease,box-shadow .18s ease}
-    #quest.map-link:active{transform:scale(.992)}
-    .quest-map-cue{position:absolute;right:10px;top:9px;width:27px;height:27px;border-radius:9px;display:grid;place-items:center;
-      background:#0b364810;color:#315468;border:1px solid #0b364820;pointer-events:none}
-    .quest-map-cue svg{width:16px;height:16px}
-    #quest.map-link:hover .quest-map-cue{background:#f5b73d24;color:#835b0b;border-color:#f5b73d55}
-
-    @media(prefers-reduced-motion:reduce){
-      #welt.map-focus-moving{transition:none!important}
-      .map-focus-ring,.map-focus-suggestion{animation:none!important}
-      .map-focus-ring{opacity:1!important}
-    }
-  `;
-  document.head.appendChild(style);
-
   const locateSvg=()=>`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><circle cx="12" cy="12" r="7.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
   const norm=s=>String(s||"").toLocaleLowerCase("de-CH").replace(/\s+/g," ").trim();
   const esc=s=>window.CSS?.escape?CSS.escape(String(s)):String(s).replace(/["\\]/g,"\\$&");

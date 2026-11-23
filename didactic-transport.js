@@ -3,13 +3,6 @@
    Keine Kosten, keine Lieferzeiten, kein zusätzliches Gameplay. */
 
 
-const transportMobileStyle=document.createElement("style");
-transportMobileStyle.id="didaktik-transport-mobile-style";
-transportMobileStyle.textContent=`@media(max-width:560px){
-  #didaktik-route-note{bottom:calc(var(--dockh) + 92px)!important;max-width:calc(100vw - 20px)!important}
-  #didaktik-transport-legende{display:none!important}
-}`;
-document.head.appendChild(transportMobileStyle);
 let transportRouteCache="";
 let transportReducedCache=null;
 

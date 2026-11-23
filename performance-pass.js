@@ -4,23 +4,6 @@
    on fast simulation ticks. */
 
 (function(){
-  const style=document.createElement("style");
-  style.id="erzwelt-performance-style";
-  style.textContent=`
-    #welt{will-change:transform}
-    .pin{filter:none!important}
-    .pin:active{filter:none!important}
-    .pin .knopf{box-shadow:0 3px 5px rgba(0,0,0,.32)}
-    .pin .bez{box-shadow:0 2px 4px rgba(0,0,0,.28)}
-    .didaktik-truck,.didaktik-ship{will-change:transform}
-    body[data-anim="1"] .pin.foerdert .staub.b,body[data-anim="1"] .pin.foerdert .staub.c{display:none}
-    #sicht.zieht .pin.foerdert .knopf>svg,#sicht.zieht .pin.foerdert .knopf>span.sym,
-    #sicht.zieht .pin.foerdert .staub{animation-play-state:paused!important}
-    #didaktik-transport-legende{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#0b3648f2!important}
-    .ueberlage{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#06202ef2!important}
-  `;
-  document.head.appendChild(style);
-
   // Both didactic migrations are called from hot render paths. Once the current
   // state already has the required schema, skip the repeated object walk/reset.
   if(typeof didaktikMigration==="function"){
