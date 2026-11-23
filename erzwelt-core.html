@@ -646,7 +646,14 @@ const LAND = {
   usa:       {name:"USA",         lohn:5000, risiko:0.4},
   kanada:    {name:"Kanada",      lohn:4800, risiko:0.4},
   australien:{name:"Australien",  lohn:5600, risiko:0.4},
-  deutschland:{name:"Deutschland",lohn:4600, risiko:0.4}
+  deutschland:{name:"Deutschland",lohn:4600, risiko:0.4},
+  griechenland:{name:"Griechenland",lohn:1500, risiko:0.6},
+  finnland:  {name:"Finnland",    lohn:3900, risiko:0.4},
+  russland:  {name:"Russland",    lohn:1100, risiko:0.9},
+  kasachstan:{name:"Kasachstan", lohn: 850, risiko:0.8},
+  usbekistan:{name:"Usbekistan", lohn: 560, risiko:0.9},
+  portugal:  {name:"Portugal",   lohn:1700, risiko:0.5, fabrik:"Braga",
+    fabrikInfo:"In Braga werden Elektronik und Sensoren für Fahrzeuge gefertigt. Im Spiel kannst du am Standort verschiedene Produkte herstellen."}
 };
 
 /* Minen: erschliessung = einmalige Kosten. ergiebigkeit = Roherz pro Arbeiter und Tag. */
@@ -690,7 +697,15 @@ const MINEN = [
   {id:"boke",      ort:"Boké",             land:"guinea",     mat:"alu",      erschliessung: 85000, ergiebigkeit:8.8, plaetze:60,
    info:"Guinea hat die grössten Bauxitvorkommen der Welt. Aus Bauxit wird Aluminium."},
   {id:"potosi",    ort:"Potosí",           land:"bolivien",   mat:"silber",   erschliessung:100000, ergiebigkeit:2.88, plaetze:45,
-   info:"Der Cerro Rico wird seit 1545 abgebaut. Er gilt als der Berg, der die halbe Welt mit Silber versorgte."}
+   info:"Der Cerro Rico wird seit 1545 abgebaut. Er gilt als der Berg, der die halbe Welt mit Silber versorgte."},
+  {id:"distomo",   ort:"Distomo",          land:"griechenland", mat:"alu",    erschliessung:155000, ergiebigkeit:13.20, plaetze:36,
+   info:"In der Gegend um Distomo wird Bauxit unter Tage gewonnen. Bauxit ist der Ausgangsstoff für Aluminium."},
+  {id:"talnach",   ort:"Talnach",          land:"russland",    mat:"nickel", erschliessung:205000, ergiebigkeit:6.80, plaetze:42,
+   info:"Bei Talnach in der Nähe von Norilsk wird unter Tage Erz gewonnen, das Nickel und Kupfer enthält."},
+  {id:"aktogay",   ort:"Aktogay",          land:"kasachstan",  mat:"kupfer", erschliessung:175000, ergiebigkeit:12.50, plaetze:48,
+   info:"In Aktogay in Ostkasachstan wird Kupfererz im Tagebau gewonnen und vor Ort aufbereitet."},
+  {id:"muruntau",  ort:"Muruntau",         land:"usbekistan",  mat:"gold",   erschliessung:220000, ergiebigkeit:9.60, plaetze:46,
+   info:"Muruntau ist ein grosser Goldtagebau in der usbekischen Wüste Kysylkum."}
 ];
 
 /* Raffinerie-Standorte: Erz wird zu Material. */
@@ -704,7 +719,11 @@ const RAFF_ORTE = [
   {id:"r_de",     land:"deutschland", ort:"Freiberg",  bau:420000, kapazitaet:1400, plaetze:14,
    info:"Europa baut Raffinerien auf, um weniger abhängig zu sein. Teuer, aber politisch gewollt."},
   {id:"r_usa",    land:"usa",         ort:"Texas",     bau:440000, kapazitaet:1500, plaetze:14,
-   info:"Die USA fördern eigene Raffinerien mit Subventionen – Stichwort Rohstoffsicherheit."}
+   info:"Die USA fördern eigene Raffinerien mit Subventionen – Stichwort Rohstoffsicherheit."},
+  {id:"r_pori",   land:"finnland",    ort:"Pori",      bau:390000, kapazitaet:1450, plaetze:13,
+   info:"In Pori wird Kupfer mit elektrischem Strom gereinigt. Das hochreine Kupfer eignet sich zum Beispiel für Kabel."},
+  {id:"r_pawlodar",land:"kasachstan", ort:"Pawlodar",  bau:260000, kapazitaet:1600, plaetze:18,
+   info:"Die Raffinerie in Pawlodar gewinnt aus Bauxit Aluminiumoxid. Daraus entsteht in einem weiteren Schritt Aluminium."}
 ];
 
 /* Produkte: rezept = Materialeinheiten pro Stück.
@@ -714,6 +733,9 @@ const PRODUKT = {
   kabel: {name:"Ladekabel",      preis: 150, nachfrage:34, proArbeiter:3.2, bauzeit: 8, plaetze:12, kosten: 60000,
     rezept:{kupfer:2, alu:1, zinn:1},
     info:"Ein Ladekabel ist fast nur Kupfer – dazu Aluminium für den Stecker und Zinn zum Löten. Das einfachste Gerät in deinem Katalog."},
+  motor: {name:"E-Bike-Motor",    preis: 520, nachfrage:24, proArbeiter:2.0, bauzeit:14, plaetze:12, kosten: 90000,
+    rezept:{kupfer:4, alu:3, seltene:1},
+    info:"Der Motor treibt das E-Bike an. In diesem Motortyp steckt Kupfer in den Spulen, Aluminium im Gehäuse und Neodym aus der Gruppe der Seltenen Erden in den Permanentmagneten."},
   phone: {name:"Velocity Smartphone", preis:1690, nachfrage:26, proArbeiter:1.1, bauzeit:20, plaetze:14, kosten:120000,
     rezept:{silizium:4, kupfer:6, kobalt:3, lithium:3, gold:1, zinn:2, tantal:1, seltene:2, indium:1, alu:4},
     info:"In einem Smartphone stecken über 60 verschiedene Elemente. Fast keines davon wird recycelt."},
@@ -731,7 +753,7 @@ const PRODUKT = {
     info:"Ein E-Bike-Akku enthält ungefähr so viel Kobalt wie 30 Smartphones."}
 };
 
-const FAB_ORTE = ["china","vietnam","mexiko","deutschland","usa"];
+const FAB_ORTE = ["china","vietnam","mexiko","deutschland","usa","portugal"];
 
 /* ---------- Ausbau (Idle-Stufen) ----------
    Jede Mine und jede Raffinerie lässt sich in Stufen ausbauen.
@@ -874,6 +896,39 @@ const FLAGGE = {};
 
   FLAGGE.deutschland = `<rect width="30" height="20" fill="#ffce00"/>
     <rect width="30" height="13.33" fill="#dd0000"/><rect width="30" height="6.67" fill="#111"/>`;
+
+  FLAGGE.griechenland = `<rect width="30" height="20" fill="#fff"/>
+    ${streifen(5, 20/9, "#0d5eaf")}
+    <rect width="11.11" height="11.11" fill="#0d5eaf"/>
+    <path d="M0 5.56h11.11M5.56 0v11.11" stroke="#fff" stroke-width="2.22"/>`;
+
+  FLAGGE.finnland = `<rect width="30" height="20" fill="#fff"/>
+    <path d="M0 10h30M10 0v20" stroke="#003580" stroke-width="4.8"/>`;
+
+  FLAGGE.russland = `<rect width="30" height="20" fill="#fff"/>
+    <rect y="6.67" width="30" height="6.67" fill="#0039a6"/>
+    <rect y="13.34" width="30" height="6.66" fill="#d52b1e"/>`;
+
+  FLAGGE.kasachstan = `<rect width="30" height="20" fill="#00afca"/>
+    <path d="M2 2l1.5 2-1.5 2 1.5 2-1.5 2 1.5 2-1.5 2 1.5 2-1.5 2" fill="none" stroke="#fec50c"/>
+    <circle cx="17" cy="8" r="3.1" fill="#fec50c"/>
+    <circle cx="17" cy="8" r="4.3" fill="none" stroke="#fec50c" stroke-dasharray=".7 .62"/>
+    <path d="M10 12.5q4 1 7 3 3-2 7-3-2 3.6-7 4.5-5-.9-7-4.5z" fill="#fec50c"/>`;
+
+  FLAGGE.usbekistan = `<rect width="30" height="20" fill="#ce1126"/>
+    <rect width="30" height="6.3" fill="#0099b5"/><rect y="6.85" width="30" height="6.3" fill="#fff"/>
+    <rect y="13.7" width="30" height="6.3" fill="#1eb53a"/>
+    <circle cx="5" cy="3.2" r="2.4" fill="#fff"/><circle cx="5.9" cy="2.9" r="2.05" fill="#0099b5"/>
+    ${[3,4,5].map((n,i)=>Array.from({length:n},(_,j)=>st(14-(n-1-j)*1.48,1.5+i*1.65,.46,"#fff")).join("")).join("")}`;
+
+  FLAGGE.portugal = `<rect width="30" height="20" fill="#ff0000"/>
+    <rect width="12" height="20" fill="#046a38"/>
+    <g transform="translate(12 10)">
+      <circle r="4.5" fill="none" stroke="#ffdf00" stroke-width="1.1"/>
+      <ellipse rx="4.6" ry="1.65" transform="rotate(23)" fill="none" stroke="#ffdf00" stroke-width=".9"/>
+      <path d="M-2.6-3h5.2v4q0 2-2.6 3-2.6-1-2.6-3z" fill="#fff" stroke="#bd1521" stroke-width="1"/>
+      <path d="M0-1.65v3.5M-1.1.1h2.2" stroke="#164194" stroke-width=".55" stroke-linecap="round"/>
+    </g>`;
 })();
 
 /* flagge("kongo")            → kleine Flagge im Text
@@ -1877,10 +1932,11 @@ const ORT = {
   fresnillo:[-102.9,23.2], sanrafael:[-70.3,-14.2],
   bangka:[106.12,-2.13], sulawesi:[121.5,-2.5],
   obuasi:[-1.7,6.2], boke:[-14.3,10.9], potosi:[-65.7,-19.6],
+  distomo:[22.67,38.43], talnach:[88.40,69.49], aktogay:[79.98,46.97], muruntau:[64.60,41.50],
   r_china:[113.27,23.13], r_malay:[103.3,3.8], r_chile:[-70.34,-23.81],
-  r_de:[13.34,50.92], r_usa:[-95.0,29.0],
+  r_de:[13.34,50.92], r_usa:[-95.0,29.0], r_pori:[21.83,61.47], r_pawlodar:[76.99,52.29],
   f_china:[119.0,31.0], f_vietnam:[105.0,20.5], f_mexiko:[-107.0,27.0],
-  f_deutschland:[14.5,52.0], f_usa:[-112.0,33.5]
+  f_deutschland:[14.5,52.0], f_usa:[-112.0,33.5], f_portugal:[-8.43,41.53]
 };
 
 const KARTE_B = 1000, KARTE_H = 560;
@@ -3568,13 +3624,14 @@ function pinsZeichnen(){
 
   if (ebenen.fab) for (const land of FAB_ORTE){
     const [x,y] = px("f_"+land);
+    const { name, fabrik } = LAND[land];
     const meine = S.fabriken.filter(f => f.land === land);
     const crew = meine.reduce((a,f)=>a+f.arbeiter, 0);
     teile.push(`<button class="pin werk ${meine.length?"":"zu"} ${winkt("fab", !!meine.length)} ${frisch("f_"+land)}"
-      data-pin="fab" data-id="${land}" style="left:${x}px;top:${y}px" aria-label="Fabrikstandort ${LAND[land].name}">
+      data-pin="fab" data-id="${land}" style="left:${x}px;top:${y}px" aria-label="Fabrikstandort ${fabrik ? fabrik + ", " : ""}${name}">
       <span class="knopf" style="${meine.length?"background:#b5703c;color:#fff":""}">${IK.fabrik}
         ${crew?`<span class="crew">${crew}</span>`:""}</span>
-      <span class="bez">${flagge(land)}${LAND[land].name}</span></button>`);
+      <span class="bez">${flagge(land)}${fabrik || name}</span></button>`);
   }
 
   welt.querySelectorAll(".pin").forEach(p => p.remove());
@@ -4094,8 +4151,10 @@ function blattRaff(id){
 /* ---------- Blatt: Fabrikstandort ---------- */
 function blattFab(land){
   const meine = S.fabriken.map((f,i)=>({f,i})).filter(o => o.f.land === land);
+  const { name, lohn, fabrik, fabrikInfo } = LAND[land];
   const kopf = `<div class="titelzeile">${flagge(land,"gross")}
-    <div><h2>${LAND[land].name}</h2><div class="ort">Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat</div></div></div>`;
+    <div><h2>${fabrik || name}</h2><div class="ort">${fabrik ? name + " · " : ""}Fabrikstandort · Lohn ${chf(lohn)}/Monat</div></div></div>
+    ${fabrikInfo ? `<div class="notiz blau">${fabrikInfo}</div>` : ""}`;
 
   const laufend = meine.map(({f,i}) => {
     const def = PRODUKT[f.produkt];

@@ -5,7 +5,9 @@ const RAFF_SPEZIAL = {
   r_malay:["seltene","zinn","tantal"],
   r_chile:["kupfer","lithium","silber"],
   r_de:["kupfer","zinn","silber","indium","gold"],
-  r_usa:["lithium","nickel","kobalt","seltene"]
+  r_usa:["lithium","nickel","kobalt","seltene"],
+  r_pori:["kupfer"],
+  r_pawlodar:["alu"]
 };
 RAFF_ORTE.forEach(r=>{r.spezial=RAFF_SPEZIAL[r.id]||[];});
 
