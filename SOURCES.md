@@ -46,6 +46,8 @@ Weitere kleine Inseln stammen aus den [Natural-Earth-Daten 1:10 Mio.](https://ww
 
 Die Binnengewässer stammen aus [Natural Earth, 1:50 Mio.](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-lakes-reservoirs/) (Version 5.0.0). Der Nicaraguasee mit Ometepe übernimmt die detaillierteren [Seendaten 1:10 Mio.](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-lakes/) (Version 5.0.0).
 
+Die zuschaltbaren Kartennamen verwenden die [Verwaltungseinheiten 1:50 Mio.](https://www.naturalearthdata.com/downloads/50m-cultural-vectors/) (Version 5.1.1) und die [Meeresgebiete 1:50 Mio.](https://www.naturalearthdata.com/downloads/50m-physical-vectors/) (Version 5.1.0). Ausgewählte Meerengen stammen aus den [Meeresgebieten 1:10 Mio.](https://www.naturalearthdata.com/downloads/10m-physical-vectors/) (Version 5.1.0). Die Grenzen folgen der Darstellung von Natural Earth. Die Insel- und Seenamen beziehen sich auf die Umrisse der Spielkarte.
+
 ### Kartenprüfung nach Regionen
 
 | Paket | Gebiet und Schwerpunkte |
