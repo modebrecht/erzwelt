@@ -84,6 +84,20 @@ Der Builder prüft dabei automatisch:
 - «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
   Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
 
+## Handy-Layout (`handy-layout.js`)
+
+Oben zwei Reihen Bedienung, darunter das Spiel:
+
+- «Verlauf» sitzt in der oberen Leiste (2. Reihe links, neben Tempo und
+  Einstellungen).
+- Meldungen docken links unten über der Leiste an.
+- Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken im Filter-Knopf
+  über + und −. Ein Punkt am Knopf zeigt, wenn nicht alle Orte sichtbar sind.
+- Aufgabenkasten kürzer: Phase als schmale Leiste mit «Phase 1/4 · …» in einer
+  Zeile, Zusammenhang ohne Kasten, nur «Ziel zeigen» als Weg zum Ziel.
+
+Nur Darstellung, keine Änderung an Spielstand oder Wirtschaft.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
