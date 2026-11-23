@@ -565,6 +565,219 @@ const ZUSTAND = () => {
     await p.close();
   }
 
+  // ---------- Einführung und Wissen (ab Schritt 7) ----------
+  // Zusätzlich zum Zustand: Feier (Funken in den Farben der Erfolgsfeier, Vibration)
+  // seit der letzten Aufnahme und die letzten Einträge im Meldungsverlauf.
+  const FEIER = () => {
+    window.__vergleichFeier = [];
+    const echtFunken = funken;
+    funken = function (x, y, farben, n) {
+      if (Array.isArray(farben) && farben.join() === "#f5b73d,#ffe9a8,#2fbe7e,#6fb8e0,#fff") window.__vergleichFeier.push("funken " + n);
+      return echtFunken.apply(this, arguments);
+    };
+    if (typeof navigator.vibrate === "function") {
+      const echt = navigator.vibrate.bind(navigator);
+      navigator.vibrate = m => { window.__vergleichFeier.push("vibration " + JSON.stringify(m)); return echt(m); };
+    }
+  };
+  const MEHR = () => ({
+    feier: (window.__vergleichFeier || []).splice(0),
+    log: (S.log || []).slice(0, 4).map(l => l.tag + " " + String(l.text).replace(/\s+/g, " ")),
+    fokus: document.activeElement ? (document.activeElement.id || document.activeElement.className || document.activeElement.tagName) + "|" + (document.activeElement.textContent || "").replace(/\s+/g, " ").trim().slice(0, 40) : null,
+    einstieg: !!document.getElementById("einstieg"),
+    schleier: !document.getElementById("schleier").hidden,
+    lupe: document.getElementById("lupe").hidden ? null : document.getElementById("lupeinhalt").innerText.replace(/[ \t]+/g, " ").trim(),
+    perkKnoepfe: [...document.querySelectorAll("#lupe [data-tun='perk']")].map(b => [b.textContent.replace(/\s+/g, " ").trim(), b.disabled, b.classList.contains("puls")])
+  });
+  const aufnahmeMehr = async (p, name, nurQuest) => {
+    await aufnahme(p, name, nurQuest);
+    const schluessel = Object.keys(ergebnis).pop();
+    ergebnis[schluessel].mehr = await p.evaluate(MEHR);
+  };
+  const einrichten = async p => {
+    await p.waitForFunction(() => typeof S !== "undefined" && typeof zeichnen === "function");
+    await p.evaluate(RUECKMELDUNG);
+    await p.evaluate(FEIER);
+    await p.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}#toasts,#tutorial-lernfeedback,#funken,#muenz-ebene{visibility:hidden!important}" +
+      ".kasse-plus,.pin.neu-status .pin-state-badge,.pin.neu-status .pin-build-tool,.pin.neu-status .pin-status-hint{display:none!important}" +
+      ".pille.kasse > div:has(.kasse-plus) > small{visibility:visible!important}" });
+    await p.evaluate(() => { const echt = tempoSetzen; tempoSetzen = () => echt(0); echt(0); });
+    await p.waitForTimeout(150);
+  };
+  // Neuladen: Spielstand wie beim Verlassen der Seite speichern («pagehide»: das Spiel fasst
+  // Speichervorgänge zusammen und schreibt erst dann alles) und in einer frischen Seite
+  // öffnen (p.reload ist unter file:// nicht verlässlich: der Speicher ist beim Start der
+  // neuen Seite manchmal leer). Rückgabe: die neue Seite.
+  const neuLaden = async alt => {
+    const ls = await alt.evaluate(() => { window.dispatchEvent(new Event("pagehide")); return { v2: localStorage.getItem("erzwelt_v2"), opt: localStorage.getItem("erzwelt_opt"), meta: localStorage.getItem("erzwelt_meta") }; });
+    await alt.close();
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
+    await ctx.addInitScript(INIT, { speicher: ls.v2 ? JSON.parse(ls.v2) : null, opt: ls.opt ? JSON.parse(ls.opt) : null });
+    if (ls.meta) await ctx.addInitScript(meta => { if (!localStorage.getItem("erzwelt_meta")) localStorage.setItem("erzwelt_meta", meta); }, ls.meta);
+    const neu = await ctx.newPage();
+    neu.on("pageerror", e => fehler.push(String(e)));
+    neu.on("dialog", d => d.accept());
+    await neu.goto(SEITE, { waitUntil: "load" });
+    await einrichten(neu);
+    return neu;
+  };
+  const seiteMitFeier = async (speicher, mehr) => { const s = await neueSeite(speicher, mehr); await s.evaluate(FEIER); return s; };
+
+  // Startbild: mit Escape schliessen, Neuladen vor und nach dem Startbild
+  p = await seiteMitFeier();
+  await aufnahmeMehr(p, "e-startbild");
+  p = await neuLaden(p); await aufnahmeMehr(p, "e-startbild-neu-geladen");
+  await p.focus("#einstieg .es-los"); await p.keyboard.press("Escape"); await p.waitForTimeout(400);
+  await aufnahmeMehr(p, "e-startbild-escape");
+  p = await neuLaden(p); await aufnahmeMehr(p, "e-gesehen-neu-geladen");
+  // Schwer freigeschaltet: Dialog neu zeigen, Schwer wählen
+  await p.evaluate(() => { META.mittelGeschafft = true; metaSpeichern(); schwierigkeitZeigen(); });
+  await aufnahmeMehr(p, "e-schwer-frei");
+  p = await neuLaden(p); await aufnahmeMehr(p, "e-schwer-frei-neu-geladen");
+  await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][2].click());
+  await aufnahmeMehr(p, "e-schwer-gewaehlt");
+  p = await neuLaden(p); await aufnahmeMehr(p, "e-schwer-gewaehlt-neu-geladen");
+  await p.close();
+  // Mittel wählen (Schwer gesperrt)
+  p = await seiteMitFeier();
+  await knopf(p, "#einstieg .es-los"); await p.waitForTimeout(400); await aufnahmeMehr(p, "e-schwierigkeit-fokus");
+  await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][2].click()); await aufnahmeMehr(p, "e-schwer-gesperrt-klick");
+  await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][1].click()); await aufnahmeMehr(p, "e-mittel-gewaehlt");
+  await p.close();
+
+  // Neue Runde nach einer beendeten Runde: Startbild erscheint wieder
+  p = await seiteMitFeier(kette());
+  p.on("dialog", d => d.accept());
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; S.einstiegGesehen = true;
+    S.ende = { grund: "etappe", etappe: 1, gewinn: etappenGewinn(), ruf: Math.round(S.ruf), geschafft: false }; speichern(); seiteWechseln("ziel"); zeichnen(); });
+  await aufnahmeMehr(p, "e-runde-beendet");
+  await klick(p, '#seite [data-tun="reset"]'); await p.waitForTimeout(400);
+  await aufnahmeMehr(p, "e-neue-runde-startbild");
+  await knopf(p, "#einstieg .es-los"); await p.waitForTimeout(400); await aufnahmeMehr(p, "e-neue-runde-schwierigkeit");
+  await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][0].click()); await aufnahmeMehr(p, "e-neue-runde-karte");
+  p = await neuLaden(p); await aufnahmeMehr(p, "e-neue-runde-neu-geladen");
+  // Neue Runde über die Einstellungen mitten in der Einführung
+  await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]');
+  await p.evaluate(() => { blattZu(); document.querySelector('[data-tun="einst"]').click(); });
+  await klick(p, '#einst [data-tun="reset"]'); await p.waitForTimeout(400);
+  await aufnahmeMehr(p, "e-reset-einstellungen");
+  await p.close();
+
+  // Rückmeldung und Feier nach jedem Einführungsschritt
+  p = await seiteMitFeier();
+  await neueRunde(p);
+  const SCHRITT = {
+    "kupfer-auf": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); },
+    "kupfer-crew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 15); },
+    "alu-auf": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); },
+    "alu-crew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 5); },
+    "zinn-auf": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); },
+    "zinn-crew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 10); },
+    "raff": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="raff-bau"]'); },
+    "raffcrew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 5); },
+    "fab": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="fab-bau"]'); },
+    "fab-crew": async () => { await tageBis(p, () => S.fabriken[0].restbau <= 0); await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 5); },
+    "verkauf": async () => { await tageBis(p, () => S.ware.kabel > 0); await seite(p, "markt"); await knopf(p, '#seite [data-tun="handverkauf"]'); },
+    "verkaeufer": async () => { await seite(p, "markt"); await regler(p, "#seite .besetzung-regler", 4); }
+  };
+  for (let i = 0; i < 14; i++) {
+    const id = await p.evaluate(() => tutorialSchritt() ? tutorialSchritt().id : null);
+    if (!id) break;
+    await SCHRITT[id]();
+    await aufnahmeMehr(p, `e-feier-${id}`);
+    if (i === 3 || i === 8) { p = await neuLaden(p); await aufnahmeMehr(p, `e-feier-${id}-neu-geladen`); }
+  }
+  // Nach der Einführung: Lupe offen, Verbesserung nicht mehr gesperrt
+  await seite(p, "wissen"); await p.evaluate(() => lupeFuellen("kette")); await aufnahmeMehr(p, "e-nach-einf-lupe-kette");
+  await p.close();
+
+  // Lupe in der Einführung: Verbesserungen gesperrt, Klick bewirkt nichts
+  p = await seiteMitFeier();
+  await neueRunde(p);
+  for (const seg of ["kette", "markt", "modell"]) {
+    await p.evaluate(s => { blattZu(); seiteWechseln("wissen"); lupeFuellen(s); }, seg);
+    await aufnahmeMehr(p, `e-einf-lupe-${seg}`);
+  }
+  await p.evaluate(() => { const b = document.querySelector('#lupe [data-tun="perk"]'); b.disabled = false; b.click(); });
+  await aufnahmeMehr(p, "e-einf-perk-erzwungen");
+  await p.close();
+
+  // Lupe für jeden Wissens-Bereich: ohne abgeholtes Wissen, abgeholt mit genug Geld,
+  // abgeholt mit zu wenig Geld, erste Stufe finanziert, alles finanziert
+  const BEREICHE = ["kette", "geologie", "leute", "chemie", "fabrik", "markt", "ruf", "modell"];
+  const ALLE_QUESTS = ["basis", "lohn", "markt", "geologie", "ruf", "modell"];
+  p = await seiteMitFeier(kette());
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+  await merken(p);
+  const lupeSzene = async (name, seg, setzen) => {
+    await p.evaluate(([seg, setzen]) => {
+      S = JSON.parse(window.__vergleichGrund);
+      if (setzen) (0, eval)("(" + setzen + ")")();
+      blattZu(); blattStand = ""; seitenStand = "";
+      seiteWechseln("wissen"); zeichnen(); lupeFuellen(seg);
+    }, [seg, setzen ? String(setzen) : null]);
+    await aufnahmeMehr(p, name);
+  };
+  for (const seg of BEREICHE) {
+    await lupeSzene(`e-lupe-${seg}-ohne-wissen`, seg);
+    await lupeSzene(`e-lupe-${seg}-bereit`, seg, flowSetzen(ALLE_QUESTS));
+    await lupeSzene(`e-lupe-${seg}-wenig-geld`, seg, flowSetzen(ALLE_QUESTS, null, "S.kasse = 5000;"));
+    await lupeSzene(`e-lupe-${seg}-stufe-2`, seg, flowSetzen(ALLE_QUESTS, null, `S.perks[WISSEN.find(s => s.id === "${seg}").perks[0].id] = true;`));
+    await lupeSzene(`e-lupe-${seg}-voll`, seg, flowSetzen(ALLE_QUESTS, null, `for (const x of WISSEN.find(s => s.id === "${seg}").perks) S.perks[x.id] = true;`));
+  }
+  await lupeSzene("e-lupe-unbekannt", "gibtsnicht", flowSetzen(ALLE_QUESTS));
+  // Verbesserung finanzieren: genug Geld, dann zweite Stufe; zu wenig Geld (Knopf aus)
+  await lupeSzene("e-perk-vorher", "markt", flowSetzen(ALLE_QUESTS));
+  await klick(p, '#lupe [data-tun="perk"]'); await aufnahmeMehr(p, "e-perk-finanziert");
+  await klick(p, '#lupe [data-tun="perk"]'); await aufnahmeMehr(p, "e-perk-stufe-2-finanziert");
+  await p.evaluate(() => { document.querySelector('[data-schliessen="lupe"]')?.click(); });
+  await aufnahmeMehr(p, "e-perk-wissen-seite");
+  await lupeSzene("e-perk-wenig-geld-vorher", "ruf", flowSetzen(ALLE_QUESTS, null, "S.kasse = 5000;"));
+  await p.evaluate(() => document.querySelector('#lupe [data-tun="perk"]').click()); await aufnahmeMehr(p, "e-perk-wenig-geld-klick");
+  await lupeSzene("e-perk-ohne-wissen-vorher", "chemie");
+  await p.evaluate(() => document.querySelector('#lupe [data-tun="perk"]').click()); await aufnahmeMehr(p, "e-perk-ohne-wissen-klick");
+  await p.close();
+
+  // Wissens-Quests nacheinander bis zum Abschluss, mit Neuladen dazwischen
+  p = await seiteMitFeier(kette());
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+  await aufnahmeMehr(p, "e-wq-basis-bereit");
+  const ansehen = async name => {
+    await aufKarte(p); await klick(p, "#quest .wissen-quest-action"); await aufnahmeMehr(p, name);
+    await p.evaluate(() => { document.querySelector('[data-schliessen="lupe"]')?.click(); });
+    await aufKarte(p); await aufnahmeMehr(p, name + "-danach");
+  };
+  await ansehen("e-wq-basis-ansehen");
+  await pinKlick(p, "mine", "boke"); await knopf(p, '#blattinhalt [data-tun="lohn"][aria-pressed="true"]').catch(() => {});
+  await aufnahmeMehr(p, "e-wq-lohn-gleiche-stufe");
+  await knopf(p, '#blattinhalt [data-tun="lohn"][aria-pressed="false"]'); await aufnahmeMehr(p, "e-wq-lohn-geaendert");
+  p = await neuLaden(p); await aufnahmeMehr(p, "e-wq-lohn-neu-geladen");
+  await ansehen("e-wq-lohn-ansehen");
+  await seite(p, "markt"); await knopf(p, '#seite [data-tun="handverkauf"]'); await aufnahmeMehr(p, "e-wq-markt-verkauft");
+  await ansehen("e-wq-markt-ansehen");
+  await pinKlick(p, "mine", "katanga"); await aufnahmeMehr(p, "e-wq-geologie-1");
+  await pinKlick(p, "mine", "katanga"); await aufnahmeMehr(p, "e-wq-geologie-1-nochmals");
+  p = await neuLaden(p); await aufKarte(p); await aufnahmeMehr(p, "e-wq-geologie-1-neu-geladen");
+  await pinKlick(p, "mine", "obuasi"); await aufnahmeMehr(p, "e-wq-geologie-2");
+  await ansehen("e-wq-geologie-ansehen");
+  await p.evaluate(() => document.querySelector('#dock [data-seite="ziel"]').click()); await aufnahmeMehr(p, "e-wq-ruf-ziel");
+  await ansehen("e-wq-ruf-ansehen");
+  await ansehen("e-wq-modell-ansehen");
+  p = await neuLaden(p); await aufKarte(p); await aufnahmeMehr(p, "e-wq-alle-neu-geladen");
+  await seite(p, "wissen"); await aufnahmeMehr(p, "e-wq-alle-wissen");
+  await p.close();
+
+  // Ältere Einführungs-Spielstände (Fassung 2) und ohne Startteam
+  for (const [name, mehr] of [
+    ["e-alt-fassung2-mitte", { einfuehrung: 2, tutorial: 5, minen: { katanga: quelle(15), boke: quelle(5) }, arbeiterGesamt: 20, startTeam: 0 }],
+    ["e-alt-fassung2-fertig", { einfuehrung: 2, tutorial: 13, minen: { katanga: quelle(15) }, arbeiterGesamt: 15, startTeam: 0 }],
+    ["e-alt-ohne-startteam", { tutorial: 0, minen: {}, arbeiterGesamt: 10 }]
+  ]) {
+    p = await seiteMitFeier(Object.assign({ tag: 20, kasse: 800000, schwierigkeit: "einfach", raff: {}, fabriken: [] }, mehr));
+    await aufnahmeMehr(p, name);
+    await p.close();
+  }
+
   fs.writeFileSync(path.join(AUS, "zustaende.json"), JSON.stringify({ fehler, ergebnis }, null, 1));
   await browser.close();
   console.log(`${Object.keys(ergebnis).length} Zustände aufgenommen nach ${AUS}` + (fehler.length ? ` · ${fehler.length} Seitenfehler` : ""));
