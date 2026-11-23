@@ -38,8 +38,11 @@ Die Landflächen und Küsten im SVG stammen aus **Natural Earth, 1:50 Mio.**, Ve
 
 Die kleineren Landflächen von Cabo Verde, São Tomé und Príncipe sowie Mahé auf den Seychellen sind aus denselben Landdaten übernommen.
 
+Das Mittelmeer enthält auch die kleineren Inseln aus den Landdaten, darunter Malta, Gozo, die Balearen und Djerba. Die Dardanellen sind im Bereich der schmalen Durchfahrt weniger stark vereinfacht.
+
 Standortreferenzen für die Rohstoffkarte
 
+- [Freiberg · Georeferenzpunkt, Stadt Freiberg](https://www.freiberg.de/stadt-und-buerger/aktuelles/neuigkeiten/schlossplatz-ist-erste-oeffentliche-teststelle-fuer-gps-geraete-in-freiberg)
 - [Katanga · Kinsevere, MMG, Abschnitt 4.1](https://www.mmg.com/content/uploads/2026/03/Mineral-Resources-Ore-Reserves-Statement-2020.pdf)
 - [Rubaya · Masisi, Bergbauministerium der DR Kongo, Anhang 2025](https://saemape.cd/wp-content/uploads/2025/12/Cartographie_Sites_Haut_Risque_SK-NK.pdf)
 - [Gatumba · Ngororero, Rwanda Environment Management Authority, Abschnitt VII.3](https://www.rema.gov.rw/fileadmin/user_upload/REMA/Publications/Reports/Nile_Nyabarongo_Upper_Catchment_Pollution_Management_Plan_Final__Jan._2021_.pdf)
