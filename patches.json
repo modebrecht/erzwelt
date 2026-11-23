@@ -65,7 +65,7 @@
     },
     {
       "name": "logic-fixes",
-      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "ziel-positiv.js", "feinschliff.js", "stil.js"]
+      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "einstieg.js"]
     }
   ]
 }

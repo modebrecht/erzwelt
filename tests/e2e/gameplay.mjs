@@ -99,6 +99,11 @@ if (initial.scrollWidth > initial.width + 1) throw new Error(`Initial horizontal
 if (!initial.didactic?.declarativeCopy || initial.didactic?.stringReplacementLayer !== false) throw new Error('Clean Sek-B didactic module not active');
 if (!initial.knowledge || !initial.objective) throw new Error('Knowledge/objective modules missing');
 
+// New round opens with the intro «Woher kommt dein Ladekabel?»; it leads to the difficulty choice.
+await page.locator('#einstieg .es-los').waitFor({ state: 'visible', timeout: 10000 });
+await page.locator('#einstieg .es-los').click();
+await page.waitForFunction(() => !document.getElementById('einstieg') && S.einstiegGesehen === true, null, { timeout: 5000 });
+
 // Choose Mittel through the real modal.
 const mittel = page.getByRole('button', { name: /Mittel/ }).filter({ visible: true });
 await mittel.first().click();

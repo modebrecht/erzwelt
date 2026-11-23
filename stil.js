@@ -23,7 +23,8 @@
      Emojis. Schwierigkeit als 1–3 Erzbrocken.
    Elementsymbole
      In Baloo 2 sehen I und l gleich aus: «Al» las sich wie «AI». Das kleine
-     l in «Al» bekommt unten einen Bogen (wie in lesefreundlichen Schriften).
+     l in «Al» wird gezeichnet: senkrecht nach unten, unten ein runder Bogen
+     nach rechts oben (wie in der Schulschrift).
      Das Symbol bleibt chemisch korrekt «Al».
    ============================================================ */
 (function(){
@@ -92,7 +93,7 @@
   /* ---------- «Al» lesbar: kleines l mit Bogen ---------- */
   const AL = /\bAl\b/;
   // Das l als gezeichnetes Zeichen: steht auf der Grundlinie, unabhängig von der Schrift.
-  const AL_HTML = 'A<span class="al-l"><span class="al-sr">l</span><svg viewBox="0 0 28 72" aria-hidden="true"><path d="M10 6V56Q10 67 22 66" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  const AL_HTML = 'A<span class="al-l"><span class="al-sr">l</span><svg viewBox="0 0 34 72" aria-hidden="true"><path d="M8 6V55Q8 66 18 65Q25 64 28.5 57" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   function alMarkieren(wurzel){
     if (!wurzel) return;
     const pruefen = t => {
@@ -135,7 +136,7 @@
     span.al-text.al-text,span.al-l.al-l,span.al-sr.al-sr{all:unset}
     span.al-text.al-text{white-space:pre-wrap}
     span.al-l.al-l{display:inline-block;position:relative}
-    span.al-l.al-l svg{display:inline-block;width:.28em;height:.72em;vertical-align:baseline;margin:0 .01em}
+    span.al-l.al-l svg{display:inline-block;width:.34em;height:.72em;vertical-align:baseline;margin:0 .01em}
     span.al-sr.al-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
     /* Der Kern setzt svg auf display:block – Symbole im Text bleiben in der Zeile */
     svg.stil-ikon{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.18em;flex:none}

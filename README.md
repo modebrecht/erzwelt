@@ -221,9 +221,21 @@ Grossbuchstaben mehr (vorher 34 Stellen); Knopftexte als Verb
 1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole.
 
 **«Al» statt «AI»:** In Baloo 2 sehen grosses I und kleines l gleich aus. Das l in
-«Al» wird darum als eigenes Zeichen mit Bogen gezeichnet (steht auf der Grundlinie,
-unabhängig von der Schrift). Das Symbol bleibt chemisch korrekt «Al»; Screenreader
+«Al» wird darum als eigenes Zeichen gezeichnet: senkrecht nach unten, unten ein
+runder Bogen nach rechts oben wie in der Schulschrift. Es steht auf der Grundlinie,
+unabhängig von der Schrift. Das Symbol bleibt chemisch korrekt «Al»; Screenreader
 lesen weiterhin «Al».
+
+## Einstieg (`einstieg.js`)
+
+Jede neue Runde beginnt mit einem Startbild **«Woher kommt dein Ladekabel?»**: ein
+aufgeschnittenes Kabel – Kupfer in der Leitung, Aluminium im Stecker, Zinn in der
+Lötstelle –, jedes mit dem Ort, an dem die Einführung danach die Quelle eröffnet
+(Katanga, Boké, Bangka). Darunter die Kette Quelle → Raffinerie → Fabrik → Markt und
+der Knopf «Firma gründen», danach die Schwierigkeitswahl. Einmal pro Runde
+(`S.einstiegGesehen`); ein einziger Ablauf beim Öffnen (Kabel zeichnen, dann die drei
+Materialien), bei «Animationen: aus» oder reduzierter Bewegung sofort vollständig.
+Escape oder «Firma gründen» schliesst es.
 
 ## PDF-Leistungsnachweis
 
