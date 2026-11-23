@@ -778,6 +778,285 @@ const ZUSTAND = () => {
     await p.close();
   }
 
+  // ---------- Karte (ab Schritt 8a) ----------
+  // Zusätzlich zum Zustand: jeder Pin als Markup (Klassen und Stilangaben sortiert, damit
+  // nur zählt, was gilt, nicht in welcher Reihenfolge es gesetzt wurde), Ebenen, Chips und
+  // Filter-Knopf, Transform der Welt, Linien der Karte (Lieferweg, Transport, Lieferfluss)
+  // in ihrer Reihenfolge, Lieferweg-Knopf, Fokus und auf Wunsch die Meldungen.
+  const KARTE = mehr => {
+    const norm = s => String(s).replace(/\s+/g, " ");
+    const attr = n => [...n.attributes].map(a => {
+      let v = norm(a.value).trim();
+      if (a.name === "class") v = v.split(" ").filter(Boolean).sort().join(" ");
+      else if (a.name === "style") v = v.split(";").map(x => x.trim().replace(/\s*:\s*/, ":")).filter(Boolean).sort().join(";");
+      return [a.name, v];
+    }).sort((a, b) => a[0] < b[0] ? -1 : 1).map(([k, v]) => ` ${k}="${v}"`).join("");
+    const markup = n => {
+      if (!n) return null;
+      if (n.nodeType === 3) return norm(n.textContent);
+      if (n.nodeType !== 1) return "";
+      const tag = n.tagName.toLowerCase();
+      return `<${tag}${attr(n)}>${[...n.childNodes].map(markup).join("").replace(/> </g, "><")}</${tag}>`;
+    };
+    const el = id => document.getElementById(id);
+    const svg = document.querySelector("svg.weltkarte");
+    const a = document.activeElement;
+    return {
+      pins: [...document.querySelectorAll("#welt .pin")].map(markup),
+      welt: [norm(welt.getAttribute("style") || ""), [...welt.classList].sort().join(" ")],
+      ebenen: typeof ebenen !== "undefined" ? Object.assign({}, ebenen) : null,
+      ebenenHtml: markup(el("ebenen")),
+      zoomHtml: markup(el("zoom")),
+      svg: svg ? [...svg.children].map(c => c.id || c.getAttribute("class") || c.tagName) : null,
+      linien: svg ? ["didaktik-lieferweg", "didaktik-transport", "lieferfluss"].map(id => markup(svg.querySelector("#" + id))) : null,
+      routeNotiz: el("didaktik-route-note") ? [el("didaktik-route-note").hidden, norm(el("didaktik-route-note").innerHTML)] : null,
+      legende: el("didaktik-transport-legende") ? [el("didaktik-transport-legende").hidden, norm(el("didaktik-transport-legende").innerHTML)] : null,
+      lieferwegKnopf: markup(el("lieferweg-knopf")),
+      sichtKinder: [...el("sicht").children].map(c => c.id || c.className),
+      body: [...document.body.classList].sort().join(" "),
+      aktiv: a ? [a.tagName, a.id, a.dataset ? (a.dataset.pin || a.dataset.ebene || "") + ":" + (a.dataset.id || "") : "", norm(a.textContent || "").trim().slice(0, 40)].join("|") : null,
+      toasts: mehr && mehr.toasts ? [...document.querySelectorAll("#toasts .toast")].map(markup) : null,
+      tabFolge: mehr && mehr.tabFolge ? mehr.tabFolge : null
+    };
+  };
+  const aufnahmeKarte = async (p, name, mehr) => {
+    mehr = mehr || {};
+    await aufnahme(p, name, mehr.nurQuest);
+    const schluessel = Object.keys(ergebnis).pop();
+    ergebnis[schluessel].karte = await p.evaluate(KARTE, { toasts: !!mehr.toasts, tabFolge: mehr.tabFolge || null });
+  };
+  // Szene wie oben, danach Kamera auf den festen Startpunkt (wie beim Laden).
+  const karteSzene = async (p, name, setzen, mehr) => {
+    await p.evaluate(setzen => {
+      S = JSON.parse(window.__vergleichGrund);
+      if (setzen) (0, eval)("(" + setzen + ")")();
+      blattZu(); blattStand = ""; seitenStand = "";
+      seiteWechseln("karte"); zeichnen();
+    }, setzen ? String(setzen) : null);
+    await aufnahmeKarte(p, name, mehr);
+  };
+  // Wartet die Sperre nach einem Fokus ab (700 ms), damit der nächste Fokus immer gleich läuft.
+  const kameraStart = async p => { await p.waitForTimeout(750); await p.evaluate(() => { ansicht.z = 1.15; zeigeAuf("obuasi", 1.15); }); };
+  // Eine neue Meldung, sofort gezeichnet (frühere Meldungen weg, damit kein Zeitablauf zählt).
+  const meldung = (p, text, art) => p.evaluate(([text, art]) => {
+    document.getElementById("toasts").replaceChildren(); notiz(text, art || ""); zeichnen();
+  }, [text, art || ""]);
+  // Leere Stelle der Karte (kein Pin, keine Bedienung) für Ziehen und Rad.
+  const leereStelle = p => p.evaluate(() => {
+    const r = document.getElementById("sicht").getBoundingClientRect();
+    for (let y = r.top + r.height * .55; y < r.bottom - 120; y += 17) for (let x = r.left + 30; x < r.right - 30; x += 19) {
+      const e = document.elementFromPoint(x, y);
+      if (e && !e.closest(".pin, #quest, #hud, #dock, #zoom, #ebenen, #lieferweg-knopf, #toasts, #didaktik-route-note") && e.closest("#sicht")) return [Math.round(x), Math.round(y)];
+    }
+    throw new Error("keine leere Stelle");
+  });
+  const PIN_MIX = () => {
+    const m = (n, mehr) => Object.assign({ arbeiter: n, stufe: 1, zufriedenheit: 70, stillBis: 0, malus: 1, malusBis: 0, ausbau: 0, sicherheit: false, nachweis: false }, mehr || {});
+    S.minen.bangka = m(10, { stillBis: S.tag + 6, zufriedenheit: 18 });
+    S.minen.obuasi = m(8, { stillBis: S.tag + 4 });
+    S.log.unshift({ tag: S.tag, text: "<b>Obuasi</b>: Unfall – die Förderung steht für die Sicherheitsprüfung.", art: "warn" });
+    S.minen.escondida = m(6, { stillBis: S.tag + 1200 });
+    S.minen.sulawesi = m(0);
+    S.raff.r_malay = { arbeiter: 0, ausbau: 0 };
+    S.fabriken.push({ produkt: "board", land: "vietnam", arbeiter: 0, restbau: 4 });
+    S.fabriken.push({ produkt: "phone", land: "mexiko", arbeiter: 3, restbau: 0 });
+    S.arbeiterGesamt += 27;
+  };
+
+  // Pins aller Arten und Zustände, Ebenen, Kamera, Fokus, Meldungen, Lieferweg, Tastatur
+  p = await neueSeite(kette());
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+  await merken(p);
+  await karteSzene(p, "k-kette-karte");
+  await karteSzene(p, "k-pins-mix", PIN_MIX);
+  await karteSzene(p, "k-pins-ohne-rohstoff", () => { S.erz = {}; S.mat = {}; });
+  await karteSzene(p, "k-pins-zwei-im-bau", () => { S.fabriken.push({ produkt: "kabel", land: "vietnam", arbeiter: 0, restbau: 3 }, { produkt: "board", land: "vietnam", arbeiter: 0, restbau: 7 }); });
+  await karteSzene(p, "k-pins-streik-endet", () => { S.minen.katanga.stillBis = S.tag + 2; S.minen.katanga.zufriedenheit = 20; });
+  await p.evaluate(() => { S.minen.katanga.stillBis = 0; zeichnen(); }); await aufnahmeKarte(p, "k-pins-streik-vorbei");
+  await karteSzene(p, "k-pins-ohne-fabrik", () => { S.fabriken = []; S.minen.katanga.arbeiter = 0; });
+  // Frisch eröffnet: kaufen, die flüchtige Anzeige «Neu eröffnet» (1,8 s) abwarten
+  await karteSzene(p, "k-vor-kauf");
+  await pinKlick(p, "mine", "obuasi"); await knopf(p, '#blattinhalt [data-tun="mine-auf"]');
+  await p.waitForTimeout(2100);
+  await p.evaluate(() => { blattZu(); zeichnen(); }); await aufnahmeKarte(p, "k-frisch-eroeffnet");
+  await pinKlick(p, "raff", "r_malay"); await knopf(p, '#blattinhalt [data-tun="raff-bau"]');
+  await p.waitForTimeout(2100);
+  await p.evaluate(() => { blattZu(); zeichnen(); }); await aufnahmeKarte(p, "k-frisch-raffinerie");
+  await pinKlick(p, "fab", "mexiko"); await knopf(p, '#blattinhalt [data-tun="fab-bau"]');
+  await p.waitForTimeout(2100);
+  await p.evaluate(() => { blattZu(); zeichnen(); }); await aufnahmeKarte(p, "k-frisch-fabrik-im-bau");
+  await tag(p, 1); await aufnahmeKarte(p, "k-fabrik-bau-tag");
+  // Ebenen einzeln und kombiniert (echter Klick; ohne Zeichnen danach)
+  await karteSzene(p, "k-ebenen-alle", PIN_MIX);
+  const chip = (p, e) => p.evaluate(e => document.querySelector(`#ebenen [data-ebene="${e}"]`).click(), e);
+  await knopf(p, "#filterknopf"); await aufnahmeKarte(p, "k-filter-offen");
+  await chip(p, "mine"); await aufnahmeKarte(p, "k-ebene-ohne-quellen");
+  await chip(p, "raff"); await aufnahmeKarte(p, "k-ebene-ohne-quellen-werke");
+  await chip(p, "fab"); await aufnahmeKarte(p, "k-ebene-keine");
+  await chip(p, "mine"); await aufnahmeKarte(p, "k-ebene-nur-quellen");
+  await p.evaluate(() => zeichnen()); await aufnahmeKarte(p, "k-ebene-nur-quellen-gezeichnet");
+  await p.evaluate(() => document.querySelector("svg.weltkarte").dispatchEvent(new MouseEvent("click", { bubbles: true }))); await aufnahmeKarte(p, "k-filter-zu");
+  await chip(p, "raff"); await chip(p, "fab"); await chip(p, "mine"); await aufnahmeKarte(p, "k-ebene-nur-werke-fabriken");
+  await chip(p, "mine"); await chip(p, "raff"); await aufnahmeKarte(p, "k-ebene-nur-fabriken");
+  await chip(p, "mine"); await chip(p, "raff"); await p.evaluate(() => zeichnen()); await aufnahmeKarte(p, "k-ebene-wieder-alle");
+  // Kamera: Zoom + / −, Ziehen, Rad
+  await karteSzene(p, "k-kamera-start");
+  await knopf(p, '#zoom [data-zoom="1"]'); await aufnahmeKarte(p, "k-zoom-plus");
+  await knopf(p, '#zoom [data-zoom="1"]'); await knopf(p, '#zoom [data-zoom="1"]'); await aufnahmeKarte(p, "k-zoom-plus-3");
+  for (let i = 0; i < 4; i++) await knopf(p, '#zoom [data-zoom="1"]');
+  await aufnahmeKarte(p, "k-zoom-max");
+  for (let i = 0; i < 9; i++) await knopf(p, '#zoom [data-zoom="-1"]');
+  await aufnahmeKarte(p, "k-zoom-min");
+  await knopf(p, '#zoom [data-zoom="1"]'); await knopf(p, '#zoom [data-zoom="1"]');
+  {
+    const [x, y] = await leereStelle(p);
+    await p.mouse.move(x, y); await p.mouse.down(); await p.mouse.move(x - 90, y - 70, { steps: 6 }); await p.mouse.up();
+    await aufnahmeKarte(p, "k-ziehen");
+    const [x2, y2] = await leereStelle(p);
+    await p.mouse.move(x2, y2); await p.mouse.wheel(0, -300); await p.waitForTimeout(100);
+    await aufnahmeKarte(p, "k-rad-naeher");
+    await p.mouse.wheel(0, 500); await p.waitForTimeout(100);
+    await aufnahmeKarte(p, "k-rad-weiter");
+  }
+  // Fokus auf Pins jeder Art über Meldungen mit Ortsbezug (Klick, Enter, ausgeblendete Ebene)
+  await karteSzene(p, "k-fokus-start", PIN_MIX);
+  await merken(p);
+  for (const [name, text] of [["quelle", "<b>Katanga</b>: Die Förderung läuft wieder."], ["streik", "<b>Bangka</b>: Streik – die Leute fordern mehr Lohn."],
+    ["raffinerie", "<b>Guangdong</b>: Die Raffinerie arbeitet wieder."], ["fabrik", "Die Fabrik in Vietnam ist bald fertig gebaut."], ["ohne-ort", "Der Dollar steigt."]]) {
+    await kameraStart(p);
+    await meldung(p, text); await aufnahmeKarte(p, `k-meldung-${name}`, { toasts: true });
+    if (await hat(p, "#toasts .toast.map-link")) { await klick(p, "#toasts .toast.map-link"); await aufnahmeKarte(p, `k-meldung-${name}-geklickt`, { toasts: true }); }
+  }
+  await kameraStart(p);
+  await meldung(p, "<b>Kuantan</b>: Kein Personal in der Raffinerie.");
+  await p.evaluate(() => document.querySelector("#toasts .toast.map-link").dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })));
+  await aufnahmeKarte(p, "k-meldung-enter", { toasts: true });
+  await kameraStart(p);
+  await chip(p, "raff"); await meldung(p, "<b>Guangdong</b>: Neue Lieferung angekommen.");
+  await klick(p, "#toasts .toast.map-link"); await aufnahmeKarte(p, "k-meldung-ebene-aus-geklickt", { toasts: true });
+  await kameraStart(p);
+  await chip(p, "fab"); await meldung(p, "Die Fabrik in Vietnam braucht Material.");
+  await p.evaluate(() => document.querySelector("#toasts .toast.map-link").dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true })));
+  await aufnahmeKarte(p, "k-meldung-ebene-aus-leertaste", { toasts: true });
+  // Aufgabenkarte als Hinweis («Vorschlag» für einen neuen Ort) und als Engpass
+  await kameraStart(p);
+  await karteSzene(p, "k-hinweis-ohne-raffinerie", `() => { ${flowCode(ALLE_QUESTS)} S.raff = {}; S.arbeiterGesamt -= 5; }`);
+  await klick(p, "#quest"); await aufnahmeKarte(p, "k-hinweis-angetippt");
+  await kameraStart(p);
+  await karteSzene(p, "k-hinweis-quelle-ohne-personal", `() => { ${flowCode(ALLE_QUESTS)} S.minen.boke.arbeiter = 0; S.minen.katanga.arbeiter = 0; S.minen.bangka.arbeiter = 0; }`);
+  await klick(p, "#quest"); await aufnahmeKarte(p, "k-hinweis-quelle-angetippt");
+  await kameraStart(p);
+  await karteSzene(p, "k-hinweis-fabrik-fehlt", `() => { ${flowCode(ALLE_QUESTS)} S.fabriken = []; }`);
+  await klick(p, "#quest"); await aufnahmeKarte(p, "k-hinweis-fabrik-angetippt");
+  // Ziel aus dem Text der Aufgabenkarte (ohne Ortsnamen): neuer Ort als «Vorschlag», eigener Ort, Reiter
+  for (const [name, titel] of [["quelle-neu", "Eröffne eine weitere Rohstoffquelle"], ["raffinerie-neu", "Baue eine Raffinerie"],
+    ["fabrik-neu", "Baue eine Fabrik"], ["quelle-eigen", "Deine Rohstoffquelle fördert zu wenig"], ["personal", "Personal zuweisen"],
+    ["verkauf", "Mehr verkaufen"], ["team", "Weitere Personen einstellen"]]) {
+    await kameraStart(p);
+    await karteSzene(p, `k-text-${name}`, `() => { ${flowCode(ALLE_QUESTS)} S.minen.boke.arbeiter = 0; S.arbeiterGesamt -= 5; }`);
+    await p.evaluate(t => { document.getElementById("q-titel").textContent = t; document.getElementById("q-text").textContent = ""; document.querySelectorAll("#quest .engpass-kasten, #quest .objective-guide-action").forEach(e => e.remove()); document.getElementById("quest").click(); }, titel);
+    await aufnahmeKarte(p, `k-text-${name}-angetippt`);
+  }
+  // Lieferweg-Knopf an/aus, Linien bei offenem Blatt und auf anderen Reitern
+  await kameraStart(p);
+  await karteSzene(p, "k-lieferweg-zu");
+  await knopf(p, "#lieferweg-knopf"); await aufnahmeKarte(p, "k-lieferweg-offen");
+  await knopf(p, "#lieferweg-knopf"); await aufnahmeKarte(p, "k-lieferweg-wieder-zu");
+  await knopf(p, "#lieferweg-knopf");
+  await p.evaluate(() => document.querySelector("svg.weltkarte").dispatchEvent(new MouseEvent("click", { bubbles: true }))); await aufnahmeKarte(p, "k-lieferweg-ausserhalb-zu");
+  await pinKlick(p, "mine", "katanga"); await aufnahmeKarte(p, "k-lieferweg-blatt-offen");
+  await seite(p, "markt"); await aufnahmeKarte(p, "k-lieferweg-markt");
+  await karteSzene(p, "k-lieferweg-zweite-fabrik", () => { S.fabriken.push({ produkt: "board", land: "vietnam", arbeiter: 4, restbau: 0 }); S.arbeiterGesamt += 4; S.minen.escondida = { arbeiter: 8, stufe: 1, zufriedenheit: 70, stillBis: 0, malus: 1, malusBis: 0, ausbau: 0 }; S.arbeiterGesamt += 8; });
+  await karteSzene(p, "k-lieferweg-ebene-aus", () => { ebenen.raff = false; });
+  await p.evaluate(() => { ebenen.raff = true; zeichnen(); });
+  await karteSzene(p, "k-lieferweg-quelle-steht", () => { S.minen.katanga.stillBis = S.tag + 5; });
+  // Tastatur: Tab über die Bedienung, Enter auf Pin und Ebenen-Chip, Leertaste
+  await karteSzene(p, "k-tastatur-start");
+  await p.evaluate(() => document.activeElement && document.activeElement.blur());
+  {
+    const folge = [];
+    for (let i = 0; i < 14; i++) {
+      await p.keyboard.press("Tab");
+      folge.push(await p.evaluate(() => { const a = document.activeElement; return a ? [a.tagName, a.id, a.dataset.pin || a.dataset.ebene || a.dataset.zoom || a.dataset.tempo || a.dataset.seite || "", a.dataset.id || "", (a.getAttribute("aria-label") || a.textContent || "").replace(/\s+/g, " ").trim().slice(0, 50)].join("|") : null; }));
+    }
+    await aufnahmeKarte(p, "k-tastatur-tab", { tabFolge: folge });
+  }
+  await p.evaluate(() => document.querySelector('#welt .pin[data-pin="raff"][data-id="r_china"]').focus());
+  await p.keyboard.press("Enter"); await aufnahmeKarte(p, "k-tastatur-pin-enter");
+  await p.evaluate(() => { blattZu(); zeichnen(); document.querySelector('#welt .pin[data-pin="mine"][data-id="obuasi"]').focus(); });
+  await p.keyboard.press(" "); await aufnahmeKarte(p, "k-tastatur-pin-leertaste");
+  await p.evaluate(() => { blattZu(); zeichnen(); });
+  await knopf(p, "#filterknopf");
+  await p.evaluate(() => document.querySelector('#ebenen [data-ebene="raff"]').focus());
+  await p.keyboard.press("Enter"); await aufnahmeKarte(p, "k-tastatur-chip-enter");
+  await p.keyboard.press(" "); await aufnahmeKarte(p, "k-tastatur-chip-leertaste");
+  await p.evaluate(() => document.querySelector('#zoom [data-zoom="1"]').focus());
+  await p.keyboard.press("Enter"); await aufnahmeKarte(p, "k-tastatur-zoom-enter");
+  await p.keyboard.press("Escape"); await aufnahmeKarte(p, "k-tastatur-escape");
+  // Neuladen: Pins, Linien und Knopf wie nach dem Laden
+  p = await neuLaden(p); await aufKarte(p); await aufnahmeKarte(p, "k-neu-geladen");
+  await p.close();
+
+  // Einführung: Ziel-Pin leuchtet, Aufgabenkarte mit Tastatur, Kamera nach dem Kauf
+  p = await neueSeite();
+  await aufnahmeKarte(p, "k-einf-geladen");
+  await neueRunde(p);
+  await aufnahmeKarte(p, "k-einf-karte");
+  await p.waitForTimeout(100);
+  await kameraStart(p); await p.evaluate(() => document.getElementById("quest").focus());
+  await p.keyboard.press("Enter"); await aufnahmeKarte(p, "k-einf-quest-enter");
+  await aufKarte(p); await kameraStart(p); await p.evaluate(() => document.getElementById("quest").focus());
+  await p.keyboard.press(" "); await aufnahmeKarte(p, "k-einf-quest-leertaste");
+  await knopf(p, "#filterknopf"); await chip(p, "mine"); await aufnahmeKarte(p, "k-einf-ebene-ohne-quellen");
+  await p.evaluate(() => document.querySelector("svg.weltkarte").dispatchEvent(new MouseEvent("click", { bubbles: true })));
+  await kameraStart(p); await klick(p, "#quest"); await aufnahmeKarte(p, "k-einf-quest-ebene-aus");
+  await p.evaluate(() => { if (!ebenen.mine) document.querySelector('#ebenen [data-ebene="mine"]').click(); });
+  await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); await aufnahmeKarte(p, "k-einf-gekauft");
+  await p.waitForTimeout(2100); await p.evaluate(() => { blattZu(); zeichnen(); }); await aufnahmeKarte(p, "k-einf-gekauft-danach");
+  await pinKlick(p, "mine", "potosi"); await aufnahmeKarte(p, "k-einf-gesperrt");
+  if (await hat(p, "#blattinhalt [data-einfuehrung-hin]")) { await klick(p, "#blattinhalt [data-einfuehrung-hin]"); await aufnahmeKarte(p, "k-einf-zum-ziel"); }
+  await p.close();
+
+  // Linien mit Bewegung («ruhig» und «voll»), Bewegung aus- und wieder einschalten
+  for (const anim of [1, 2]) {
+    p = await neueSeite(kette(), { opt: { schrift: 106, tempo: 100, anim }, bewegung: "no-preference" });
+    await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+    await aufnahmeKarte(p, `k-anim${anim}-linien`, { nurQuest: true });
+    await p.evaluate(() => document.querySelector('[data-tun="einst"]').click());
+    await regler(p, '#einst [data-regler="anim"]', 0);
+    await p.evaluate(() => { ueberlageZu("einst"); zeichnen(); }); await aufnahmeKarte(p, `k-anim${anim}-aus`, { nurQuest: true });
+    await p.evaluate(() => document.querySelector('[data-tun="einst"]').click());
+    await regler(p, '#einst [data-regler="anim"]', anim);
+    await p.evaluate(() => { ueberlageZu("einst"); zeichnen(); }); await aufnahmeKarte(p, `k-anim${anim}-wieder-an`, { nurQuest: true });
+    await p.evaluate(PIN_MIX); await p.evaluate(() => zeichnen()); await aufnahmeKarte(p, `k-anim${anim}-pins-mix`, { nurQuest: true });
+    await p.close();
+  }
+
+  // 360 px, 820 px, 1280 px
+  for (const [name, viewport] of [["k360", { width: 360, height: 800 }], ["k820", { width: 820, height: 1180 }], ["k1280", { width: 1280, height: 800 }]]) {
+    p = await neueSeite(null, { viewport });
+    await neueRunde(p);
+    await aufnahmeKarte(p, `${name}-einf-karte`);
+    await kameraStart(p); await klick(p, "#quest"); await aufnahmeKarte(p, `${name}-einf-quest-angetippt`);
+    await p.close();
+    p = await neueSeite(kette(), { viewport });
+    await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+    await merken(p);
+    await karteSzene(p, `${name}-pins-mix`, PIN_MIX);
+    await knopf(p, "#filterknopf"); await chip(p, "fab"); await aufnahmeKarte(p, `${name}-filter-ohne-fabriken`);
+    await chip(p, "fab");
+    await p.evaluate(() => document.querySelector("svg.weltkarte").dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    await knopf(p, '#zoom [data-zoom="1"]'); await aufnahmeKarte(p, `${name}-zoom-plus`);
+    await knopf(p, '#zoom [data-zoom="-1"]'); await knopf(p, '#zoom [data-zoom="-1"]'); await aufnahmeKarte(p, `${name}-zoom-minus`);
+    await kameraStart(p);
+    await meldung(p, "<b>Guangdong</b>: Die Raffinerie arbeitet wieder.");
+    await klick(p, "#toasts .toast.map-link"); await aufnahmeKarte(p, `${name}-meldung-geklickt`, { toasts: true });
+    await kameraStart(p);
+    await karteSzene(p, `${name}-lieferweg`);
+    await knopf(p, "#lieferweg-knopf"); await aufnahmeKarte(p, `${name}-lieferweg-offen`);
+    await p.close();
+  }
+
   fs.writeFileSync(path.join(AUS, "zustaende.json"), JSON.stringify({ fehler, ergebnis }, null, 1));
   await browser.close();
   console.log(`${Object.keys(ergebnis).length} Zustände aufgenommen nach ${AUS}` + (fehler.length ? ` · ${fehler.length} Seitenfehler` : ""));
