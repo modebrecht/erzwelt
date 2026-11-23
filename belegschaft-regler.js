@@ -15,17 +15,13 @@
    (data-tun crew/rcrew/fcrew/vcrew). Keine neue Wirtschaft: Einstellen
    kostet dasselbe wie im Team-Reiter.
    Den Regler baut regler(tun, ref, wert, plaetze) (exportiert, von
-   module/blaetter.js aufgerufen); im Markt ersetzt er vorerst noch die
-   alte Crewzeile des Verkaufsteams.
+   module/blaetter.js und module/seiten.js – Verkaufsteam im Markt –
+   aufgerufen). Die Monatskosten im Team-Reiter schreibt module/seiten.js.
    ============================================================ */
 (function(){
   const VERSION = 1;
   const FARBE = {crew:"#6fb8e0", rcrew:"#5b8f7a", fcrew:"#b5703c", vcrew:"#e5a83a"};
 
-  /* Alte Crewzeile (−n, −, Zahl, +, +n) samt Fortschrittsleiste direkt danach. */
-  const ALT = /<div class="crewzeile">\s*<button data-tun="(crew|rcrew|fcrew|vcrew)"([^>]*)>[^<]*<\/button>\s*<button[^>]*>[^<]*<\/button>\s*<div class="zahl"><b>(\d+)<\/b><small>([^<]*)<\/small><\/div>\s*<button[^>]*>[^<]*<\/button>\s*<button[^>]*>[^<]*<\/button>\s*<\/div>(\s*<div class="leiste"><i style="[^"]*"><\/i><\/div>)?/g;
-
-  const attr = (s, name) => { const m = s.match(new RegExp(`data-${name}="([^"]*)"`)); return m ? m[1] : null; };
   const prozent = (v, max) => (max > 0 ? Math.min(100, Math.max(0, v / max * 100)) : 0).toFixed(1) + "%";
 
   function zielFuer(tun, ref){
@@ -67,12 +63,8 @@
   /* Der Regler für eine Station. ref: Id der Quelle/Raffinerie, Index der
      Fabrik in S.fabriken, beim Verkauf null. plaetze: Höchstzahl der Station. */
   function regler(tun, ref, wert, plaetze){
-    const attr = tun === "fcrew" ? `data-i="${ref}"` : tun === "vcrew" || ref === null || ref === undefined ? "" : `data-id="${ref}"`;
     const r = tun === "fcrew" ? +ref : tun === "vcrew" ? null : ref;
-    return reglerHtml(tun, attr, r, wert, plaetze);
-  }
-
-  function reglerHtml(tun, ref, r, wert, plaetze){
+    const attrs = tun === "fcrew" ? `data-i="${ref}"` : tun === "vcrew" || ref === null || ref === undefined ? "" : `data-id="${ref}"`;
     let max = plaetze;
     const frei = Math.max(0, freieArbeiter());
     const lohn = lohnProKopf(tun, r);
@@ -89,11 +81,11 @@
     const zielMarke = ziel && ziel <= max ? `<span class="besetzung-ziel ${wert >= ziel ? "ok" : ""}" style="--z:${(ziel / max).toFixed(4)}"><i></i><b>${wert >= ziel ? "✓ " : ""}Ziel ${ziel}</b></span>` : "";
     const unten = tun === "vcrew" ? "im Verkauf" : `von ${plaetze}`;
     const hinweis = frei > 0 ? `${frei} frei im Team` : erreichbar > wert ? "Mehr = neu einstellen" : "Zu wenig Geld zum Einstellen";
-    return `<div class="besetzung" data-art="${tun}" ${ref} data-wert="${wert}" data-max="${max}" data-erreichbar="${erreichbar}" data-frei="${frei}" data-lohn="${lohn}">
+    return `<div class="besetzung" data-art="${tun}" ${attrs} data-wert="${wert}" data-max="${max}" data-erreichbar="${erreichbar}" data-frei="${frei}" data-lohn="${lohn}">
       <div class="besetzung-zeile">
-        <button class="besetzung-schritt" data-tun="${tun}" ${ref} data-n="-1" ${wert <= 0 ? "disabled" : ""} aria-label="Eine Person weniger">−</button>
+        <button class="besetzung-schritt" data-tun="${tun}" ${attrs} data-n="-1" ${wert <= 0 ? "disabled" : ""} aria-label="Eine Person weniger">−</button>
         <div class="zahl"><b>${wert}</b><small>${unten}</small></div>
-        <button class="besetzung-schritt" data-tun="${tun}" ${ref} data-n="1" ${wert >= erreichbar ? "disabled" : ""} aria-label="Eine Person mehr">+</button>
+        <button class="besetzung-schritt" data-tun="${tun}" ${attrs} data-n="1" ${wert >= erreichbar ? "disabled" : ""} aria-label="Eine Person mehr">+</button>
       </div>
       <div class="besetzung-bahn ${zielMarke ? "mit-ziel" : ""}">
         <input type="range" class="regler besetzung-regler" min="0" max="${max}" step="1" value="${wert}"
@@ -103,40 +95,13 @@
       </div>
       <div class="besetzung-skala"><span>0</span><span>${hinweis}</span><span>${max}</span></div>
       <div class="besetzung-kosten">${kostenHtml(wert, wert, frei, lohn)}</div>
-      <button class="besetzung-anwenden" data-tun="${tun}" ${ref} data-n="0" tabindex="-1" aria-hidden="true"></button>
+      <button class="besetzung-anwenden" data-tun="${tun}" ${attrs} data-n="0" tabindex="-1" aria-hidden="true"></button>
     </div>`;
   }
 
-  /* Markt (Verkaufsteam): alte Crewzeile vorerst noch ersetzen. Die Blätter
-     rufen regler() direkt auf (module/blaetter.js). */
-  function bauen(tun, attrs, wert, klein){
-    const id = attr(attrs, "id"), i = attr(attrs, "i");
-    const ref = id !== null ? `data-id="${id}"` : i !== null ? `data-i="${i}"` : "";
-    const vonMatch = klein.match(/von\s+(\d+)/);
-    const plaetze = vonMatch ? +vonMatch[1] : (typeof VERKAUF_PLAETZE === "number" ? VERKAUF_PLAETZE : 40);
-    return reglerHtml(tun, ref, id !== null ? id : i !== null ? +i : null, wert, plaetze);
-  }
-  const umbauen = html => typeof html === "string"
-    ? html.replace(ALT, (_, tun, attrs, wert, klein) => bauen(tun, attrs, +wert, klein))
-    : html;
-  const vorherMarkt = seiteMarkt;
-  seiteMarkt = function(){ return umbauen(vorherMarkt.apply(this, arguments)); };
-
-  /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
-  const lohnSpanne = () => {
-    const l = Object.values(LAND).map(x => x.lohn);
-    return `${chf(Math.min(...l))}–${chf(Math.max(...l)).replace(/^CHF\s*/, "")}`;
-  };
-  const EINMALIG = /(STELLE \d+ PERSONEN EIN · CHF[^<]*?)(?=\s*<\/button>)/;
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    let html = vorherTeam.apply(this, arguments);
-    html = html.replace(EINMALIG, "$1 einmalig");
-    const monat = `<div class="notiz monatskosten"><b>Danach jeden Monat Lohn:</b> je nach Land ${lohnSpanne()} pro Person,
-      im Verkauf ${chf(VERKAUF_LOHN)}. Wer keine Aufgabe hat, kostet ${chf(200)}.</div>`;
-    return html.replace(/(<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>)/, `$1${monat}`);
-  };
-  /* Der Kern schreibt den Knopf beim Ziehen des Reglers neu – «einmalig» wieder anhängen. */
+  /* ---------- Team: Einstell-Regler «Wie viele?» ----------
+     Den Knopf «… einmalig» schreibt module/seiten.js. Der Kern schreibt ihn
+     beim Ziehen des Reglers neu – «einmalig» wieder anhängen. */
   document.addEventListener("input", e => {
     if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
     const k = document.querySelector('[data-tun="anstellen"]');

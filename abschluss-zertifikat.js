@@ -179,11 +179,7 @@
       </form>
     </section>`;
   }
-  const originalZiel=seiteZiel;
-  seiteZiel=function(){
-    const html=originalZiel();
-    return html.replace('<button class="cta still" data-tun="reset">',certificateCard()+'<button class="cta still" data-tun="reset">');
-  };
+  // Die Karte steht im Ziel-Reiter vor «Neue Runde starten» (module/seiten.js).
   const originalSeiteFuellen=seiteFuellen;
   seiteFuellen=function(name){
     // Ein laufender Spieltag darf das aktive Formular nicht ersetzen.
@@ -234,5 +230,5 @@
     }catch(error){status.textContent="Das PDF konnte nicht erstellt werden. Bitte versuche es erneut.";console.error("Erzwelt PDF:",error);}
     finally{exporting=false;}
   });
-  window.__erzweltCertificate={version:1,report,pdf};
+  window.__erzweltCertificate={version:1,report,pdf,karte:certificateCard};
 })();

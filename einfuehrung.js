@@ -301,21 +301,15 @@
   const vorherAnstellbar = anstellbar;
   anstellbar = function(){ return tutorialLaeuft() ? 0 : vorherAnstellbar(); };
 
-  const REGLER_ANSTELL = /<div class="reglerzeile">\s*<div class="kopf"><b>Wie viele\?<\/b>[\s\S]*?<\/small><\/div>/;
-  const KNOPF_ANSTELL = /<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>(\s*<div class="notiz monatskosten">[\s\S]*?<\/div>)?/;
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    if (!tutorialLaeuft()){
-      if (anstellMenge % 5 || anstellMenge < 5) anstellMenge = 10;
-      return vorherTeam.apply(this, arguments);
-    }
+  /* Bedarfsliste statt Einstellen; der Team-Reiter (module/seiten.js) setzt sie ein. */
+  function bedarfHinweis(){
     const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.ist}/${b.soll}</b></span>`).join("");
-    return vorherTeam.apply(this, arguments).replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
+    return `<div class="einfuehrung-bedarf">
         <b>Eingestellt wird an der Station</b>
         <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was einmalig und was jeden Monat kostet.</small>
         <div class="bedarf-liste">${liste}</div>
-      </div>`);
-  };
+      </div>`;
+  }
 
   /* ---------- Wissen: Verbesserungen erst nach der Einführung ---------- */
   if (typeof lupeFuellen === "function"){
@@ -355,7 +349,7 @@
     return v && v.art === art && String(v.id) === String(ref) ? v.brauch : null;
   }
 
-  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf, kaufSperre, sperrHinweis};
+  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf, kaufSperre, sperrHinweis, bedarfHinweis};
   blattStand = ""; seitenStand = "";
   if (typeof zeichnen === "function") zeichnen();
 })();

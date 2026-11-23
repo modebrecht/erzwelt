@@ -19,7 +19,6 @@
 (function(){
   const ziele = (window.__erzweltLogikFixes && window.__erzweltLogikFixes.ziele) || {einfach:500000, mittel:3000000, schwer:3000000};
   const kurzChf = n => (n >= 1e6 ? `CHF ${(n/1e6).toLocaleString("de-CH")} Mio` : chf(n)).replace(/ /g, "&nbsp;");
-  const ersetze = (html, alt, neu) => html.split(alt).join(neu);
 
   /* ---------- 1. Schwierigkeit ---------- */
   SCHWIERIGKEIT.einfach.effekt = "Verkauf bringt 20 % mehr";
@@ -56,8 +55,8 @@
   };
 
   /* ---------- 5. Einheiten und 8. weniger Vorbehalte ----------
-     Blätter: direkt in module/blaetter.js. Die Tutorial-Raffinerie zeigt
-     die Kabel-Rohstoffe (6.). */
+     Blätter: direkt in module/blaetter.js, Seiten (Team, Markt): direkt in
+     module/seiten.js. Die Tutorial-Raffinerie zeigt die Kabel-Rohstoffe (6.). */
   if (typeof szeneRaff === "function"){
     const vorherSzeneRaff = szeneRaff;
     szeneRaff = function(def, r){
@@ -65,23 +64,6 @@
       return vorherSzeneRaff(def, r);
     };
   }
-
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    let html = vorherTeam();
-    html = ersetze(html, `<div class="unter">Lohnkosten im Spielmodell</div>`, `<div class="unter">Personal einstellen und auf die Stationen verteilen</div>`);
-    html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`, "");
-    html = ersetze(html, "<small>pro Tag</small>", "<small>Löhne pro Tag</small>");
-    return html;
-  };
-
-  const vorherMarkt = seiteMarkt;
-  seiteMarkt = function(){
-    let html = vorherMarkt();
-    html = ersetze(html, "Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.",
-      "Die Quelle liefert Rohstoff, die Raffinerie macht Material daraus.");
-    return html;
-  };
 
   /* HUD: «Frei» heisst freies Personal. */
   const hudLabel = document.querySelector("#hud .pille.crew small");

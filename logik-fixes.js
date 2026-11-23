@@ -156,31 +156,9 @@
     speichern(); blattStand = ""; seitenStand = ""; zeichnen();
   }, true);
 
-  /* Ziel-Reiter: Ziel pro Schwierigkeit, Investitionen, Nachweis-Zähler. */
-  const originalZiel = seiteZiel;
-  seiteZiel = function(){
-    let html = originalZiel();
-    const gewinn = etappenGewinn(), ziel = zielGewinn();
-    const invest = etappenInvestitionen();
-    html = html.replace(/(<div class="leiste"><i style="width:)[\d.]+(%;background:var\(--gold\)"><\/i><\/div>)/,
-      `$1${klemm(gewinn / ziel * 100, 0, 100)}$2`);
-    html = html.replace(`Ziel ${chf(ZIEL_GEWINN)} · Gesamtgewinn`, `Ziel ${chf(ziel)} · Gesamtgewinn`);
-    html = html.replace(/(Gesamtgewinn seit Start [^<]*<\/div>)/,
-      `$1
-      <div class="zeile" style="margin-top:8px"><span>Davon Investitionen</span><b>${chf(-invest)}</b></div>
-      <div class="zeile"><span>Laufendes Geschäft</span><b style="color:${gewinn + invest >= 0 ? "var(--gruen)" : "var(--alarm)"}">${chf(gewinn + invest)}</b></div>
-      <div class="ort">Investitionen: Standorte, Ausbau, Leute, Verbesserungen. Sie lohnen sich erst über Verkäufe.</div>`);
-
-    const n = offeneMinen().length, g = geprueft(), perk = nachweisDurchPerk();
-    const hilfe = perk
-      ? `Der Transparenzbericht gilt für alle deine Rohstoffquellen.`
-      : `Nachweis holen: Quelle öffnen → <b>«Herkunft prüfen lassen»</b> (${chf(NACHWEIS_KOSTEN)}). Oder im Reiter Wissen den <b>Transparenzbericht</b> finanzieren: gilt für alle.`;
-    html = html.replace(
-      '<div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div>',
-      `${perk ? "" : `<div class="zeile"><span>Geprüfte Rohstoffquellen</span><b>${g} von ${n}</b></div>`}
-      <div class="notiz">Das Lieferkettengesetz verlangt für jede Quelle einen Nachweis. ${hilfe}</div>`);
-    return html;
-  };
+  /* Ziel-Reiter (Ziel pro Schwierigkeit, Investitionen, Nachweis-Zähler):
+     module/seiten.js mit zielGewinn, etappenInvestitionen, nachweisDurchPerk,
+     geprueft und NACHWEIS_KOSTEN von hier. */
 
   const gesetz = EREIGNISSE.find(e => e.id === "lieferkettengesetz");
   if (gesetz){
@@ -225,6 +203,6 @@
     };
   }
 
-  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN, nachweisKarte};
+  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN, nachweisKarte, nachweisDurchPerk, geprueft};
   seitenStand = ""; blattStand = "";
 })();

@@ -73,18 +73,11 @@
   };
   if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 
-  const vorherWissen = seiteWissen;
-  seiteWissen = function(){ return vorherWissen.apply(this, arguments).replace("⏸", IKON.pause); };
-
-  /* ---------- Knopftexte als Verb, normale Schreibweise ----------
-     Die Blätter (module/blaetter.js) schreiben «Verdoppeln · » selbst. */
-  const knopfText = html => html
-    .replace(/STELLE (\d+) PERSONEN EIN/g, "$1 Personen einstellen")
-    .replace(/SELBST VERKAUFEN/g, "Selbst verkaufen")
-    .replace(/VERDOPPELN · /g, "Verdoppeln · ");
-  const mitText = vorher => function(){ return knopfText(vorher.apply(this, arguments)); };
-  seiteTeam = mitText(seiteTeam);
-  seiteMarkt = mitText(seiteMarkt);
+  /* Pause-Symbol im Wissen und Knopftexte der Seiten («Selbst verkaufen»,
+     «22 Personen einstellen»): direkt in module/seiten.js; Blätter
+     («Verdoppeln · »): module/blaetter.js. Der Kern schreibt den Einstell-Knopf
+     beim Ziehen des Reglers «Wie viele?» neu – dort die Schreibweise anpassen. */
+  const knopfText = html => html.replace(/STELLE (\d+) PERSONEN EIN/g, "$1 Personen einstellen");
   document.addEventListener("input", e => {
     if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
     const k = document.querySelector('[data-tun="anstellen"]');

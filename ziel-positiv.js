@@ -10,7 +10,9 @@
      Hinweis, was hilft.
    - Investitionen werden als Aufbau erklärt, nicht als Verlust.
    Nur Anzeige; der Monatsverlauf wird im Spielstand mitgeschrieben
-   (S.monatsVerlauf, letzte 6 Monate).
+   (S.monatsVerlauf, letzte 6 Monate). heldKarte() (Hauptzahl, Verlauf,
+   Prognose) ist exportiert; der Ziel-Reiter in module/seiten.js setzt sie
+   unter den Titel und schreibt die Texte zu den Investitionen.
    ============================================================ */
 (function(){
   const VERSION = 1;
@@ -74,18 +76,6 @@
     </div>`;
   }
 
-  const vorherZiel = seiteZiel;
-  seiteZiel = function(){
-    let html = vorherZiel.apply(this, arguments);
-    // Held direkt unter Titel und Untertitel
-    html = html.replace(/(<div class="unter">[\s\S]*?<\/div>)/, `$1${heldKarte()}`);
-    // Investitionen als Aufbau erklären
-    html = html.replace(/<span>Etappengewinn<\/span>/, "<span>Etappengewinn <small class=\"ziel-klein\">mit Investitionen</small></span>");
-    html = html.replace("Investitionen: Standorte, Ausbau, Leute, Verbesserungen. Sie lohnen sich erst über Verkäufe.",
-      "Investitionen sind dein Aufbau: Standorte, Ausbau, Leute, Verbesserungen. Sie zahlen sich über das laufende Geschäft zurück.");
-    return html;
-  };
-
   seitenStand = "";
-  window.__erzweltZielPositiv = {version: VERSION};
+  window.__erzweltZielPositiv = {version: VERSION, heldKarte};
 })();

@@ -9,7 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
-- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/blaetter.js` (Blätter) lädt nach `einfuehrung.js`.
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/blaetter.js` (Blätter) und `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) laden nach `einfuehrung.js`.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -91,6 +91,31 @@ Der Builder prüft dabei automatisch:
   Blatt-Funktionen.
 - Lädt nach `einfuehrung.js` (Gruppe `logic-fixes`).
 
+## Seiten (`module/seiten.js`)
+
+- **Einziger Besitzer** von `seiteMarkt` (Markt & Verkauf), `seiteTeam` (Dein Team),
+  `seiteZiel` (Ziel · Etappe) und `seiteWissen` (Übersicht der Wissensbereiche).
+  Jede Funktion schreibt das endgültige HTML direkt; kein Patch umhüllt sie danach
+  oder ersetzt Text darin. Früher entstanden die Seiten in bis zu fünf Schichten
+  (Kern, `didactic-ui.js`, `sek-b-klarheit.js`, `belegschaft-regler.js`,
+  `einfuehrung.js`, `abschluss-zertifikat.js`, `logik-fixes.js`, `ziel-positiv.js`,
+  `stil.js`) mit Regex- und Textersetzung.
+- **Bausteine, die anderswo leben** und beim Zeichnen abgefragt werden:
+  `__erzweltBelegschaftRegler.regler("vcrew", null, wert, plaetze)` (Verkaufsteam),
+  `__erzweltEinfuehrung.bedarfHinweis()` (Bedarfsliste im Team während der
+  Einführung), `__erzweltLogikFixes.zielGewinn()`, `.etappenInvestitionen()`,
+  `.nachweisDurchPerk()`, `.geprueft()`, `.NACHWEIS_KOSTEN` (Ziel, Investitionen,
+  Nachweise), `__erzweltZielPositiv.heldKarte()` (laufendes Geschäft, Verlauf,
+  Prognose), `__erzweltCertificate.karte()` (PDF-Karte), `__erzweltStil.ikon.pause`.
+- **Bedienung und Zustand bleiben, wo sie sind:** Regler ziehen und Einstellen
+  (`belegschaft-regler.js`), `anstellbar` in der Einführung (`einfuehrung.js`),
+  Monatsverlauf mitschreiben (`ziel-positiv.js`), PDF-Formular und dessen Schutz
+  vor Neuzeichnen (`abschluss-zertifikat.js`). Der Einstell-Regler «Wie viele?»
+  schreibt beim Ziehen den Knopf neu (Kern), `belegschaft-regler.js` hängt
+  «einmalig» an, `stil.js` setzt «… Personen einstellen».
+- Nach dem Einsetzen kürzen `kurztexte.js` (Sätze, Rohstoff-Tabelle, ohne
+  Meldungen im Ziel) und `stil.js` («Al») den Seiteninhalt – über `seiteFuellen`.
+
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 
 - **Etappenziel nach Schwierigkeit:** Einfach CHF 500'000, Mittel und Schwer
@@ -101,7 +126,9 @@ Der Builder prüft dabei automatisch:
   also ein zweites Produkt (z. B. Mainboard), aber kein perfektes Timing.
 - **Investitionen getrennt ausgewiesen:** Der Reiter **Ziel** zeigt unter dem
   Etappengewinn, wie viel davon Investitionen sind (Standorte, Ausbau,
-  Einstellungen, Verbesserungen) und wie das laufende Geschäft dasteht.
+  Einstellungen, Verbesserungen) und wie das laufende Geschäft dasteht. Die Werte
+  (`zielGewinn`, `etappenInvestitionen`, `nachweisDurchPerk`, `geprueft`) kommen von
+  hier, den Reiter schreibt `module/seiten.js`.
 - **Herkunftsnachweise:** Jede Rohstoffquelle hat nach dem Tutorial die Karte
   «Herkunftsnachweis» (Prüfung CHF 30'000). Das Lieferkettengesetz verlangt
   Nachweise für alle Quellen; der Transparenzbericht deckt alle Quellen ab und
@@ -119,8 +146,8 @@ Der Builder prüft dabei automatisch:
   offenem Blatt über der Kopfzeile statt über dem Blatt.
 - «Ziel zeigen» setzt den Ziel-Pin mittig unter die Aufgabenkarte und blendet
   Meldungen kurz ab.
-- Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück (die Blatt-Texte
-  stehen jetzt direkt in `module/blaetter.js`); HUD «Team frei».
+- Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück (die Texte
+  stehen jetzt direkt in `module/blaetter.js` bzw. `module/seiten.js`); HUD «Team frei».
 - Tutorial-Raffinerie zeigt Kupfer statt Seltener Erden, ohne Spezialisierungskarte.
 - Konkrete Engpass-Hinweise nach dem Tutorial (nur wenn ein Material die Produktion
   wirklich gebremst hat, nicht schon bei knappem Lager), z. B. «Zinn fehlt für Ladekabel –
@@ -231,10 +258,12 @@ Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine 
   pro neue Person) und **Jeden Monat** (Lohn am Standort, je nach Land und Lohnstufe).
 - In der Einführung zeigt eine Marke («Ziel 10») die verlangte Zahl.
 - Den Regler baut `regler(tun, ref, wert, plaetze)` (exportiert über
-  `__erzweltBelegschaftRegler`); die Blätter rufen ihn direkt auf. Nur im Markt
-  ersetzt der Patch die alte Crewzeile des Verkaufsteams noch per Ersetzung.
-- Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»;
+  `__erzweltBelegschaftRegler`); die Blätter und der Markt (Verkaufsteam,
+  `module/seiten.js`) rufen ihn direkt auf.
+- Im Team-Reiter heisst der Knopf «… Personen einstellen · CHF … einmalig»;
   darunter steht der monatliche Lohn (je nach Land, Verkauf, ohne Aufgabe).
+  Beides schreibt `module/seiten.js`; beim Ziehen von «Wie viele?» hängt der
+  Patch «einmalig» wieder an.
 
 ## Aufgabe kompakt (`aufgabe-kompakt.js`)
 
@@ -253,7 +282,9 @@ Der Ziel-Reiter beginnt mit dem **laufenden Geschäft pro Monat** (Einnahmen min
 Löhne und Betrieb) als grosser Zahl, mit Trend und Balken der letzten Monate
 (`S.monatsVerlauf`). Darunter eine Prognose: «Bei diesem Tempo erreichst du das
 Ziel in etwa 17 Monaten – du hast noch 20» oder was noch fehlt und was hilft.
-Investitionen sind als Aufbau erklärt, nicht als Verlust.
+Investitionen sind als Aufbau erklärt, nicht als Verlust. Die Karte baut
+`heldKarte()` (exportiert über `__erzweltZielPositiv`), den Reiter schreibt
+`module/seiten.js`.
 
 ## Feinschliff (`feinschliff.js`)
 
@@ -275,8 +306,8 @@ aber jede Farbe hat eine feste Rolle:
 
 Knöpfe mit drei Radien (12 / 14 / 18) und gleicher Kante. Keine gesperrten
 Grossbuchstaben mehr (vorher 34 Stellen); Knopftexte als Verb
-(«22 Personen einstellen», «Selbst verkaufen»; «Verdoppeln» im Ausbau schreibt
-`module/blaetter.js` selbst). Keine Emojis mehr: Schwierigkeit als
+(«22 Personen einstellen», «Selbst verkaufen»; die Seiten schreibt
+`module/seiten.js`, «Verdoppeln» im Ausbau `module/blaetter.js` selbst). Keine Emojis mehr: Schwierigkeit als
 1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole.
 
 **«Al» statt «AI»:** In Baloo 2 sehen grosses I und kleines l gleich aus. Das l in
@@ -299,7 +330,9 @@ Escape oder «Firma gründen» schliesst es.
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
-PDF-Zwischenstand herunterladen. Nach Etappenende oder Insolvenz führt
+PDF-Zwischenstand herunterladen. Die Karte baut `certificateCard()` in
+`abschluss-zertifikat.js` (exportiert als `__erzweltCertificate.karte`);
+`module/seiten.js` setzt sie vor «Neue Runde starten». Nach Etappenende oder Insolvenz führt
 **PDF-Abschluss erstellen** direkt zum Abschlusszertifikat.
 
 Das PDF enthält pro Produkt hergestellte und verkaufte Stück, den aktuellen
