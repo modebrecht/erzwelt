@@ -93,11 +93,19 @@ Oben zwei Reihen Bedienung, darunter das Spiel:
 - Meldungen docken links unten über der Leiste an.
 - Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken im Filter-Knopf
   über + und −. Ein Punkt am Knopf zeigt, wenn nicht alle Orte sichtbar sind.
-- Aufgabe steht auf allen Seiten rechts oben, wie auf der Karte.
+- Aufgabe steht auf allen Seiten rechts oben, wie auf der Karte; gleicher
+  Abstand zwischen den beiden oberen Leisten und dem Aufgabenkasten.
 - Aufgabenkasten kürzer: Phase als schmale Leiste mit «Phase 1/4 · …» in einer
   Zeile, Zusammenhang ohne Kasten, nur «Ziel zeigen» als Weg zum Ziel.
 
 Nur Darstellung, keine Änderung an Spielstand oder Wirtschaft.
+
+## Erfolg feiern (`erfolg-feier.js`)
+
+Ist ein Tutorial-Schritt oder eine Wissens-Quest erledigt, gibt es einen kurzen,
+leisen Erfolgston (Web Audio, keine Datei) und Funken; beim Abschluss des
+Tutorials etwas grösser. Ton in den Einstellungen unter «Töne» abschaltbar,
+Funken über «Animationen: aus».
 
 ## PDF-Leistungsnachweis
 

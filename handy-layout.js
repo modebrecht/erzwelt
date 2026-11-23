@@ -51,6 +51,9 @@
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
     #ebenen button[aria-pressed="false"]{color:var(--grau)!important}
 
+    /* Gleicher Abstand: Leiste 1 → Leiste 2 → Aufgabe (je 7px) */
+    #quest:not(.breit){top:calc(var(--hudh) - 1px)}
+
     /* Aufgabe auch auf Markt, Team, Ziel und Wissen rechts – wie auf der Karte */
     @media (max-width:819px){
       #quest.breit{left:auto;right:10px;width:min(68%,300px)}
