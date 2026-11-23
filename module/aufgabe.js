@@ -32,10 +32,10 @@
    Bausteine von anderen Modulen (beim Zeichnen abgefragt, nicht beim Laden):
      __erzweltTutorialEnhance.phasen, .phase(id), .text(t), .toastLayout(q, t)
                                Phasen, Text mit Lagerstand, Meldungen unter der
-                               Karte (tutorial-enhance.js)
+                               Karte (module/einfuehrung.js)
      __erzweltKnowledgeQuestFlow.zustand(), .quest(), .fertig(def), .liste,
        .active(), .nextGeologyTarget()
-                               Wissens-Quests (knowledge-quest-flow.js)
+                               Wissens-Quests (module/wissen.js)
      __erzweltMapFocusNavigation.questAction(), .zielSymbol()
                                Ziel der Karte ermitteln (map-focus-navigation.js)
      __erzweltSekBKlarheit.engpass(), .engpassOeffnen(e)
@@ -53,10 +53,10 @@
          nach hinweiseSetzen `verknuepfen()` dieses Moduls auf;
        interaction-focus-final-fix.js: role/tabindex und Enter/Leertaste
          (im nächsten Frame, gemeinsam mit den Ebenen-Chips);
-       knowledge-quest-flow.js: «Ansehen» (Klick über document) und das
+       module/wissen.js: «Ansehen» (Klick über document) und das
          Mitzählen von Lohn, Markt, Ziel, Rohstoffstandorten;
-       tutorial-enhance.js: Rückmeldung nach einem Schritt; ruft danach
-         `tutorialNeu()` und questZeichnen.
+       module/einfuehrung.js: Rückmeldung nach einem Schritt (tutorialPruefen);
+         ruft danach `tutorialNeu()` und questZeichnen.
    Markierungen: window.__erzweltAufgabe, __erzweltObjectiveGuide (Tests),
    __erzweltAufgabeKompakt. */
 "use strict";
@@ -177,7 +177,7 @@
       const knopf = document.createElement("button");
       knopf.type = "button";
       knopf.className = "wissen-quest-action";
-      knopf.dataset.wissenQuest = def.id;     // Klick: knowledge-quest-flow.js
+      knopf.dataset.wissenQuest = def.id;     // Klick: module/wissen.js
       knopf.textContent = "Ansehen";
       punkte.insertAdjacentElement("beforebegin", knopf);
       document.querySelectorAll('[data-seite="wissen"]').forEach(b => b.classList.add("wink"));

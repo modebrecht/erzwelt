@@ -3,7 +3,7 @@
    SEK-B-KLARHEIT
 
    Verständlichkeit und Bedienung auf dem Handy. Keine neue Wirtschaft.
-   1. Schwierigkeitsdialog ohne Fachjargon, Einfach empfohlen.
+   1. Schwierigkeit: Wirkung ohne Fachjargon (Dialog: module/einfuehrung.js).
    2. Tutorial-Karte: eine Fortschrittsanzeige weniger.
    3. «Ziel zeigen»: Ziel landet unter der Aufgabenkarte, nicht dahinter.
    4. «Schritt abgeschlossen» überdeckt kein offenes Blatt mehr.
@@ -12,48 +12,19 @@
    7. Konkrete Engpass-Hinweise: welcher Ort braucht was (Kasten in der
       Aufgabenkarte: module/aufgabe.js über engpass()/engpassOeffnen()).
    8. Weniger «Spielmodell»-Vorbehalte in Blättern und Seiten.
-   Gelb: Tutorial-Prüfung = Text, «Das Spielmodell» ohne Formeln,
-   Zeit steht bei Kauf-Entscheiden.
+   Gelb: Tutorial-Prüfung = Text, Zeit steht bei Kauf-Entscheiden
+   («Das Spielmodell» ohne Formeln: module/wissen.js).
    Aufgabe auf anderen Seiten nur als schmale Zeile (module/aufgabe.js).
    ============================================================ */
 
 (function(){
-  const ziele = (window.__erzweltLogikFixes && window.__erzweltLogikFixes.ziele) || {einfach:500000, mittel:3000000, schwer:3000000};
-  const kurzChf = n => (n >= 1e6 ? `CHF ${(n/1e6).toLocaleString("de-CH")} Mio` : chf(n)).replace(/ /g, "&nbsp;");
-
   /* ---------- 1. Schwierigkeit ---------- */
   SCHWIERIGKEIT.einfach.effekt = "Verkauf bringt 20 % mehr";
   SCHWIERIGKEIT.mittel.effekt  = "normale Verkaufspreise";
   SCHWIERIGKEIT.schwer.effekt  = "Verkauf bringt 30 % weniger";
 
-  schwierigkeitZeigen = function(){
-    modalOffen = true; tempoSetzen(0);
-    $("#d-art").textContent = "Neue Runde";
-    $("#d-titel").textContent = "Wähle die Schwierigkeit";
-    $("#d-text").innerHTML = `Die Schwierigkeit bestimmt, wie viel dir ein Verkauf einbringt und wie hoch dein Ziel ist. Für den Start empfehlen wir <b>Einfach</b>.`;
-    const optionen = [
-      ["einfach","🌱","Einfach",`Verkauf bringt 20&nbsp;% mehr<br>Ziel: ${kurzChf(ziele.einfach)}`,false,"Empfohlen"],
-      ["mittel","⚙️","Mittel",`Normale Verkaufspreise<br>Ziel: ${kurzChf(ziele.mittel)}`,false,""],
-      ["schwer","🔥","Schwer",`Verkauf bringt 30&nbsp;% weniger<br>Ziel: ${kurzChf(ziele.schwer)}`,!META.mittelGeschafft,"🔒 Erst Mittel schaffen"]
-    ];
-    $("#d-wahlen").innerHTML = "";
-    optionen.forEach(([id,icon,name,klein,gesperrt,status])=>{
-      const b = document.createElement("button");
-      b.className = "wahl schwierigkeit"; b.disabled = gesperrt;
-      const badge = id === "einfach" ? ` <span class="empfohlen">${status}</span>` : "";
-      const sperre = gesperrt ? `<br><span class="sperre">${status}</span>` : "";
-      b.innerHTML = `<span class="schwierigkeitsicon">${icon}</span><span><b>${name}${badge}</b><small>${klein}${sperre}</small></span>`;
-      if (!gesperrt) b.onclick = () => {
-        S.schwierigkeit = id; S.etappe = 1; S.etappeStartEingenommen = S.eingenommen; S.etappeStartAusgegeben = S.ausgegeben; S.ende = null;
-        modalOffen = false; $("#schleier").hidden = true;
-        notiz(`${icon} Schwierigkeit <b>${name}</b> gewählt · ${SCHWIERIGKEIT[id].effekt}.`, "gut");
-        speichern(); tempoSetzen(1); zeichnen();
-      };
-      $("#d-wahlen").appendChild(b);
-      if (id === "einfach") setTimeout(()=>b.focus(), 60);
-    });
-    $("#schleier").hidden = false; zeichnen();
-  };
+  /* Der Dialog «Wähle die Schwierigkeit» steht in module/einfuehrung.js. Die
+     Wirkungstexte oben bleiben hier: Ziel-Seite und Etappen-Dialog nutzen sie auch. */
 
   /* ---------- 5. Einheiten und 8. weniger Vorbehalte ----------
      Blätter: direkt in module/blaetter.js, Seiten (Team, Markt): direkt in
@@ -210,33 +181,7 @@
   }
 
   /* ---------- Gelb: kleine Unstimmigkeiten ---------- */
-  /* «Das Modell im Code» → «Das Spielmodell», Zusammenhänge in Worten statt Formeln. */
-  const modellSeg = WISSEN.find(seg => seg.id === "modell");
-  if (modellSeg){
-    modellSeg.titel = "Das Spielmodell";
-    modellSeg.formeln = null;
-    modellSeg.fakten = ["Ortsinfos sind für den Unterricht gekürzt und vereinfacht.", "Die Hintergrundinfos wurden 2026 geprüft."];
-    const REGELN = [
-      ["Förderung", "Mehr Personal und zufriedenere Leute holen mehr Rohstoff aus der Quelle."],
-      ["Raffination", "Aus Rohstoff wird Material. Ein Teil bleibt als Abraum zurück."],
-      ["Fabrik", "Das knappste Material bestimmt, wie viele Produkte entstehen."],
-      ["Nachfrage", "Saison, Ereignisse und dein Ruf verändern, wie viel gekauft wird."],
-      ["Preis", "Ein volles Lager senkt den Preis. Der Dollarkurs kann ihn heben oder senken."]
-    ];
-    const vorherLupe = lupeFuellen;
-    lupeFuellen = function(segId){
-      const out = vorherLupe(segId);
-      if (segId === "modell"){
-        const merken = [...document.querySelectorAll("#lupeinhalt .karte > h3")].find(h => h.textContent.trim() === "Zum Merken");
-        const karte = document.createElement("div");
-        karte.className = "karte modell-regeln";
-        karte.innerHTML = `<h3>So hängt es zusammen</h3><table>${REGELN.map(([a, t]) => `<tr><td><b>${a}</b></td><td>${t}</td></tr>`).join("")}</table>`;
-        if (merken) merken.closest(".karte").before(karte);
-        else document.getElementById("lupeinhalt")?.appendChild(karte);
-      }
-      return out;
-    };
-  }
+  /* «Das Spielmodell» ohne Formeln, Zusammenhänge in Worten (Lupe): module/wissen.js. */
 
   /* Kauf-Entscheide in Ruhe: Solange ein Blatt für einen noch nicht gekauften
      Standort offen ist, steht die Zeit. Nach dem Kauf oder Schliessen läuft
@@ -308,9 +253,6 @@
     fortsetzen();
     return out;
   };
-
-  /* Der Startdialog wurde schon vom Kern gezeigt: mit der neuen Fassung ersetzen. */
-  if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 
   /* Engpass-Kasten und kompakte Zeile der Aufgabenkarte: module/aufgabe.js. */
   window.__erzweltSekBKlarheit = {version:1, engpass, engpassOeffnen};

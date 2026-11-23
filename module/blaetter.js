@@ -8,12 +8,12 @@
      __erzweltBelegschaftRegler.regler(tun, ref, wert, plaetze)
                                      Regler + Kostenkacheln (belegschaft-regler.js)
      __erzweltEinfuehrung.kaufSperre(art, id), .sperrHinweis()
-                                     Kaufsperre in der Einführung (einfuehrung.js)
+                                     Kaufsperre in der Einführung (module/einfuehrung.js)
      __erzweltLogikFixes.nachweisKarte(id)
                                      Herkunftsnachweis (logik-fixes.js)
      __erzweltSekBKlarheit.engpass() Tipp bei fehlendem Material (sek-b-klarheit.js)
    Bedienung bleibt, wo sie ist: Regler ziehen und Einstellen beim Loslassen
-   (belegschaft-regler.js), Kauf-Abfangen und «Zu …» (einfuehrung.js),
+   (belegschaft-regler.js), Kauf-Abfangen und «Zu …» (module/einfuehrung.js),
    Nachweis kaufen (logik-fixes.js), Sicherheit (didactic-*.js).
 
    Nach dem Einsetzen bearbeiten den Blattinhalt noch (über blattFuellen bzw.

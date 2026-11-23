@@ -9,7 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
-- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/blaetter.js` (Blätter), `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) und `module/aufgabe.js` (Aufgabenkarte) laden nach `einfuehrung.js`.
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/wissen.js` (Lerntexte, Wissens-Quests, Lupe) lädt in der Gruppe `sek-b-guidance`; `module/einfuehrung.js` (Startbild, Schwierigkeitswahl, Einführung), danach `module/blaetter.js` (Blätter), `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) und `module/aufgabe.js` (Aufgabenkarte) in der Gruppe `logic-fixes`.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -55,6 +55,10 @@ Der Builder prüft dabei automatisch:
 - `Erzwelt.nachAufgabe(fn)`: läuft am Ende jedes `questZeichnen` (`module/aufgabe.js`),
   in Anmeldereihenfolge – für Beobachter, die an der Aufgabenkarte nichts ändern
   (`erfolg-feier.js`: Funken, wenn eine Wissens-Quest abgeholt wurde).
+- Gemeinsame Bausteine: `Erzwelt.ikon` (Linien-Symbole Warnung, Pause, Schloss,
+  Lieferweg) und `Erzwelt.stufe(n)` (Schwierigkeit als 1–3 Erzbrocken). Sie stehen
+  hier, weil `module/einfuehrung.js` die Schwierigkeitswahl schon beim Laden zeichnet;
+  `stil.js` gibt sie weiter als `__erzweltStil.ikon` und `.stufe`.
 
 ## Ein Stylesheet (`module/stil.js`)
 
@@ -87,12 +91,12 @@ Der Builder prüft dabei automatisch:
   (Kaufsperre in der Einführung), `__erzweltLogikFixes.nachweisKarte(id)`
   (Herkunftsnachweis), `__erzweltSekBKlarheit.engpass()` (Tipp bei fehlendem Material).
 - **Bedienung bleibt, wo sie ist:** Regler ziehen und Einstellen beim Loslassen
-  (`belegschaft-regler.js`), Kauf-Abfangen und «Zu …» (`einfuehrung.js`), Nachweis
+  (`belegschaft-regler.js`), Kauf-Abfangen und «Zu …» (`module/einfuehrung.js`), Nachweis
   kaufen (`logik-fixes.js`). Nach dem Einsetzen bearbeiten `kurztexte.js`,
   `stop-safety-visual.js`, `sek-b-klarheit.js` (Kaufblatt-Leiste, Pause-Hinweis)
   und `stil.js` («Al») den Blattinhalt weiter – über `blattFuellen`, nicht über die
   Blatt-Funktionen.
-- Lädt nach `einfuehrung.js` (Gruppe `logic-fixes`).
+- Lädt nach `module/einfuehrung.js` (Gruppe `logic-fixes`).
 
 ## Seiten (`module/seiten.js`)
 
@@ -111,7 +115,7 @@ Der Builder prüft dabei automatisch:
   Nachweise), `__erzweltZielPositiv.heldKarte()` (laufendes Geschäft, Verlauf,
   Prognose), `__erzweltCertificate.karte()` (PDF-Karte), `__erzweltStil.ikon.pause`.
 - **Bedienung und Zustand bleiben, wo sie sind:** Regler ziehen und Einstellen
-  (`belegschaft-regler.js`), `anstellbar` in der Einführung (`einfuehrung.js`),
+  (`belegschaft-regler.js`), `anstellbar` in der Einführung (`module/einfuehrung.js`),
   Monatsverlauf mitschreiben (`ziel-positiv.js`), PDF-Formular und dessen Schutz
   vor Neuzeichnen (`abschluss-zertifikat.js`). Der Einstell-Regler «Wie viele?»
   schreibt beim Ziehen den Knopf neu (Kern), `belegschaft-regler.js` hängt
@@ -152,9 +156,114 @@ Der Builder prüft dabei automatisch:
   nach `hinweiseSetzen` `__erzweltAufgabe.verknuepfen()` aufruft); `role`/`tabindex`
   und Enter/Leertaste (`interaction-focus-final-fix.js`, im nächsten Frame mit den
   Ebenen-Chips); Klick auf «Ansehen» und Mitzählen für Wissens-Quests
-  (`knowledge-quest-flow.js`); Rückmeldung nach einem Schritt (`tutorial-enhance.js`).
+  (`module/wissen.js`); Rückmeldung nach einem Schritt (`module/einfuehrung.js`).
 - Markierungen `__erzweltAufgabe`, `__erzweltObjectiveGuide` (E2E-Test),
   `__erzweltAufgabeKompakt`. Lädt nach `module/seiten.js` (Gruppe `logic-fixes`).
+
+## Start und Einführung (`module/einfuehrung.js`)
+
+Bündelt, was eine neue Runde bis zum Ende der Einführung führt (früher
+`einfuehrung.js`, `tutorial-enhance.js`, `einstieg.js`, der Einführungs-Teil von
+`erfolg-feier.js` und die Schwierigkeitswahl aus `sek-b-klarheit.js` und `stil.js`).
+Jede Funktion hat hier genau eine Definition mit dem endgültigen Ergebnis:
+`tutorialPruefen`, `schwierigkeitZeigen`, `mineErlaubt`, `gesperrt`, `anstellbar`.
+
+**Startbild.** Jede neue Runde beginnt mit **«Woher kommt dein Ladekabel?»**: ein
+aufgeschnittenes Kabel – Kupfer in der Leitung, Aluminium im Stecker, Zinn in der
+Lötstelle –, jedes mit dem Ort, an dem die Einführung danach die Quelle eröffnet
+(Katanga, Boké, Bangka). Darunter die Kette Quelle → Raffinerie → Fabrik → Markt und
+der Knopf «Firma gründen», danach die Schwierigkeitswahl. Einmal pro Runde
+(`S.einstiegGesehen`); ein einziger Ablauf beim Öffnen (Kabel zeichnen, dann die drei
+Materialien), bei «Animationen: aus» oder reduzierter Bewegung sofort vollständig.
+Escape oder «Firma gründen» schliesst es.
+
+**Schwierigkeitswahl** ohne Fachjargon: jede Stufe nennt Wirkung und Ziel,
+**Einfach** ist fokussiert und als «Empfohlen» markiert, Schwer ist erst nach einer
+geschafften Mittel-Etappe frei (Schloss). Stufen als 1–3 Erzbrocken
+(`Erzwelt.stufe`), die Meldung «Schwierigkeit … gewählt» ohne Emoji. Die
+Wirkungstexte (`SCHWIERIGKEIT.*.effekt`) setzt `sek-b-klarheit.js`, weil auch Ziel
+und Etappen-Dialog sie zeigen.
+
+**Einführung: eine Aufgabe = eine Handlung an einem Ort.** Nur dieser Ort leuchtet
+auf der Karte, «Ziel zeigen» führt genau dorthin.
+
+1./2. Kupfer-Quelle (Katanga) eröffnen und mit 15 Personen besetzen ·
+3./4. Aluminium (Boké) eröffnen und mit 5 besetzen · 5./6. Zinn (Bangka) eröffnen
+und mit 10 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
+9./10. Kabelfabrik (China) bauen und nach dem Bau mit 5 besetzen ·
+11. einmal selbst verkaufen · 12. Verkaufsteam mit 4 Personen.
+
+- **Neue Runde mit 0 Personen.** Eingestellt wird direkt an der Station mit dem
+  Regler (`belegschaft-regler.js`). Schon die erste Aufgabe zeigt: Personal kostet
+  einmalig beim Einstellen und danach jeden Monat Lohn. Im Team-Reiter wird während
+  der Einführung nicht eingestellt (`anstellbar` = 0); er zeigt den Stand pro Station
+  (`bedarfHinweis()`, eingesetzt von `module/seiten.js`).
+- **Nur so viel Personal wie nötig:** Jede Station lässt sich nur bis zum Bedarf
+  besetzen (Kupfer 15, Aluminium 5, Zinn 10, Raffinerie 5, Fabrik 5, Verkauf 4 –
+  zusammen 44, Lohn rund CHF 21'000 pro Monat). Am Ende sitzt niemand untätig.
+- **Die Kette läuft danach von selbst.** Die Zahlen sind durchgerechnet (Simulation
+  ohne Ereignisse, 120 Tage): Die Fabrik macht 16 Ladekabel pro Tag, Kupfer,
+  Aluminium und Zinn reichen dafür, das Verkaufsteam schafft 20 pro Tag. Kein
+  Engpass, das Lager bleibt leer, rund CHF 41'000 laufender Gewinn pro Monat
+  (Einfach). Vorher (10/5/5, Verkauf 2) fehlten sofort Zinn und Verkäufer.
+- Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
+  passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
+- **Kaufsperre:** Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte
+  zeigen «Noch nicht dran» und einen Knopf zum richtigen Ort (`kaufSperre`/
+  `sperrHinweis`, geschrieben von `module/blaetter.js`); ein Klick-Listener fängt
+  Käufe trotzdem ab. Verbesserungen im Wissen gibt es erst nach der Einführung. So
+  kann niemand alles Geld ausgeben und dann feststecken (am Ende der Einführung
+  bleiben rund CHF 0.67 Mio).
+- Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe zuerst
+  dorthin zum Umverteilen, statt neu einstellen zu lassen.
+- Ältere Spielstände werden übernommen (Marke `S.einfuehrung`): Fertige bleiben
+  fertig, laufende springen zum ersten offenen Schritt. Sie behalten ihre
+  10 Startleute (`S.startTeam`, zählt nicht als Investition).
+- **Nach jedem Schritt** (`tutorialPruefen`): Meldung «Erledigt: …» (am Schluss
+  «Tutorial abgeschlossen – …»), Rückmeldung «Schritt abgeschlossen» mit dem
+  Zusammenhang des Schritts, Aufgabenkarte neu, Erfolg feiern
+  (`__erzweltErfolgFeier.feiern`, beim letzten Schritt grösser).
+- **Für die Aufgabenkarte** (`module/aufgabe.js`): Phasen (Rohstoffe, Raffination,
+  Fertigung, Verkauf), Aufgabentext mit Lagerstand beim Verkaufen, Meldungen auf
+  dem Handy unter der Karte.
+- **Ladereihenfolge:** an der früheren Stelle von `einfuehrung.js` (nach
+  `belegschaft-regler.js`). Beim Laden: Schritte einsetzen (`TUTORIAL.splice`),
+  Spielstand übernehmen, Karte zeichnen, dann den schon offenen
+  Schwierigkeitsdialog in der endgültigen Fassung und darüber das Startbild.
+- Markierungen: `__erzweltEinfuehrung` (`schritte`, `besetzungsZiel`,
+  `obergrenze`, `offenerBedarf`, `kaufSperre`, `sperrHinweis`, `bedarfHinweis`),
+  `__erzweltTutorialEnhance` (`phasen`, `phase`, `text`, `toastLayout`),
+  `__erzweltEinstieg` (`zeigen`).
+
+## Wissen (`module/wissen.js`)
+
+Bündelt Lerntexte, Wissens-Quests und die Lupe (früher `knowledge-quest-flow.js`,
+die Texte aus `didactic-complexity.js`, überschriebene Texte aus
+`didactic-model.js` und `didactic-should.js`, das Spielmodell aus
+`sek-b-klarheit.js` und die Sperre in der Lupe aus `einfuehrung.js`).
+
+- **Lerntexte**, einmal und endgültig gesetzt: Ortsinfos der Rohstoffquellen und
+  Raffinerien, Produkt- und Materialtexte, die acht Wissens-Bereiche (Titel,
+  Kurztext, Text, Fakten; «Das Spielmodell» ohne Formeln), Texte der
+  Verbesserungen. Text und Wirkung von Transparenzbericht und Zertifizierung setzt
+  `logik-fixes.js`, die Wirkung des Sicherheitsprogramms `didactic-model.js`.
+- **Wissens-Quests nach der Einführung:** immer genau ein nächster Schritt –
+  Lieferkette (Einführung abgeschlossen), Lohn ändern, selbst verkaufen, zwei
+  Rohstoffstandorte ansehen, Ruf und Nachweise im Ziel vergleichen, Spielmodell.
+  Kein Grind (Umsatz, Monate, Ausbau). Ein erfüllter Schritt bleibt sichtbar, bis er
+  mit «Ansehen» abgeholt wird; dann öffnet sich der Bereich in der Lupe. Spielstand:
+  `S.wissenQuestFlow` (Fassung 4). Den Kopf der Aufgabenkarte und «Ansehen»
+  zeichnet `module/aufgabe.js`, die Funken beim Abholen `erfolg-feier.js`.
+- **Voraussetzung einer Verbesserung** (`wissenPraxis`): Das Wissensfeld muss
+  abgeholt sein; höhere Stufen brauchen die vorherige Verbesserung.
+- **Lupe** (`lupeFuellen`, einzige Definition): Text, Tabellen (Rohstoffe, Löhne,
+  Rezepte), «So hängt es zusammen» beim Spielmodell, «Zum Merken», finanzierte
+  Verbesserungen und die nächste mit Voraussetzung und Knopf («Verbesserung
+  finanzieren», «Zu wenig Geld», «Voraussetzung noch nicht erfüllt», in der
+  Einführung «Erst nach der Einführung»).
+- Markierungen: `__erzweltKnowledgeQuestFlow` (`zustand`, `quest`, `fertig`,
+  `liste`, `active`, `nextGeologyTarget`, `quests`), `__erzweltDidacticComplexity`
+  (E2E-Test).
 
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 
@@ -180,8 +289,8 @@ Der Builder prüft dabei automatisch:
 
 ## Verständlichkeit für Sek B (`sek-b-klarheit.js`)
 
-- Schwierigkeitsdialog ohne Fachjargon; **Einfach** ist vorausgewählt und als
-  «Empfohlen» markiert, jede Stufe nennt ihr Ziel.
+- Wirkung der Schwierigkeit ohne Fachjargon («Verkauf bringt 20 % mehr»); den
+  Dialog zeichnet `module/einfuehrung.js`.
 - Tutorial-Karte ohne doppelte Punkte-Leiste; «Schritt abgeschlossen» liegt bei
   offenem Blatt über der Kopfzeile statt über dem Blatt.
 - «Ziel zeigen» setzt den Ziel-Pin mittig unter die Aufgabenkarte und blendet
@@ -205,7 +314,7 @@ Der Builder prüft dabei automatisch:
   der Seite, auf der die Aufgabe erledigt wird (Tutorial: Team, Markt;
   Wissensauftrag: Wissen). Gezeichnet in `module/aufgabe.js`.
 - «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
-  Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
+  Worten statt mit Formeln (seit Schritt 7 in `module/wissen.js`).
 
 ## Handy-Layout (`handy-layout.js`)
 
@@ -227,7 +336,8 @@ Nur Darstellung, keine Änderung an Spielstand oder Wirtschaft.
 ## Erfolg feiern (`erfolg-feier.js`)
 
 Ist ein Tutorial-Schritt oder eine Wissens-Quest erledigt, gibt es einen kurzen,
-leisen Erfolgston (Web Audio, keine Datei) und Funken (Wissens-Quest über den Hook
+leisen Erfolgston (Web Audio, keine Datei) und Funken (Tutorial-Schritt: Aufruf aus
+`tutorialPruefen` in `module/einfuehrung.js`; Wissens-Quest über den Hook
 `Erzwelt.nachAufgabe`); beim Abschluss des
 Tutorials etwas grösser. Kaufen und selbst verkaufen haben je einen eigenen
 kurzen Ton (der tägliche Verkauf durch das Team bleibt still). Auf Android
@@ -254,42 +364,6 @@ Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
 Lange Erklärsätze auf Markt, Team, Ziel, Wissen und in den Blättern kürzer;
 Rohstoffe ohne Quelle im Markt in einer Zeile; keine doppelte Meldungsliste
 im Ziel (dafür gibt es «Verlauf»). Lerninhalte in der Wissens-Lupe bleiben.
-
-## Einführung Schritt für Schritt (`einfuehrung.js`)
-
-Die Einführung nimmt an der Hand: **eine Aufgabe = eine Handlung an einem Ort**.
-Nur dieser Ort leuchtet auf der Karte, «Ziel zeigen» führt genau dorthin.
-
-1./2. Kupfer-Quelle (Katanga) eröffnen und mit 15 Personen besetzen ·
-3./4. Aluminium (Boké) eröffnen und mit 5 besetzen · 5./6. Zinn (Bangka) eröffnen
-und mit 10 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
-9./10. Kabelfabrik (China) bauen und nach dem Bau mit 5 besetzen ·
-11. einmal selbst verkaufen · 12. Verkaufsteam mit 4 Personen.
-
-- **Neue Runde mit 0 Personen.** Eingestellt wird direkt an der Station mit dem
-  Regler (siehe unten). Schon die erste Aufgabe zeigt: Personal kostet einmalig
-  beim Einstellen und danach jeden Monat Lohn. Im Team-Reiter wird während der
-  Einführung nicht eingestellt; er zeigt den Stand pro Station.
-- **Nur so viel Personal wie nötig:** Jede Station lässt sich nur bis zum Bedarf
-  besetzen (Kupfer 15, Aluminium 5, Zinn 10, Raffinerie 5, Fabrik 5, Verkauf 4 –
-  zusammen 44, Lohn rund CHF 21'000 pro Monat). Am Ende sitzt niemand untätig.
-- **Die Kette läuft danach von selbst.** Die Zahlen sind durchgerechnet (Simulation
-  ohne Ereignisse, 120 Tage): Die Fabrik macht 16 Ladekabel pro Tag, Kupfer,
-  Aluminium und Zinn reichen dafür, das Verkaufsteam schafft 20 pro Tag. Kein
-  Engpass, das Lager bleibt leer, rund CHF 41'000 laufender Gewinn pro Monat
-  (Einfach). Vorher (10/5/5, Verkauf 2) fehlten sofort Zinn und Verkäufer.
-- Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
-  passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
-- Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
-  «Noch nicht dran» und einen Knopf zum richtigen Ort (`kaufSperre`/`sperrHinweis`,
-  geschrieben von `module/blaetter.js`). Verbesserungen im Wissen
-  gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
-  dann feststecken (am Ende der Einführung bleiben rund CHF 0.67 Mio).
-- Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe zuerst
-  dorthin zum Umverteilen, statt neu einstellen zu lassen.
-- Ältere Spielstände werden übernommen (Marke `S.einfuehrung`): Fertige bleiben
-  fertig, laufende springen zum ersten offenen Schritt. Sie behalten ihre
-  10 Startleute (`S.startTeam`, zählt nicht als Investition).
 
 ## Belegschaft per Regler (`belegschaft-regler.js`)
 
@@ -353,24 +427,14 @@ Knöpfe mit drei Radien (12 / 14 / 18) und gleicher Kante. Keine gesperrten
 Grossbuchstaben mehr (vorher 34 Stellen); Knopftexte als Verb
 («22 Personen einstellen», «Selbst verkaufen»; die Seiten schreibt
 `module/seiten.js`, «Verdoppeln» im Ausbau `module/blaetter.js` selbst). Keine Emojis mehr: Schwierigkeit als
-1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole.
+1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole (gezeichnet
+in `module/basis.js`; den Schwierigkeitsdialog schreibt `module/einfuehrung.js`).
 
 **«Al» statt «AI»:** In Baloo 2 sehen grosses I und kleines l gleich aus. Das l in
 «Al» wird darum als eigenes Zeichen gezeichnet: senkrecht nach unten, unten ein
 runder Bogen nach rechts oben wie in der Schulschrift. Es steht auf der Grundlinie,
 unabhängig von der Schrift. Das Symbol bleibt chemisch korrekt «Al»; Screenreader
 lesen weiterhin «Al».
-
-## Einstieg (`einstieg.js`)
-
-Jede neue Runde beginnt mit einem Startbild **«Woher kommt dein Ladekabel?»**: ein
-aufgeschnittenes Kabel – Kupfer in der Leitung, Aluminium im Stecker, Zinn in der
-Lötstelle –, jedes mit dem Ort, an dem die Einführung danach die Quelle eröffnet
-(Katanga, Boké, Bangka). Darunter die Kette Quelle → Raffinerie → Fabrik → Markt und
-der Knopf «Firma gründen», danach die Schwierigkeitswahl. Einmal pro Runde
-(`S.einstiegGesehen`); ein einziger Ablauf beim Öffnen (Kabel zeichnen, dann die drei
-Materialien), bei «Animationen: aus» oder reduzierter Bewegung sofort vollständig.
-Escape oder «Firma gründen» schliesst es.
 
 ## PDF-Leistungsnachweis
 
@@ -408,9 +472,13 @@ Test-PDFs entstehen unter `artifacts/certificate/`.
 Hält fest, wie das Spiel aussieht und sich verhält, und vergleicht zwei Stände.
 `aufnahme.cjs` spielt das gebaute `index.html` mit festem Zufall und ohne Animationen
 durch (Startbild, alle Einführungsschritte, alle Blätter und Seiten, 60 Spieltage,
-alter Spielstand, Aufgabenkarte in allen Lagen inkl. Klicks, 360 und 820 px) und
-speichert pro Zustand Text, Klassen, Knöpfe, Spielstand, Markup der Aufgabenkarte,
-Rückmeldungen, Fokusringe, Kamera und Screenshot. Anzeigen, die nur eine feste
+alter Spielstand, Aufgabenkarte in allen Lagen inkl. Klicks, 360 und 820 px;
+Startbild mit Escape und nach Neuladen, Neue Runde, Schwierigkeitswahl, Feier nach
+jedem Schritt, Lupe jedes Wissens-Bereichs, Verbesserungen, Wissens-Quests bis zum
+Abschluss) und speichert pro Zustand Text, Klassen, Knöpfe, Spielstand, Markup der
+Aufgabenkarte, Rückmeldungen, Fokusringe, Kamera und Screenshot (in den Szenarien
+ab Schritt 7 zusätzlich Feier, Meldungsverlauf, Fokus und Lupe). «Neuladen» öffnet
+den beim Verlassen gespeicherten Stand in einer frischen Seite. Anzeigen, die nur eine feste
 Zeit stehen (Meldungen, Verkaufsbetrag in der Kasse, «Neu eröffnet»), sind
 ausgeblendet. `vergleich.py` meldet jeden Unterschied.
 

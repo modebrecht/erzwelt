@@ -96,16 +96,8 @@
     requestAnimationFrame(() => feierFunken(gross));
   }
 
-  /* ---------- Auslöser: Tutorial-Schritt erledigt ---------- */
-  if (typeof tutorialPruefen === "function"){
-    const vorher = tutorialPruefen;
-    tutorialPruefen = function(){
-      const davor = S.tutorial;
-      const out = vorher.apply(this, arguments);
-      if (S.tutorial > davor) feiern(S.tutorial >= TUTORIAL.length);
-      return out;
-    };
-  }
+  /* Auslöser «Einführungsschritt erledigt»: tutorialPruefen in module/einfuehrung.js
+     ruft feiern() über window.__erzweltErfolgFeier auf. */
 
   /* ---------- Auslöser: Kaufen und selbst verkaufen ---------- */
   let vorAus = 0, vorEin = 0;

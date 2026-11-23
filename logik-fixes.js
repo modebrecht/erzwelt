@@ -22,7 +22,7 @@
      perfektes Timing mit hohen Schulden. */
   const ZIEL_NACH_STUFE = {einfach:500000, mittel:3000000, schwer:3000000};
   const zielGewinn = () => ZIEL_NACH_STUFE[S && S.schwierigkeit] ?? ZIEL_GEWINN;
-  const START_TEAM = 10;   // ältere Spielstände; neue Runden: S.startTeam = 0 (einfuehrung.js)
+  const START_TEAM = 10;   // ältere Spielstände; neue Runden: S.startTeam = 0 (module/einfuehrung.js)
 
   /* Wert aller bisherigen Investitionen, aus dem Spielstand berechnet:
      Erschliessung, Bau, Ausbau, Fabriken, Einstellungen, Verbesserungen. */

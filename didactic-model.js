@@ -78,85 +78,18 @@ ikonLohn = function(stufe, aktiv){
 };
 
 /* Sicherheit ist eine sichtbare Entscheidung pro Mine.
-   Das Wissens-Upgrade macht diese Entscheidung günstiger, statt sie automatisch zu setzen. */
+   Das Wissens-Upgrade macht diese Entscheidung günstiger, statt sie automatisch zu setzen.
+   Lerntexte der Wissens-Bereiche (Titel, Kurztext, Text, Fakten) und der Text der
+   Verbesserung: module/wissen.js. */
 const leuteSeg = WISSEN.find(s => s.id === "leute");
 if (leuteSeg){
-  leuteSeg.titel = "Menschen, Löhne & Sicherheit";
-  leuteSeg.kurz = "Lohn und Sicherheit sind zwei verschiedene Entscheidungen.";
-  leuteSeg.text = [
-    "Im Spiel beeinflusst der <b>Lohn</b> vor allem die Zufriedenheit. Sinkt sie stark, kann es zum Streik kommen.",
-    "<b>Sicherheit ist separat:</b> Schutz, Ausrüstung und Schulung senken das Unfallrisiko. Ein hoher Lohn ersetzt keine Sicherheitsmassnahmen – und gute Sicherheit ersetzt keinen fairen Lohn."
-  ];
-  leuteSeg.fakten = [
-    "Sicherheitsmassnahmen wie geeignete Ausrüstung, Schulung und klare Arbeitsabläufe können Unfallrisiken senken.",
-    "Im Spiel beeinflusst die Zufriedenheit die Förderleistung. Die Stärke dieses Effekts ist eine vereinfachte Spielregel.",
-    "Lohn und Sicherheit werden im Spiel getrennt dargestellt, damit ihre unterschiedlichen Wirkungen sichtbar bleiben."
-  ];
   const sicherPerk = leuteSeg.perks.find(p => p.id === "leute1");
   if (sicherPerk){
     sicherPerk.titel = "Sicherheitsprogramm";
-    sicherPerk.text = "Ein gemeinsamer Standard macht Sicherheitsausbauten in deinen Rohstoffquellen einfacher und günstiger.";
     sicherPerk.wirkung = ["Sicherheitsausbau −50 % Kosten"];
     delete sicherPerk.plus;
     sicherPerk.mult = {sicherheit:0.50};
   }
-}
-
-const marktSeg = WISSEN.find(s => s.id === "markt");
-if (marktSeg){
-  marktSeg.kurz = "Nachfrage, Lager und Dollarkurs bei Fertigwaren.";
-  marktSeg.text = [
-    "Fertige Produkte müssen verkauft werden. Entweder du verkaufst selber, oder dein Verkaufsteam erledigt das jeden Tag.",
-    "Das Spiel simuliert Preis und Nachfrage deiner <b>Fertigwaren</b>. Weltmarktpreise der Rohstoffe sind Hintergrundwissen – du kaufst und verkaufst im Spiel keine Rohstoffe am Markt."
-  ];
-}
-
-const rufSeg = WISSEN.find(s => s.id === "ruf");
-if (rufSeg){
-  rufSeg.titel = "Ruf & Nachweise";
-  rufSeg.kurz = "Ruf beeinflusst Nachfrage. Nachweise belegen deine Lieferkette.";
-  rufSeg.text = [
-    "Dein <b>Ruf</b> zeigt, wie Kundinnen und Kunden deine Firma wahrnehmen. Ein niedriger Ruf senkt die Nachfrage nach deinen Produkten.",
-    "<b>Nachweise</b> sind etwas anderes: Sie zeigen, ob du die Herkunft deiner Rohstoffe dokumentieren kannst. Ein Lieferkettengesetz prüft diese Nachweise – nicht deinen Ruf."
-  ];
-}
-
-const modellSeg = WISSEN.find(s => s.id === "modell");
-if (modellSeg){
-  modellSeg.text = [
-    "Erzwelt ist ein <b>Spielmodell</b>. Mengen, Kosten, Löhne und Rezepte sind bewusst vereinfacht und dienen dem Spiel – sie sind keine aktuellen Statistiken.",
-    "Das Modell zeigt nur ausgewählte Zusammenhänge. Vergleiche beim Spielen: Welche Faktoren sind sichtbar dargestellt, und welche zusätzlichen Einflüsse gäbe es in einer realen Lieferkette?"
-  ];
-  modellSeg.fakten = [
-    "Die Werte sind gerundet und vereinfacht. Reale Lieferketten umfassen weitere Einflussfaktoren.",
-    "Ein Spieltag folgt der Reihenfolge: fördern, raffinieren, produzieren, verkaufen.",
-    "Rohstoffpreise am Weltmarkt werden im Spiel nicht berechnet."
-  ];
-  modellSeg.formeln = [
-    ["Förderung / Tag","Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)"],
-    ["Material aus Rohstoff","Rohstoff × Ausbeute"],
-    ["Fabrik-Ausstoss","Arbeiter × Ausstoss, begrenzt vom knappsten Material"],
-    ["Nachfrage","Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)"],
-    ["Verkaufspreis","Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs"]
-  ];
-}
-
-const ketteSeg = WISSEN.find(s => s.id === "kette");
-if (ketteSeg){
-  ketteSeg.kurz = "Rohstoff → Raffinerie → Material → Fabrik → Markt.";
-  ketteSeg.text = [
-    "Aus einer Rohstoffquelle kommt zunächst <b>Rohstoff</b>: zum Beispiel Bauxit, Coltan oder Kupfererz. Die <b>Raffinerie</b> macht daraus nutzbares Material wie Aluminium, Tantal oder Kupfer. Erst die <b>Fabrik</b> baut daraus ein Produkt.",
-    "Reisst ein Glied, steht die Kette. Eine Rohstoffquelle ohne Raffinerie liefert noch kein Material für die Fabrik."
-  ];
-}
-
-const chemieSeg = WISSEN.find(s => s.id === "chemie");
-if (chemieSeg){
-  chemieSeg.kurz = "Aus Rohstoffen werden nutzbare Materialien.";
-  chemieSeg.text = [
-    "Die <b>Ausbeute</b> ist im Spiel ein vereinfachter Wert: Sie bestimmt, wie viel nutzbares Material aus einer Einheit Rohstoff entsteht. Der Rest steht für Abraum und Verluste der Verarbeitung.",
-    "Nicht nur der Abbau, auch die Raffination kann zum Engpass einer Lieferkette werden."
-  ];
 }
 
 /* Bestehende Spielstände erweitern, ohne Progress zu verlieren. */

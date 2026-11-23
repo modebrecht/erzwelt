@@ -9,31 +9,15 @@ const RAFF_SPEZIAL = {
 };
 RAFF_ORTE.forEach(r=>{r.spezial=RAFF_SPEZIAL[r.id]||[];});
 
-const ketteShould=WISSEN.find(s=>s.id==="kette");
-if(ketteShould){
-  ketteShould.kurz="Rohstoff → Raffinerie → Fabrik → Markt – und wo diese Orte liegen.";
-  ketteShould.text=[
-    "Eine Lieferkette verbindet mehrere Orte. Auf der Karte siehst du nach dem Tutorial einen <b>Beispielweg</b> zwischen einer eigenen Rohstoffquelle, einer Raffinerie und einer Fabrik.",
-    "Die Entfernung ist geografische Orientierung. <b>Transportkosten und Lieferzeiten werden in Erzwelt nicht berechnet.</b> So bleibt klar, was das Spiel wirklich simuliert."
-  ];
-}
-const chemShould=WISSEN.find(s=>s.id==="chemie");
-if(chemShould){
-  chemShould.text=[
-    "Die <b>Ausbeute</b> ist ein vereinfachter Spielwert dafür, wie viel nutzbares Material aus einer Einheit Rohstoff entsteht.",
-    "Jede Raffinerie kann im Spiel alle Rohstoffe verarbeiten. Sie hat zusätzlich einen sichtbaren <b>Spezialisierung im Spiel</b>: passende Rohstoffe werden dort 25 % schneller verarbeitet. Diese Spezialisierung ist eine Spielregel und beschreibt keine reale Anlage."
-  ];
-}
-
-const modellShould=WISSEN.find(s=>s.id==="modell");
-if(modellShould&&modellShould.text){
-  modellShould.text[1]="Der Kern des Modells steht in <code>erzwelt-core.html</code>. Die didaktischen Korrekturen sind bewusst in <code>didactic-model.js</code>, <code>didactic-events.js</code>, <code>didactic-ui.js</code> und <code>didactic-should.js</code> getrennt. Vergleiche: Welche Regeln wurden vereinfacht, damit Ursache und Wirkung klar bleiben?";
-}
+/* Lerntexte im Wissen (Lieferkette, Chemie, Spielmodell): module/wissen.js. */
 function shouldMigration(){
   if(!S||typeof S!=="object")return;
   if(!S.wissenGesehen||typeof S.wissenGesehen!=="object")S.wissenGesehen={};
   S.shouldDidaktikVersion=SHOULD_DIDAKTIK_VERSION;
 }
+/* Voraussetzungen für Verbesserungen: Die gültige Fassung setzt module/wissen.js
+   (abgeholtes Wissen statt Spielfortschritt). Diese bleibt bis Schritt 9 stehen, weil
+   naechsterSchritt unten sie schon beim Laden (zeichnen) braucht, bevor wissen.js lädt. */
 function wissenPraxis(segId,stufe){
   const minen=offeneMinen();
   const aktiveMinen=minen.filter(id=>S.minen[id]&&S.minen[id].arbeiter>0);
@@ -81,33 +65,7 @@ function wissenPraxis(segId,stufe){
   const r=regeln[segId]?.[stufe]||[true,"Voraussetzung erfüllt."];
   return {ok:!!r[0],text:r[1]};
 }
-const originalLupeFuellenShould=lupeFuellen;
-lupeFuellen=function(segId){
-  shouldMigration();
-  S.wissenGesehen[segId]=true;
-  originalLupeFuellenShould(segId);
-  const seg=WISSEN.find(s=>s.id===segId),next=seg&&naechsterPerk(seg);
-  if(!seg||!next){speichern();return;}
-  const idx=seg.perks.indexOf(next),praxis=wissenPraxis(segId,idx);
-  const button=document.querySelector("#lupeinhalt [data-tun='perk']");
-  const card=button?.closest(".perkkarte");
-  if(card){
-    card.querySelector(".didaktik-praxis")?.remove();
-    const note=document.createElement("div");
-    note.className="notiz didaktik-praxis";
-    note.innerHTML=`<b>Voraussetzung:</b> ${praxis.text}<br>${praxis.ok?"✓ Voraussetzung erfüllt. Die Verbesserung kann jetzt finanziert werden.":"Voraussetzung noch nicht erfüllt."}`;
-    button?.before(note);
-  }
-  if(button){
-    const vorherGesperrt=idx>0&&!S.perks[seg.perks[idx-1].id];
-    const genug=S.kasse>=next.kosten;
-    const geht=praxis.ok&&!vorherGesperrt&&genug;
-    button.disabled=!geht;
-    button.classList.toggle("puls",geht);
-    button.innerHTML=vorherGesperrt?"Vorherige Verbesserung fehlt":!praxis.ok?"Voraussetzung noch nicht erfüllt":!genug?"Zu wenig Geld · "+chf(next.kosten):IK.gluehbirne+"Verbesserung finanzieren · "+chf(next.kosten);
-  }
-  speichern();
-};
+/* Lupe (Voraussetzung, Knopf «Verbesserung finanzieren»): module/wissen.js. */
 naechsterSchritt=function(){
   const minen=offeneMinen();
   if(!minen.length)return["Noch keine Rohstoffquelle","Welches Material brauchst du für dein nächstes Produkt? Suche dafür eine passende Quelle auf der Karte."];

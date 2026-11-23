@@ -8,7 +8,7 @@
      __erzweltBelegschaftRegler.regler("vcrew", null, wert, plaetze)
                                      Regler Verkaufsteam (belegschaft-regler.js)
      __erzweltEinfuehrung.bedarfHinweis()
-                                     Bedarfsliste im Team-Reiter (einfuehrung.js)
+                                     Bedarfsliste im Team-Reiter (module/einfuehrung.js)
      __erzweltLogikFixes.zielGewinn(), .etappenInvestitionen(),
        .nachweisDurchPerk(), .geprueft(), .NACHWEIS_KOSTEN
                                      Ziel-Werte, Investitionen, Nachweise (logik-fixes.js)
@@ -17,7 +17,7 @@
      __erzweltCertificate.karte()    PDF-Karte im Ziel-Reiter (abschluss-zertifikat.js)
      __erzweltStil.ikon.pause        Pause-Symbol im Wissen (stil.js)
    Bedienung und Zustand bleiben, wo sie sind: Regler ziehen und Einstellen
-   (belegschaft-regler.js), «anstellbar» in der Einführung (einfuehrung.js),
+   (belegschaft-regler.js), «anstellbar» in der Einführung (module/einfuehrung.js),
    Monatsverlauf mitschreiben (ziel-positiv.js), PDF-Formular (abschluss-
    zertifikat.js), Einstell-Regler «Wie viele?» beim Ziehen (Kern,
    belegschaft-regler.js «einmalig», stil.js Knopftext).
@@ -102,7 +102,7 @@
     const geht = menge > 0 && S.kasse >= kosten;
     const frei = freieArbeiter();
 
-    // In der Einführung wird an der Station eingestellt (einfuehrung.js), hier nur der Bedarf.
+    // In der Einführung wird an der Station eingestellt (module/einfuehrung.js), hier nur der Bedarf.
     const einstellen = einfuehrung ? `
       ${bedarfHinweis()}` : `${regler("anstell", "Wie viele?", "Einmalige Einstellungskosten: CHF " + LOHN_PRO_KOPF.toLocaleString("de-CH") + " pro Person.",
                5, 50, 5, anstellMenge, anstellMenge + " Personen")}
