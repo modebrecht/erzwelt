@@ -90,9 +90,9 @@ Oben zwei Reihen Bedienung, darunter das Spiel:
 
 - «Verlauf» sitzt in der oberen Leiste (2. Reihe links, neben Tempo und
   Einstellungen).
-- Meldungen docken links unten über der Leiste an.
+- Meldungen docken links unten am Bildschirmrand über der Leiste an.
 - Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken im Filter-Knopf
-  über + und −. Ein Punkt am Knopf zeigt, wenn nicht alle Orte sichtbar sind.
+  über + und − (gleiche Abstände). Ein Punkt am Knopf zeigt, wenn nicht alle Orte sichtbar sind.
 - Aufgabe steht auf allen Seiten rechts oben, wie auf der Karte; gleicher
   Abstand zwischen den beiden oberen Leisten und dem Aufgabenkasten.
 - Aufgabenkasten kürzer: Phase als schmale Leiste mit «Phase 1/4 · …» in einer

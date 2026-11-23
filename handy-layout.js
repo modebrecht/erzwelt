@@ -2,7 +2,7 @@
 /* Handy-Layout: oben zwei Reihen Bedienung, darunter das Spiel.
    1. «Verlauf» sitzt in der oberen Leiste (2. Reihe links, neben Tempo und
       Einstellungen) statt auf der Karte.
-   2. Meldungen docken links unten über der Leiste an, statt mitten über der
+   2. Meldungen docken links unten am Rand über der Leiste an, statt mitten über der
       Karte oder unter dem Aufgabenkasten zu schweben.
    3. Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken in einem
       Filter-Knopf über + und −.
@@ -21,11 +21,11 @@
       border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;font-size:var(--f1);pointer-events:auto}
 
     /* 2. Meldungen links unten */
-    html body #toasts#toasts#toasts{top:auto!important;bottom:calc(var(--dockh) + 12px)!important;left:10px!important;
-      width:min(calc(100% - 76px),420px)!important}
+    html body #toasts#toasts#toasts{top:auto!important;bottom:calc(var(--dockh) + 12px)!important;left:0!important;
+      width:min(calc(100% - 66px),430px)!important}
 
     /* 3. Filter-Knopf und Ebenen-Auswahl */
-    #zoom #filterknopf{position:relative;margin-bottom:6px;display:grid;place-items:center}
+    #zoom #filterknopf{position:relative;display:grid;place-items:center}
     #zoom #filterknopf svg{width:20px;height:20px}
     #zoom #filterknopf[aria-expanded="true"]{background:var(--gold);color:#4a3000;border-color:#fff6}
     #filterknopf .filter-punkt{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;
