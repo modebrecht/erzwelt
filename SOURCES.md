@@ -40,6 +40,8 @@ Die kleineren Landflächen von Cabo Verde, São Tomé und Príncipe sowie Mahé 
 
 Das Mittelmeer enthält auch die kleineren Inseln aus den Landdaten, darunter Malta, Gozo, die Balearen und Djerba. Die Dardanellen sind im Bereich der schmalen Durchfahrt weniger stark vereinfacht.
 
+Die Küsten an den Engstellen der Arabischen Halbinsel sind mit weniger Vereinfachung übernommen. Kleine Inseln wie Bahrain, Masirah, Farasan und die Nebeninseln von Sokotra stammen aus den [Natural-Earth-Landdaten 1:10 Mio.](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-land/) (Version 5.1.1).
+
 Standortreferenzen für die Rohstoffkarte
 
 - [Freiberg · Georeferenzpunkt, Stadt Freiberg](https://www.freiberg.de/stadt-und-buerger/aktuelles/neuigkeiten/schlossplatz-ist-erste-oeffentliche-teststelle-fuer-gps-geraete-in-freiberg)
