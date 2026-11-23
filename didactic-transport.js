@@ -185,11 +185,7 @@ function lieferwegTransportZeichnen(){
   svg.appendChild(g);
 }
 
-const originalZeichnenTransport=zeichnen;
-zeichnen=function(){
-  originalZeichnenTransport();
-  lieferwegTransportZeichnen();
-};
+Erzwelt.nachZeichnen(()=>lieferwegTransportZeichnen());
 
 window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener?.("change",()=>{
   transportRouteCache="";

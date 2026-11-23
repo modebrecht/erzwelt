@@ -268,14 +268,13 @@
     aufgeklapptAuf = aktiveSeite;
     questKompakt();
   }, true);
-  const vorherZeichnen = zeichnen;
   /* Zeigt das Tutorial auf einen Knopf der Leiste unten (z. B. Team),
      endet das Blatt über der Leiste, damit der Knopf antippbar bleibt. */
   const dockHinweis = () => document.body.classList.toggle("dock-hinweis",
     tutorialLaeuft() && !!document.querySelector("#dock button.wink"));
   const dockEl = document.getElementById("dock");
   if (dockEl) new MutationObserver(dockHinweis).observe(dockEl, {subtree:true, attributes:true, attributeFilter:["class"]});
-  zeichnen = function(){ const out = vorherZeichnen(); materiallisteKlaeren(); dockHinweis(); return out; };
+  Erzwelt.nachZeichnen(() => { materiallisteKlaeren(); dockHinweis(); });
 
   /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte ----------
      map-focus-navigation rechnet mit der Ecke des Pins statt mit seinem

@@ -223,6 +223,6 @@ function lieferwegZeichnen(){
   const mine=MINEN.find(x=>x.id===r.mineId),raff=RAFF_ORTE.find(x=>x.id===r.raffId),km=(Math.round((r.d1+r.d2)/100)*100).toLocaleString("de-CH");
   note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
 }
-const originalZeichnenShould=zeichnen;
-zeichnen=function(){shouldMigration();originalZeichnenShould();lieferwegZeichnen();};
+Erzwelt.vorZeichnen(()=>shouldMigration());
+Erzwelt.nachZeichnen(()=>lieferwegZeichnen());
 shouldMigration();seitenStand="";blattStand="";zeichnen();

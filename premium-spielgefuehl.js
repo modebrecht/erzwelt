@@ -194,10 +194,7 @@
     const transport = svg.querySelector("#didaktik-transport");
     if (transport) svg.insertBefore(g, transport); else svg.appendChild(g);
   }
-  if (typeof zeichnen === "function"){
-    const vorherZeichnen = zeichnen;
-    zeichnen = function(){ const out = vorherZeichnen.apply(this, arguments); lieferflussZeichnen(); return out; };
-  }
+  Erzwelt.nachZeichnen(() => lieferflussZeichnen());
   if (typeof tempoSetzen === "function"){
     const vorherTempo = tempoSetzen;
     tempoSetzen = function(){ const out = vorherTempo.apply(this, arguments); lieferflussZeichnen(); return out; };
@@ -329,10 +326,7 @@
       + `Nur zur Orientierung: Transportkosten und Lieferzeiten rechnet das Spiel nicht.</span></span>`;
     if (lwKnopf.dataset.inhalt !== inhalt){ lwKnopf.innerHTML = inhalt; lwKnopf.dataset.inhalt = inhalt; }
   }
-  if (typeof zeichnen === "function"){
-    const vorherZ = zeichnen;
-    zeichnen = function(){ const out = vorherZ.apply(this, arguments); lieferwegKnopf(); return out; };
-  }
+  Erzwelt.nachZeichnen(() => lieferwegKnopf());
 
   if (typeof pinsZeichnen === "function"){ try { pinsMitRohstoff(); } catch (e){} }
   lieferflussZeichnen();

@@ -225,10 +225,7 @@
     });
   }
 
-  if(typeof zeichnen==="function"){
-    const originalZeichnen=zeichnen;
-    zeichnen=function(){const out=originalZeichnen();inspectTransitions();return out;};
-  }
+  Erzwelt.nachZeichnen(()=>inspectTransitions());
   inspectTransitions();
 
   window.__erzweltPremiumAnimationTreatment={

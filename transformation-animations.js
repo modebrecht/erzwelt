@@ -189,14 +189,7 @@
     });
   }
 
-  if(typeof zeichnen==="function"){
-    const originalZeichnen=zeichnen;
-    zeichnen=function(){
-      const out=originalZeichnen();
-      updateTransformationScenes();
-      return out;
-    };
-  }
+  Erzwelt.nachZeichnen(()=>updateTransformationScenes());
 
   let pendingSale={stueck:0,erloes:0,products:new Set()};
   let saleTimer=0,lastSaleVisual=-1e9;

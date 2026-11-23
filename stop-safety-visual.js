@@ -222,15 +222,7 @@
     };
   }
 
-  if(typeof zeichnen==="function"){
-    const original=zeichnen;
-    zeichnen=function(){
-      const out=original();
-      decorateWorld();
-      decorateMineDetail();
-      return out;
-    };
-  }
+  Erzwelt.nachZeichnen(()=>{decorateWorld();decorateMineDetail();});
   decorateWorld();
 
   window.__erzweltStopSafetyVisual={version:1,features:["strike-vs-safety","real-stop-visual","mine-detail-causal-separation","resume-feedback"]};

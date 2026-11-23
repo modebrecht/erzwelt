@@ -208,10 +208,7 @@
     document.querySelectorAll(".fabrik-prozess[data-index]").forEach(enhanceFab);
   }
 
-  if(typeof zeichnen==="function"){
-    const original=zeichnen;
-    zeichnen=function(){const out=original();enhanceScenes();return out;};
-  }
+  Erzwelt.nachZeichnen(()=>enhanceScenes());
 
   enhanceScenes();
   window.__erzweltProcessEnhance={version:1,features:["phasen","zustandsklarheit","fehlmaterial","verkaufsfeedback"]};

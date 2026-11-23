@@ -181,10 +181,7 @@
     };
   }
 
-  if(typeof zeichnen==="function"){
-    const originalZeichnen=zeichnen;
-    zeichnen=function(){const out=originalZeichnen();updateWorldStates();return out;};
-  }
+  Erzwelt.nachZeichnen(()=>updateWorldStates());
 
   updateWorldStates();
   window.__erzweltWorldStatus={version:1,realConstruction:["fabrik"],instantSetup:["mine","raffinerie"]};

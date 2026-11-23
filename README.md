@@ -9,6 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -38,6 +39,19 @@ Der Builder prüft dabei automatisch:
 - dass die geschriebene Datei dem erzeugten Inhalt entspricht.
 
 > Änderungen immer in den Quelldateien vornehmen und danach neu bauen. `index.html` nicht direkt pflegen.
+
+## Hook-Punkte (`module/basis.js`)
+
+- Lädt als erste Gruppe (`basis`) direkt nach dem Kern und umhüllt `zeichnen` als
+  einzige Datei. Patches und Module hängen sich über
+  `Erzwelt.vorZeichnen(fn)` und `Erzwelt.nachZeichnen(fn)` an, statt `zeichnen`
+  selbst zu umhüllen.
+- **Reihenfolge:** vor-Hooks laufen in umgekehrter Anmeldereihenfolge, nach-Hooks in
+  Anmeldereihenfolge – genau wie früher, als die zuletzt geladene Hülle die äusserste
+  war. Angemeldet wird beim Laden; ein `zeichnen()`-Aufruf während des Ladens sieht
+  nur die bis dahin angemeldeten Hooks.
+- Hooks als `() => name()` anmelden, damit spätere Ersetzungen von `name` (z. B. in
+  `performance-pass.js`) wirksam bleiben. Der Rückgabewert von `zeichnen` bleibt erhalten.
 
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 

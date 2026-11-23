@@ -229,8 +229,7 @@
 
   const vorherPruefen = tutorialPruefen;
   tutorialPruefen = function(){ migrieren(); return vorherPruefen.apply(this, arguments); };
-  const vorherZeichnen = zeichnen;
-  zeichnen = function(){ migrieren(); return vorherZeichnen.apply(this, arguments); };
+  Erzwelt.vorZeichnen(() => migrieren());
 
   /* ---------- Nur der Zielort ist kaufbar ---------- */
   const erlaubtKauf = (art, id) => {
