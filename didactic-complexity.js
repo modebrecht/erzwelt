@@ -132,24 +132,6 @@
     for(const p of seg.perks||[]){ if(perkTexte[p.id]) p.text=perkTexte[p.id]; }
   }
 
-  const tutorial={
-    mine1:{titel:"Rohstoffquelle eröffnen",text:"Für das Ladekabel brauchst du Kupfer, Aluminium und Zinn. Eröffne zuerst eine passende Rohstoffquelle.",zusammenhang:"Rohstoffquelle → Rohstoff"},
-    minecrew:{titel:"Personal zuweisen",text:"Ohne Personal wird nichts gefördert. Weise mindestens 10 Personen zu.",zusammenhang:"Personal → Förderung"},
-    team:{titel:"Mehr Personal einstellen",text:"Du brauchst Personal für mehrere Stationen. Erhöhe den Bestand auf mindestens 40 Personen.",zusammenhang:"Personal muss auf mehrere Stationen verteilt werden."},
-    minen3:{titel:"Drei Rohstoffe sichern",text:"Eröffne Quellen für Kupfererz, Bauxit und Zinnerz.",zusammenhang:"Kupfererz → Kupfer · Bauxit → Aluminium · Zinnerz → Zinn"},
-    crew3:{titel:"Quellen aktivieren",text:"Weise jeder der drei Rohstoffquellen mindestens 5 Personen zu.",zusammenhang:"Ohne Personal kein Rohstoff."},
-    raff:{titel:"Raffinerie bauen",text:"Rohstoffe können nicht direkt in die Fabrik. Baue eine Raffinerie.",zusammenhang:"Rohstoff → Raffinerie → Material"},
-    raffcrew:{titel:"Raffinerie besetzen",text:"Weise der Raffinerie mindestens 5 Personen zu.",zusammenhang:"Ohne Personal keine Verarbeitung."},
-    fab:{titel:"Kabelfabrik bauen",text:"Baue eine Fabrik für Ladekabel.",zusammenhang:"Material → Fabrik → Produkt"},
-    fabcrew:{titel:"Fabrik besetzen",text:"Wenn die Fabrik fertig ist, weise ihr Personal zu.",zusammenhang:"Personal + Material → Produkt"},
-    verkauf:{titel:"Ladekabel verkaufen",text:"Öffne den Markt und verkaufe Ladekabel einmal selbst.",zusammenhang:"Produkt → Verkauf → Geld"},
-    verkaeufer:{titel:"Verkaufsteam einsetzen",text:"Weise mindestens 2 Personen dem Verkauf zu.",zusammenhang:"Verkaufsteam → Verkauf pro Tag"}
-  };
-  for(const t of TUTORIAL){
-    const c=tutorial[t.id];
-    if(c) Object.assign(t,c);
-  }
-
   if(SCHWIERIGKEIT?.mittel) SCHWIERIGKEIT.mittel.effekt="Standard";
 
   /* Event semantics are explicit here rather than hidden in copy replacements. */

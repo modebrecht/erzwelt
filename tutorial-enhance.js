@@ -32,48 +32,17 @@
   document.head.appendChild(style);
 
   const PHASEN=[
-    // Alte Schritt-IDs bleiben für ältere Patches; einfuehrung.js nutzt die neuen.
-    {id:"rohstoff",nr:1,label:"Rohstoffe",steps:["mine1","minecrew","team","minen3","crew3",
-      "kupfer-auf","kupfer-crew","alu-auf","alu-crew","zinn-auf","zinn-crew"]},
+    // Schritt-IDs aus einfuehrung.js.
+    {id:"rohstoff",nr:1,label:"Rohstoffe",steps:["kupfer-auf","kupfer-crew","alu-auf","alu-crew","zinn-auf","zinn-crew"]},
     {id:"raff",nr:2,label:"Raffination",steps:["raff","raffcrew"]},
-    {id:"fab",nr:3,label:"Fertigung",steps:["fab","fabcrew","fab-crew"]},
+    {id:"fab",nr:3,label:"Fertigung",steps:["fab","fab-crew"]},
     {id:"verkauf",nr:4,label:"Verkauf",steps:["verkauf","verkaeufer"]}
   ];
-
-  const COPY={
-    mine1:{titel:"Erste Rohstoffquelle eröffnen",text:"Das Ladekabel braucht Kupfer, Aluminium und Zinn. Beginne mit einer Quelle für einen dieser Rohstoffe.",zusammenhang:"Rohstoffquellen liefern die Ausgangsstoffe der Lieferkette."},
-    minecrew:{titel:"Förderung starten",text:"Eine eröffnete Rohstoffquelle produziert erst mit Personal. Weise mindestens 10 Personen zu.",zusammenhang:"Rohstoffquelle + Personal → Rohstoff"},
-    team:{titel:"Personal für die Kette bereitstellen",text:"Mehrere Stationen brauchen gleichzeitig Personal. Erhöhe den Personalbestand auf mindestens 40 Personen.",zusammenhang:"Personal ist begrenzt und muss auf die Stationen der Lieferkette verteilt werden."},
-    minen3:{titel:"Drei Rohstoffe sichern",text:"Eröffne je eine Quelle für Kupfererz, Bauxit und Zinnerz. Daraus entstehen später Kupfer, Aluminium und Zinn.",zusammenhang:"Kupfererz → Kupfer · Bauxit → Aluminium · Zinnerz → Zinn"},
-    crew3:{titel:"Alle Rohstoffquellen aktivieren",text:"Eine eröffnete Quelle ohne Personal fördert nichts. Weise jeder der drei Quellen mindestens 5 Personen zu.",zusammenhang:"Erst aktive Rohstoffquellen versorgen die nächste Station."},
-    raff:{titel:"Rohstoffe verarbeiten",text:"Die geförderten Rohstoffe können nicht direkt in der Fabrik verwendet werden. Baue eine Raffinerie.",zusammenhang:"Rohstoff → Raffinerie → nutzbares Material"},
-    raffcrew:{titel:"Raffination starten",text:"Auch die Raffinerie arbeitet nur mit Personal. Weise ihr mindestens 5 Personen zu.",zusammenhang:"Die Raffinerie wandelt Rohstoffe in Materialien für die Fertigung um."},
-    fab:{titel:"Kabelfabrik bauen",text:"Jetzt kann aus den Materialien ein Produkt entstehen. Baue die Fabrik für Ladekabel.",zusammenhang:"Materialien → Fabrik → Produkt"},
-    fabcrew:{titel:"Produktion starten",text:"Eine fertige Fabrik braucht Personal und die Materialien ihres Rezepts. Weise ihr Personal zu.",zusammenhang:"Nur wenn Personal und alle benötigten Materialien vorhanden sind, entsteht ein Produkt."},
-    verkauf:{titel:"Erstes Produkt verkaufen",text:"Produktion erzeugt Warenbestand, aber noch kein Geld. Verkaufe Ladekabel einmal selbst im Markt.",zusammenhang:"Produkt → Verkauf → Geld"},
-    verkaeufer:{titel:"Verkaufsteam einsetzen",text:"Der manuelle Verkauf gilt nur für einen Spieltag. Weise mindestens 2 Personen dem Verkauf zu.",zusammenhang:"Verkaufskapazität bestimmt, wie viele fertige Produkte pro Tag verkauft werden können."}
-  };
-
-  const tut=Object.fromEntries(TUTORIAL.map(t=>[t.id,t]));
-  for(const [id,c] of Object.entries(COPY)){
-    if(!tut[id])continue;
-    tut[id].titel=c.titel;
-    tut[id].text=c.text;
-    tut[id].zusammenhang=c.zusammenhang;
-  }
-
-  if(tut.minecrew)tut.minecrew.fertig=()=>Object.values(S.minen).some(m=>m.arbeiter>=10);
 
   function phaseFor(id){return PHASEN.findIndex(p=>p.steps.includes(id));}
 
   function dynamischerText(t){
     if(!t)return "";
-    if(t.id==="fabcrew"){
-      const baut=S.fabriken.filter(f=>f.restbau>0);
-      if(baut.length){const rest=Math.min(...baut.map(f=>f.restbau));return `Die Kabelfabrik wird gebaut. Noch ${rest} ${rest===1?"Tag":"Tage"}. Danach kannst du Personal zuweisen.`;}
-      const fertig=S.fabriken.find(f=>f.restbau<=0);
-      if(fertig&&fertig.arbeiter<=0)return "Die Kabelfabrik ist fertig. Weise ihr jetzt Personal zu, damit die Produktion starten kann.";
-    }
     if(t.id==="verkauf"){
       const lager=S.ware?.[START_PRODUKT]||0;
       if(lager<=0){

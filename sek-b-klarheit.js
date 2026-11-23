@@ -55,10 +55,6 @@
     $("#schleier").hidden = false; zeichnen();
   };
 
-  /* ---------- Tutorial-Texte ---------- */
-  const tut = Object.fromEntries(TUTORIAL.map(t => [t.id, t]));
-  if (tut.team) tut.team.text = "Mehrere Stationen brauchen gleichzeitig Personal. Stelle weitere Personen ein, bis du mindestens 40 hast. Tipp: Schieb den Regler auf 30.";
-
   /* ---------- 5. Einheiten und 8. weniger Vorbehalte ---------- */
   const proTag = v => v >= 10 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toLocaleString("de-CH");
 
@@ -332,9 +328,6 @@
   }
 
   /* ---------- Gelb: kleine Unstimmigkeiten ---------- */
-  /* Tutorial-Prüfung passt zum Text «mindestens 10 Personen». */
-  if (tut.minecrew) tut.minecrew.fertig = () => Object.values(S.minen).some(m => m.arbeiter >= 10);
-
   /* «Das Modell im Code» → «Das Spielmodell», Zusammenhänge in Worten statt Formeln. */
   const modellSeg = WISSEN.find(seg => seg.id === "modell");
   if (modellSeg){

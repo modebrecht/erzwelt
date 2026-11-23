@@ -34,11 +34,6 @@ seiteMarkt = function(){
     ${eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
 };
 
-const tut = Object.fromEntries(TUTORIAL.map(t=>[t.id,t]));
-if (tut.mine1) tut.mine1.text = "Dein Ladekabel braucht Kupfer, Aluminium und Zinn. Sichere zuerst eine eigene Rohstoffquelle.";
-if (tut.minen3) tut.minen3.text = "Kupfererz → Kupfer, Bauxit → Aluminium, Zinnerz → Zinn. Öffne für alle drei eine Rohstoffquelle.";
-if (tut.raff) tut.raff.text = "Rohstoffe lassen sich nicht direkt verbauen. Erst die Raffinerie macht daraus nutzbares Material.";
-
 const originalZeichnen = zeichnen;
 zeichnen = function(){
   didaktikMigration();
