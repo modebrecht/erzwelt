@@ -133,7 +133,7 @@
   seiteMarkt = function(){
     let html = vorherMarkt();
     html = ersetze(html, "Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.",
-      "Deine Rohstoffe kommen aus deinen eigenen Quellen. Die Raffinerie macht daraus Material.");
+      "Die Quelle liefert Rohstoff, die Raffinerie macht Material daraus.");
     return html;
   };
 

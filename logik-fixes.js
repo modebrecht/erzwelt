@@ -136,7 +136,7 @@
     const genug = S.kasse >= NACHWEIS_KOSTEN;
     return `<div class="karte nachweiskarte ${ok ? "sicher" : "offen"}">
       <h3>Herkunftsnachweis</h3>
-      <div class="ort">Eine unabhängige Prüfung belegt, woher dein Rohstoff kommt. Ein Lieferkettengesetz verlangt Nachweise für <b>alle</b> deine Rohstoffquellen.</div>
+      <div class="ort">Eine Prüfung zeigt, woher dein Rohstoff kommt. Das Lieferkettengesetz verlangt das für <b>jede</b> Quelle.</div>
       <div class="zeile"><span>Status</span><b style="color:${ok ? "var(--gruen)" : "var(--warn)"}">${status}</b></div>
       ${ok ? "" : `<button class="cta gruen" data-didaktik="nachweis" data-id="${id}" ${genug ? "" : "disabled"}>${IK.schild}${genug ? "Herkunft prüfen lassen · " + chf(NACHWEIS_KOSTEN) : "Zu wenig Geld · " + chf(NACHWEIS_KOSTEN)}</button>`}
     </div>`;
@@ -176,16 +176,16 @@
       `$1
       <div class="zeile" style="margin-top:8px"><span>Davon Investitionen</span><b>${chf(-invest)}</b></div>
       <div class="zeile"><span>Laufendes Geschäft</span><b style="color:${gewinn + invest >= 0 ? "var(--gruen)" : "var(--alarm)"}">${chf(gewinn + invest)}</b></div>
-      <div class="ort">Investitionen sind Standorte, Ausbau, Einstellungen und Verbesserungen. Sie zahlen sich erst über deine Verkäufe aus.</div>`);
+      <div class="ort">Investitionen: Standorte, Ausbau, Leute, Verbesserungen. Sie lohnen sich erst über Verkäufe.</div>`);
 
     const n = offeneMinen().length, g = geprueft(), perk = nachweisDurchPerk();
     const hilfe = perk
       ? `Der Transparenzbericht gilt für alle deine Rohstoffquellen.`
-      : `So bekommst du Nachweise: Öffne eine Rohstoffquelle und tippe auf <b>«Herkunft prüfen lassen»</b> (${chf(NACHWEIS_KOSTEN)}). Oder finanziere im Reiter Wissen den <b>Transparenzbericht</b> – er gilt für alle Quellen.`;
+      : `Nachweis holen: Quelle öffnen → <b>«Herkunft prüfen lassen»</b> (${chf(NACHWEIS_KOSTEN)}). Oder im Reiter Wissen den <b>Transparenzbericht</b> finanzieren: gilt für alle.`;
     html = html.replace(
       '<div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div>',
       `${perk ? "" : `<div class="zeile"><span>Geprüfte Rohstoffquellen</span><b>${g} von ${n}</b></div>`}
-      <div class="notiz">Ein Lieferkettengesetz verlangt Nachweise für alle deine Rohstoffquellen. ${hilfe} Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div>`);
+      <div class="notiz">Das Lieferkettengesetz verlangt für jede Quelle einen Nachweis. ${hilfe}</div>`);
     return html;
   };
 

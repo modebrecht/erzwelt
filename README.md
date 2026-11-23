@@ -107,6 +107,25 @@ leisen Erfolgston (Web Audio, keine Datei) und Funken; beim Abschluss des
 Tutorials etwas grösser. Ton in den Einstellungen unter «Töne» abschaltbar,
 Funken über «Animationen: aus».
 
+## Premium-Spielgefühl (`premium-spielgefuehl.js`)
+
+- Rohstoff auf einen Blick: Auch nicht eröffnete Rohstoffquellen zeigen
+  Kürzel und Farbe (Cu, Al, Sn …); im Aufgabentext steht «Kupfer (Cu)».
+- Lieferkette lebt: Von jeder fördernden Quelle fährt Ware zur nächsten
+  Raffinerie, von dort Material zu jeder laufenden Fabrik. Bei Pause steht
+  die Ware still; «Animationen: aus» zeigt nur die Wege.
+- Verkauf: Münzen fallen in die Kasse, der Betrag erscheint kurz im
+  Kassen-Feld.
+- Monatsabschluss als kleine Bilanz: laufendes Geschäft (Einnahmen minus
+  Löhne und Betrieb) mit Trendpfeil, dazu was investiert wurde.
+- Beispiel-Lieferweg als kleiner Knopf unter «Verlauf» statt Textkasten.
+
+## Kurztexte (`kurztexte.js`)
+
+Lange Erklärsätze auf Markt, Team, Ziel, Wissen und in den Blättern kürzer;
+Rohstoffe ohne Quelle im Markt in einer Zeile; keine doppelte Meldungsliste
+im Ziel (dafür gibt es «Verlauf»). Lerninhalte in der Wissens-Lupe bleiben.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
