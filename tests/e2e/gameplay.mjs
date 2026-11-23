@@ -155,8 +155,8 @@ const hired = await state();
 if (hired.workers !== 15 || hired.free !== 0 || cashBeforeHire - hired.kasse !== 15 * 1800) throw new Error(`Inline hiring wrong: ${JSON.stringify(hired)}`);
 await checkpoint('kupfer-crew');
 
-// The team page does not hire during the introduction.
-await page.locator('button[data-seite="team"]').first().click();
+// The team page does not hire during the introduction (close the open sheet first).
+await dock('team');
 if (await page.locator('#seite button[data-tun="anstellen"]').count()) throw new Error('Team page still hires during the introduction');
 
 // 3-6: aluminium and tin, one source and one staffing step each.
