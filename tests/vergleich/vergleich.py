@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Vergleicht zwei Aufnahmen des Prüfstands (aufnahme.cjs).
+
+    python3 tests/vergleich/vergleich.py <referenz> <neu> [--bild-toleranz 0.002]
+
+Text, Klassen, Knöpfe und Spielstand müssen gleich sein. Screenshots dürfen nur
+minimal abweichen (Anteil abweichender Pixel <= Toleranz, Standard 0,2 %).
+Exit-Code 0 = gleich, 1 = Unterschiede.
+"""
+import json, sys, os
+from PIL import Image, ImageChops
+
+def lade(ordner):
+    with open(os.path.join(ordner, "zustaende.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+def unterschiede(a, b, pfad=""):
+    if type(a) != type(b):
+        yield pfad, a, b
+    elif isinstance(a, dict):
+        for k in sorted(set(a) | set(b)):
+            if k not in a or k not in b:
+                yield f"{pfad}.{k}", a.get(k, "<fehlt>"), b.get(k, "<fehlt>")
+            else:
+                yield from unterschiede(a[k], b[k], f"{pfad}.{k}")
+    elif isinstance(a, list):
+        if len(a) != len(b):
+            yield f"{pfad}[Länge]", len(a), len(b)
+        for i, (x, y) in enumerate(zip(a, b)):
+            yield from unterschiede(x, y, f"{pfad}[{i}]")
+    elif isinstance(a, float) and isinstance(b, float):
+        if abs(a - b) > 1e-6:
+            yield pfad, a, b
+    elif a != b:
+        yield pfad, a, b
+
+def bild_abweichung(p1, p2):
+    a, b = Image.open(p1).convert("RGB"), Image.open(p2).convert("RGB")
+    if a.size != b.size:
+        return 1.0
+    diff = ImageChops.difference(a, b).convert("L").point(lambda v: 255 if v > 24 else 0)
+    return sum(1 for v in (diff.get_flattened_data() if hasattr(diff, 'get_flattened_data') else diff.getdata()) if v) / (a.size[0] * a.size[1])
+
+def main():
+    args = [x for x in sys.argv[1:] if not x.startswith("--")]
+    tol = 0.002
+    if "--bild-toleranz" in sys.argv:
+        tol = float(sys.argv[sys.argv.index("--bild-toleranz") + 1])
+        args = [x for x in args if x != str(tol)]
+    ref, neu = args[:2]
+    A, B = lade(ref), lade(neu)
+    fehler = 0
+    if B["fehler"]:
+        print("SEITENFEHLER in neu:", *B["fehler"], sep="\n  ")
+        fehler += 1
+    za, zb = A["ergebnis"], B["ergebnis"]
+    for name in sorted(set(za) | set(zb)):
+        if name not in za or name not in zb:
+            print(f"✗ {name}: nur in {'Referenz' if name in za else 'neu'}"); fehler += 1; continue
+        d = list(unterschiede(za[name], zb[name]))
+        anteil = bild_abweichung(os.path.join(ref, name + ".png"), os.path.join(neu, name + ".png"))
+        if d or anteil > tol:
+            fehler += 1
+            print(f"✗ {name}: {len(d)} Unterschiede, Bild {anteil*100:.2f} % abweichend")
+            for pfad, a, b in d[:8]:
+                print(f"    {pfad}\n      Referenz: {str(a)[:160]}\n      neu:      {str(b)[:160]}")
+        else:
+            print(f"✓ {name}" + (f" (Bild {anteil*100:.2f} %)" if anteil else ""))
+    print(f"\n{len(za)} Zustände, {fehler} mit Unterschieden")
+    sys.exit(1 if fehler else 0)
+
+if __name__ == "__main__":
+    main()

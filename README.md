@@ -266,6 +266,25 @@ Prüft echte Tagesschritte, manuelle und automatische Verkäufe, Erlöse,
 Save/Reload, Etappenwechsel, Neustart, Altdatenmigration sowie die PDF-Erzeugung.
 Test-PDFs entstehen unter `artifacts/certificate/`.
 
+## Prüfstand (`tests/vergleich/`)
+
+Hält fest, wie das Spiel aussieht und sich verhält, und vergleicht zwei Stände.
+`aufnahme.cjs` spielt das gebaute `index.html` mit festem Zufall und ohne Animationen
+durch (Startbild, alle Einführungsschritte, alle Blätter und Seiten, 60 Spieltage,
+alter Spielstand) und speichert pro Zustand Text, Klassen, Knöpfe, Spielstand und
+Screenshot. `vergleich.py` meldet jeden Unterschied.
+
+```bash
+node scripts/build-standalone.mjs
+node tests/vergleich/aufnahme.cjs artifacts/vorher     # Referenz
+# … ändern, neu bauen …
+node tests/vergleich/aufnahme.cjs artifacts/nachher
+python3 tests/vergleich/vergleich.py artifacts/vorher artifacts/nachher
+```
+
+Gebraucht für den Umbau zu Modulen (`docs/MODULE-KONZEPT.md`): Jeder Schritt muss
+die Referenz ohne Unterschied treffen.
+
 ## Release-Gates
 
 Vor einer finalen Freigabe:
