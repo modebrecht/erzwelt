@@ -7,7 +7,8 @@
    - Zeile: − · Zahl «von Plätzen» · +   (einzelne Personen, gut antippbar)
    - darunter ein Regler 0 … Plätze. Der Teil, den das freie Team nicht
      füllen kann, ist schraffiert; weiter schieben geht nicht.
-   - Im Tutorial zeigt eine Marke, wie viele Personen das Ziel verlangt.
+   - Im Tutorial zeigt eine Marke, wie viele Personen das Ziel verlangt;
+     der Regler reicht nur so weit, wie die Einführung Personal braucht.
    Übernommen wird beim Loslassen, über die bestehende Spiellogik
    (data-tun crew/rcrew/fcrew/vcrew). Keine neue Wirtschaft.
    ============================================================ */
@@ -26,19 +27,33 @@
     return api && typeof api.besetzungsZiel === "function" ? api.besetzungsZiel(tun, ref) : null;
   }
 
+  function obergrenze(tun, ref){
+    const api = window.__erzweltEinfuehrung;
+    return api && typeof api.obergrenze === "function" ? api.obergrenze(tun, ref) : null;
+  }
+
   function bauen(tun, attrs, wert, klein){
     const id = attr(attrs, "id"), i = attr(attrs, "i");
     const ref = id !== null ? `data-id="${id}"` : i !== null ? `data-i="${i}"` : "";
     const vonMatch = klein.match(/von\s+(\d+)/);
-    const max = vonMatch ? +vonMatch[1] : (typeof VERKAUF_PLAETZE === "number" ? VERKAUF_PLAETZE : 40);
+    let max = vonMatch ? +vonMatch[1] : (typeof VERKAUF_PLAETZE === "number" ? VERKAUF_PLAETZE : 40);
+    const plaetze = max;
     const frei = Math.max(0, freieArbeiter());
-    const erreichbar = Math.min(max, wert + frei);
-    const ziel = zielFuer(tun, id !== null ? id : i !== null ? +i : null);
+    const r = id !== null ? id : i !== null ? +i : null;
+    // In der Einführung nur so viele, wie gebraucht werden (alte Spielstände: nie unter den Ist-Wert).
+    const grenze = obergrenze(tun, r);
+    if (grenze !== null) max = Math.min(plaetze, Math.max(grenze, wert));
+    const erreichbar = grenze !== null
+      ? Math.min(max, Math.max(wert, Math.min(grenze, wert + frei)))
+      : Math.min(max, wert + frei);
+    const ziel = zielFuer(tun, r);
     const zielMarke = ziel && ziel <= max ? `<span class="besetzung-ziel ${wert >= ziel ? "ok" : ""}" style="--z:${(ziel / max).toFixed(4)}"><i></i><b>${wert >= ziel ? "✓ " : ""}Ziel ${ziel}</b></span>` : "";
-    const unten = tun === "vcrew" ? "im Verkauf" : `von ${max}`;
-    const hinweis = erreichbar < max
-      ? (frei > 0 ? `Noch ${frei} frei im Team` : "Niemand frei im Team")
-      : `${frei} frei im Team`;
+    const unten = tun === "vcrew" ? "im Verkauf" : `von ${plaetze}`;
+    const hinweis = grenze !== null && wert + frei >= grenze
+      ? `Einführung: ${grenze} reichen`
+      : erreichbar < max
+        ? (frei > 0 ? `Noch ${frei} frei im Team` : "Niemand frei im Team")
+        : `${frei} frei im Team`;
     return `<div class="besetzung" data-art="${tun}" ${ref} data-wert="${wert}" data-max="${max}" data-erreichbar="${erreichbar}">
       <div class="besetzung-zeile">
         <button class="besetzung-schritt" data-tun="${tun}" ${ref} data-n="-1" ${wert <= 0 ? "disabled" : ""} aria-label="Eine Person weniger">−</button>

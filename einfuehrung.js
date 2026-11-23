@@ -10,6 +10,9 @@
      selbst verkaufen → Verkaufsteam einsetzen
    - Vorgeschlagen werden die günstigsten Orte; wer schon eine passende
      Quelle oder Raffinerie hat (alter Spielstand), arbeitet mit dieser.
+   - Personal: Jede Station lässt sich nur bis zum Bedarf besetzen
+     (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5, Verkauf 2),
+     eingestellt wird genau der fehlende Rest.
    - Kaufen geht nur am Zielort des aktuellen Schritts. Verbesserungen im
      Wissen gibt es erst nach der Einführung. So kann niemand das Geld
      ausgeben und dann feststecken.
@@ -19,7 +22,6 @@
 (function(){
   const VERSION = 2;                         // Marke im Spielstand: S.einfuehrung
   const ALTE_LAENGE = 11;
-  const TEAM_ZIEL = 40;
 
   /* ---------- Orte ---------- */
   const minenDef = id => MINEN.find(d => d.id === id);
@@ -50,7 +52,43 @@
     };
     for (const id in S.minen) pruefe("mine", id, S.minen[id].arbeiter, soll["mine:" + id] || 0);
     for (const id in S.raff) pruefe("raff", id, S.raff[id].arbeiter, 5);
+    for (const f of S.fabriken) pruefe("fab", f.land, f.arbeiter, 5);
     return best;
+  }
+
+  /* ---------- Bedarf: so viele Leute braucht die Einführung ---------- */
+  const BEDARF = {quelle: k => k === START_MATERIALIEN[0] ? 10 : 5, raff: 5, fab: 5, verkauf: 2};
+  function bedarfListe(){
+    const fi = fabIndex();
+    return [
+      ...START_MATERIALIEN.map(k => { const id = materialMine(k); return {name: MAT_NAME(k), soll: BEDARF.quelle(k), ist: id ? S.minen[id].arbeiter : 0}; }),
+      {name:"Raffinerie", soll: BEDARF.raff, ist: Object.values(S.raff)[0]?.arbeiter || 0},
+      {name:"Fabrik", soll: BEDARF.fab, ist: fi >= 0 ? S.fabriken[fi].arbeiter : 0},
+      {name:"Verkauf", soll: BEDARF.verkauf, ist: S.verkaeufer || 0}
+    ];
+  }
+  const offenerBedarf = () => bedarfListe().reduce((a, b) => a + Math.max(0, b.soll - b.ist), 0);
+  /* Wie viele Leute dürfen jetzt noch eingestellt werden? Gesamtbedarf minus
+     alle Angestellten – wer anderswo zu viele hat, verteilt um statt neu einzustellen. */
+  const nochEinstellen = () => Math.max(0, bedarfListe().reduce((a, b) => a + b.soll, 0) - S.arbeiterGesamt);
+
+  /* Höchstzahl pro Station während der Einführung */
+  function obergrenze(tun, ref){
+    if (!tutorialLaeuft()) return null;
+    if (tun === "crew"){
+      const k = START_MATERIALIEN.find(k => materialMine(k) === String(ref));
+      return k ? BEDARF.quelle(k) : 0;
+    }
+    if (tun === "rcrew") return BEDARF.raff;
+    if (tun === "fcrew") return BEDARF.fab;
+    if (tun === "vcrew") return BEDARF.verkauf;
+    return null;
+  }
+  function istWert(tun, ref){
+    if (tun === "crew") return S.minen[ref]?.arbeiter || 0;
+    if (tun === "rcrew") return S.raff[ref]?.arbeiter || 0;
+    if (tun === "fcrew") return S.fabriken[+ref]?.arbeiter || 0;
+    return S.verkaeufer || 0;
   }
 
   /* Text für Besetzungs-Schritte: zeigt um, wenn niemand frei ist. */
@@ -62,7 +100,7 @@
     if (v) return {
       text: `Im Team ist zu wenig Personal frei. In ${ortName(v.art, v.id)} arbeiten ${v.ist}, nötig sind ${v.brauch}. Öffne ${ortName(v.art, v.id)} und schieb den Regler auf ${v.brauch}.`,
       ziel: pinZiel(v.art, v.id), entlasten: v};
-    return {text: "Im Team ist zu wenig Personal frei. Tippe unten auf «Team» und stelle 10 Personen ein.", ziel: "dock:team"};
+    return {text: `Im Team ist zu wenig Personal frei. Tippe unten auf «Team» und stelle ${nochEinstellen()} Personen ein.`, ziel: "dock:team"};
   }
 
   /* ---------- Die Schritte ---------- */
@@ -93,14 +131,14 @@
 
   const SCHRITTE = [
     ...quellenSchritte(CU, "hacke", 10, "Das Ladekabel braucht Kupfer, Aluminium und Zinn. Jede Rohstoffquelle liefert einen Rohstoff."),
-    { id:"team", ikon:"person", titel:"Mehr Personal einstellen",
+    { id:"team", ikon:"person", titel:"Personal einstellen",
       get text(){
-        const fehlt = Math.max(5, Math.ceil((TEAM_ZIEL - S.arbeiterGesamt) / 5) * 5);
-        return `Tippe unten auf «Team». Schieb den Regler auf ${fehlt} und tippe dann auf «Stelle ${fehlt} Personen ein».`;
+        const n = nochEinstellen();
+        return `Für die ganze Lieferkette fehlen noch ${n} Personen. Tippe unten auf «Team» und dann auf «Stelle ${n} Personen ein».`;
       },
-      zusammenhang:"Jede Station braucht eigene Leute. Personal muss verteilt werden.",
+      zusammenhang:"Stell nur so viele Leute ein, wie du brauchst – jede Person kostet Lohn.",
       ziel: () => "dock:team",
-      fertig: () => S.arbeiterGesamt >= TEAM_ZIEL },
+      fertig: () => nochEinstellen() === 0 },
     ...quellenSchritte(AL, "berg", 5, "Bauxit wird später zu Aluminium."),
     ...quellenSchritte(SN, "berg", 5, "Zinnerz wird später zu Zinn. Jetzt hast du alle drei Rohstoffe."),
     { id:"raff", ikon:"kolben", titel:"Raffinerie bauen",
@@ -130,7 +168,7 @@
       zusammenhang:"Personal + Material → Ladekabel",
       ziel: () => { const f = S.fabriken[fabIndex()]; return f && f.restbau > 0 ? pinZiel("fab", fabLand()) : besetzen("fab", fabLand(), 5, "").ziel; },
       crew: () => { const f = S.fabriken[fabIndex()]; return f && f.restbau <= 0 ? {tun:"fcrew", ref: fabIndex(), n:5} : null; },
-      fertig: () => S.fabriken.some(f => f.restbau === 0 && f.arbeiter > 0) },
+      fertig: () => S.fabriken.some(f => f.restbau === 0 && f.arbeiter >= BEDARF.fab) },
     { id:"verkauf", ikon:"markt", titel:"Ladekabel selbst verkaufen",
       text:"Tippe unten auf «Markt» und dann auf «Selbst verkaufen».",
       zusammenhang:"Produkt → Verkauf → Geld",
@@ -139,7 +177,7 @@
     { id:"verkaeufer", ikon:"muenze", titel:"Verkaufsteam einsetzen",
       get text(){
         const fehlt = 2 - (S.verkaeufer || 0);
-        if (fehlt > 0 && freieArbeiter() < fehlt) return "Für den Verkauf ist niemand frei. Tippe unten auf «Team» und stelle 5 Personen ein.";
+        if (fehlt > 0 && freieArbeiter() < fehlt) return `Für den Verkauf ist niemand frei. Tippe unten auf «Team» und stelle ${nochEinstellen()} Personen ein.`;
         return "Im Markt beim Verkaufsteam: Schieb den Regler auf 2 Personen. Sie verkaufen dann jeden Tag.";
       },
       zusammenhang:"Das Verkaufsteam verkauft jeden Tag – du musst nicht mehr selbst.",
@@ -247,6 +285,42 @@
     blattFuellen(art, id);
   }, true);
 
+  /* ---------- Nur so viel Personal wie nötig ---------- */
+  document.addEventListener("click", e => {
+    const b = e.target.closest && e.target.closest('[data-tun="crew"],[data-tun="rcrew"],[data-tun="fcrew"],[data-tun="vcrew"]');
+    if (!b || !tutorialLaeuft() || !(+b.dataset.n > 0)) return;
+    const tun = b.dataset.tun, ref = tun === "fcrew" ? b.dataset.i : tun === "vcrew" ? null : b.dataset.id;
+    const platz = obergrenze(tun, ref) - istWert(tun, ref);
+    if (platz <= 0){ e.preventDefault(); e.stopImmediatePropagation(); blattStand = ""; seitenStand = ""; zeichnen(); return; }
+    if (+b.dataset.n > platz) b.dataset.n = platz;
+  }, true);
+
+  const vorherAnstellbar = anstellbar;
+  anstellbar = function(){
+    if (!tutorialLaeuft()) return vorherAnstellbar();
+    return nochEinstellen();
+  };
+
+  const REGLER_ANSTELL = /<div class="reglerzeile">\s*<div class="kopf"><b>Wie viele\?<\/b>[\s\S]*?<\/small><\/div>/;
+  const vorherTeam = seiteTeam;
+  seiteTeam = function(){
+    if (!tutorialLaeuft()){
+      if (anstellMenge % 5) anstellMenge = 10;          // Regler wieder auf seine Stufen
+      return vorherTeam.apply(this, arguments);
+    }
+    const n = nochEinstellen();
+    anstellMenge = Math.max(1, n);
+    let html = vorherTeam.apply(this, arguments);
+    const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.soll}</b></span>`).join("");
+    html = html.replace(REGLER_ANSTELL, `<div class="einfuehrung-bedarf">
+        <b>${n > 0 ? `Es fehlen noch ${n} Personen` : "Du hast genug Personal"}</b>
+        <div class="bedarf-liste">${liste}</div>
+        <small>In der Einführung stellst du genau so viele Leute ein, wie die Lieferkette braucht. Jede Person kostet CHF&nbsp;${LOHN_PRO_KOPF.toLocaleString("de-CH")} beim Einstellen und danach Lohn.</small>
+      </div>`);
+    html = html.replace(/Im Tutorial genügen \d+ Leute/, "Genug Personal für die Einführung");
+    return html;
+  };
+
   /* ---------- Wissen: Verbesserungen erst nach der Einführung ---------- */
   if (typeof lupeFuellen === "function"){
     const vorherLupe = lupeFuellen;
@@ -292,10 +366,15 @@
     #blattinhalt .einfuehrung-hin{display:flex;align-items:center;justify-content:center;width:100%;min-height:42px;margin-top:8px;
       border-radius:10px;border:1.5px solid #e5ba55;background:#fff7df;color:#704d0b;
       font-family:"Baloo 2",sans-serif;font-weight:800;font-size:var(--f1);box-shadow:0 2px 0 #d6a438;cursor:pointer}
+    .einfuehrung-bedarf{margin:14px 0 12px}
+    .einfuehrung-bedarf > b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f3)}
+    .einfuehrung-bedarf .bedarf-liste{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0}
+    .einfuehrung-bedarf .bedarf-liste span{padding:3px 10px;border-radius:99px;background:#f3e8d2;font-size:var(--f0);font-weight:700}
+    .einfuehrung-bedarf small{display:block;color:var(--grau);font-size:var(--f0);font-weight:600;line-height:1.35}
   `;
   document.head.appendChild(style);
 
-  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel};
+  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf, nochEinstellen};
   blattStand = ""; seitenStand = "";
   if (typeof zeichnen === "function") zeichnen();
 })();

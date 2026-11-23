@@ -138,23 +138,22 @@ await clickVisible('#blatt.auf button[data-tun="mine-auf"]:not([disabled])');
 await waitTutorial('kupfer-crew');
 await checkpoint('kupfer-auf');
 
-// 2: staff copper with the slider; the slider shows the goal.
+// 2: staff copper with the slider; the slider shows the goal and stops at the need.
 if (!await page.locator('#blatt.auf .besetzung-ziel').count()) throw new Error('Slider goal marker missing');
+if (await page.locator('#blatt.auf .besetzung-regler').getAttribute('max') !== '10') throw new Error('Copper slider not capped at the introduction need');
 await setSlider('#blatt.auf', 10);
 await waitTutorial('team');
 await checkpoint('kupfer-crew');
 
-// 3: hire to >= 40.
+// 3: hire exactly the missing people for the whole chain in one tap.
 await page.locator('button[data-seite="team"]').first().click();
-for (let i=0;i<10 && (await state()).workers < 40;i++) {
-  const hire = page.locator('button[data-tun="anstellen"]:not([disabled])');
-  if (!await hire.count()) throw new Error('Hire button missing before 40 workers');
-  await hire.first().evaluate(el => el.click());
-  await page.waitForTimeout(100);
-}
-if ((await state()).workers < 40) throw new Error('Could not hire 40 workers');
+const need = await page.evaluate(() => window.__erzweltEinfuehrung.nochEinstellen());
+await clickVisible('button[data-tun="anstellen"]:not([disabled])');
 await waitTutorial('alu-auf');
-await checkpoint('team40');
+const hired = await state();
+if (hired.workers !== 10 + need || hired.free !== need) throw new Error(`Expected exactly ${need} new hires, got ${JSON.stringify(hired)}`);
+if (await page.locator('button[data-tun="anstellen"]:not([disabled])').count()) throw new Error('Hiring beyond the introduction need is possible');
+await checkpoint('team-hired');
 
 // 4-7: aluminium and tin, one source and one staffing step each.
 for (const k of ['alu','zinn']) {

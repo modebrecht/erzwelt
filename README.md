@@ -135,13 +135,17 @@ Die Einführung nimmt an der Hand: **eine Aufgabe = eine Handlung an einem Ort**
 Nur dieser Ort leuchtet auf der Karte, «Ziel zeigen» führt genau dorthin.
 
 1. Kupfer-Quelle eröffnen (Katanga) · 2. Katanga mit 10 Personen besetzen ·
-3. Team auf 40 aufstocken · 4./5. Aluminium (Boké) eröffnen und mit 5 besetzen ·
+3. genau das fehlende Personal einstellen (22) · 4./5. Aluminium (Boké) eröffnen und mit 5 besetzen ·
 6./7. Zinn (Bangka) eröffnen und mit 5 besetzen · 8./9. Raffinerie (Guangdong) bauen
 und mit 5 besetzen · 10./11. Kabelfabrik (China) bauen und nach dem Bau mit 5
 besetzen · 12. einmal selbst verkaufen · 13. Verkaufsteam mit 2 Personen.
 
 - Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
   passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
+- **Nur so viel Personal wie nötig:** Jede Station lässt sich nur bis zum Bedarf
+  besetzen (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5, Verkauf 2 –
+  zusammen 32). Eingestellt wird genau der Rest (Bedarf minus alle Angestellten);
+  der Team-Reiter zeigt die Liste statt des Reglers. Am Ende sitzt niemand untätig.
 - Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
   «Noch nicht dran» und einen Knopf zum richtigen Ort. Verbesserungen im Wissen
   gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
