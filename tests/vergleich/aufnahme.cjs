@@ -15,16 +15,30 @@ const AUS = path.resolve(process.argv[2] || "artifacts/vergleich");
 const SEITE = "file://" + path.resolve(__dirname, "../../index.html");
 fs.mkdirSync(AUS, { recursive: true });
 
-const INIT = ({ speicher }) => {
+const INIT = ({ speicher, opt }) => {
   // Fester Zufall (mulberry32)
   let a = 0x2f6b1d3;
   Math.random = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   if (!sessionStorage.getItem("vergleich-init")) {
     sessionStorage.setItem("vergleich-init", "1");
     localStorage.clear();
-    localStorage.setItem("erzwelt_opt", JSON.stringify({ schrift: 106, tempo: 100, anim: 0 }));
+    localStorage.setItem("erzwelt_opt", JSON.stringify(opt || { schrift: 106, tempo: 100, anim: 0 }));
     if (speicher) localStorage.setItem("erzwelt_v2", JSON.stringify(speicher));
   }
+};
+
+// Rückmeldung nach einem Einführungsschritt (#tutorial-lernfeedback) mitschreiben, auch
+// wenn sie unsichtbar ist oder schon wieder entfernt wurde: jede neue Fassung zählt.
+// Erst nach dem Laden einrichten (index.html schreibt das Dokument per document.write neu).
+const RUECKMELDUNG = () => {
+  window.__vergleichRueckmeldungen = [];
+  const merke = el => window.__vergleichRueckmeldungen.push(el.textContent.replace(/\s+/g, " ").trim());
+  const beobachteFeedback = el => new MutationObserver(() => merke(el)).observe(el, { childList: true });
+  const schon = document.getElementById("tutorial-lernfeedback");
+  if (schon) { merke(schon); beobachteFeedback(schon); }
+  new MutationObserver(liste => {
+    for (const m of liste) for (const n of m.addedNodes) if (n.id === "tutorial-lernfeedback") { merke(n); beobachteFeedback(n); }
+  }).observe(document.body, { childList: true });
 };
 
 const ZUSTAND = () => {
@@ -32,6 +46,15 @@ const ZUSTAND = () => {
   const text = sel => { const el = document.querySelector(sel); return el && sichtbar(el) ? el.innerText.replace(/[ \t]+/g, " ").trim() : null; };
   const knoepfe = wurzel => wurzel ? [...wurzel.querySelectorAll("button, input[type=range]")].filter(sichtbar).map(b =>
     [b.tagName === "INPUT" ? `regler ${b.min}-${b.max}=${b.value}` : b.innerText.replace(/\s+/g, " ").trim(), b.disabled ? "aus" : "an", b.dataset.tun || ""]) : [];
+  // Markup mit Attributen in fester (alphabetischer) Reihenfolge: Die Reihenfolge, in
+  // der Attribute zuerst gesetzt wurden, ist kein sichtbares Verhalten.
+  const markup = n => {
+    if (n.nodeType === 3) return n.textContent.replace(/\s+/g, " ");
+    if (n.nodeType !== 1) return "";
+    const tag = n.tagName.toLowerCase();
+    const attr = [...n.attributes].map(a => [a.name, a.value]).sort((a, b) => a[0] < b[0] ? -1 : 1).map(([k, v]) => ` ${k}="${v.replace(/\s+/g, " ")}"`).join("");
+    return `<${tag}${attr}>${[...n.childNodes].map(markup).join("").replace(/> </g, "><")}</${tag}>`;
+  };
   const q = document.getElementById("quest");
   const s = JSON.parse(JSON.stringify(S));
   delete s.leistungsdaten;
@@ -46,7 +69,21 @@ const ZUSTAND = () => {
     dock: [...document.querySelectorAll("#dock button")].map(b => [b.dataset.seite || "", b.classList.contains("wink")]),
     pins: [...document.querySelectorAll("#welt .pin")].map(p => [p.dataset.pin, p.dataset.id, ["zu", "wink", "blass", "foerdert", "alarm"].filter(k => p.classList.contains(k)).join(" "), (p.querySelector(".crew") || {}).textContent || ""]),
     tutorial: typeof tutorialSchritt === "function" && tutorialSchritt() ? tutorialSchritt().id : null,
-    S: s
+    S: s,
+    // Aufgabenkarte (ab Schritt 6): ganzes Markup, Rückmeldungen seit der letzten Aufnahme,
+    // Fokus-/Hinweisringe, Kamera und gemessene Höhe.
+    questHtml: q ? markup(q) : null,
+    rueckmeldungen: (window.__vergleichRueckmeldungen || []).splice(0),
+    fokus: {
+      pins: [...document.querySelectorAll("#welt .pin")].filter(p => p.querySelector(".map-focus-ring,.map-focus-suggestion"))
+        .map(p => [p.dataset.pin, p.dataset.id, p.querySelector(".map-focus-ring") ? "ring" : "", p.querySelector(".map-focus-suggestion") ? "vorschlag" : ""].join(" ").trim()),
+      dock: [...document.querySelectorAll("#dock button")].filter(b => b.querySelector(".map-focus-ring")).map(b => b.dataset.seite),
+      body: ["ziel-fokus", "dock-hinweis", "fensterauf"].filter(k => document.body.classList.contains(k))
+    },
+    kamera: typeof ansicht !== "undefined" ? [ansicht.x, ansicht.y, ansicht.z].map(v => Math.round(v * 100) / 100) : null,
+    questh: document.documentElement.style.getPropertyValue("--questh"),
+    toastsStil: (document.getElementById("toasts") || { getAttribute: () => null }).getAttribute("style") || "",
+    ort: [typeof aktiveSeite !== "undefined" ? aktiveSeite : null, typeof offenesBlatt !== "undefined" && offenesBlatt ? offenesBlatt.art + ":" + offenesBlatt.id : null]
   };
 };
 
@@ -56,25 +93,44 @@ const ZUSTAND = () => {
   const ergebnis = {};
   let nr = 0;
 
-  async function neueSeite(speicher) {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
-    await ctx.addInitScript(INIT, { speicher: speicher || null });
+  async function neueSeite(speicher, mehr) {
+    mehr = mehr || {};
+    const ctx = await browser.newContext({ viewport: mehr.viewport || { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: mehr.bewegung || "reduce" });
+    await ctx.addInitScript(INIT, { speicher: speicher || null, opt: mehr.opt || null });
     const p = await ctx.newPage();
     p.on("pageerror", e => fehler.push(String(e)));
     await p.goto(SEITE, { waitUntil: "load" });
     await p.waitForFunction(() => typeof S !== "undefined" && typeof zeichnen === "function");
-    await p.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}#toasts,#tutorial-lernfeedback,#funken,#muenz-ebene{visibility:hidden!important}" });
+    await p.evaluate(RUECKMELDUNG);
+    // Ausgeblendet wie Meldungen: Anzeigen, die nur eine feste Zeit stehen (Verkaufsbetrag in
+    // der Kasse 1,55 s, «Neu eröffnet» am Pin 1,8 s) – sonst entscheidet die Laufzeit des
+    // Codes, ob eine Aufnahme sie noch erwischt.
+    await p.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}#toasts,#tutorial-lernfeedback,#funken,#muenz-ebene{visibility:hidden!important}" +
+      ".kasse-plus,.pin.neu-status .pin-state-badge,.pin.neu-status .pin-build-tool,.pin.neu-status .pin-status-hint{display:none!important}" +
+      ".pille.kasse > div:has(.kasse-plus) > small{visibility:visible!important}" });
     // Die Spieluhr bleibt immer stehen: nur tag() schaltet Tage weiter.
     await p.evaluate(() => { const echt = tempoSetzen; tempoSetzen = () => echt(0); echt(0); });
     await p.waitForTimeout(150);
     return p;
   }
-  async function aufnahme(p, name) {
+  async function aufnahme(p, name, nurQuest) {
     await p.waitForTimeout(200);
     const z = await p.evaluate(ZUSTAND);
     const datei = String(++nr).padStart(2, "0") + "-" + name;
     ergebnis[datei] = z;
-    await p.screenshot({ path: path.join(AUS, datei + ".png") });
+    // nurQuest: mit Animationen läuft die Welt weiter, verglichen wird dann nur die Aufgabenkarte
+    if (nurQuest) await p.screenshot({ path: path.join(AUS, datei + ".png"), clip: await p.evaluate(() => {
+      const r = document.getElementById("quest").getBoundingClientRect();
+      return { x: Math.max(0, r.x - 4), y: Math.max(0, r.y - 4), width: Math.max(8, r.width + 8), height: Math.max(8, r.height + 8) };
+    }) });
+    else await p.screenshot({ path: path.join(AUS, datei + ".png") });
+    // Fokusring und Zielfokus verschwinden sonst nach Zeitablauf (1–2,6 s): für feste
+    // Folgezustände nach der Aufnahme sofort entfernen.
+    await p.evaluate(() => {
+      document.querySelectorAll(".map-focus-ring,.map-focus-suggestion").forEach(e => e.remove());
+      document.body.classList.remove("ziel-fokus");
+      if (typeof welt !== "undefined") welt.classList.remove("map-focus-moving");
+    });
   }
   const tag = (p, n) => p.evaluate(n => {
     for (let i = 0; i < n; i++) {
@@ -344,6 +400,170 @@ const ZUSTAND = () => {
   await seiteSzene(p, "wissen-mit-perks", "wissen", () => { S.perks = { kette1: true, geo1: true, ruf1: true }; });
   await seiteSzene(p, "wissen-bereich-voll", "wissen", () => { S.perks = { markt1: true, markt2: true, leute1: true }; });
   await p.close();
+
+  // ---------- Aufgabenkarte (ab Schritt 6) ----------
+  const klick = (p, sel) => p.evaluate(sel => { const el = document.querySelector(sel); if (!el) throw new Error("fehlt: " + sel); el.click(); }, sel);
+  const hat = (p, sel) => p.evaluate(sel => !!document.querySelector(sel), sel);
+  const aufKarte = p => p.evaluate(() => { blattZu(); if (aktiveSeite !== "karte") seiteWechseln("karte"); zeichnen(); });
+  const neueRunde = async p => { await knopf(p, "#einstieg .es-los"); await p.evaluate(() => [...document.querySelectorAll("#d-wahlen .wahl")][0].click()); };
+  const tageBis = async (p, bedingung) => { for (let i = 0; i < 25 && !(await p.evaluate(bedingung)); i++) await tag(p, 1); };
+
+  // Einführung: jede Aufgabe auf der Karte, «Ziel zeigen», auf einem anderen Reiter
+  // (kompakte Zeile), Antippen der Zeile, Rückmeldung nach dem Schritt.
+  p = await neueSeite();
+  await neueRunde(p);
+  const AKTION = {
+    "kupfer-auf": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); },
+    "kupfer-crew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 15); },
+    "alu-auf": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); },
+    "alu-crew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 5); },
+    "zinn-auf": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); },
+    "zinn-crew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 10); },
+    "raff": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="raff-bau"]'); },
+    "raffcrew": async () => { await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 5); },
+    "fab": async () => { await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="fab-bau"]'); },
+    "fab-crew": async () => {
+      await tageBis(p, () => S.fabriken[0].restbau <= 0);
+      await aufKarte(p); await aufnahme(p, "a-fab-crew-fabrik-fertig");
+      await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 5);
+    },
+    "verkauf": async () => {
+      await tageBis(p, () => S.ware.kabel > 0);
+      await seite(p, "markt"); await aufnahme(p, "a-verkauf-ware-da");
+      await knopf(p, '#seite [data-tun="handverkauf"]');
+    },
+    "verkaeufer": async () => { await seite(p, "markt"); await regler(p, "#seite .besetzung-regler", 4); }
+  };
+  for (let i = 0; i < 14; i++) {
+    const id = await p.evaluate(() => tutorialSchritt() ? tutorialSchritt().id : null);
+    if (!id) break;
+    await aufKarte(p); await aufnahme(p, `a-${id}-karte`);
+    await seite(p, "ziel"); await aufnahme(p, `a-${id}-reiter-ziel`);
+    if (["verkauf", "verkaeufer"].includes(id) || i % 3 === 0) { await klick(p, "#quest"); await aufnahme(p, `a-${id}-zeile-antippen`); }
+    if (["verkauf", "verkaeufer", "kupfer-crew"].includes(id)) { await seite(p, ["kupfer-crew"].includes(id) ? "team" : "markt"); await aufnahme(p, `a-${id}-reiter-eigen`); }
+    await aufKarte(p);
+    if (await hat(p, "#quest .objective-guide-action")) { await klick(p, "#quest .objective-guide-action"); await aufnahme(p, `a-${id}-ziel-zeigen`); }
+    await aufKarte(p);
+    await AKTION[id]();
+    await aufnahme(p, `a-${id}-erledigt`);
+  }
+  await aufKarte(p); await aufnahme(p, "a-fertig-karte");
+  await p.close();
+
+  // Wissens-Quests: bereit («Neues Wissen», «Ansehen»), laufend mit Punkten,
+  // abgeschlossen, mit und ohne Engpass, «Ziel zeigen», Engpass antippen, ohne Aufgabe.
+  const kette = mehr => Object.assign({ tag: 100, kasse: 2000000, tutorial: 12, einfuehrung: 3, schwierigkeit: "einfach", startTeam: 0,
+    arbeiterGesamt: 60, verkaeufer: 4, verkauftSelber: true, etappe: 1,
+    minen: { katanga: quelle(15), boke: quelle(5), bangka: quelle(10) },
+    raff: { r_china: { arbeiter: 5, ausbau: 0 } },
+    fabriken: [{ produkt: "kabel", land: "china", arbeiter: 5, restbau: 0 }],
+    erz: { kupfer: 40, alu: 20, zinn: 20 }, mat: { kupfer: 60, alu: 30, zinn: 30 }, ware: { kabel: 12 } }, mehr || {});
+  const flow = (ids, mehr) => Object.assign({ version: 4, flags: {}, collected: Object.fromEntries(ids.map(i => [i, true])),
+    fields: Object.fromEntries(ids.flatMap(i => ({ basis: ["kette", "chemie", "fabrik"], lohn: ["leute"], markt: ["markt"], geologie: ["geologie"], ruf: ["ruf"], modell: ["modell"] })[i]).map(f => [f, true])),
+    geologieBesucht: [] }, mehr || {});
+  const szene = async (p, name, s, setzen) => {
+    await p.evaluate(([s, setzen]) => {
+      S = JSON.parse(window.__vergleichGrund);
+      if (setzen) (0, eval)("(" + setzen + ")")();
+      blattZu(); blattStand = ""; seitenStand = "";
+      seiteWechseln(s); zeichnen();
+    }, [s, setzen ? String(setzen) : null]);
+    await aufnahme(p, name);
+  };
+  const flowCode = (ids, mehr) => `S.wissenQuestFlow = ${JSON.stringify(flow(ids, mehr))};`;
+  const flowSetzen = (ids, mehr, dazu) => `() => { ${flowCode(ids, mehr)} ${dazu || ""} }`;
+  p = await neueSeite(kette());
+  await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+  await merken(p);
+  await szene(p, "w-basis-bereit-karte", "karte");
+  await szene(p, "w-basis-bereit-markt", "markt");
+  await szene(p, "w-basis-bereit-wissen", "wissen");
+  await szene(p, "w-basis-bereit-ziel", "ziel");
+  await klick(p, "#quest .wissen-quest-action"); await aufnahme(p, "w-basis-ansehen");
+  await p.evaluate(() => { document.querySelector('[data-schliessen="lupe"]')?.click(); });
+  await aufKarte(p); await aufnahme(p, "w-lohn-laufend-karte");
+  await klick(p, "#quest .objective-guide-action"); await aufnahme(p, "w-lohn-ziel-zeigen");
+  await seite(p, "team"); await aufnahme(p, "w-lohn-reiter-team");
+  await klick(p, "#quest"); await aufnahme(p, "w-lohn-zeile-antippen");
+  await aufKarte(p);
+  await pinKlick(p, "mine", "boke"); await knopf(p, '#blattinhalt [data-tun="lohn"][aria-pressed="false"]'); await aufnahme(p, "w-lohn-geaendert");
+  await aufKarte(p); await aufnahme(p, "w-lohn-bereit-karte");
+  await seite(p, "markt"); await aufnahme(p, "w-lohn-bereit-markt");
+  await klick(p, "#quest .wissen-quest-action"); await aufnahme(p, "w-lohn-ansehen");
+  await p.evaluate(() => { document.querySelector('[data-schliessen="lupe"]')?.click(); });
+  await szene(p, "w-markt-laufend-karte", "karte", flowSetzen(["basis", "lohn"]));
+  await szene(p, "w-markt-laufend-ziel", "ziel", flowSetzen(["basis", "lohn"]));
+  await klick(p, "#quest"); await aufnahme(p, "w-markt-zeile-antippen");
+  await szene(p, "w-geologie-laufend-karte", "karte", flowSetzen(["basis", "lohn", "markt"], { geologieBesucht: ["katanga"] }));
+  await klick(p, "#quest .objective-guide-action"); await aufnahme(p, "w-geologie-ziel-zeigen");
+  await aufKarte(p); await aufnahme(p, "w-geologie-danach-karte");
+  await szene(p, "w-ruf-laufend-karte", "karte", flowSetzen(["basis", "lohn", "markt", "geologie"]));
+  await szene(p, "w-ruf-laufend-markt", "markt", flowSetzen(["basis", "lohn", "markt", "geologie"]));
+  await klick(p, "#quest"); await aufnahme(p, "w-ruf-zeile-aufgeklappt");
+  await klick(p, "#quest"); await aufnahme(p, "w-ruf-zeile-nochmals");
+  await seite(p, "team"); await aufnahme(p, "w-ruf-anderer-reiter");
+  await aufKarte(p); await klick(p, "#quest .objective-guide-action"); await aufnahme(p, "w-ruf-ziel-zeigen");
+  await aufKarte(p); await aufnahme(p, "w-ruf-bereit-karte");
+  await szene(p, "w-ruf-laufend-wissen", "wissen", flowSetzen(["basis", "lohn", "markt", "geologie"]));
+  await szene(p, "w-modell-bereit-karte", "karte", flowSetzen(["basis", "lohn", "markt", "geologie", "ruf"]));
+  await szene(p, "w-modell-bereit-team", "team", flowSetzen(["basis", "lohn", "markt", "geologie", "ruf"]));
+  // Engpass während einer Wissens-Quest
+  await szene(p, "w-lohn-engpass-karte", "karte", flowSetzen(["basis"], null, "S.mat.zinn = 0;"));
+  await szene(p, "w-lohn-engpass-markt", "markt", flowSetzen(["basis"], null, "S.mat.zinn = 0;"));
+  await szene(p, "w-lohn-engpass-karte-2", "karte", flowSetzen(["basis"], null, "S.mat.zinn = 0;"));
+  await klick(p, "#quest .engpass-kasten"); await aufnahme(p, "w-engpass-antippen");
+  await szene(p, "w-ruf-engpass-quelle-fehlt", "karte", flowSetzen(["basis", "lohn", "markt", "geologie"], null, "delete S.minen.bangka; S.mat.zinn = 0; S.arbeiterGesamt -= 10;"));
+  await klick(p, "#quest .engpass-kasten"); await aufnahme(p, "w-engpass-quelle-antippen");
+  await szene(p, "w-bereit-engpass-karte", "karte", `() => { S.mat.zinn = 0; }`);
+  // Alle Wissens-Quests abgeschlossen
+  await szene(p, "w-alle-hinweis-karte", "karte", flowSetzen(["basis", "lohn", "markt", "geologie", "ruf", "modell"]));
+  await szene(p, "w-alle-hinweis-ziel", "ziel", flowSetzen(["basis", "lohn", "markt", "geologie", "ruf", "modell"]));
+  await szene(p, "w-alle-engpass-karte", "karte", flowSetzen(["basis", "lohn", "markt", "geologie", "ruf", "modell"], null, "S.mat.zinn = 0;"));
+  await szene(p, "w-alle-engpass-team", "team", flowSetzen(["basis", "lohn", "markt", "geologie", "ruf", "modell"], null, "S.mat.zinn = 0;"));
+  await klick(p, "#quest"); await aufnahme(p, "w-alle-engpass-antippen");
+  const ohneAufgabe = flowSetzen(["basis", "lohn", "markt", "geologie", "ruf", "modell"], { fields: {} }, "S.arbeiterGesamt -= freieArbeiter();");
+  await szene(p, "w-ohne-aufgabe-karte", "karte", ohneAufgabe);
+  await szene(p, "w-ohne-aufgabe-markt", "markt", ohneAufgabe);
+  await szene(p, "w-blatt-offen", "karte", flowSetzen(["basis"]));
+  await pinKlick(p, "mine", "katanga"); await aufnahme(p, "w-blatt-offen-quelle");
+  await p.close();
+
+  // Einstellungen: Animationen an («ruhig») und über die Einstellungen ausschalten
+  p = await neueSeite(null, { opt: { schrift: 106, tempo: 100, anim: 1 } });
+  await neueRunde(p);
+  await aufKarte(p); await aufnahme(p, "anim-an-karte");
+  await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); await aufnahme(p, "anim-an-erledigt");
+  await aufKarte(p);
+  await p.evaluate(() => document.querySelector('[data-tun="einst"]').click());
+  await regler(p, '#einst [data-regler="anim"]', 0); await aufnahme(p, "anim-aus-einstellungen");
+  await p.evaluate(() => { ueberlageZu("einst"); zeichnen(); }); await aufnahme(p, "anim-aus-karte");
+  await zielKlick(p); await regler(p, "#blattinhalt .besetzung-regler", 15); await aufnahme(p, "anim-aus-erledigt");
+  await p.close();
+  // Ohne «weniger Bewegung» im System: Rückmeldung mit Einblenden (nur die Karte im Bild)
+  p = await neueSeite(null, { opt: { schrift: 106, tempo: 100, anim: 1 }, bewegung: "no-preference" });
+  await neueRunde(p);
+  await aufKarte(p); await aufnahme(p, "bewegung-karte", true);
+  await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); await aufnahme(p, "bewegung-erledigt", true);
+  await p.close();
+
+  // Schmaler Bildschirm (360 px) und Tablet (820 px)
+  for (const [name, viewport] of [["schmal", { width: 360, height: 800 }], ["tablet", { width: 820, height: 1180 }]]) {
+    p = await neueSeite(null, { viewport });
+    await neueRunde(p);
+    await aufKarte(p); await aufnahme(p, `${name}-einf-karte`);
+    await seite(p, "team"); await aufnahme(p, `${name}-einf-team`);
+    await aufKarte(p); await klick(p, "#quest .objective-guide-action"); await aufnahme(p, `${name}-einf-ziel-zeigen`);
+    await zielKlick(p); await knopf(p, '#blattinhalt [data-tun="mine-auf"]'); await aufnahme(p, `${name}-einf-erledigt`);
+    await p.close();
+    p = await neueSeite(kette(), { viewport });
+    await p.evaluate(() => { modalOffen = false; document.getElementById("schleier").hidden = true; zeichnen(); });
+    await merken(p);
+    await szene(p, `${name}-w-bereit-karte`, "karte");
+    await szene(p, `${name}-w-bereit-markt`, "markt");
+    await szene(p, `${name}-w-lohn-engpass-karte`, "karte", flowSetzen(["basis"], null, "S.mat.zinn = 0;"));
+    await szene(p, `${name}-w-ruf-ziel`, "ziel", flowSetzen(["basis", "lohn", "markt", "geologie"]));
+    await p.close();
+  }
 
   fs.writeFileSync(path.join(AUS, "zustaende.json"), JSON.stringify({ fehler, ergebnis }, null, 1));
   await browser.close();
