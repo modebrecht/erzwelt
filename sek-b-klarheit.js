@@ -13,6 +13,7 @@
    8. Weniger «Spielmodell»-Vorbehalte in Blättern und Seiten.
    Gelb: Tutorial-Prüfung = Text, «Das Spielmodell» ohne Formeln,
    Zeit steht bei Kauf-Entscheiden.
+   Aufgabe auf anderen Seiten nur als schmale Zeile.
    ============================================================ */
 
 (function(){
@@ -237,8 +238,35 @@
 
   if (typeof questZeichnen === "function"){
     const vorherQuest = questZeichnen;
-    questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); return out; };
+    questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); questKompakt(); return out; };
   }
+
+  /* Aufgabe auf anderen Seiten als der Karte nur als schmale Zeile – ausser
+     die Aufgabe wird genau auf dieser Seite erledigt (Tutorial: Team, Markt;
+     Wissensauftrag: Wissen) oder ein Wissen ist zum Ansehen bereit. Antippen führt wie bisher zum Ziel; ohne Ziel
+     klappt die Zeile auf. */
+  let aufgeklapptAuf = null;
+  function questGehoertZuSeite(q){
+    const t = tutorialSchritt();
+    if (t) return t.ziel() === "dock:" + aktiveSeite;
+    if (q.classList.contains("wissen-bereit")) return true;   // «Ansehen» geht überall
+    return q.classList.contains("wissen-quest") && aktiveSeite === "wissen";
+  }
+  function questKompakt(){
+    const q = document.getElementById("quest");
+    if (!q) return;
+    if (aufgeklapptAuf !== aktiveSeite) aufgeklapptAuf = null;
+    const kompakt = !q.hidden && aktiveSeite !== "karte" && aufgeklapptAuf === null && !questGehoertZuSeite(q);
+    q.classList.toggle("kompakt", kompakt);
+    if (typeof questHoeheMessen === "function") questHoeheMessen();
+  }
+  document.getElementById("quest")?.addEventListener("click", ev => {
+    const q = ev.currentTarget;
+    if (!q.classList.contains("kompakt") || q.classList.contains("map-link")) return;
+    ev.preventDefault(); ev.stopPropagation();
+    aufgeklapptAuf = aktiveSeite;
+    questKompakt();
+  }, true);
   const vorherZeichnen = zeichnen;
   /* Zeigt das Tutorial auf einen Knopf der Leiste unten (z. B. Team),
      endet das Blatt über der Leiste, damit der Knopf antippbar bleibt. */
@@ -406,6 +434,13 @@
   style.id = "erzwelt-sek-b-klarheit-style";
   style.textContent = `
     #quest.tutorial-aktiv #q-punkte{display:none}
+    #quest.breit.kompakt{padding:7px 46px 8px 12px!important;cursor:pointer}
+    #quest.kompakt > :not(.kopf):not(#q-titel):not(.quest-map-cue){display:none!important}
+    #quest.kompakt .kopf{font-size:11px}
+    #quest.kompakt #q-titel{font-size:var(--f1);margin:1px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #quest.kompakt .quest-map-cue{top:50%;transform:translateY(-50%)}
+    #quest.kompakt:not(.map-link)::after{content:"";position:absolute;right:16px;top:50%;width:9px;height:9px;
+      border:solid var(--grau);border-width:0 2.5px 2.5px 0;transform:translateY(-70%) rotate(45deg)}
     #quest .tutorial-phase span{display:none}
     body.ziel-fokus #toasts{opacity:.12;transition:opacity .2s}
     body.fensterauf #tutorial-lernfeedback{top:calc(env(safe-area-inset-top) + 4px);padding:6px 12px;font-size:var(--f0)}

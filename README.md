@@ -77,6 +77,10 @@ Der Builder prüft dabei automatisch:
   Im Kaufblatt klebt der Kaufknopf unten und ist ohne Scrollen sichtbar; das
   Bild ist flacher. Auf dem Handy reicht jedes Blatt über die Leiste unten bis
   an den Rand; oben bleiben Kasse, Team und Tag sichtbar.
+- Aufgabe/Hinweis auf Markt, Team, Ziel und Wissen nur als schmale Zeile
+  (Antippen führt zum Ziel). Ganz sichtbar bleibt sie auf der Karte und auf
+  der Seite, auf der die Aufgabe erledigt wird (Tutorial: Team, Markt;
+  Wissensauftrag: Wissen), und wenn ein Wissen zum Ansehen bereit ist.
 - «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
   Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
 
