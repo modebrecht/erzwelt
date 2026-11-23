@@ -4,23 +4,26 @@
 
    Das Tutorial führt an der Hand: Jede Aufgabe verlangt genau EINE
    Handlung an genau EINEM Ort, und nur dieser Ort leuchtet auf der Karte.
-     Kupfer eröffnen → Kupfer besetzen → Team aufstocken →
-     Aluminium eröffnen → besetzen → Zinn eröffnen → besetzen →
+     Kupfer eröffnen → Kupfer besetzen → Aluminium eröffnen → besetzen →
+     Zinn eröffnen → besetzen →
      Raffinerie bauen → besetzen → Kabelfabrik bauen → besetzen →
      selbst verkaufen → Verkaufsteam einsetzen
    - Vorgeschlagen werden die günstigsten Orte; wer schon eine passende
      Quelle oder Raffinerie hat (alter Spielstand), arbeitet mit dieser.
-   - Personal: Jede Station lässt sich nur bis zum Bedarf besetzen
-     (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5, Verkauf 2),
-     eingestellt wird genau der fehlende Rest.
+   - Neue Runde startet mit 0 Personen. Eingestellt wird direkt an der
+     Station über den Regler (belegschaft-regler.js); dort steht, was einmalig
+     und was jeden Monat kostet. Jede Station lässt sich nur bis zum Bedarf
+     besetzen (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5,
+     Verkauf 2). Im Team-Reiter wird während der Einführung nicht eingestellt.
    - Kaufen geht nur am Zielort des aktuellen Schritts. Verbesserungen im
      Wissen gibt es erst nach der Einführung. So kann niemand das Geld
      ausgeben und dann feststecken.
-   - Fehlen freie Leute, sagt die Aufgabe, wo zu viele sitzen.
-   - Spielstände aus der alten 11-Schritt-Fassung werden übernommen.
+   - Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe
+     zuerst dorthin zum Umverteilen statt neu einzustellen.
+   - Spielstände aus älteren Fassungen werden übernommen (S.einfuehrung).
    ============================================================ */
 (function(){
-  const VERSION = 2;                         // Marke im Spielstand: S.einfuehrung
+  const VERSION = 3;                         // Marke im Spielstand: S.einfuehrung
   const ALTE_LAENGE = 11;
 
   /* ---------- Orte ---------- */
@@ -68,9 +71,6 @@
     ];
   }
   const offenerBedarf = () => bedarfListe().reduce((a, b) => a + Math.max(0, b.soll - b.ist), 0);
-  /* Wie viele Leute dürfen jetzt noch eingestellt werden? Gesamtbedarf minus
-     alle Angestellten – wer anderswo zu viele hat, verteilt um statt neu einzustellen. */
-  const nochEinstellen = () => Math.max(0, bedarfListe().reduce((a, b) => a + b.soll, 0) - S.arbeiterGesamt);
 
   /* Höchstzahl pro Station während der Einführung */
   function obergrenze(tun, ref){
@@ -95,12 +95,11 @@
   function besetzen(art, id, n, normal){
     const ist = art === "mine" ? (S.minen[id]?.arbeiter || 0) : art === "raff" ? (S.raff[id]?.arbeiter || 0) : (S.fabriken[fabIndex()]?.arbeiter || 0);
     const fehlt = n - ist;
-    if (fehlt <= 0 || freieArbeiter() >= fehlt) return {text: normal, ziel: pinZiel(art, id)};
-    const v = zuViele(art + ":" + id);
+    const v = fehlt > 0 && freieArbeiter() < fehlt ? zuViele(art + ":" + id) : null;
     if (v) return {
-      text: `Im Team ist zu wenig Personal frei. In ${ortName(v.art, v.id)} arbeiten ${v.ist}, nötig sind ${v.brauch}. Öffne ${ortName(v.art, v.id)} und schieb den Regler auf ${v.brauch}.`,
+      text: `In ${ortName(v.art, v.id)} arbeiten ${v.ist}, nötig sind ${v.brauch}. Öffne zuerst ${ortName(v.art, v.id)} und schieb den Regler auf ${v.brauch} – so musst du niemanden neu einstellen.`,
       ziel: pinZiel(v.art, v.id), entlasten: v};
-    return {text: `Im Team ist zu wenig Personal frei. Tippe unten auf «Team» und stelle ${nochEinstellen()} Personen ein.`, ziel: "dock:team"};
+    return {text: normal, ziel: pinZiel(art, id)};
   }
 
   /* ---------- Die Schritte ---------- */
@@ -117,8 +116,16 @@
         kauf: () => ({art:"mine", id: quelle(k)}),
         fertig: () => !!materialMine(k) },
       { id: k + "-crew", ikon:"person", get titel(){ return `Personal nach ${ortName("mine", quelle(k))}`; },
-        get text(){ const o = ortName("mine", quelle(k)); return besetzen("mine", quelle(k), n, `Öffne ${fett(o)} und schieb den Regler auf ${n} Personen.`).text; },
-        zusammenhang: `Ohne Personal wird kein ${rohstoffName(k)} gefördert.`,
+        get text(){
+          const o = ortName("mine", quelle(k));
+          const erst = k === START_MATERIALIEN[0] && !S.arbeiterGesamt
+            ? `Du hast noch kein Personal. Öffne ${fett(o)} und schieb den Regler auf ${n} – die Leute werden dabei eingestellt.`
+            : `Öffne ${fett(o)} und schieb den Regler auf ${n} Personen.`;
+          return besetzen("mine", quelle(k), n, erst).text;
+        },
+        zusammenhang: k === START_MATERIALIEN[0]
+          ? "Personal kostet zweimal: einmal beim Einstellen, danach jeden Monat Lohn."
+          : `Ohne Personal wird kein ${rohstoffName(k)} gefördert.`,
         ziel: () => besetzen("mine", quelle(k), n, "").ziel,
         crew: () => ({tun:"crew", ref: quelle(k), n}),
         fertig: () => { const id = materialMine(k); return !!id && S.minen[id].arbeiter >= n; } }
@@ -131,14 +138,6 @@
 
   const SCHRITTE = [
     ...quellenSchritte(CU, "hacke", 10, "Das Ladekabel braucht Kupfer, Aluminium und Zinn. Jede Rohstoffquelle liefert einen Rohstoff."),
-    { id:"team", ikon:"person", titel:"Personal einstellen",
-      get text(){
-        const n = nochEinstellen();
-        return `Für die ganze Lieferkette fehlen noch ${n} Personen. Tippe unten auf «Team» und dann auf «Stelle ${n} Personen ein».`;
-      },
-      zusammenhang:"Stell nur so viele Leute ein, wie du brauchst – jede Person kostet Lohn.",
-      ziel: () => "dock:team",
-      fertig: () => nochEinstellen() === 0 },
     ...quellenSchritte(AL, "berg", 5, "Bauxit wird später zu Aluminium."),
     ...quellenSchritte(SN, "berg", 5, "Zinnerz wird später zu Zinn. Jetzt hast du alle drei Rohstoffe."),
     { id:"raff", ikon:"kolben", titel:"Raffinerie bauen",
@@ -176,12 +175,10 @@
       fertig: () => S.verkauftSelber },
     { id:"verkaeufer", ikon:"muenze", titel:"Verkaufsteam einsetzen",
       get text(){
-        const fehlt = 2 - (S.verkaeufer || 0);
-        if (fehlt > 0 && freieArbeiter() < fehlt) return `Für den Verkauf ist niemand frei. Tippe unten auf «Team» und stelle ${nochEinstellen()} Personen ein.`;
         return "Im Markt beim Verkaufsteam: Schieb den Regler auf 2 Personen. Sie verkaufen dann jeden Tag.";
       },
       zusammenhang:"Das Verkaufsteam verkauft jeden Tag – du musst nicht mehr selbst.",
-      ziel: () => { const fehlt = 2 - (S.verkaeufer || 0); return fehlt > 0 && freieArbeiter() < fehlt ? "dock:team" : "dock:markt"; },
+      ziel: () => "dock:markt",
       crew: () => ({tun:"vcrew", ref:null, n:2}),
       fertig: () => (S.verkaeufer || 0) >= 2 }
   ];
@@ -191,10 +188,29 @@
   const schritt = () => tutorialSchritt();
   const kaufZiel = () => { const t = schritt(); return t && t.kauf ? t.kauf() : null; };
 
+  /* ---------- Neue Runde: 0 Personen ---------- */
+  const vorherNeu = neuerZustand;
+  neuerZustand = function(){ const z = vorherNeu.apply(this, arguments); z.arbeiterGesamt = 0; z.startTeam = 0; return z; };
+  // Ältere Spielstände hatten 10 Startleute (zählen nicht als Investition).
+  const vorherLaden = laden;
+  laden = function(){
+    let roh = null;
+    try { roh = JSON.parse(SPEICHER.lies(SCHLUESSEL) || SPEICHER.lies("erzwelt_v1") || "null"); } catch (e){}
+    const ok = vorherLaden.apply(this, arguments);
+    if (ok && roh && roh.startTeam === undefined) S.startTeam = 10;
+    return ok;
+  };
+  // Beim Seitenstart wurde eine neue Runde noch mit dem alten Startzustand angelegt.
+  if (typeof geladen !== "undefined" && !geladen && S.tag === 1 && S.schwierigkeit === null
+      && !Object.keys(S.minen).length && S.startTeam === undefined){
+    S.arbeiterGesamt = 0; S.startTeam = 0;
+  }
+
   /* ---------- Spielstände übernehmen ---------- */
+  const LAENGE_FRUEHER = {undefined: ALTE_LAENGE, 2: 13};
   function migrieren(){
     if (!S || S.einfuehrung === VERSION) return;
-    if (S.tutorial >= ALTE_LAENGE) S.tutorial = TUTORIAL.length;
+    if (S.tutorial >= (LAENGE_FRUEHER[S.einfuehrung] ?? ALTE_LAENGE)) S.tutorial = TUTORIAL.length;
     else if (S.tutorial > 0){
       S.tutorial = 0;                                   // still vorspulen, was schon erledigt ist
       while (tutorialLaeuft() && TUTORIAL[S.tutorial].fertig()) S.tutorial++;
@@ -295,30 +311,24 @@
     if (+b.dataset.n > platz) b.dataset.n = platz;
   }, true);
 
+  /* Team-Reiter: In der Einführung wird an der Station eingestellt, nicht hier. */
   const vorherAnstellbar = anstellbar;
-  anstellbar = function(){
-    if (!tutorialLaeuft()) return vorherAnstellbar();
-    return nochEinstellen();
-  };
+  anstellbar = function(){ return tutorialLaeuft() ? 0 : vorherAnstellbar(); };
 
   const REGLER_ANSTELL = /<div class="reglerzeile">\s*<div class="kopf"><b>Wie viele\?<\/b>[\s\S]*?<\/small><\/div>/;
+  const KNOPF_ANSTELL = /<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>(\s*<div class="notiz monatskosten">[\s\S]*?<\/div>)?/;
   const vorherTeam = seiteTeam;
   seiteTeam = function(){
     if (!tutorialLaeuft()){
-      if (anstellMenge % 5) anstellMenge = 10;          // Regler wieder auf seine Stufen
+      if (anstellMenge % 5 || anstellMenge < 5) anstellMenge = 10;
       return vorherTeam.apply(this, arguments);
     }
-    const n = nochEinstellen();
-    anstellMenge = Math.max(1, n);
-    let html = vorherTeam.apply(this, arguments);
-    const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.soll}</b></span>`).join("");
-    html = html.replace(REGLER_ANSTELL, `<div class="einfuehrung-bedarf">
-        <b>${n > 0 ? `Es fehlen noch ${n} Personen` : "Du hast genug Personal"}</b>
+    const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.ist}/${b.soll}</b></span>`).join("");
+    return vorherTeam.apply(this, arguments).replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
+        <b>Eingestellt wird an der Station</b>
+        <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was einmalig und was jeden Monat kostet.</small>
         <div class="bedarf-liste">${liste}</div>
-        <small>In der Einführung stellst du genau so viele Leute ein, wie die Lieferkette braucht. Jede Person kostet CHF&nbsp;${LOHN_PRO_KOPF.toLocaleString("de-CH")} beim Einstellen und danach Lohn.</small>
       </div>`);
-    html = html.replace(/Im Tutorial genügen \d+ Leute/, "Genug Personal für die Einführung");
-    return html;
   };
 
   /* ---------- Wissen: Verbesserungen erst nach der Einführung ---------- */
@@ -374,7 +384,7 @@
   `;
   document.head.appendChild(style);
 
-  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf, nochEinstellen};
+  window.__erzweltEinfuehrung = {version: VERSION, schritte: TUTORIAL.map(t => t.id), besetzungsZiel, obergrenze, offenerBedarf};
   blattStand = ""; seitenStand = "";
   if (typeof zeichnen === "function") zeichnen();
 })();

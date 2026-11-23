@@ -125,11 +125,12 @@ const setSlider = async (scope, value) => {
   await page.waitForTimeout(150);
 };
 const steps = await page.evaluate(() => TUTORIAL.map(t => t.id));
-const expectedSteps = ['kupfer-auf','kupfer-crew','team','alu-auf','alu-crew','zinn-auf','zinn-crew','raff','raffcrew','fab','fab-crew','verkauf','verkaeufer'];
+const expectedSteps = ['kupfer-auf','kupfer-crew','alu-auf','alu-crew','zinn-auf','zinn-crew','raff','raffcrew','fab','fab-crew','verkauf','verkaeufer'];
 if (JSON.stringify(steps) !== JSON.stringify(expectedSteps)) throw new Error(`Unexpected tutorial steps ${JSON.stringify(steps)}`);
 
-// 1: copper source. A different source must not be buyable.
+// 1: copper source. A new round starts without staff; a different source must not be buyable.
 await waitTutorial('kupfer-auf');
+if ((await state()).workers !== 0) throw new Error('New round should start with 0 people');
 await clickMineById('boke');
 if (!await page.locator('#blatt.auf button[data-tun="mine-auf"][disabled]').count()) throw new Error('Non-target source was buyable during the introduction');
 if (!await page.locator('#blatt.auf [data-einfuehrung-hin]').count()) throw new Error('Locked sheet does not point to the current target');
@@ -138,24 +139,22 @@ await clickVisible('#blatt.auf button[data-tun="mine-auf"]:not([disabled])');
 await waitTutorial('kupfer-crew');
 await checkpoint('kupfer-auf');
 
-// 2: staff copper with the slider; the slider shows the goal and stops at the need.
+// 2: staff copper with the slider: the missing people are hired right there.
 if (!await page.locator('#blatt.auf .besetzung-ziel').count()) throw new Error('Slider goal marker missing');
 if (await page.locator('#blatt.auf .besetzung-regler').getAttribute('max') !== '10') throw new Error('Copper slider not capped at the introduction need');
+if (!/Einmalig/i.test(await page.locator('#blatt.auf .besetzung-kosten').innerText())) throw new Error('One-time / monthly cost tiles missing');
+const cashBeforeHire = (await state()).kasse;
 await setSlider('#blatt.auf', 10);
-await waitTutorial('team');
-await checkpoint('kupfer-crew');
-
-// 3: hire exactly the missing people for the whole chain in one tap.
-await page.locator('button[data-seite="team"]').first().click();
-const need = await page.evaluate(() => window.__erzweltEinfuehrung.nochEinstellen());
-await clickVisible('button[data-tun="anstellen"]:not([disabled])');
 await waitTutorial('alu-auf');
 const hired = await state();
-if (hired.workers !== 10 + need || hired.free !== need) throw new Error(`Expected exactly ${need} new hires, got ${JSON.stringify(hired)}`);
-if (await page.locator('button[data-tun="anstellen"]:not([disabled])').count()) throw new Error('Hiring beyond the introduction need is possible');
-await checkpoint('team-hired');
+if (hired.workers !== 10 || hired.free !== 0 || cashBeforeHire - hired.kasse !== 10 * 1800) throw new Error(`Inline hiring wrong: ${JSON.stringify(hired)}`);
+await checkpoint('kupfer-crew');
 
-// 4-7: aluminium and tin, one source and one staffing step each.
+// The team page does not hire during the introduction.
+await page.locator('button[data-seite="team"]').first().click();
+if (await page.locator('#seite button[data-tun="anstellen"]').count()) throw new Error('Team page still hires during the introduction');
+
+// 3-6: aluminium and tin, one source and one staffing step each.
 for (const k of ['alu','zinn']) {
   await openTarget();
   await clickVisible('#blatt.auf button[data-tun="mine-auf"]:not([disabled])');
@@ -171,7 +170,7 @@ for (const k of ['alu','zinn']) {
   await checkpoint(`${k}-staffed`);
 }
 
-// 8-9: refinery.
+// 7-8: refinery.
 await openTarget();
 await clickVisible('#blatt.auf button[data-tun="raff-bau"]:not([disabled])');
 await waitTutorial('raffcrew');
@@ -179,13 +178,13 @@ await setSlider('#blatt.auf', 5);
 await waitTutorial('fab');
 await checkpoint('refinery-staffed');
 
-// 10: cable factory.
+// 9: cable factory.
 await openTarget();
 await clickVisible('#blatt.auf button[data-tun="fab-bau"]:not([disabled])');
 await waitTutorial('fab-crew');
 await checkpoint('factory-started');
 
-// 11: wait for construction at 4x, then staff.
+// 10: wait for construction at 4x, then staff.
 await goMap();
 await setTempo(4);
 await page.waitForFunction(() => S.fabriken.length && S.fabriken[0].restbau === 0, null, { timeout: 30000 });
@@ -201,20 +200,14 @@ await setTempo(4);
 await page.waitForFunction(() => (S.ware?.kabel || 0) > 0, null, { timeout: 30000 });
 await setTempo(0);
 
-// 12: manual sale.
+// 11: manual sale.
 await dock('markt');
 await clickVisible('button[data-tun="handverkauf"]:not([disabled])');
 await waitTutorial('verkaeufer');
 await checkpoint('manual-sale');
 
-// 13: sales team via the market slider (hire first if nobody is free).
-let s = await state();
-if (s.free < 2) {
-  await dock('team');
-  const hire = page.locator('button[data-tun="anstellen"]:not([disabled])');
-  await hire.first().click();
-  await page.waitForTimeout(100);
-}
+// 12: sales team via the market slider (hires the two people directly).
+let s;
 await dock('markt');
 await setSlider('#seite', 2);
 await page.waitForFunction(() => (S.verkaeufer || 0) >= 2 && S.tutorial >= TUTORIAL.length, null, { timeout: 10000 });

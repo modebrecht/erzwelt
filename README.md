@@ -134,38 +134,43 @@ im Ziel (dafür gibt es «Verlauf»). Lerninhalte in der Wissens-Lupe bleiben.
 Die Einführung nimmt an der Hand: **eine Aufgabe = eine Handlung an einem Ort**.
 Nur dieser Ort leuchtet auf der Karte, «Ziel zeigen» führt genau dorthin.
 
-1. Kupfer-Quelle eröffnen (Katanga) · 2. Katanga mit 10 Personen besetzen ·
-3. genau das fehlende Personal einstellen (22) · 4./5. Aluminium (Boké) eröffnen und mit 5 besetzen ·
-6./7. Zinn (Bangka) eröffnen und mit 5 besetzen · 8./9. Raffinerie (Guangdong) bauen
-und mit 5 besetzen · 10./11. Kabelfabrik (China) bauen und nach dem Bau mit 5
-besetzen · 12. einmal selbst verkaufen · 13. Verkaufsteam mit 2 Personen.
+1./2. Kupfer-Quelle (Katanga) eröffnen und mit 10 Personen besetzen ·
+3./4. Aluminium (Boké) eröffnen und mit 5 besetzen · 5./6. Zinn (Bangka) eröffnen
+und mit 5 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
+9./10. Kabelfabrik (China) bauen und nach dem Bau mit 5 besetzen ·
+11. einmal selbst verkaufen · 12. Verkaufsteam mit 2 Personen.
 
-- Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
-  passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
+- **Neue Runde mit 0 Personen.** Eingestellt wird direkt an der Station mit dem
+  Regler (siehe unten). Schon die erste Aufgabe zeigt: Personal kostet einmalig
+  beim Einstellen und danach jeden Monat Lohn. Im Team-Reiter wird während der
+  Einführung nicht eingestellt; er zeigt den Stand pro Station.
 - **Nur so viel Personal wie nötig:** Jede Station lässt sich nur bis zum Bedarf
   besetzen (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5, Verkauf 2 –
-  zusammen 32). Eingestellt wird genau der Rest (Bedarf minus alle Angestellten);
-  der Team-Reiter zeigt die Liste statt des Reglers. Am Ende sitzt niemand untätig.
+  zusammen 32, Lohn rund CHF 16'000 pro Monat). Am Ende sitzt niemand untätig.
+- Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
+  passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
 - Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
   «Noch nicht dran» und einen Knopf zum richtigen Ort. Verbesserungen im Wissen
   gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
-  dann feststecken (am Ende der Einführung bleiben rund CHF 0.7 Mio).
-- Ist für einen Besetzungsschritt niemand frei, schickt die Aufgabe dorthin,
-  wo zu viele Leute arbeiten, und der Regler zeigt dort die richtige Zahl.
-- Spielstände aus dem alten 11-Schritt-Tutorial werden übernommen (Marke
-  `S.einfuehrung`): Fertige bleiben fertig, laufende springen zum ersten
-  offenen Schritt.
+  dann feststecken (am Ende der Einführung bleiben rund CHF 0.69 Mio).
+- Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe zuerst
+  dorthin zum Umverteilen, statt neu einstellen zu lassen.
+- Ältere Spielstände werden übernommen (Marke `S.einfuehrung`): Fertige bleiben
+  fertig, laufende springen zum ersten offenen Schritt. Sie behalten ihre
+  10 Startleute (`S.startTeam`, zählt nicht als Investition).
 
 ## Belegschaft per Regler (`belegschaft-regler.js`)
 
 Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine Zeile
-**− · Zahl · +** für einzelne Personen und darunter ein Regler 0 … Plätze. Was das
-freie Team nicht füllen kann, ist schraffiert; weiter geht der Regler nicht.
-Übernommen wird beim Loslassen über die bestehende Spiellogik. In der Einführung
-zeigt eine Marke («Ziel 10») die verlangte Zahl.
+**− · Zahl · +** für einzelne Personen und darunter ein Regler 0 … Plätze.
 
-Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»; darunter
-steht, was danach jeden Monat an Lohn anfällt (je nach Land, Verkauf, ohne Aufgabe).
+- Blau: arbeitet hier. Hell: kommt aus dem freien Team. Gelb: wird beim Loslassen
+  **neu eingestellt**, soweit das Geld reicht. Schraffiert: geht nicht.
+- Zwei Kacheln zeigen live beim Ziehen, was das kostet: **Einmalig** (CHF 1'800
+  pro neue Person) und **Jeden Monat** (Lohn am Standort, je nach Land und Lohnstufe).
+- In der Einführung zeigt eine Marke («Ziel 10») die verlangte Zahl.
+- Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»;
+  darunter steht der monatliche Lohn (je nach Land, Verkauf, ohne Aufgabe).
 
 ## PDF-Leistungsnachweis
 
@@ -203,7 +208,7 @@ Vor einer finalen Freigabe:
 - [ ] Standalone-Build erfolgreich ausführen.
 - [ ] Generierte `index.html` direkt öffnen.
 - [ ] Mobile Zielgrösse 360×800 prüfen.
-- [ ] Einführung Schritte 1–13 vollständig durchspielen.
+- [ ] Einführung Schritte 1–12 vollständig durchspielen.
 - [ ] Rohstoffquelle → Raffinerie → Fabrik → Verkauf prüfen.
 - [ ] Fabrikbau, Fortschrittsring und Abschlusszustand prüfen.
 - [ ] Streik, Stillstand und Sicherheitsstopp prüfen.
