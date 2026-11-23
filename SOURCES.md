@@ -42,12 +42,38 @@ Das Mittelmeer enthält auch die kleineren Inseln aus den Landdaten, darunter Ma
 
 Die Küsten an den Engstellen der Arabischen Halbinsel sind mit weniger Vereinfachung übernommen. Kleine Inseln wie Bahrain, Masirah, Farasan und die Nebeninseln von Sokotra stammen aus den [Natural-Earth-Landdaten 1:10 Mio.](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-land/) (Version 5.1.1).
 
+Weitere kleine Inseln stammen aus den [Natural-Earth-Daten 1:10 Mio.](https://www.naturalearthdata.com/downloads/10m-physical-vectors/) (Landflächen 5.1.1 und kleinere Inseln 4.1.0). Die grössten Inseln je Kontinent und wichtige kleinere Inseln haben bei der Kartenprüfung Vorrang.
+
+Die Binnengewässer stammen aus [Natural Earth, 1:50 Mio.](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-lakes-reservoirs/) (Version 5.0.0). Der Nicaraguasee mit Ometepe übernimmt die detaillierteren [Seendaten 1:10 Mio.](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-lakes/) (Version 5.0.0).
+
+### Kartenprüfung nach Regionen
+
+| Paket | Gebiet und Schwerpunkte |
+| --- | --- |
+| 1 | Afrika, einschliesslich Atlantikinseln und westlichem Indischen Ozean |
+| 2 | Europa und Mittelmeer bis Nordafrika, anschliessend Arabische Halbinsel und Rotes Meer |
+| 3 | Griechenland und Ägäis, Türkei, Schwarzes Meer, Südrussland, Kaukasus und Zentralasien bis zum Kaspischen Meer |
+| 4a | Nord- und Ostasien, von Sibirien und der Beringstrasse bis zu Korea, Japan und Taiwan |
+| 4b | Südasien mit indischem Subkontinent, Sri Lanka, Andamanen und Nikobaren sowie Malediven |
+| 5 | Südostasien mit Festland und Inselbögen von den Philippinen über Malaysia und Singapur bis nach Indonesien und Timor |
+| 6 | Übergang von Südostasien über Neuguinea nach Australien, Neuseeland und zu den Inselgruppen im Pazifik |
+| 7 | Nordamerika mit Grönland, kanadischem Archipel, Grossen Seen, Alaska und Aleuten sowie Hawaii |
+| 8 | Mexiko und Mittelamerika mit den Inseln im Pazifik, den Bahamas sowie den Grossen und Kleinen Antillen |
+| 9 | Südamerika mit Galápagos, Feuerland, den Inseln Patagoniens und den vorgelagerten Inseln im Atlantik |
+
 Standortreferenzen für die Rohstoffkarte
 
 - [Freiberg · Georeferenzpunkt, Stadt Freiberg](https://www.freiberg.de/stadt-und-buerger/aktuelles/neuigkeiten/schlossplatz-ist-erste-oeffentliche-teststelle-fuer-gps-geraete-in-freiberg)
 - [Katanga · Kinsevere, MMG, Abschnitt 4.1](https://www.mmg.com/content/uploads/2026/03/Mineral-Resources-Ore-Reserves-Statement-2020.pdf)
 - [Rubaya · Masisi, Bergbauministerium der DR Kongo, Anhang 2025](https://saemape.cd/wp-content/uploads/2025/12/Cartographie_Sites_Haut_Risque_SK-NK.pdf)
 - [Gatumba · Ngororero, Rwanda Environment Management Authority, Abschnitt VII.3](https://www.rema.gov.rw/fileadmin/user_upload/REMA/Publications/Reports/Nile_Nyabarongo_Upper_Catchment_Pollution_Management_Plan_Final__Jan._2021_.pdf)
+- [Greenbushes · Bergbaugebiet, Environmental Protection Authority Western Australia, Abschnitt 3.1](https://www.epa.wa.gov.au/sites/default/files/Referral_Documentation/Appendix%20W%20-%20ContaminationAssessment_Historical%20Mining%20Areas.pdf)
+- [Kalgoorlie · Fimiston Open Pit, Northern Star Resources](https://www.nsrltd.com/our-assets/kcgm-operations/)
+- [Salar de Atacama · NASA JPL](https://www.jpl.nasa.gov/images/pia23420-salar-de-atacama-chile/)
+- [Escondida · BHP, Abschnitt 6.2.1](https://www.bhp.com/-/media/documents/investors/annual-reports/2024/bhpform20f2024.pdf)
+- [Bangka · Pangkalpinang, Stadtverwaltung](https://setwan.pangkalpinangkota.go.id/geografis/)
+- [Guangdong · Guangzhou, Regionalregierung](https://en.gdfao.gov.cn/2026-02/11/c_1015878.htm)
+- [Antofagasta · Altonorte, Glencore](https://www.glencore.com/.rest/api/v1/documents/1bee35fd44a33fa1bde908afef97a901/GISTM%2Bdisclosure%2B2025%2BAltonorte%2BTSF.pdf)
 
 ## Didaktische Abgrenzung
 
