@@ -129,6 +129,37 @@ Lange Erklärsätze auf Markt, Team, Ziel, Wissen und in den Blättern kürzer;
 Rohstoffe ohne Quelle im Markt in einer Zeile; keine doppelte Meldungsliste
 im Ziel (dafür gibt es «Verlauf»). Lerninhalte in der Wissens-Lupe bleiben.
 
+## Einführung Schritt für Schritt (`einfuehrung.js`)
+
+Die Einführung nimmt an der Hand: **eine Aufgabe = eine Handlung an einem Ort**.
+Nur dieser Ort leuchtet auf der Karte, «Ziel zeigen» führt genau dorthin.
+
+1. Kupfer-Quelle eröffnen (Katanga) · 2. Katanga mit 10 Personen besetzen ·
+3. Team auf 40 aufstocken · 4./5. Aluminium (Boké) eröffnen und mit 5 besetzen ·
+6./7. Zinn (Bangka) eröffnen und mit 5 besetzen · 8./9. Raffinerie (Guangdong) bauen
+und mit 5 besetzen · 10./11. Kabelfabrik (China) bauen und nach dem Bau mit 5
+besetzen · 12. einmal selbst verkaufen · 13. Verkaufsteam mit 2 Personen.
+
+- Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
+  passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
+- Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
+  «Noch nicht dran» und einen Knopf zum richtigen Ort. Verbesserungen im Wissen
+  gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
+  dann feststecken (am Ende der Einführung bleiben rund CHF 0.7 Mio).
+- Ist für einen Besetzungsschritt niemand frei, schickt die Aufgabe dorthin,
+  wo zu viele Leute arbeiten, und der Regler zeigt dort die richtige Zahl.
+- Spielstände aus dem alten 11-Schritt-Tutorial werden übernommen (Marke
+  `S.einfuehrung`): Fertige bleiben fertig, laufende springen zum ersten
+  offenen Schritt.
+
+## Belegschaft per Regler (`belegschaft-regler.js`)
+
+Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine Zeile
+**− · Zahl · +** für einzelne Personen und darunter ein Regler 0 … Plätze. Was das
+freie Team nicht füllen kann, ist schraffiert; weiter geht der Regler nicht.
+Übernommen wird beim Loslassen über die bestehende Spiellogik. In der Einführung
+zeigt eine Marke («Ziel 10») die verlangte Zahl.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
@@ -165,7 +196,7 @@ Vor einer finalen Freigabe:
 - [ ] Standalone-Build erfolgreich ausführen.
 - [ ] Generierte `index.html` direkt öffnen.
 - [ ] Mobile Zielgrösse 360×800 prüfen.
-- [ ] Tutorial Schritte 1–11 vollständig durchspielen.
+- [ ] Einführung Schritte 1–13 vollständig durchspielen.
 - [ ] Rohstoffquelle → Raffinerie → Fabrik → Verkauf prüfen.
 - [ ] Fabrikbau, Fortschrittsring und Abschlusszustand prüfen.
 - [ ] Streik, Stillstand und Sicherheitsstopp prüfen.
