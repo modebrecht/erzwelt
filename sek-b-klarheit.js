@@ -170,6 +170,9 @@
         if (q < quote){ quote = q; knapp = k; }
       }
       if (!knapp || quote >= 1) continue;
+      // Reicht der Rest nach der heutigen Produktion noch für ein weiteres Stück,
+      // hat das Material nicht gebremst – knappes Lager bei abgestimmter Kette ist kein Engpass.
+      if ((S.mat[knapp]||0) >= def.rezept[knapp]) continue;
       const mat = MATERIAL[knapp];
       const titel = `${mat.name} fehlt für ${def.name}`;
       const mineId = materialMine(knapp);

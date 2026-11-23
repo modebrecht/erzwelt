@@ -13,8 +13,10 @@
    - Neue Runde startet mit 0 Personen. Eingestellt wird direkt an der
      Station über den Regler (belegschaft-regler.js); dort steht, was einmalig
      und was jeden Monat kostet. Jede Station lässt sich nur bis zum Bedarf
-     besetzen (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5,
-     Verkauf 2). Im Team-Reiter wird während der Einführung nicht eingestellt.
+     besetzen (Kupfer 15, Aluminium 5, Zinn 10, Raffinerie 5, Fabrik 5,
+     Verkauf 4). Durchgerechnet: Damit läuft die Kette danach ohne Engpass
+     (16 Kabel pro Tag hergestellt, bis 20 verkauft). Im Team-Reiter wird
+     während der Einführung nicht eingestellt.
    - Kaufen geht nur am Zielort des aktuellen Schritts. Verbesserungen im
      Wissen gibt es erst nach der Einführung. So kann niemand das Geld
      ausgeben und dann feststecken.
@@ -46,7 +48,7 @@
   /* Wo sitzen mehr Leute, als die Einführung braucht? */
   function zuViele(ausser){
     const soll = {};
-    for (const k of START_MATERIALIEN){ const id = materialMine(k); if (id) soll["mine:" + id] = k === START_MATERIALIEN[0] ? 10 : 5; }
+    for (const k of START_MATERIALIEN){ const id = materialMine(k); if (id) soll["mine:" + id] = BEDARF.quelle(k); }
     let best = null;
     const pruefe = (art, id, ist, brauch) => {
       if (art + ":" + id === ausser) return;
@@ -60,7 +62,10 @@
   }
 
   /* ---------- Bedarf: so viele Leute braucht die Einführung ---------- */
-  const BEDARF = {quelle: k => k === START_MATERIALIEN[0] ? 10 : 5, raff: 5, fab: 5, verkauf: 2};
+  /* Abgestimmt (Simulation ohne Ereignisse, 120 Tage): Fabrik 5 → 16 Kabel pro Tag,
+     dafür Kupfer 15, Aluminium 5, Zinn 10; Verkauf 4 → 20 pro Tag. Kein Engpass,
+     Lager bleibt leer, rund CHF 41'000 laufender Gewinn pro Monat (Einfach). */
+  const BEDARF = {quelle: k => [15, 5, 10][START_MATERIALIEN.indexOf(k)] ?? 5, raff: 5, fab: 5, verkauf: 4};
   function bedarfListe(){
     const fi = fabIndex();
     return [
@@ -106,8 +111,8 @@
   const [CU, AL, SN] = START_MATERIALIEN;          // kupfer, alu, zinn
   const MAT_NAME = k => MATERIAL[k].name;
 
-  function quellenSchritte(k, ikon, n, zusammenhangAuf){
-    const name = MAT_NAME(k);
+  function quellenSchritte(k, ikon, zusammenhangAuf, warum){
+    const name = MAT_NAME(k), n = BEDARF.quelle(k);
     return [
       { id: k + "-auf", ikon, titel: `${name}-Quelle eröffnen`,
         get text(){ return `Tippe auf der Karte auf ${fett(ortName("mine", quelle(k)))} und eröffne die Rohstoffquelle.`; },
@@ -119,8 +124,8 @@
         get text(){
           const o = ortName("mine", quelle(k));
           const erst = k === START_MATERIALIEN[0] && !S.arbeiterGesamt
-            ? `Du hast noch kein Personal. Öffne ${fett(o)} und schieb den Regler auf ${n} – die Leute werden dabei eingestellt.`
-            : `Öffne ${fett(o)} und schieb den Regler auf ${n} Personen.`;
+            ? `Du hast noch kein Personal. Öffne ${fett(o)} und schieb den Regler auf ${n} – die Leute werden dabei eingestellt.${warum ? " " + warum : ""}`
+            : `Öffne ${fett(o)} und schieb den Regler auf ${n} Personen.${warum ? " " + warum : ""}`;
           return besetzen("mine", quelle(k), n, erst).text;
         },
         zusammenhang: k === START_MATERIALIEN[0]
@@ -137,9 +142,11 @@
   }
 
   const SCHRITTE = [
-    ...quellenSchritte(CU, "hacke", 10, "Das Ladekabel braucht Kupfer, Aluminium und Zinn. Jede Rohstoffquelle liefert einen Rohstoff."),
-    ...quellenSchritte(AL, "berg", 5, "Bauxit wird später zu Aluminium."),
-    ...quellenSchritte(SN, "berg", 5, "Zinnerz wird später zu Zinn. Jetzt hast du alle drei Rohstoffe."),
+    ...quellenSchritte(CU, "hacke", "Das Ladekabel braucht Kupfer, Aluminium und Zinn. Jede Rohstoffquelle liefert einen Rohstoff.",
+      "Ein Ladekabel braucht doppelt so viel Kupfer wie Aluminium oder Zinn."),
+    ...quellenSchritte(AL, "berg", "Bauxit wird später zu Aluminium."),
+    ...quellenSchritte(SN, "berg", "Zinnerz wird später zu Zinn. Jetzt hast du alle drei Rohstoffe.",
+      "Zinnerz enthält wenig Zinn – darum braucht es hier mehr Leute als in Boké."),
     { id:"raff", ikon:"kolben", titel:"Raffinerie bauen",
       get text(){ return `Rohstoff lässt sich nicht direkt verbauen. Tippe auf ${fett(ortName("raff", raffId()))} und baue die Raffinerie.`; },
       zusammenhang:"Rohstoff → Raffinerie → Material",
@@ -175,12 +182,12 @@
       fertig: () => S.verkauftSelber },
     { id:"verkaeufer", ikon:"muenze", titel:"Verkaufsteam einsetzen",
       get text(){
-        return "Im Markt beim Verkaufsteam: Schieb den Regler auf 2 Personen. Sie verkaufen dann jeden Tag.";
+        return `Im Markt beim Verkaufsteam: Schieb den Regler auf ${BEDARF.verkauf} Personen. Jede verkauft ${STUECK_PRO_VERKAEUFER} Kabel pro Tag – zusammen mehr, als die Fabrik herstellt.`;
       },
       zusammenhang:"Das Verkaufsteam verkauft jeden Tag – du musst nicht mehr selbst.",
       ziel: () => "dock:markt",
-      crew: () => ({tun:"vcrew", ref:null, n:2}),
-      fertig: () => (S.verkaeufer || 0) >= 2 }
+      crew: () => ({tun:"vcrew", ref:null, n: BEDARF.verkauf}),
+      fertig: () => (S.verkaeufer || 0) >= BEDARF.verkauf }
   ];
 
   TUTORIAL.splice(0, TUTORIAL.length, ...SCHRITTE);

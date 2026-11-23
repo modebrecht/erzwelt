@@ -68,7 +68,8 @@ Der Builder prüft dabei automatisch:
   Meldungen kurz ab.
 - Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück; HUD «Team frei».
 - Tutorial-Raffinerie zeigt Kupfer statt Seltener Erden, ohne Spezialisierungskarte.
-- Konkrete Engpass-Hinweise nach dem Tutorial, z. B. «Zinn fehlt für Ladekabel –
+- Konkrete Engpass-Hinweise nach dem Tutorial (nur wenn ein Material die Produktion
+  wirklich gebremst hat, nicht schon bei knappem Lager), z. B. «Zinn fehlt für Ladekabel –
   setze in San Rafael mehr Personal ein (jetzt 5 von 45)». Während einer
   Wissens-Quest erscheint der Engpass als Kasten in der Aufgabenkarte.
 - «Spielmodell»-Vorbehalte nur noch im Reiter Wissen, nicht mehr in jedem Blatt.
@@ -134,25 +135,30 @@ im Ziel (dafür gibt es «Verlauf»). Lerninhalte in der Wissens-Lupe bleiben.
 Die Einführung nimmt an der Hand: **eine Aufgabe = eine Handlung an einem Ort**.
 Nur dieser Ort leuchtet auf der Karte, «Ziel zeigen» führt genau dorthin.
 
-1./2. Kupfer-Quelle (Katanga) eröffnen und mit 10 Personen besetzen ·
+1./2. Kupfer-Quelle (Katanga) eröffnen und mit 15 Personen besetzen ·
 3./4. Aluminium (Boké) eröffnen und mit 5 besetzen · 5./6. Zinn (Bangka) eröffnen
-und mit 5 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
+und mit 10 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
 9./10. Kabelfabrik (China) bauen und nach dem Bau mit 5 besetzen ·
-11. einmal selbst verkaufen · 12. Verkaufsteam mit 2 Personen.
+11. einmal selbst verkaufen · 12. Verkaufsteam mit 4 Personen.
 
 - **Neue Runde mit 0 Personen.** Eingestellt wird direkt an der Station mit dem
   Regler (siehe unten). Schon die erste Aufgabe zeigt: Personal kostet einmalig
   beim Einstellen und danach jeden Monat Lohn. Im Team-Reiter wird während der
   Einführung nicht eingestellt; er zeigt den Stand pro Station.
 - **Nur so viel Personal wie nötig:** Jede Station lässt sich nur bis zum Bedarf
-  besetzen (Kupfer 10, Aluminium 5, Zinn 5, Raffinerie 5, Fabrik 5, Verkauf 2 –
-  zusammen 32, Lohn rund CHF 16'000 pro Monat). Am Ende sitzt niemand untätig.
+  besetzen (Kupfer 15, Aluminium 5, Zinn 10, Raffinerie 5, Fabrik 5, Verkauf 4 –
+  zusammen 44, Lohn rund CHF 21'000 pro Monat). Am Ende sitzt niemand untätig.
+- **Die Kette läuft danach von selbst.** Die Zahlen sind durchgerechnet (Simulation
+  ohne Ereignisse, 120 Tage): Die Fabrik macht 16 Ladekabel pro Tag, Kupfer,
+  Aluminium und Zinn reichen dafür, das Verkaufsteam schafft 20 pro Tag. Kein
+  Engpass, das Lager bleibt leer, rund CHF 41'000 laufender Gewinn pro Monat
+  (Einfach). Vorher (10/5/5, Verkauf 2) fehlten sofort Zinn und Verkäufer.
 - Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
   passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
 - Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
   «Noch nicht dran» und einen Knopf zum richtigen Ort. Verbesserungen im Wissen
   gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
-  dann feststecken (am Ende der Einführung bleiben rund CHF 0.69 Mio).
+  dann feststecken (am Ende der Einführung bleiben rund CHF 0.67 Mio).
 - Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe zuerst
   dorthin zum Umverteilen, statt neu einstellen zu lassen.
 - Ältere Spielstände werden übernommen (Marke `S.einfuehrung`): Fertige bleiben
