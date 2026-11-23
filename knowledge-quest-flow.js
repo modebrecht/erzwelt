@@ -122,45 +122,6 @@
     return originalNaechsterSchritt();
   };
 
-  function syncWissenHinweis(){
-    const def=aktiveQuest();
-    const q=document.getElementById("quest");
-    if(!q) return;
-    q.querySelector(".wissen-quest-action")?.remove();
-    q.classList.remove("wissen-quest","wissen-bereit");
-    document.querySelectorAll('[data-seite="wissen"]').forEach(b=>b.classList.remove("wink"));
-    if(!def||tutorialLaeuft()||offenesBlatt||q.hidden) return;
-
-    const state=flowState(),ready=questFertig(def),index=QUESTS.indexOf(def);
-    q.classList.add("wissen-quest");
-    q.classList.toggle("wissen-bereit",ready);
-    const art=document.getElementById("q-art");
-    if(art) art.textContent=ready?"Wissen freigeschaltet":`Wissens-Quest ${index+1}/${QUESTS.length}`;
-    const emoji=document.getElementById("q-emoji");
-    if(emoji) emoji.innerHTML=ready?(IK.gluehbirne||IK.wissen||IK.ziel):(IK.wissen||IK.ziel);
-    const points=document.getElementById("q-punkte");
-    if(points) points.innerHTML=QUESTS.map((x,i)=>`<i class="${state.collected[x.id]?"ok":i===index?"jetzt":""}"></i>`).join("");
-
-    if(ready){
-      const button=document.createElement("button");
-      button.type="button";
-      button.className="wissen-quest-action";
-      button.dataset.wissenQuest=def.id;
-      button.textContent="Ansehen";
-      points?.insertAdjacentElement("beforebegin",button);
-      document.querySelectorAll('[data-seite="wissen"]').forEach(b=>b.classList.add("wink"));
-    }
-    if(typeof questHoeheMessen==="function") questHoeheMessen();
-  }
-
-  const originalQuestZeichnen=questZeichnen;
-  questZeichnen=function(){
-    flowState();
-    const out=originalQuestZeichnen();
-    syncWissenHinweis();
-    return out;
-  };
-
   function markieren(flag){
     if(tutorialLaeuft()) return;
     const q=flowState();
@@ -216,11 +177,17 @@
   });
 
   flowState();
-  if(typeof questZeichnen==="function") questZeichnen();
+  /* Bausteine für die Aufgabenkarte (module/aufgabe.js): Kopf, Punkte und
+     «Ansehen» zeichnet sie dort; den Klick auf «Ansehen» fängt oben der
+     document-Listener ab. */
   window.__erzweltKnowledgeQuestFlow={
     version:FLOW_VERSION,
     quests:QUESTS.map(q=>q.id),
     active:()=>aktiveQuest()?.id||null,
-    nextGeologyTarget:naechsterGeologieStandort
+    nextGeologyTarget:naechsterGeologieStandort,
+    zustand:flowState,
+    quest:aktiveQuest,
+    fertig:questFertig,
+    liste:QUESTS
   };
 })();

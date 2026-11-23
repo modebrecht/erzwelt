@@ -2,7 +2,7 @@
 /* Premium-Spielgefühl (nur Darstellung, keine Änderung an Wirtschaft):
    1. Rohstoff auf einen Blick: Auch noch nicht eröffnete Rohstoffquellen
       zeigen Kürzel und Farbe ihres Rohstoffs (Cu, Al, Sn …). Im Aufgabentext
-      steht das Kürzel hinter dem Rohstoffnamen: «Kupfer (Cu)».
+      steht das Kürzel hinter dem Rohstoffnamen: «Kupfer (Cu)» (module/aufgabe.js).
    2. Lieferkette lebt: Von jeder fördernden Quelle fährt Ware zur nächsten
       Raffinerie, von dort Material zu jeder laufenden Fabrik. Steht die Zeit
       still, steht auch die Ware still.
@@ -42,27 +42,6 @@
   if (typeof pinsZeichnen === "function"){
     const vorherPins = pinsZeichnen;
     pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); pinsMitRohstoff(); return out; };
-  }
-
-  // «Kupfer» → «Kupfer (Cu)» im Aufgabentext (je Rohstoff einmal)
-  const buchstabe = "A-Za-zÄÖÜäöüß";
-  function kuerzelImText(el){
-    if (!el || el.dataset.kuerzel === el.textContent) return;
-    let t = el.textContent;
-    for (const m of Object.values(MATERIAL)){
-      const re = new RegExp(`(^|[^${buchstabe}])${m.name}(?![${buchstabe}]| \\()`);
-      t = t.replace(re, `$1${m.name} (${m.sym})`);
-    }
-    if (t !== el.textContent) el.textContent = t;
-    el.dataset.kuerzel = el.textContent;
-  }
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      kuerzelImText(document.getElementById("q-text"));
-      return out;
-    };
   }
 
   /* ---------- 2. Lieferkette lebt ---------- */

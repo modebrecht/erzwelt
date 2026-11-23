@@ -9,11 +9,12 @@
    4. «Schritt abgeschlossen» überdeckt kein offenes Blatt mehr.
    5. Einheiten: pro Person, pro Tag, pro Monat, pro Stück.
    6. Tutorial-Raffinerie zeigt die Kabel-Rohstoffe statt Seltener Erden.
-   7. Konkrete Engpass-Hinweise: welcher Ort braucht was.
+   7. Konkrete Engpass-Hinweise: welcher Ort braucht was (Kasten in der
+      Aufgabenkarte: module/aufgabe.js über engpass()/engpassOeffnen()).
    8. Weniger «Spielmodell»-Vorbehalte in Blättern und Seiten.
    Gelb: Tutorial-Prüfung = Text, «Das Spielmodell» ohne Formeln,
    Zeit steht bei Kauf-Entscheiden.
-   Aufgabe auf anderen Seiten nur als schmale Zeile.
+   Aufgabe auf anderen Seiten nur als schmale Zeile (module/aufgabe.js).
    ============================================================ */
 
 (function(){
@@ -150,56 +151,6 @@
     return vorherNaechster();
   };
 
-  /* Während einer Wissens-Quest erscheint der Engpass als kleiner Kasten in der Karte. */
-  function engpassKasten(){
-    const q = document.getElementById("quest");
-    if (!q) return;
-    q.querySelector(".engpass-kasten")?.remove();
-    if (q.hidden || !q.classList.contains("wissen-quest")) return;
-    const e = engpass();
-    if (!e) return;
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "engpass-kasten";
-    const warn = window.__erzweltStil ? window.__erzweltStil.ikon.warnung : "⚠";
-    b.innerHTML = `<b>${warn} ${e.titel}</b><span>${e.text}</span>`;
-    b.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); engpassOeffnen(e); });
-    const vor = q.querySelector(".objective-guide-action") || document.getElementById("q-punkte");
-    if (vor) vor.insertAdjacentElement("beforebegin", b); else q.appendChild(b);
-    if (typeof questHoeheMessen === "function") questHoeheMessen();
-  }
-
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); questKompakt(); return out; };
-  }
-
-  /* Aufgabe auf anderen Seiten als der Karte nur als schmale Zeile – ausser
-     die Aufgabe wird genau auf dieser Seite erledigt (Tutorial: Team, Markt;
-     Wissensauftrag: Wissen) oder ein Wissen ist zum Ansehen bereit. Antippen führt wie bisher zum Ziel; ohne Ziel
-     klappt die Zeile auf. */
-  let aufgeklapptAuf = null;
-  function questGehoertZuSeite(q){
-    const t = tutorialSchritt();
-    if (t) return t.ziel() === "dock:" + aktiveSeite;
-    // «Ansehen» geht überall; ausserhalb von Wissen als schmale Zeile mit Knopf (aufgabe-kompakt.js)
-    if (q.classList.contains("wissen-bereit")) return aktiveSeite === "wissen";
-    return q.classList.contains("wissen-quest") && aktiveSeite === "wissen";
-  }
-  function questKompakt(){
-    const q = document.getElementById("quest");
-    if (!q) return;
-    if (aufgeklapptAuf !== aktiveSeite) aufgeklapptAuf = null;
-    const kompakt = !q.hidden && aktiveSeite !== "karte" && aufgeklapptAuf === null && !questGehoertZuSeite(q);
-    q.classList.toggle("kompakt", kompakt);
-    if (typeof questHoeheMessen === "function") questHoeheMessen();
-  }
-  document.getElementById("quest")?.addEventListener("click", ev => {
-    const q = ev.currentTarget;
-    if (!q.classList.contains("kompakt") || q.classList.contains("map-link")) return;
-    ev.preventDefault(); ev.stopPropagation();
-    aufgeklapptAuf = aktiveSeite;
-    questKompakt();
-  }, true);
   /* Zeigt das Tutorial auf einen Knopf der Leiste unten (z. B. Team),
      endet das Blatt über der Leiste, damit der Knopf antippbar bleibt. */
   const dockHinweis = () => document.body.classList.toggle("dock-hinweis",
@@ -361,7 +312,7 @@
   /* Der Startdialog wurde schon vom Kern gezeigt: mit der neuen Fassung ersetzen. */
   if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 
-  window.__erzweltSekBKlarheit = {version:1, engpass};
+  /* Engpass-Kasten und kompakte Zeile der Aufgabenkarte: module/aufgabe.js. */
+  window.__erzweltSekBKlarheit = {version:1, engpass, engpassOeffnen};
   seitenStand = ""; blattStand = "";
-  if (typeof questZeichnen === "function") questZeichnen();
 })();

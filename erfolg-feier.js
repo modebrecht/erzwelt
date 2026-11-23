@@ -120,19 +120,15 @@
     else if (S.ausgegeben > vorAus){ kaufTon(); vibrieren(14); }
   });
 
-  /* ---------- Auslöser: Wissens-Quest abgeschlossen ---------- */
+  /* ---------- Auslöser: Wissens-Quest abgeschlossen ----------
+     Nach jedem Zeichnen der Aufgabenkarte (Hook aus module/basis.js). */
   const anzahlWissen = () => Object.keys(S?.wissenQuestFlow?.collected || {}).length;
   let wissenBisher = anzahlWissen();
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      const jetzt = anzahlWissen();
-      if (jetzt > wissenBisher) feiern(false);
-      wissenBisher = jetzt;
-      return out;
-    };
-  }
+  Erzwelt.nachAufgabe(() => {
+    const jetzt = anzahlWissen();
+    if (jetzt > wissenBisher) feiern(false);
+    wissenBisher = jetzt;
+  });
 
   /* ---------- Einstellung «Töne» ---------- */
   if (typeof einstFuellen === "function"){

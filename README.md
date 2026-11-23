@@ -9,7 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
-- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/blaetter.js` (Blätter) und `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) laden nach `einfuehrung.js`.
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/blaetter.js` (Blätter), `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) und `module/aufgabe.js` (Aufgabenkarte) laden nach `einfuehrung.js`.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -52,6 +52,9 @@ Der Builder prüft dabei automatisch:
   nur die bis dahin angemeldeten Hooks.
 - Hooks als `() => name()` anmelden, damit spätere Ersetzungen von `name` (z. B. in
   `performance-pass.js`) wirksam bleiben. Der Rückgabewert von `zeichnen` bleibt erhalten.
+- `Erzwelt.nachAufgabe(fn)`: läuft am Ende jedes `questZeichnen` (`module/aufgabe.js`),
+  in Anmeldereihenfolge – für Beobachter, die an der Aufgabenkarte nichts ändern
+  (`erfolg-feier.js`: Funken, wenn eine Wissens-Quest abgeholt wurde).
 
 ## Ein Stylesheet (`module/stil.js`)
 
@@ -116,6 +119,43 @@ Der Builder prüft dabei automatisch:
 - Nach dem Einsetzen kürzen `kurztexte.js` (Sätze, Rohstoff-Tabelle, ohne
   Meldungen im Ziel) und `stil.js` («Al») den Seiteninhalt – über `seiteFuellen`.
 
+## Aufgabenkarte (`module/aufgabe.js`)
+
+- **Einziger Besitzer** von `questZeichnen`: Einführung, Wissens-Quest und Hinweis
+  mit Phasen, «Zusammenhang», «Ziel zeigen», «Ansehen», Engpass-Kasten, kompakter
+  Zeile, Karten-Verknüpfung (`map-link`, Ziel-Symbol, `aria-label`) und
+  Rohstoff-Kürzel («Kupfer (Cu)»). Früher zwölf Schichten (Kern, `didactic-should`,
+  `performance-pass`, `tutorial-enhance`, `map-focus-navigation`,
+  `knowledge-quest-flow`, `objective-guide`, `sek-b-klarheit`, `handy-layout`,
+  `erfolg-feier`, `premium-spielgefuehl`, `aufgabe-kompakt`); `objective-guide.js`
+  und `aufgabe-kompakt.js` gibt es nicht mehr.
+- **Reihenfolge** wie die früheren Schichten (siehe Kopfkommentar): Grundkarte →
+  Einführung → Verknüpfung → Wissens-Quest → «Ziel zeigen» → Engpass → kompakt →
+  Phasenzeile und Höhe (`--questh`) → Kürzel → `Erzwelt.nachAufgabe`. Sie zählt:
+  Die Verknüpfung liest den Kartentext, wie er dann dasteht (auch versteckte
+  Phasen nach der Einführung), die Höhe wird vor den Kürzeln gemessen.
+- **Cache** (früher `performance-pass.js`): Grundkarte nur neu, wenn sich Seite,
+  Blatt, Einführungsschritt (Titel, Text) oder Hinweis ändern; Phasen nur neu, wenn
+  sich Schritt, Text mit Lagerstand, Zusammenhang oder Seite ändern
+  (`__erzweltAufgabe.tutorialNeu()` erzwingt das nach einem erledigten Schritt).
+- **Bausteine**: `__erzweltTutorialEnhance.phasen`, `.phase(id)`, `.text(t)`,
+  `.toastLayout(q, t)`; `__erzweltKnowledgeQuestFlow.zustand()`, `.quest()`,
+  `.fertig(def)`, `.liste`, `.active()`, `.nextGeologyTarget()`;
+  `__erzweltMapFocusNavigation.questAction()`, `.zielSymbol()`;
+  `__erzweltSekBKlarheit.engpass()`, `.engpassOeffnen(e)`.
+- **Bedienung hier**: «Ziel zeigen» (Wissens-Quest Rohstoffstandorte: nächsten
+  Standort öffnen, Ruf: Ziel-Reiter, sonst wie Antippen der Karte), Engpass-Kasten,
+  kompakte Zeile ohne Ziel aufklappen (Capture-Listener, stoppt den Klick), nach
+  Klicks ausserhalb «Ziel zeigen» im nächsten Frame abgleichen.
+- **Bewusst als Hook geblieben**: Klick auf die Karte führt zum Ziel und
+  `data-map-focus-bound` (`map-focus-navigation.js`, das nach neuen Meldungen und
+  nach `hinweiseSetzen` `__erzweltAufgabe.verknuepfen()` aufruft); `role`/`tabindex`
+  und Enter/Leertaste (`interaction-focus-final-fix.js`, im nächsten Frame mit den
+  Ebenen-Chips); Klick auf «Ansehen» und Mitzählen für Wissens-Quests
+  (`knowledge-quest-flow.js`); Rückmeldung nach einem Schritt (`tutorial-enhance.js`).
+- Markierungen `__erzweltAufgabe`, `__erzweltObjectiveGuide` (E2E-Test),
+  `__erzweltAufgabeKompakt`. Lädt nach `module/seiten.js` (Gruppe `logic-fixes`).
+
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 
 - **Etappenziel nach Schwierigkeit:** Einfach CHF 500'000, Mittel und Schwer
@@ -152,7 +192,8 @@ Der Builder prüft dabei automatisch:
 - Konkrete Engpass-Hinweise nach dem Tutorial (nur wenn ein Material die Produktion
   wirklich gebremst hat, nicht schon bei knappem Lager), z. B. «Zinn fehlt für Ladekabel –
   setze in San Rafael mehr Personal ein (jetzt 5 von 45)». Während einer
-  Wissens-Quest erscheint der Engpass als Kasten in der Aufgabenkarte.
+  Wissens-Quest erscheint der Engpass als Kasten in der Aufgabenkarte
+  (gezeichnet von `module/aufgabe.js` über `engpass()`/`engpassOeffnen()`).
 - «Spielmodell»-Vorbehalte nur noch im Reiter Wissen, nicht mehr in jedem Blatt.
 - Kauf-Entscheide in Ruhe: Solange das Blatt eines noch nicht gekauften
   Standorts offen ist, steht die Zeit; nach Kauf oder Schliessen läuft sie weiter.
@@ -162,7 +203,7 @@ Der Builder prüft dabei automatisch:
 - Aufgabe/Hinweis auf Markt, Team, Ziel und Wissen nur als schmale Zeile
   (Antippen führt zum Ziel). Ganz sichtbar bleibt sie auf der Karte und auf
   der Seite, auf der die Aufgabe erledigt wird (Tutorial: Team, Markt;
-  Wissensauftrag: Wissen), und wenn ein Wissen zum Ansehen bereit ist.
+  Wissensauftrag: Wissen). Gezeichnet in `module/aufgabe.js`.
 - «Das Spielmodell» (vorher «Das Modell im Code») erklärt die Zusammenhänge in
   Worten statt mit Formeln. Tutorial-Schritt 2 prüft wie im Text 10 Personen.
 
@@ -178,14 +219,16 @@ Oben zwei Reihen Bedienung, darunter das Spiel:
 - Aufgabe steht auf allen Seiten rechts oben, wie auf der Karte; gleicher
   Abstand zwischen den beiden oberen Leisten und dem Aufgabenkasten.
 - Aufgabenkasten kürzer: Phase als schmale Leiste mit «Phase 1/4 · …» in einer
-  Zeile, Zusammenhang ohne Kasten, nur «Ziel zeigen» als Weg zum Ziel.
+  Zeile, Zusammenhang ohne Kasten, nur «Ziel zeigen» als Weg zum Ziel (die Zeile
+  baut `module/aufgabe.js`).
 
 Nur Darstellung, keine Änderung an Spielstand oder Wirtschaft.
 
 ## Erfolg feiern (`erfolg-feier.js`)
 
 Ist ein Tutorial-Schritt oder eine Wissens-Quest erledigt, gibt es einen kurzen,
-leisen Erfolgston (Web Audio, keine Datei) und Funken; beim Abschluss des
+leisen Erfolgston (Web Audio, keine Datei) und Funken (Wissens-Quest über den Hook
+`Erzwelt.nachAufgabe`); beim Abschluss des
 Tutorials etwas grösser. Kaufen und selbst verkaufen haben je einen eigenen
 kurzen Ton (der tägliche Verkauf durch das Team bleibt still). Auf Android
 vibriert das Handy kurz bei Kauf, eigenem Verkauf und Erfolg. In den
@@ -195,7 +238,8 @@ Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
 ## Premium-Spielgefühl (`premium-spielgefuehl.js`)
 
 - Rohstoff auf einen Blick: Auch nicht eröffnete Rohstoffquellen zeigen
-  Kürzel und Farbe (Cu, Al, Sn …); im Aufgabentext steht «Kupfer (Cu)».
+  Kürzel und Farbe (Cu, Al, Sn …); im Aufgabentext steht «Kupfer (Cu)»
+  (seit Schritt 6 in `module/aufgabe.js`).
 - Lieferkette lebt: Von jeder fördernden Quelle fährt Ware zur nächsten
   Raffinerie, von dort Material zu jeder laufenden Fabrik. Bei Pause steht
   die Ware still; «Animationen: aus» zeigt nur die Wege.
@@ -265,9 +309,10 @@ Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine 
   Beides schreibt `module/seiten.js`; beim Ziehen von «Wie viele?» hängt der
   Patch «einmalig» wieder an.
 
-## Aufgabe kompakt (`aufgabe-kompakt.js`)
+## Aufgabe kompakt (früher `aufgabe-kompakt.js`)
 
-Auf dem Handy mehr Platz für die Karte (nur Darstellung):
+Auf dem Handy mehr Platz für die Karte (nur Darstellung; Stil in `module/stil.js`,
+«Neues Wissen» und die Zeile mit «Ansehen» in `module/aufgabe.js`):
 
 - Tutorial-Aufgabe ohne «Zusammenhang» (kommt als Rückmeldung nach dem Schritt),
   Phase nur als Balken, «Ziel zeigen» niedriger – rund 30 % kleiner.
@@ -363,8 +408,11 @@ Test-PDFs entstehen unter `artifacts/certificate/`.
 Hält fest, wie das Spiel aussieht und sich verhält, und vergleicht zwei Stände.
 `aufnahme.cjs` spielt das gebaute `index.html` mit festem Zufall und ohne Animationen
 durch (Startbild, alle Einführungsschritte, alle Blätter und Seiten, 60 Spieltage,
-alter Spielstand) und speichert pro Zustand Text, Klassen, Knöpfe, Spielstand und
-Screenshot. `vergleich.py` meldet jeden Unterschied.
+alter Spielstand, Aufgabenkarte in allen Lagen inkl. Klicks, 360 und 820 px) und
+speichert pro Zustand Text, Klassen, Knöpfe, Spielstand, Markup der Aufgabenkarte,
+Rückmeldungen, Fokusringe, Kamera und Screenshot. Anzeigen, die nur eine feste
+Zeit stehen (Meldungen, Verkaufsbetrag in der Kasse, «Neu eröffnet»), sind
+ausgeblendet. `vergleich.py` meldet jeden Unterschied.
 
 ```bash
 node scripts/build-standalone.mjs

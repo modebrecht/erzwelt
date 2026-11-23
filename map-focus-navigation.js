@@ -1,6 +1,8 @@
 "use strict";
 /* Context navigation for notifications and quest/tutorial cards.
-   View/navigation only: no economy, progression or save-state changes. */
+   View/navigation only: no economy, progression or save-state changes.
+   Für die Aufgabenkarte (gezeichnet in module/aufgabe.js): questAction()
+   ermittelt das Ziel, der Klick auf die Karte führt hin (Listener hier). */
 (function(){
   const locateSvg=()=>`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><circle cx="12" cy="12" r="7.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
   const norm=s=>String(s||"").toLocaleLowerCase("de-CH").replace(/\s+/g," ").trim();
@@ -155,17 +157,6 @@
     return false;
   }
 
-  function decorateQuest(){
-    const q=document.getElementById("quest");if(!q||q.hidden)return;
-    const action=questAction();
-    q.classList.toggle("map-link",!!action);
-    q.dataset.contextAction=action?"1":"";
-    let cue=q.querySelector(".quest-map-cue");
-    if(action&&!cue){cue=document.createElement("span");cue.className="quest-map-cue";cue.innerHTML=locateSvg();q.appendChild(cue);}
-    if(!action&&cue)cue.remove();
-    if(action)q.setAttribute("aria-label",`${q.textContent.trim()} · Ziel anzeigen`);
-  }
-
   const quest=document.getElementById("quest");
   if(quest&&!quest.dataset.mapFocusBound){
     quest.dataset.mapFocusBound="1";
@@ -195,19 +186,20 @@
     }
   }
 
+  /* Die Aufgabenkarte zeichnet module/aufgabe.js (samt Ziel-Symbol und
+     aria-label). Nach neuen Meldungen und nach hinweiseSetzen (Pins und Dock
+     blinken neu) gleicht sie ihre Verknüpfung hier ab. */
+  const questVerknuepfen=()=>window.__erzweltAufgabe?.verknuepfen();
   if(typeof toastsErneuern==="function"){
     const priorToasts=toastsErneuern;
-    toastsErneuern=function(){const out=priorToasts();decorateToasts();decorateQuest();return out;};
-  }
-  if(typeof questZeichnen==="function"){
-    const priorQuest=questZeichnen;
-    questZeichnen=function(){const out=priorQuest();decorateQuest();return out;};
+    toastsErneuern=function(){const out=priorToasts();decorateToasts();questVerknuepfen();return out;};
   }
   if(typeof hinweiseSetzen==="function"){
     const priorHints=hinweiseSetzen;
-    hinweiseSetzen=function(){const out=priorHints();decorateQuest();return out;};
+    hinweiseSetzen=function(){const out=priorHints();questVerknuepfen();return out;};
   }
 
-  decorateToasts();decorateQuest();
-  window.__erzweltMapFocusNavigation={version:1,features:["clickable-location-notifications","quest-context-focus","suggested-purchase-location","smooth-camera-focus"]};
+  decorateToasts();
+  window.__erzweltMapFocusNavigation={version:1,features:["clickable-location-notifications","quest-context-focus","suggested-purchase-location","smooth-camera-focus"],
+    questAction,zielSymbol:locateSvg};
 })();

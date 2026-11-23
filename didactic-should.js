@@ -138,14 +138,6 @@ naechsterSchritt=function(){
   if(nahe)return["Nächste Ausbaustufe mit grösserer Wirkung","Vergleiche Kosten und Wirkung deiner Ausbauten. Nicht jeder Engpass braucht dieselbe Lösung."];
   return null;
 };
-const originalQuestZeichnenShould=questZeichnen;
-questZeichnen=function(){
-  originalQuestZeichnenShould();
-  if(!tutorialLaeuft()){
-    const q=document.getElementById("quest");
-    if(q&&!q.hidden){const art=document.getElementById("q-art");if(art)art.textContent="Hinweis";}
-  }
-};
 tagVor=function(){
   if(S.ende||modalOffen)return;
   S.tag++;letzteFoerderung={};

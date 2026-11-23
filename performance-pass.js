@@ -134,21 +134,7 @@
     };
   }
 
-  if(typeof questZeichnen==="function"){
-    const original=questZeichnen;
-    let key="";
-    questZeichnen=function(){
-      const t=tutorialSchritt();
-      const w=t?null:naechsterSchritt();
-      const next=JSON.stringify([
-        aktiveSeite,!!offenesBlatt,
-        t?[S.tutorial,t.id,t.titel,t.text]:w
-      ]);
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
+  // Aufgabenkarte: gleicher Cache jetzt direkt in module/aufgabe.js (Grundkarte).
 
   if(typeof hinweiseSetzen==="function"){
     const original=hinweiseSetzen;

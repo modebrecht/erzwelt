@@ -9,7 +9,8 @@
    4. Aufgabe auf allen Seiten rechts (wie auf der Karte).
    5. Aufgabenkasten auf der Karte kürzer: Phase als schmale Leiste mit Text
       in einer Zeile (statt Kästchen 1–4 plus «Phase 1/4»), Zusammenhang ohne
-      Kasten, und nur ein Weg zum Ziel: «Ziel zeigen».
+      Kasten, und nur ein Weg zum Ziel: «Ziel zeigen». Die Zeile baut
+      module/aufgabe.js, das Aussehen steht in module/stil.js.
    Nur Darstellung: keine Änderung an Spielstand oder Wirtschaft. */
 (function(){
   const VERSION = 1;
@@ -89,33 +90,6 @@
       pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); filterPunkt(); return out; };
     }
     filterPunkt();
-  }
-
-  /* ---------- 4. Aufgabenkasten: Phase in einer Zeile ---------- */
-  function phaseZeile(){
-    const q = document.getElementById("quest");
-    if (!q) return;
-    const kette = q.querySelector(".tutorial-kette");
-    const name = q.querySelector(".tutorial-phase-name");
-    if (!kette || !name) return;
-    let zeile = kette.parentElement.classList.contains("phase-zeile") ? kette.parentElement : null;
-    if (!zeile){
-      zeile = document.createElement("div");
-      zeile.className = "phase-zeile";
-      kette.before(zeile);
-      zeile.append(name, kette);
-    }
-    zeile.hidden = !!kette.hidden;
-  }
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      phaseZeile();
-      if (typeof questHoeheMessen === "function") questHoeheMessen();
-      return out;
-    };
-    questZeichnen();
   }
 
   window.__erzweltHandyLayout = {version:VERSION};

@@ -13,10 +13,14 @@
      - nach-Hooks laufen IN Anmeldereihenfolge (zuerst angemeldet zuerst).
    Wirft ein Hook, bricht der Aufruf ab wie früher bei der Hülle (kein try/catch).
    Der Rückgabewert des Kern-`zeichnen` wird durchgereicht.
-   Hooks mit `() => name()` anmelden, wenn `name` später noch ersetzt werden kann. */
+   Hooks mit `() => name()` anmelden, wenn `name` später noch ersetzt werden kann.
+
+     Erzwelt.nachAufgabe(fn)   fn läuft am Ende jedes `questZeichnen` (module/aufgabe.js),
+                               in Anmeldereihenfolge. Für Beobachter, die nichts an der
+                               Aufgabenkarte ändern (z. B. Erfolg feiern). */
 "use strict";
 (function(){
-  const vor = [], nach = [];
+  const vor = [], nach = [], aufgabe = [];
   const kern = zeichnen;
   zeichnen = function(){
     for (let i = vor.length - 1; i >= 0; i--) vor[i]();
@@ -26,6 +30,9 @@
   };
   window.Erzwelt = Object.freeze({
     vorZeichnen(fn){ vor.push(fn); },
-    nachZeichnen(fn){ nach.push(fn); }
+    nachZeichnen(fn){ nach.push(fn); },
+    nachAufgabe(fn){ aufgabe.push(fn); },
+    /* nur für module/aufgabe.js */
+    aufgabeGezeichnet(){ for (let i = 0; i < aufgabe.length; i++) aufgabe[i](); }
   });
 })();

@@ -62,8 +62,7 @@
       "name": "sek-b-guidance",
       "files": [
         "didactic-complexity.js",
-        "knowledge-quest-flow.js",
-        "objective-guide.js"
+        "knowledge-quest-flow.js"
       ]
     },
     {
@@ -72,7 +71,7 @@
     },
     {
       "name": "logic-fixes",
-      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "module/blaetter.js", "module/seiten.js", "aufgabe-kompakt.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "einstieg.js"]
+      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "module/blaetter.js", "module/seiten.js", "module/aufgabe.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "einstieg.js"]
     }
   ]
 }

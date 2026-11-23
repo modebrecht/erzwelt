@@ -1,6 +1,9 @@
 "use strict";
 /* Didaktischer Qualitäts-Pass für das Tutorial (Schritte: einfuehrung.js).
-   Keine neuen Lernziele: Aufgabe + Begründung + sichtbarer Platz in der Lieferkette. */
+   Keine neuen Lernziele: Aufgabe + Begründung + sichtbarer Platz in der Lieferkette.
+   Phasen, Text und Meldungs-Lage liefert diese Datei als Bausteine; gezeichnet
+   wird die Aufgabenkarte in module/aufgabe.js. Hier bleiben die Rückmeldung
+   nach einem Schritt und das Nachführen der Meldungen bei Grössenänderung. */
 
 (function(){
   const PHASEN=[
@@ -31,20 +34,6 @@
     return t.text;
   }
 
-  function ensureExtras(q){
-    let chain=q.querySelector(".tutorial-kette");
-    if(!chain){
-      chain=document.createElement("div");chain.className="tutorial-kette";chain.setAttribute("aria-label","Fortschritt in der Lieferkette");
-      chain.innerHTML=PHASEN.map(p=>`<div class="tutorial-phase" data-phase="${p.id}"><b>${p.nr}</b><span>${p.label}</span></div>`).join("");
-      const progress=q.querySelector(".fortschritt");if(progress)progress.insertAdjacentElement("beforebegin",chain);else q.appendChild(chain);
-    }
-    let phaseName=q.querySelector(".tutorial-phase-name");
-    if(!phaseName){phaseName=document.createElement("div");phaseName.className="tutorial-phase-name";chain.insertAdjacentElement("afterend",phaseName);}
-    let relation=q.querySelector(".tutorial-zusammenhang");
-    if(!relation){relation=document.createElement("div");relation.className="tutorial-zusammenhang";const text=q.querySelector("#q-text");if(text)text.insertAdjacentElement("afterend",relation);else q.appendChild(relation);}
-    return {chain,phaseName,relation};
-  }
-
   function syncTutorialToastLayout(q,t){
     const root=document.getElementById("toasts");
     if(!root)return;
@@ -58,37 +47,6 @@
     const bottom=Math.ceil(q.getBoundingClientRect().bottom+8);
     root.style.setProperty("top",bottom+"px","important");
     root.style.setProperty("width","min(72%,310px)","important");
-  }
-
-  let lastQuestKey="";
-  if(typeof questZeichnen==="function"){
-    const originalQuest=questZeichnen;
-    questZeichnen=function(){
-      const out=originalQuest();
-      const q=document.getElementById("quest"),t=tutorialSchritt();
-      if(!q)return out;
-      if(!t||q.hidden){
-        q.classList.remove("tutorial-aktiv");
-        q.querySelectorAll(".tutorial-kette,.tutorial-phase-name,.tutorial-zusammenhang").forEach(el=>el.hidden=true);
-        lastQuestKey="";
-        syncTutorialToastLayout(q,null);
-        return out;
-      }
-      q.classList.add("tutorial-aktiv");
-      const text=dynamischerText(t);
-      const key=[S.tutorial,t.id,text,t.zusammenhang,aktiveSeite,!!offenesBlatt].join("|");
-      if(key===lastQuestKey)return out;
-      lastQuestKey=key;
-      const qText=document.getElementById("q-text");if(qText&&qText.textContent!==text)qText.textContent=text;
-      const {chain,phaseName,relation}=ensureExtras(q);chain.hidden=phaseName.hidden=relation.hidden=false;
-      const current=phaseFor(t.id);
-      chain.querySelectorAll(".tutorial-phase").forEach((el,i)=>{el.classList.toggle("erledigt",i<current);el.classList.toggle("aktiv",i===current);});
-      phaseName.textContent=`Phase ${current+1}/4 · ${PHASEN[current]?.label||"Lieferkette"}`;
-      relation.innerHTML=`<b>Zusammenhang:</b> ${t.zusammenhang||""}`;
-      if(typeof questHoeheMessen==="function")questHoeheMessen();
-      requestAnimationFrame(()=>syncTutorialToastLayout(q,t));
-      return out;
-    };
   }
 
   function scheduleToastLayout(){
@@ -121,7 +79,7 @@
       if(after>before){
         if(after>=TUTORIAL.length)feedback("Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",true);
         else if(step?.zusammenhang)feedback(step.zusammenhang,false);
-        lastQuestKey="";if(typeof questZeichnen==="function")questZeichnen();
+        window.__erzweltAufgabe?.tutorialNeu();if(typeof questZeichnen==="function")questZeichnen();
       }
       return out;
     };
@@ -135,6 +93,8 @@
     };
   }
 
-  if(typeof questZeichnen==="function")questZeichnen();
-  window.__erzweltTutorialEnhance={version:3,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),mobileToastStack:true,eventDrivenToastLayout:true};
+  /* Bausteine für die Aufgabenkarte (module/aufgabe.js): Phasen, Text mit
+     Lagerstand, Meldungen unter der Karte. */
+  window.__erzweltTutorialEnhance={version:3,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),mobileToastStack:true,eventDrivenToastLayout:true,
+    phasen:PHASEN,phase:phaseFor,text:dynamischerText,toastLayout:syncTutorialToastLayout};
 })();
