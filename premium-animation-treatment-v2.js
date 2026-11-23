@@ -25,7 +25,7 @@
       last.set(id,state);
     });
   }
-  Erzwelt.nachZeichnen(()=>inspect());
+  Erzwelt.nachPinStatus(()=>inspect());   // direkt nach der Statusanzeige (module/karte.js)
   inspect();
   window.__erzweltPremiumAnimationTreatmentV2={version:1,features:["build-day-tick","construction-finale","machine-beat","output-glint","sale-materiality","transport-depth","tutorial-completion-line","quiet-mode","reduced-motion"]};
 })();

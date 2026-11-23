@@ -4,8 +4,7 @@
       Einstellungen) statt auf der Karte.
    2. Meldungen docken links unten am Rand über der Leiste an, statt mitten über der
       Karte oder unter dem Aufgabenkasten zu schweben.
-   3. Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken in einem
-      Filter-Knopf über + und −.
+   3. Die Kartenebenen stecken in einem Filter-Knopf über + und − (module/karte.js).
    4. Aufgabe auf allen Seiten rechts (wie auf der Karte).
    5. Aufgabenkasten auf der Karte kürzer: Phase als schmale Leiste mit Text
       in einer Zeile (statt Kästchen 1–4 plus «Phase 1/4»), Zusammenhang ohne
@@ -45,52 +44,7 @@
     aufraeumen();
   }
 
-  /* ---------- 3. Filter-Knopf ---------- */
-  const filterSvg = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6.2 7.4V18l-3.6 2v-7.6Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
-  const zoom = document.getElementById("zoom");
-  const ebenenEl = document.getElementById("ebenen");
-  let filterKnopf = null;
-  function filterPunkt(){
-    if (!filterKnopf || typeof ebenen === "undefined" || !ebenen) return;
-    const aus = Object.values(ebenen).some(v => !v);
-    filterKnopf.querySelector(".filter-punkt").hidden = !aus;
-    filterKnopf.setAttribute("aria-label", aus ? "Karte filtern (nicht alle Orte sichtbar)" : "Karte filtern");
-  }
-  function filterZu(){
-    document.body.classList.remove("filter-offen");
-    filterKnopf?.setAttribute("aria-expanded", "false");
-  }
-  if (zoom && ebenenEl){
-    if (!ebenenEl.querySelector(".filter-titel")){
-      const titel = document.createElement("p");
-      titel.className = "filter-titel";
-      titel.textContent = "Auf der Karte zeigen";
-      ebenenEl.prepend(titel);
-    }
-    filterKnopf = document.createElement("button");
-    filterKnopf.type = "button";
-    filterKnopf.id = "filterknopf";
-    filterKnopf.setAttribute("aria-expanded", "false");
-    filterKnopf.setAttribute("aria-controls", "ebenen");
-    filterKnopf.innerHTML = `${filterSvg}<span class="filter-punkt" hidden></span>`;
-    zoom.prepend(filterKnopf);
-    filterKnopf.addEventListener("click", ev => {
-      ev.stopPropagation();
-      const offen = document.body.classList.toggle("filter-offen");
-      filterKnopf.setAttribute("aria-expanded", String(offen));
-    });
-    document.addEventListener("click", ev => {
-      if (ev.target.closest("[data-ebene]")) { setTimeout(filterPunkt, 0); return; }
-      if (!document.body.classList.contains("filter-offen")) return;
-      if (ev.target.closest("#ebenen, #filterknopf")) return;
-      filterZu();
-    });
-    if (typeof pinsZeichnen === "function"){
-      const vorherPins = pinsZeichnen;
-      pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); filterPunkt(); return out; };
-    }
-    filterPunkt();
-  }
+  /* ---------- 3. Filter-Knopf: module/karte.js ---------- */
 
   window.__erzweltHandyLayout = {version:VERSION};
 })();

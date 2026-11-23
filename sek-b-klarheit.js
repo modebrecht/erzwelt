@@ -5,7 +5,7 @@
    Verständlichkeit und Bedienung auf dem Handy. Keine neue Wirtschaft.
    1. Schwierigkeit: Wirkung ohne Fachjargon (Dialog: module/einfuehrung.js).
    2. Tutorial-Karte: eine Fortschrittsanzeige weniger.
-   3. «Ziel zeigen»: Ziel landet unter der Aufgabenkarte, nicht dahinter.
+   3. «Ziel zeigen»: Ziel landet unter der Aufgabenkarte (jetzt module/karte.js).
    4. «Schritt abgeschlossen» überdeckt kein offenes Blatt mehr.
    5. Einheiten: pro Person, pro Tag, pro Monat, pro Stück.
    6. Tutorial-Raffinerie zeigt die Kabel-Rohstoffe statt Seltener Erden.
@@ -130,55 +130,7 @@
   if (dockEl) new MutationObserver(dockHinweis).observe(dockEl, {subtree:true, attributes:true, attributeFilter:["class"]});
   Erzwelt.nachZeichnen(() => { materiallisteKlaeren(); dockHinweis(); });
 
-  /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte ----------
-     map-focus-navigation rechnet mit der Ecke des Pins statt mit seinem
-     sichtbaren Kopf. Hier wird der Ziel-Pin berechnet und so platziert,
-     dass er mittig und unterhalb der Aufgabenkarte erscheint. */
-  if (typeof ansichtAnwenden === "function"){
-    const vorherAnsicht = ansichtAnwenden;
-    let zuletzt = 0;
-    ansichtAnwenden = function(){
-      const fokus = welt.classList.contains("map-focus-moving");
-      if (!fokus || Date.now() - zuletzt < 700 || aktiveSeite !== "karte") return vorherAnsicht();
-      zuletzt = Date.now();
-      const W = sicht.clientWidth;
-      const hud = document.getElementById("hud")?.offsetHeight || 56;
-      const dock = document.getElementById("dock")?.offsetHeight || 86;
-      const oben = hud + 8, unten = Math.max(oben + 80, sicht.clientHeight - dock - 8);
-      const alt = oben + (unten - oben) * .48;
-      // Ziel-Pin aus der Kamera-Formel zurückrechnen.
-      const px = (W * .5 - ansicht.x) / ansicht.z, py = (alt - ansicht.y) / ansicht.z;
-      const pin = [...document.querySelectorAll("#welt .pin")].find(p =>
-        Math.abs(p.offsetLeft + p.offsetWidth / 2 - px) < 3 && Math.abs(p.offsetTop + Math.min(28, p.offsetHeight / 2) - py) < 3);
-      const kopf = pin && (pin.querySelector(".knopf") || pin);
-      if (!kopf) return vorherAnsicht();
-
-      let zielY = alt;
-      const q = document.getElementById("quest");
-      const s = sicht.getBoundingClientRect();
-      if (q && !q.hidden && !q.classList.contains("breit")){
-        const r = q.getBoundingClientRect();
-        const kartenUnten = r.bottom - s.top;
-        const deckt = r.left - s.left < W / 2 + 40 && r.right - s.left > W / 2 - 40 && kartenUnten > alt - 50;
-        if (deckt && kartenUnten + 70 < unten) zielY = kartenUnten + (unten - kartenUnten) * .42;
-      }
-      // Sichtbaren Pin-Kopf berechnen: Der Pin hängt an seinem unteren
-      // Mittelpunkt (offsetLeft/offsetTop) und wird mit s = k/z skaliert.
-      const zmin = Math.max(W / KARTE_B, 0.95);
-      const z = Math.min(4.5, Math.max(zmin, ansicht.z));
-      const sk = Math.max(0.62, Math.min(1, 0.45 + z * 0.55)) / z;
-      const kopfX = (kopf === pin ? 0 : kopf.offsetLeft + kopf.offsetWidth / 2 - pin.offsetWidth / 2) * sk;
-      const kopfY = (pin.offsetHeight - (kopf === pin ? pin.offsetHeight / 2 : kopf.offsetTop + kopf.offsetHeight / 2)) * sk;
-      const weltX = pin.offsetLeft + kopfX, weltY = pin.offsetTop - kopfY;
-      ansicht.z = z;
-      ansicht.x = W / 2 - weltX * z;
-      ansicht.y = zielY - weltY * z;
-      document.body.classList.add("ziel-fokus");
-      clearTimeout(window.__zielFokusTimer);
-      window.__zielFokusTimer = setTimeout(() => document.body.classList.remove("ziel-fokus"), 2600);
-      return vorherAnsicht();
-    };
-  }
+  /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte: module/karte.js (ansichtAnwenden) ---------- */
 
   /* ---------- Gelb: kleine Unstimmigkeiten ---------- */
   /* «Das Spielmodell» ohne Formeln, Zusammenhänge in Worten (Lupe): module/wissen.js. */

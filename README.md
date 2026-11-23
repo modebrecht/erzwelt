@@ -9,7 +9,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
-- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/wissen.js` (Lerntexte, Wissens-Quests, Lupe) lädt in der Gruppe `sek-b-guidance`; `module/einfuehrung.js` (Startbild, Schwierigkeitswahl, Einführung), danach `module/blaetter.js` (Blätter), `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) und `module/aufgabe.js` (Aufgabenkarte) in der Gruppe `logic-fixes`.
+- `module/` — Module des laufenden Umbaus (siehe `docs/MODULE-KONZEPT.md`); `module/basis.js` lädt als erste Datei, danach `module/stil.js` (alle Stile); `module/karte.js` (Weltkarte) lädt am Anfang der Gruppe `world-presentation`; `module/wissen.js` (Lerntexte, Wissens-Quests, Lupe) lädt in der Gruppe `sek-b-guidance`; `module/einfuehrung.js` (Startbild, Schwierigkeitswahl, Einführung), danach `module/blaetter.js` (Blätter), `module/seiten.js` (Markt, Team, Ziel, Wissen-Übersicht) und `module/aufgabe.js` (Aufgabenkarte) in der Gruppe `logic-fixes`.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -55,6 +55,14 @@ Der Builder prüft dabei automatisch:
 - `Erzwelt.nachAufgabe(fn)`: läuft am Ende jedes `questZeichnen` (`module/aufgabe.js`),
   in Anmeldereihenfolge – für Beobachter, die an der Aufgabenkarte nichts ändern
   (`erfolg-feier.js`: Funken, wenn eine Wissens-Quest abgeholt wurde).
+- Weitere Hook-Punkte (je in Anmeldereihenfolge): `Erzwelt.nachPins(fn)` am Ende jedes
+  `pinsZeichnen` (auch wenn die Pins aus dem Cache stehen bleiben; Ziel-Pin der
+  Einführung), `Erzwelt.nachPinStatus(fn)` nach der Bau- und Statusanzeige an den Pins
+  (Übergangs-Animationen in `premium-animation-*.js`), `Erzwelt.nachMeldungen(fn)` und
+  `Erzwelt.nachHinweisen(fn)` in `zeichnen` direkt nach `toastsErneuern` bzw.
+  `hinweiseSetzen` (zwei Hook-Punkte im Kern; der zweite läuft auch, wenn
+  `performance-pass.js` `hinweiseSetzen` überspringt), `Erzwelt.nachTempo(fn)` nach jedem
+  `tempoSetzen` (hier umhüllt).
 - Gemeinsame Bausteine: `Erzwelt.ikon` (Linien-Symbole Warnung, Pause, Schloss,
   Lieferweg) und `Erzwelt.stufe(n)` (Schwierigkeit als 1–3 Erzbrocken). Sie stehen
   hier, weil `module/einfuehrung.js` die Schwierigkeitswahl schon beim Laden zeichnet;
@@ -146,19 +154,64 @@ Der Builder prüft dabei automatisch:
   `.toastLayout(q, t)`; `__erzweltKnowledgeQuestFlow.zustand()`, `.quest()`,
   `.fertig(def)`, `.liste`, `.active()`, `.nextGeologyTarget()`;
   `__erzweltMapFocusNavigation.questAction()`, `.zielSymbol()`;
-  `__erzweltSekBKlarheit.engpass()`, `.engpassOeffnen(e)`.
+  `__erzweltSekBKlarheit.engpass()`, `.engpassOeffnen(e)` (`questAction` und
+  `zielSymbol` jetzt aus `module/karte.js`).
 - **Bedienung hier**: «Ziel zeigen» (Wissens-Quest Rohstoffstandorte: nächsten
   Standort öffnen, Ruf: Ziel-Reiter, sonst wie Antippen der Karte), Engpass-Kasten,
   kompakte Zeile ohne Ziel aufklappen (Capture-Listener, stoppt den Klick), nach
   Klicks ausserhalb «Ziel zeigen» im nächsten Frame abgleichen.
 - **Bewusst als Hook geblieben**: Klick auf die Karte führt zum Ziel und
-  `data-map-focus-bound` (`map-focus-navigation.js`, das nach neuen Meldungen und
-  nach `hinweiseSetzen` `__erzweltAufgabe.verknuepfen()` aufruft); `role`/`tabindex`
-  und Enter/Leertaste (`interaction-focus-final-fix.js`, im nächsten Frame mit den
-  Ebenen-Chips); Klick auf «Ansehen» und Mitzählen für Wissens-Quests
+  `data-map-focus-bound`, `role`/`tabindex` und Enter/Leertaste (`module/karte.js`, das
+  nach neuen Meldungen und nach `hinweiseSetzen` `__erzweltAufgabe.verknuepfen()`
+  aufruft; Tastatur im nächsten Frame mit den Ebenen-Chips); Klick auf «Ansehen» und Mitzählen für Wissens-Quests
   (`module/wissen.js`); Rückmeldung nach einem Schritt (`module/einfuehrung.js`).
 - Markierungen `__erzweltAufgabe`, `__erzweltObjectiveGuide` (E2E-Test),
   `__erzweltAufgabeKompakt`. Lädt nach `module/seiten.js` (Gruppe `logic-fixes`).
+
+## Weltkarte (`module/karte.js`)
+
+Alles, was die Karte zeichnet und bedient (früher `construction-visibility.js`,
+`map-focus-navigation.js`, `interaction-focus-final-fix.js`, `didactic-transport.js`,
+die Pin-Anzeige aus `stop-safety-visual.js`, der Lieferweg aus `didactic-should.js`,
+die Karten-Caches aus `performance-pass.js` und Teile aus `premium-spielgefuehl.js`,
+`handy-layout.js` und `sek-b-klarheit.js`; diese Dateien gibt es nicht mehr bzw. nur
+noch ohne Karten-Teil).
+
+- **Einziger Besitzer** von `pinsZeichnen` (alle Pins mit Rohstoff-Kürzel und -Farbe
+  auch an geschlossenen Quellen, Cache: nur neu, wenn sich Sichtbares ändert –
+  Personal, Stillstand, Einführungsschritt, Ebenen; danach Filter-Punkt und
+  `Erzwelt.nachPins`), `ansichtAnwenden` (Kamera begrenzen, Transform einmal pro Frame,
+  Pin-Grösse nur bei neuem Zoom; bei «Ziel zeigen» und Meldungen den Ziel-Pin mittig
+  unter die Aufgabenkarte) und `pinFeiern` («Neu eröffnet», Bauzeit merken). `zeigeAuf`,
+  Zoom-Knöpfe, Ziehen, Rad und Klicks auf Pins und Ebenen-Chips bleiben im Kern.
+- **Nach jedem Zeichnen**, in dieser Reihenfolge: Lieferweg (Linie und Text, Cache),
+  Transportweg LKW → Schiff → LKW mit Legende (Cache; «ruhig»: ein Punkt je Wegstück,
+  stille Knoten), Bau- und Statusanzeige an den Pins (Ring, Abzeichen, Hinweis,
+  `aria-label`), `Erzwelt.nachPinStatus`, Stillstand an Quellen (Streik,
+  Sicherheitsstopp, Stillstand), Lieferfluss, Lieferweg-Knopf. Ein Klick auf einen
+  Ebenen-Chip zeichnet nur die Pins neu (Kern): deren Status kommt mit dem nächsten
+  Zeichnen.
+- **Fokus:** Antippen der Aufgabenkarte oder einer Meldung mit Ortsbezug führt zum Ort
+  (Kamera, Fokusring, bei neuen Orten «Vorschlag», ausgeblendete Ebene wieder an).
+  Meldungen werden über `Erzwelt.nachMeldungen` verknüpft (Ziel-Symbol, Enter und
+  Leertaste), die Aufgabenkarte über `Erzwelt.nachMeldungen`/`.nachHinweisen` neu
+  abgeglichen (`__erzweltAufgabe.verknuepfen()`). Im nächsten Frame: Ebenen-Chips
+  zeigen den wahren Stand, die verknüpfte Aufgabenkarte ist ein Knopf (`role`,
+  `tabindex`, Enter/Leertaste).
+- **Filter-Knopf** über + und −: die Ebenen (Rohstoffquellen, Werke, Fabriken) stecken
+  darin; ein Punkt zeigt, wenn nicht alle Orte sichtbar sind.
+- **Lieferweg-Knopf** unter «Verlauf»: Antippen zeigt die Erklärung, ein Klick daneben
+  schliesst sie. Nur auf der Karte, ohne offenes Blatt, nach der Einführung.
+- **Exporte:** `__erzweltKarte.transportNeu()` (`reduced-motion-final.js`, wenn Bewegung
+  wieder an ist), `__erzweltKarte.stillstand` (`ursache`, `rest`, `ikon`: Stillstand-Karte
+  im Blatt, `stop-safety-visual.js`). Markierungen `__erzweltMapFocusNavigation`
+  (`questAction`, `zielSymbol` für `module/aufgabe.js`), `__erzweltWorldStatus`,
+  `__erzweltInteractionFocusFinalFix`.
+- **Ladereihenfolge:** am Anfang der Gruppe `world-presentation` (früher
+  `construction-visibility.js`). Beim Laden wie die früheren Dateien nacheinander:
+  Lieferweg (noch ohne Cache), Transportweg, Statusanzeige, Stillstand, Meldungen
+  verknüpfen, Tastatur-Abgleich, Filter-Knopf, Lieferfluss. Die Pins zeichnet das
+  nächste `zeichnen` neu (`module/einfuehrung.js`).
 
 ## Start und Einführung (`module/einfuehrung.js`)
 
@@ -294,7 +347,7 @@ die Texte aus `didactic-complexity.js`, überschriebene Texte aus
 - Tutorial-Karte ohne doppelte Punkte-Leiste; «Schritt abgeschlossen» liegt bei
   offenem Blatt über der Kopfzeile statt über dem Blatt.
 - «Ziel zeigen» setzt den Ziel-Pin mittig unter die Aufgabenkarte und blendet
-  Meldungen kurz ab.
+  Meldungen kurz ab (seit Schritt 8a in `module/karte.js`).
 - Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück (die Texte
   stehen jetzt direkt in `module/blaetter.js` bzw. `module/seiten.js`); HUD «Team frei».
 - Tutorial-Raffinerie zeigt Kupfer statt Seltener Erden, ohne Spezialisierungskarte.
@@ -324,7 +377,7 @@ Oben zwei Reihen Bedienung, darunter das Spiel:
   Einstellungen).
 - Meldungen docken links unten am Bildschirmrand über der Leiste an.
 - Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken im Filter-Knopf
-  über + und − (gleiche Abstände). Ein Punkt am Knopf zeigt, wenn nicht alle Orte sichtbar sind.
+  über + und − (seit Schritt 8a in `module/karte.js`).
 - Aufgabe steht auf allen Seiten rechts oben, wie auf der Karte; gleicher
   Abstand zwischen den beiden oberen Leisten und dem Aufgabenkasten.
 - Aufgabenkasten kürzer: Phase als schmale Leiste mit «Phase 1/4 · …» in einer
@@ -347,17 +400,12 @@ Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
 
 ## Premium-Spielgefühl (`premium-spielgefuehl.js`)
 
-- Rohstoff auf einen Blick: Auch nicht eröffnete Rohstoffquellen zeigen
-  Kürzel und Farbe (Cu, Al, Sn …); im Aufgabentext steht «Kupfer (Cu)»
-  (seit Schritt 6 in `module/aufgabe.js`).
-- Lieferkette lebt: Von jeder fördernden Quelle fährt Ware zur nächsten
-  Raffinerie, von dort Material zu jeder laufenden Fabrik. Bei Pause steht
-  die Ware still; «Animationen: aus» zeigt nur die Wege.
+- Rohstoff-Pins, Lieferfluss und Lieferweg-Knopf: seit Schritt 8a in
+  `module/karte.js`; «Kupfer (Cu)» im Aufgabentext in `module/aufgabe.js`.
 - Verkauf: Münzen fallen in die Kasse, der Betrag erscheint kurz im
   Kassen-Feld.
 - Monatsabschluss als kleine Bilanz: laufendes Geschäft (Einnahmen minus
   Löhne und Betrieb) mit Trendpfeil, dazu was investiert wurde.
-- Beispiel-Lieferweg als kleiner Knopf unter «Verlauf» statt Textkasten.
 
 ## Kurztexte (`kurztexte.js`)
 
@@ -477,7 +525,11 @@ Startbild mit Escape und nach Neuladen, Neue Runde, Schwierigkeitswahl, Feier na
 jedem Schritt, Lupe jedes Wissens-Bereichs, Verbesserungen, Wissens-Quests bis zum
 Abschluss) und speichert pro Zustand Text, Klassen, Knöpfe, Spielstand, Markup der
 Aufgabenkarte, Rückmeldungen, Fokusringe, Kamera und Screenshot (in den Szenarien
-ab Schritt 7 zusätzlich Feier, Meldungsverlauf, Fokus und Lupe). «Neuladen» öffnet
+ab Schritt 7 zusätzlich Feier, Meldungsverlauf, Fokus und Lupe; ab Schritt 8a
+Karten-Szenarien – Pins aller Arten und Zustände, Ebenen einzeln und kombiniert, Zoom,
+Ziehen, Rad, Fokus über Meldungen und Aufgabenkarte, Lieferweg-Knopf, Tastatur, 360,
+820 und 1280 px – mit Markup jedes Pins, Ebenen, Filter-Knopf, Linien der Karte und
+Lieferweg-Knopf). «Neuladen» öffnet
 den beim Verlassen gespeicherten Stand in einer frischen Seite. Anzeigen, die nur eine feste
 Zeit stehen (Meldungen, Verkaufsbetrag in der Kasse, «Neu eröffnet»), sind
 ausgeblendet. `vergleich.py` meldet jeden Unterschied.

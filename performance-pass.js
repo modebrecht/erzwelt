@@ -51,77 +51,7 @@
     document.addEventListener("visibilitychange",()=>{if(document.hidden)flushSave();});
   }
 
-  const sortedEntries=o=>Object.keys(o||{}).sort().map(k=>[k,o[k]]);
-  // Only values that are actually visible on map pins belong in the cache key.
-  // Cash, inventories, satisfaction drift and upgrades must NOT force a pin rebuild.
-  const minePinState=()=>sortedEntries(S.minen).map(([id,m])=>[id,m.arbeiter,m.stillBis>S.tag?1:0]);
-  const raffPinState=()=>sortedEntries(S.raff).map(([id,r])=>[id,r.arbeiter]);
-  const fabPinState=()=>S.fabriken.map(f=>[f.produkt,f.land,f.arbeiter]);
-  const routeState=()=>JSON.stringify([
-    tutorialLaeuft()?S.tutorial:-1,
-    Object.keys(S.minen).sort(),Object.keys(S.raff).sort(),
-    S.fabriken.map(f=>[f.produkt,f.land,f.restbau===0?0:1])
-  ]);
-
-  if(typeof beispielKette==="function"){
-    const original=beispielKette;
-    let key="",value=null;
-    beispielKette=function(){
-      const next=routeState();
-      if(next===key)return value;
-      key=next; value=original();
-      return value;
-    };
-  }
-
-  if(typeof lieferwegZeichnen==="function"){
-    const original=lieferwegZeichnen;
-    let key="";
-    lieferwegZeichnen=function(){
-      const next=routeState()+"|"+aktiveSeite+"|"+(offenesBlatt?`${offenesBlatt.art}:${offenesBlatt.id}`:"-");
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
-
-  // Pan/zoom used to rescale every pin on every pointer event, even when only panning.
-  // Clamp state synchronously, but batch the DOM transform to one paint per frame and
-  // recalculate individual pin sizes only when zoom actually changes.
-  if(typeof ansichtAnwenden==="function"){
-    let raf=0,lastPinZoom=NaN;
-    ansichtAnwenden=function(){
-      const b=sicht.clientWidth,hh=sicht.clientHeight;
-      const zmin=Math.max(b/KARTE_B,0.95),zmax=4.5;
-      ansicht.z=Math.min(zmax,Math.max(zmin,ansicht.z));
-      const bb=KARTE_B*ansicht.z,bh=KARTE_H*ansicht.z;
-      ansicht.x=bb<=b?(b-bb)/2:Math.min(0,Math.max(b-bb,ansicht.x));
-      ansicht.y=bh<=hh?(hh-bh)/2:Math.min(0,Math.max(hh-bh,ansicht.y));
-      if(raf)return;
-      raf=requestAnimationFrame(()=>{
-        raf=0;
-        welt.style.transform=`translate(${ansicht.x}px,${ansicht.y}px) scale(${ansicht.z})`;
-        if(!Number.isFinite(lastPinZoom)||Math.abs(ansicht.z-lastPinZoom)>0.0001){
-          pinGroesse();
-          lastPinZoom=ansicht.z;
-        }
-      });
-    };
-  }
-
-  if(typeof pinsZeichnen==="function"){
-    const original=pinsZeichnen;
-    let key="";
-    pinsZeichnen=function(){
-      const next=JSON.stringify([
-        S.tutorial,minePinState(),raffPinState(),fabPinState(),
-        ebenen.mine?1:0,ebenen.raff?1:0,ebenen.fab?1:0
-      ]);
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
+  // Karte (Pins, Kamera, Lieferweg, Transportweg): Caches jetzt direkt in module/karte.js.
 
   if(typeof dockZeichnen==="function"){
     const original=dockZeichnen;
@@ -172,28 +102,6 @@
   if(typeof seiteFuellen==="function"){
     const original=seiteFuellen;
     seiteFuellen=throttleTickRender(original,name=>String(name));
-  }
-
-  // "Ruhig" keeps the route readable but avoids the full decorative animation load.
-  if(typeof addFlowDot==="function"){
-    const original=addFlowDot;
-    let lastPath="",count=0;
-    addFlowDot=function(parent,path,...rest){
-      if(path!==lastPath){lastPath=path;count=0;}
-      count++;
-      if(OPT.anim===1&&count>1)return;
-      return original(parent,path,...rest);
-    };
-  }
-  if(typeof addNodePulse==="function"){
-    const original=addNodePulse;
-    addNodePulse=function(parent,p,color){
-      if(OPT.anim!==1)return original(parent,p,color);
-      const g=svgEl("g",{transform:`translate(${p[0]} ${p[1]})`});
-      g.appendChild(svgEl("circle",{r:7,fill:"none",stroke:color,"stroke-width":1.6,opacity:.35}));
-      g.appendChild(svgEl("circle",{r:3.2,fill:color,stroke:"#fffaf0","stroke-width":1.5}));
-      parent.appendChild(g);
-    };
   }
 
   window.__erzweltPerf={

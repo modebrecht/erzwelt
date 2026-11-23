@@ -37,7 +37,7 @@
        .active(), .nextGeologyTarget()
                                Wissens-Quests (module/wissen.js)
      __erzweltMapFocusNavigation.questAction(), .zielSymbol()
-                               Ziel der Karte ermitteln (map-focus-navigation.js)
+                               Ziel der Karte ermitteln (module/karte.js)
      __erzweltSekBKlarheit.engpass(), .engpassOeffnen(e)
                                Engpass und wohin er führt (sek-b-klarheit.js)
      __erzweltStil.ikon.warnung
@@ -48,10 +48,10 @@
        klappt auf, stoppt den Klick), nach Klicks ausserhalb der Karte
        «Ziel zeigen» im nächsten Frame abgleichen.
      – Hooks, die bewusst woanders bleiben:
-       map-focus-navigation.js: Klick auf die Karte führt zum Ziel (Listener
+       module/karte.js: Klick auf die Karte führt zum Ziel (Listener
          auf #quest samt data-map-focus-bound) und ruft nach Meldungen und
-         nach hinweiseSetzen `verknuepfen()` dieses Moduls auf;
-       interaction-focus-final-fix.js: role/tabindex und Enter/Leertaste
+         nach hinweiseSetzen (Hooks Erzwelt.nachMeldungen, .nachHinweisen)
+         `verknuepfen()` dieses Moduls auf; role/tabindex und Enter/Leertaste
          (im nächsten Frame, gemeinsam mit den Ebenen-Chips);
        module/wissen.js: «Ansehen» (Klick über document) und das
          Mitzählen von Lohn, Markt, Ziel, Rohstoffstandorten;
@@ -144,7 +144,7 @@
   }
 
   /* ---------- 4. Karten-Verknüpfung ----------
-     Das Ziel ermittelt map-focus-navigation.js aus Pins, Dock und dem Text der
+     Das Ziel ermittelt module/karte.js aus Pins, Dock und dem Text der
      Karte, wie er jetzt dasteht (auch aus versteckten Teilen). */
   function verknuepfen(){
     if (q.hidden) return;
@@ -210,7 +210,7 @@
     const id = aktivesWissen();
     if (q.classList.contains("wissen-quest") && id === "geologie" && geologieOeffnen()) return;
     if (q.classList.contains("wissen-quest") && id === "ruf"){ seiteWechseln("ziel"); return; }
-    // Sonst derselbe Weg wie ein Antippen der Karte (map-focus-navigation.js).
+    // Sonst derselbe Weg wie ein Antippen der Karte (module/karte.js).
     q.click();
   }
   function zielKnopf(){

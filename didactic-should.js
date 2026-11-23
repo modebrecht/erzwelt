@@ -139,40 +139,6 @@ tagVor=function(){
   }
   if(S.tag%5===0)marktBewegen();ereignisPruefen();if(S.kasse<-800000)rundeBeenden("insolvenz");else if(S.tag>etappenEnde())rundeBeenden("etappe");speichern();
 };
-function kmDistanz(idA,idB){
-  const a=ORT[idA],b=ORT[idB];if(!a||!b)return 0;const rad=x=>x*Math.PI/180,dLat=rad(b[1]-a[1]),dLon=rad(b[0]-a[0]);
-  const q=Math.sin(dLat/2)**2+Math.cos(rad(a[1]))*Math.cos(rad(b[1]))*Math.sin(dLon/2)**2;
-  return 6371*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q));
-}
-function beispielKette(){
-  if(tutorialLaeuft())return null;
-  const fabrik=S.fabriken.find(f=>f.restbau===0);if(!fabrik)return null;
-  const fabId="f_"+fabrik.land;if(!ORT[fabId])return null;
-  const rezept=Object.keys(PRODUKT[fabrik.produkt].rezept);
-  const mineIds=offeneMinen().filter(id=>rezept.includes(MINEN.find(x=>x.id===id)?.mat)),raffIds=Object.keys(S.raff);
-  if(!mineIds.length||!raffIds.length)return null;
-  let best=null;
-  for(const mineId of mineIds){const mat=MINEN.find(x=>x.id===mineId).mat;
-    for(const raffId of raffIds){const bonus=(RAFF_SPEZIAL[raffId]||[]).includes(mat)?0.85:1,d1=kmDistanz(mineId,raffId),d2=kmDistanz(raffId,fabId),score=(d1+d2)*bonus;
-      if(!best||score<best.score)best={mineId,raffId,fabId,mat,d1,d2,score,fabrik};}}
-  return best;
-}
-function lieferwegZeichnen(){
-  const svg=document.querySelector("svg.weltkarte");if(!svg)return;svg.querySelector("#didaktik-lieferweg")?.remove();
-  let note=document.getElementById("didaktik-route-note");
-  if(!note){
-    note=document.createElement("div");note.id="didaktik-route-note";
-    note.style.cssText="position:absolute;left:10px;bottom:calc(var(--dockh) + 10px);z-index:12;max-width:min(310px,calc(100vw - 82px));background:#fffaf0ee;color:#241c14;border:1px solid #d9c9aa;border-radius:14px;padding:8px 10px;box-shadow:0 3px 12px #0002;font-size:var(--f0);font-weight:700;line-height:1.3;pointer-events:none";
-    document.getElementById("sicht")?.appendChild(note);
-  }
-  const r=beispielKette(),sichtbar=!!r&&aktiveSeite==="karte"&&!offenesBlatt;note.hidden=!sichtbar;if(!sichtbar)return;
-  const [x1,y1]=px(r.mineId),[x2,y2]=px(r.raffId),[x3,y3]=px(r.fabId),ns="http://www.w3.org/2000/svg",g=document.createElementNS(ns,"g");
-  g.id="didaktik-lieferweg";g.setAttribute("pointer-events","none");
-  const line=(a,b,c,d)=>{const l=document.createElementNS(ns,"line");l.setAttribute("x1",a);l.setAttribute("y1",b);l.setAttribute("x2",c);l.setAttribute("y2",d);l.setAttribute("stroke","#f08c2e");l.setAttribute("stroke-width","4");l.setAttribute("stroke-dasharray","9 7");l.setAttribute("opacity",".72");return l;};
-  g.appendChild(line(x1,y1,x2,y2));g.appendChild(line(x2,y2,x3,y3));svg.appendChild(g);
-  const mine=MINEN.find(x=>x.id===r.mineId),raff=RAFF_ORTE.find(x=>x.id===r.raffId),km=(Math.round((r.d1+r.d2)/100)*100).toLocaleString("de-CH");
-  note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
-}
+/* Beispiel-Lieferweg (kmDistanz, beispielKette, Linie und Text): module/karte.js. */
 Erzwelt.vorZeichnen(()=>shouldMigration());
-Erzwelt.nachZeichnen(()=>lieferwegZeichnen());
 shouldMigration();seitenStand="";blattStand="";zeichnen();

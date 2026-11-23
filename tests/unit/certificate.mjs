@@ -7,7 +7,7 @@ const script=core.match(/<script>([\s\S]*?)<\/script>/)[1];
 const model=script.slice(script.indexOf('const ZIEL_GEWINN'),script.indexOf('/* ============================================================\n   Ereignisse'));
 const product=script.slice(script.indexOf('const PRODUKT ='),script.indexOf('const FAB_ORTE'));
 const should=await readFile('didactic-should.js','utf8');
-const effectiveDay=should.slice(should.indexOf('tagVor=function(){'),should.indexOf('function kmDistanz'));
+const effectiveDay=should.slice(should.indexOf('tagVor=function(){'),should.indexOf('Erzwelt.vorZeichnen(()=>shouldMigration())'));
 const disk={};
 const listeners={};
 const elements={};

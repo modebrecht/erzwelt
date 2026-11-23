@@ -31,7 +31,7 @@
     });
   }
 
-  Erzwelt.nachZeichnen(()=>inspectTransitions());
+  Erzwelt.nachPinStatus(()=>inspectTransitions());   // direkt nach der Statusanzeige (module/karte.js)
   inspectTransitions();
 
   window.__erzweltPremiumAnimationTreatment={

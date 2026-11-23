@@ -23,8 +23,7 @@
       // A static route may have had its SMIL nodes removed. Force the existing
       // transport renderer to rebuild it when motion is enabled again.
       try{
-        if(typeof transportRouteCache!=="undefined")transportRouteCache="";
-        if(typeof lieferwegTransportZeichnen==="function")lieferwegTransportZeichnen();
+        window.__erzweltKarte?.transportNeu();
       }catch(e){}
     }
     previousOff=off;

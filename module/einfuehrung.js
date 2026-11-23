@@ -360,8 +360,7 @@
       p.classList.toggle("blass", !treffer);
     });
   }
-  const vorherPins = pinsZeichnen;
-  pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); zielPinMarkieren(); return out; };
+  Erzwelt.nachPins(() => zielPinMarkieren());
 
   /* Ziel des Reglers im Blatt (Marke «Ziel 10») */
   function besetzungsZiel(tun, ref){

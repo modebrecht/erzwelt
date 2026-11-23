@@ -14,8 +14,7 @@
         "didactic-model.js",
         "didactic-events.js",
         "didactic-ui.js",
-        "didactic-should.js",
-        "didactic-transport.js"
+        "didactic-should.js"
       ]
     },
     {
@@ -34,7 +33,7 @@
     {
       "name": "world-presentation",
       "files": [
-        "construction-visibility.js",
+        "module/karte.js",
         "construction-animation-enhance.js",
         "premium-animation-treatment.js",
         "premium-animation-polish.js",
@@ -46,9 +45,7 @@
       "files": [
         "notification-history.js",
         "notification-reload-fix.js",
-        "stop-safety-visual.js",
-        "map-focus-navigation.js",
-        "interaction-focus-final-fix.js"
+        "stop-safety-visual.js"
       ]
     },
     {

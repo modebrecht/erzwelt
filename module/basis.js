@@ -19,18 +19,36 @@
                                in Anmeldereihenfolge. Für Beobachter, die nichts an der
                                Aufgabenkarte ändern (z. B. Erfolg feiern).
 
+   Weitere Hook-Punkte, alle in Anmeldereihenfolge:
+     Erzwelt.nachPins(fn)       am Ende jedes `pinsZeichnen` (module/karte.js), auch wenn
+                                die Pins aus dem Cache stehen bleiben (Ziel-Pin der Einführung)
+     Erzwelt.nachPinStatus(fn)  nach der Bau- und Statusanzeige an den Pins, vor der
+                                Stillstand-Anzeige (module/karte.js, im Zeichnen-Hook)
+     Erzwelt.nachMeldungen(fn)  in `zeichnen` direkt nach `toastsErneuern` (Kern)
+     Erzwelt.nachHinweisen(fn)  in `zeichnen` direkt nach `hinweiseSetzen` (Kern) – auch
+                                dann, wenn performance-pass.js hinweiseSetzen überspringt
+     Erzwelt.nachTempo(fn)      nach jedem `tempoSetzen` (hier umhüllt, innen: spätere
+                                Hüllen wie sek-b-klarheit.js tun nach dem Aufruf nichts mehr)
+
    Gemeinsame Bausteine (früher stil.js; hier, weil module/einfuehrung.js sie schon
    beim Laden für die Schwierigkeitswahl braucht):
      Erzwelt.ikon              Linien-Symbole: warnung, pause, schloss, laster
      Erzwelt.stufe(n)          Schwierigkeit als 1–3 gefüllte Erzbrocken (SVG) */
 "use strict";
 (function(){
-  const vor = [], nach = [], aufgabe = [];
+  const vor = [], nach = [], aufgabe = [], pins = [], pinStatus = [], meldungen = [], hinweise = [], tempoNach = [];
+  const alle = liste => { for (let i = 0; i < liste.length; i++) liste[i](); };
   const kern = zeichnen;
   zeichnen = function(){
     for (let i = vor.length - 1; i >= 0; i--) vor[i]();
     const out = kern.apply(this, arguments);
-    for (let i = 0; i < nach.length; i++) nach[i]();
+    alle(nach);
+    return out;
+  };
+  const kernTempo = tempoSetzen;
+  tempoSetzen = function(){
+    const out = kernTempo.apply(this, arguments);
+    alle(tempoNach);
     return out;
   };
   const linie = inhalt => `<svg class="stil-ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inhalt}</svg>`;
@@ -55,7 +73,18 @@
     vorZeichnen(fn){ vor.push(fn); },
     nachZeichnen(fn){ nach.push(fn); },
     nachAufgabe(fn){ aufgabe.push(fn); },
+    nachPins(fn){ pins.push(fn); },
+    nachPinStatus(fn){ pinStatus.push(fn); },
+    nachMeldungen(fn){ meldungen.push(fn); },
+    nachHinweisen(fn){ hinweise.push(fn); },
+    nachTempo(fn){ tempoNach.push(fn); },
     /* nur für module/aufgabe.js */
-    aufgabeGezeichnet(){ for (let i = 0; i < aufgabe.length; i++) aufgabe[i](); }
+    aufgabeGezeichnet(){ alle(aufgabe); },
+    /* nur für module/karte.js */
+    pinsGezeichnet(){ alle(pins); },
+    pinStatusGezeigt(){ alle(pinStatus); },
+    /* nur für den Kern (zeichnen) */
+    meldungenErneuert(){ alle(meldungen); },
+    hinweiseGesetzt(){ alle(hinweise); }
   });
 })();

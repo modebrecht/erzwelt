@@ -2398,8 +2398,10 @@ function zeichnen(){
   pinsZeichnen();
   dockZeichnen();
   toastsErneuern();
+  if (window.Erzwelt) Erzwelt.meldungenErneuert();   // Hook-Punkt (module/basis.js)
   questZeichnen();
   hinweiseSetzen();
+  if (window.Erzwelt) Erzwelt.hinweiseGesetzt();     // Hook-Punkt (module/basis.js)
   if (offenesBlatt) blattFuellen(offenesBlatt.art, offenesBlatt.id);
   if (aktiveSeite !== "karte") seiteFuellen(aktiveSeite);
   // Fördermenge des Tages im offenen Minenfenster als schwebende Zahl
