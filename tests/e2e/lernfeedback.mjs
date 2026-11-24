@@ -66,7 +66,9 @@ try {
   assert.match(await feedback.innerText(), /Tutorial abgeschlossen/);
   // Ende nach 10.7 s (+ Ausblenden): in kleinen Schritten abwarten statt fixem Fenster
   for (let i = 0; i < 16 && await feedback.count(); i++) await page.clock.runFor(250);
-  assert.equal(await feedback.count(), 0);
+  assert.equal(await feedback.count(), 0, await page.evaluate(() => JSON.stringify({
+    texte:[...document.querySelectorAll('#tutorial-lernfeedback')].map(e => e.textContent.slice(0, 80)),
+    tutorial:S.tutorial, laenge:TUTORIAL.length, anim:OPT.anim, dauer:OPT.lernfeedbackdauer, now:performance.now()})));
 
   await slider.fill('150');
   await page.evaluate(() => {
