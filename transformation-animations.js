@@ -1,6 +1,6 @@
 "use strict";
 /* Sichtbare Prozessanimationen für die drei zentralen Umwandlungen:
-   Rohstoff -> Material, Materialien -> Produkt, Produkt -> Geld.
+   Rohstoff -> Material und Materialien -> Produkt.
    Reine Darstellung; keine Änderungen an Spielregeln oder Berechnungen. */
 
 (function(){
@@ -29,8 +29,7 @@
     .rohbrocken:nth-child(2){transform:translate(2px,8px) rotate(11deg);width:15px;height:14px}
     .rohbrocken:nth-child(3){transform:translate(20px,-6px) rotate(24deg);width:13px;height:12px}
     .prozessszene.aktiv .rohbrocken:nth-child(1){animation:rohRein 2.4s ease-in infinite}
-    .prozessszene.aktiv .rohbrocken:nth-child(2){animation:rohRein 2.4s .55s ease-in infinite}
-    .prozessszene.aktiv .rohbrocken:nth-child(3){animation:rohRein 2.4s 1.1s ease-in infinite}
+    .prozessszene.aktiv .rohbrocken:not(:first-child){display:none}
     @keyframes rohRein{0%,12%{opacity:0;transform:translate(-34px,-9px) scale(.8)}25%{opacity:1}72%{opacity:1}88%,100%{opacity:0;transform:translate(52px,0) scale(.55)}}
     .prozess-reaktor{position:relative;z-index:3;width:66px;height:70px;display:grid;place-items:center}
     .prozess-reaktor svg{width:62px;height:62px;overflow:visible}
@@ -55,10 +54,7 @@
     .rezeptchips{position:relative;z-index:2;height:68px;display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;max-width:105px;margin:auto}
     .rezeptchip{width:26px;height:26px;border-radius:8px;background:var(--chip);border:2px solid #fff;color:#fff;
       display:grid;place-items:center;font-size:11px;font-family:"Baloo 2",sans-serif;font-weight:900;box-shadow:0 2px 4px #0002}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(1){animation:chipRein 2.6s ease-in infinite}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(2){animation:chipRein 2.6s .38s ease-in infinite}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(3){animation:chipRein 2.6s .76s ease-in infinite}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(4){animation:chipRein 2.6s 1.14s ease-in infinite}
+    .fabrik-prozess.aktiv .rezeptchips{animation:chipRein 2.6s ease-in infinite}
     @keyframes chipRein{0%,12%{opacity:0;transform:translateX(-25px) scale(.75)}24%{opacity:1}68%{opacity:1}84%,100%{opacity:0;transform:translateX(58px) scale(.55)}}
     .fabrikmaschine{position:relative;z-index:3;width:78px;height:70px;display:grid;place-items:center}
     .fabrikmaschine svg{width:76px;height:64px;overflow:visible}
@@ -77,17 +73,6 @@
     body[data-anim="1"] .rohbrocken:nth-child(3),body[data-anim="1"] .rezeptchip:nth-child(n+4){display:none}
     body[data-anim="0"] .prozessszene .prozesslinie{background:#ddd0b7}
 
-    #verkauf-visual-layer{position:fixed;inset:0;z-index:120;pointer-events:none;overflow:hidden}
-    .verkauf-paket{position:absolute;width:50px;height:42px;border-radius:7px;background:#d5a968;border:2px solid #fff;
-      box-shadow:0 4px 12px #0004;display:grid;place-items:center;color:#5b3b17;font-family:"Baloo 2",sans-serif;font-weight:900;font-size:11px;text-align:center;line-height:1.05}
-    .verkauf-paket::after{content:"";position:absolute;left:5px;right:5px;top:8px;border-top:2px solid #9b6d3466}
-    .verkauf-geld{position:fixed;z-index:121;pointer-events:none;padding:5px 9px;border-radius:999px;background:#2fbe7e;color:#073b27;
-      border:2px solid #fff;font-family:"Baloo 2",sans-serif;font-weight:900;font-size:var(--f1);box-shadow:0 3px 9px #0003;white-space:nowrap}
-    .pille.kasse.verkauf-puls{animation:kassenPuls .48s cubic-bezier(.2,1.7,.4,1)}
-    @keyframes kassenPuls{0%{transform:scale(1)}45%{transform:scale(1.16)}100%{transform:scale(1)}}
-    .verkauf-kette-mini{display:flex;align-items:center;justify-content:center;gap:7px;margin:8px 0 10px;padding:7px 10px;
-      border-radius:12px;background:#eef7f1;color:#335246;font-size:var(--f0);font-weight:800}
-    .verkauf-kette-mini b{color:#1f7754}
   `;
   document.head.appendChild(style);
 
@@ -198,81 +183,6 @@
     };
   }
 
-  let pendingSale={stueck:0,erloes:0,products:new Set()};
-  let saleTimer=0,lastSaleVisual=-1e9;
-  const reduced=()=>window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function saleOrigin(){
-    const manual=aktiveSeite==="markt"?document.querySelector("[data-tun='handverkauf']"):null;
-    return manual||document.querySelector("#dock [data-seite='markt']")||document.querySelector("#dock");
-  }
-  function saleTarget(){return document.querySelector(".pille.kasse")||document.getElementById("h-kasse");}
-
-  function cashLabel(erloes,target,staticOnly){
-    if(!target)return;
-    const r=target.getBoundingClientRect();
-    const d=document.createElement("div");d.className="verkauf-geld";d.textContent="+"+chf(erloes);
-    d.style.left=(r.left+r.width/2)+"px";d.style.top=(r.bottom+5)+"px";d.style.transform="translateX(-50%)";
-    document.body.appendChild(d);
-    if(staticOnly||!d.animate){setTimeout(()=>d.remove(),650);return;}
-    d.animate([{opacity:0,transform:"translate(-50%,8px) scale(.85)"},{opacity:1,offset:.18,transform:"translate(-50%,0) scale(1.05)"},{opacity:1,offset:.72},{opacity:0,transform:"translate(-50%,-22px) scale(.96)"}],{duration:1100,easing:"ease-out"}).finished.finally(()=>d.remove());
-  }
-
-  function flushSaleVisual(){
-    saleTimer=0;
-    if(!pendingSale.stueck||!pendingSale.erloes)return;
-    const data=pendingSale;pendingSale={stueck:0,erloes:0,products:new Set()};lastSaleVisual=performance.now();
-    const target=saleTarget();if(!target)return;
-    if(OPT.anim===0||reduced()){
-      cashLabel(data.erloes,target,true);return;
-    }
-    const origin=saleOrigin(),or=origin?.getBoundingClientRect(),tr=target.getBoundingClientRect();
-    if(!or){cashLabel(data.erloes,target,false);return;}
-    let layer=document.getElementById("verkauf-visual-layer");
-    if(!layer){layer=document.createElement("div");layer.id="verkauf-visual-layer";document.body.appendChild(layer);}
-    const pack=document.createElement("div");pack.className="verkauf-paket";
-    pack.textContent=data.products.size===1?[...data.products][0]:`${data.stueck} Stück`;
-    const sx=or.left+or.width/2-25,sy=or.top+or.height/2-21,ex=tr.left+tr.width/2-25,ey=tr.top+tr.height/2-21;
-    pack.style.left=sx+"px";pack.style.top=sy+"px";layer.appendChild(pack);
-    const dx=ex-sx,dy=ey-sy;
-    const anim=pack.animate([
-      {transform:"translate(0,0) scale(.78)",opacity:0},
-      {transform:"translate(0,0) scale(1)",opacity:1,offset:.16},
-      {transform:`translate(${dx*.52}px,${dy*.38-32}px) rotate(-4deg)`,opacity:1,offset:.56},
-      {transform:`translate(${dx}px,${dy}px) scale(.5) rotate(5deg)`,opacity:.2}
-    ],{duration:850,easing:"cubic-bezier(.22,.8,.25,1)"});
-    anim.finished.finally(()=>pack.remove());
-    setTimeout(()=>{
-      target.classList.remove("verkauf-puls");void target.offsetWidth;target.classList.add("verkauf-puls");
-      setTimeout(()=>target.classList.remove("verkauf-puls"),520);
-      cashLabel(data.erloes,target,false);
-    },700);
-  }
-
-  function queueSaleVisual(stueck,erloes,names){
-    if(stueck<=0||erloes<=0)return;
-    pendingSale.stueck+=stueck;pendingSale.erloes+=erloes;for(const n of names)pendingSale.products.add(n);
-    const minGap=OPT.anim===2?620:820;
-    const rest=Math.max(80,minGap-(performance.now()-lastSaleVisual));
-    if(!saleTimer)saleTimer=setTimeout(flushSaleVisual,rest);
-  }
-
-  if(typeof wareVerkaufen==="function"){
-    const originalWareVerkaufen=wareVerkaufen;
-    wareVerkaufen=function(max){
-      const before={};for(const p in PRODUKT)before[p]=S.ware[p]||0;
-      const out=originalWareVerkaufen(max);
-      if(out&&out.stueck>0&&out.erloes>0){
-        const names=[];
-        for(const p in PRODUKT)if(before[p]-(S.ware[p]||0)>0)names.push(PRODUKT[p].name);
-        queueSaleVisual(out.stueck,out.erloes,names);
-      }
-      return out;
-    };
-  }
-
-
-
   updateTransformationScenes();
-  window.__erzweltProcessAnimations={version:1,features:["raffination","fertigung","verkauf"]};
+  window.__erzweltProcessAnimations={version:1,features:["raffination","fertigung"]};
 })();

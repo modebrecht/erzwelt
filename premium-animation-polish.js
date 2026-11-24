@@ -39,27 +39,6 @@
       50%{box-shadow:inset 0 0 0 1px #e9aaa4,0 0 0 3px #e0504a14}
     }
 
-    /* Sale: tactile conversion from product to cash. */
-    .verkauf-paket{filter:drop-shadow(0 4px 5px #0002)}
-    .verkauf-paket::before{
-      box-shadow:inset 0 1px #fff,0 2px 5px #0002;
-      letter-spacing:.01em;
-    }
-    .verkauf-geld{
-      text-shadow:0 1px #fff,0 3px 9px #2fbe7e30;
-      filter:drop-shadow(0 2px 4px #0001);
-    }
-    .pille.kasse.verkauf-puls{
-      animation:premiumCashPulse .68s cubic-bezier(.16,1.3,.3,1)!important;
-    }
-    @keyframes premiumCashPulse{
-      0%{transform:scale(1)}
-      28%{transform:translateY(-1px) scale(1.12)}
-      55%{transform:translateY(0) scale(.985)}
-      76%{transform:scale(1.025)}
-      100%{transform:scale(1)}
-    }
-
     /* Tutorial feedback: one clean acknowledgement, not arcade confetti. */
     #tutorial-lernfeedback{
       box-shadow:inset 0 1px #ffffffc0,0 9px 24px #0003;
@@ -72,7 +51,7 @@
 
     @media(prefers-reduced-motion:reduce){
       .prozessszene,.prozessszene.aktiv .prozess-meta-pfeil,.prozessszene.aktiv .prozess-status i,
-      .prozess-materialliste span.fehlt,.pille.kasse.verkauf-puls{
+      .prozess-materialliste span.fehlt{
         animation:none!important;transition:none!important
       }
     }

@@ -3,6 +3,8 @@
    Präzisiert Zustände und Übergaben, ohne Spielregeln oder Berechnungen zu verändern. */
 
 (function(){
+  const raffAnimationsdauer = `${3.2 * RESSOURCEN_ANIMATIONSFAKTOR}s`;
+  const fabrikAnimationsdauer = `${3.4 * RESSOURCEN_ANIMATIONSFAKTOR}s`;
   const style=document.createElement("style");
   style.id="erzwelt-process-enhance-style";
   style.textContent=`
@@ -21,27 +23,25 @@
 
     .prozessbahn{height:78px}
     .prozesslinie{height:3px;opacity:.62}
-    .prozessszene.aktiv .prozesslinie{animation:prozessBand 3.2s linear infinite}
+    .prozessszene.aktiv .prozesslinie{animation:prozessBand ${raffAnimationsdauer} linear infinite}
     .prozessszene.aktiv .prozess-reaktor::after,.prozessszene.aktiv .fabrikmaschine::after{
       content:"";position:absolute;inset:8px;border:2px solid color-mix(in srgb,var(--prozess-farbe) 65%,white);border-radius:50%;opacity:0;pointer-events:none;
-      animation:prozessImpuls 3.2s ease-in-out infinite}
+      animation:prozessImpuls ${raffAnimationsdauer} ease-in-out infinite}
     .prozessszene.aktiv .fabrikmaschine::after{inset:9px 10px;border-radius:14px}
     @keyframes prozessImpuls{0%,25%,68%,100%{opacity:0;transform:scale(.78)}38%{opacity:.75;transform:scale(1)}55%{opacity:.18;transform:scale(1.18)}}
 
-    .prozessszene.aktiv .rohbrocken:nth-child(1){animation:rohReinKlar 3.2s 0s ease-in-out infinite}
-    .prozessszene.aktiv .rohbrocken:nth-child(2){animation:rohReinKlar 3.2s .18s ease-in-out infinite}
-    .prozessszene.aktiv .rohbrocken:nth-child(3){animation:rohReinKlar 3.2s .36s ease-in-out infinite}
+    .prozessszene.aktiv .rohbrocken:nth-child(1){animation:rohReinKlar ${raffAnimationsdauer} ease-in-out infinite}
     @keyframes rohReinKlar{
       0%,8%{opacity:0;transform:translate(-42px,-7px) scale(.72)}
       17%{opacity:1}
       33%{opacity:1;transform:translate(-5px,0) scale(1)}
       46%,100%{opacity:0;transform:translate(53px,0) scale(.48)}
     }
-    .prozessszene.aktiv .prozess-zahn{animation:prozessDrehKlar 3.2s ease-in-out infinite}
+    .prozessszene.aktiv .prozess-zahn{animation:prozessDrehKlar ${raffAnimationsdauer} ease-in-out infinite}
     @keyframes prozessDrehKlar{0%,24%{transform:rotate(0)}58%{transform:rotate(300deg)}70%,100%{transform:rotate(320deg)}}
-    .prozessszene.aktiv .prozess-fluessig{animation:prozessFluessigKlar 3.2s ease-in-out infinite}
+    .prozessszene.aktiv .prozess-fluessig{animation:prozessFluessigKlar ${raffAnimationsdauer} ease-in-out infinite}
     @keyframes prozessFluessigKlar{0%,24%,72%,100%{transform:scaleY(.86);opacity:.62}44%{transform:scaleY(1.1);opacity:1}}
-    .prozessszene.aktiv .materialblock{animation:materialRausKlar 3.2s ease-out infinite}
+    .prozessszene.aktiv .materialblock{animation:materialRausKlar ${raffAnimationsdauer} ease-out infinite}
     @keyframes materialRausKlar{
       0%,46%{opacity:0;transform:translateX(-38px) scale(.55)}
       57%{opacity:1}
@@ -49,21 +49,18 @@
       90%,100%{opacity:0;transform:translateX(34px) scale(.9)}
     }
 
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(1){animation:chipReinKlar 3.4s 0s ease-in-out infinite}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(2){animation:chipReinKlar 3.4s .16s ease-in-out infinite}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(3){animation:chipReinKlar 3.4s .32s ease-in-out infinite}
-    .fabrik-prozess.aktiv .rezeptchip:nth-child(4){animation:chipReinKlar 3.4s .48s ease-in-out infinite}
+    .fabrik-prozess.aktiv .rezeptchips{animation:chipReinKlar ${fabrikAnimationsdauer} ease-in-out infinite}
     @keyframes chipReinKlar{
       0%,8%{opacity:0;transform:translateX(-32px) scale(.7)}
       18%{opacity:1}
       34%{opacity:1;transform:translateX(-2px) scale(1)}
       47%,100%{opacity:0;transform:translateX(58px) scale(.5)}
     }
-    .fabrik-prozess.aktiv .fabrikrad{animation:fabrikRadKlar 3.4s ease-in-out infinite}
+    .fabrik-prozess.aktiv .fabrikrad{animation:fabrikRadKlar ${fabrikAnimationsdauer} ease-in-out infinite}
     @keyframes fabrikRadKlar{0%,27%{transform:rotate(0)}60%{transform:rotate(320deg)}72%,100%{transform:rotate(340deg)}}
-    .fabrik-prozess.aktiv .fabriklicht{animation:fabrikBlinkKlar 3.4s linear infinite}
+    .fabrik-prozess.aktiv .fabriklicht{animation:fabrikBlinkKlar ${fabrikAnimationsdauer} linear infinite}
     @keyframes fabrikBlinkKlar{0%,28%,63%,100%{opacity:.28}36%,44%,52%{opacity:1}}
-    .fabrik-prozess.aktiv .produktkarton{animation:produktRausKlar 3.4s ease-out infinite}
+    .fabrik-prozess.aktiv .produktkarton{animation:produktRausKlar ${fabrikAnimationsdauer} ease-out infinite}
     @keyframes produktRausKlar{
       0%,48%{opacity:0;transform:translateX(-45px) scale(.55)}
       59%{opacity:1}
@@ -82,21 +79,14 @@
     .prozessszene.prozess-takt .prozess-reaktor svg,.prozessszene.prozess-takt .fabrikmaschine svg{animation:prozessTakt .42s cubic-bezier(.2,1.5,.4,1)}
     @keyframes prozessTakt{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
 
-    .verkauf-paket{will-change:transform,opacity}
-    .verkauf-paket::before{content:"Verkauf";position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);
-      padding:1px 5px;border-radius:999px;background:#fff8e9;color:#76511f;border:1px solid #d9bd91;font-size:9px;line-height:1.2}
-    .verkauf-geld{will-change:transform,opacity}
-    .pille.kasse.verkauf-puls{animation:kassenPulsNeu .5s cubic-bezier(.2,1.55,.4,1)}
-    @keyframes kassenPulsNeu{0%{transform:scale(1)}42%{transform:scale(1.11)}70%{transform:scale(.98)}100%{transform:scale(1)}}
-
-    body[data-anim="1"] .prozessszene.aktiv .prozesslinie{animation-duration:4s}
+    body[data-anim="1"] .prozessszene.aktiv .prozesslinie{animation-duration:${4 * RESSOURCEN_ANIMATIONSFAKTOR}s}
     body[data-anim="1"] .prozessszene.aktiv .prozess-reaktor::after,
     body[data-anim="1"] .prozessszene.aktiv .fabrikmaschine::after{display:none}
     body[data-anim="1"] .prozess-materialliste span{font-size:9.5px}
 
     @media (prefers-reduced-motion: reduce){
       .prozessszene *,.prozessszene *::before,.prozessszene *::after{animation:none!important;transition:none!important}
-      .prozessszene.aktiv .materialblock,.prozessszene.aktiv .produktkarton,.prozessszene.aktiv .rezeptchip,.prozessszene.aktiv .rohbrocken{opacity:1!important;transform:none!important}
+      .prozessszene.aktiv .materialblock,.prozessszene.aktiv .produktkarton,.prozessszene.aktiv .rezeptchips,.prozessszene.aktiv .rohbrocken{opacity:1!important;transform:none!important}
     }
   `;
   document.head.appendChild(style);

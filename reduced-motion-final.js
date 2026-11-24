@@ -1,7 +1,5 @@
 "use strict";
-/* Final motion gate.
-   Honors both OS-level reduced-motion and the in-game "Animationen = aus" setting,
-   including SVG SMIL used by the illustrative transport route. */
+/* Bewegungseinstellungen gelten auch für die SVG-Lieferpunkte auf der Karte. */
 (function(){
   const style=document.createElement("style");
   style.id="erzwelt-reduced-motion-final-style";
@@ -16,7 +14,6 @@
         transition-delay:0ms!important;
       }
       #welt{will-change:auto!important}
-      .didaktik-truck,.didaktik-ship{will-change:auto!important}
     }
     body[data-anim="0"] *,body[data-anim="0"] *::before,body[data-anim="0"] *::after{
       animation:none!important;
@@ -32,9 +29,7 @@
       animation:none!important;
       transition:none!important;
     }
-    body[data-anim="0"] #welt,
-    body[data-anim="0"] .didaktik-truck,
-    body[data-anim="0"] .didaktik-ship{will-change:auto!important}
+    body[data-anim="0"] #welt{will-change:auto!important}
   `;
   document.head.appendChild(style);
 
@@ -42,31 +37,14 @@
   const motionOff=()=>!!media?.matches||document.body?.dataset.anim==="0";
   let previousOff=motionOff();
 
-  function stripSmil(){
-    if(!motionOff())return;
-    // CSS does not control SVG SMIL. Transport graphics use animate,
-    // animateMotion and animateTransform, so remove those nodes whenever
-    // all motion is meant to be off.
-    document.querySelectorAll("#didaktik-transport animate,#didaktik-transport animateMotion,#didaktik-transport animateTransform").forEach(el=>el.remove());
-  }
-
   function syncMotion(){
-    const off=motionOff();
-    if(off){
-      stripSmil();
-    }else if(previousOff){
-      // A static route may have had its SMIL nodes removed. Force the existing
-      // transport renderer to rebuild it when motion is enabled again.
-      try{
-        if(typeof transportRouteCache!=="undefined")transportRouteCache="";
-        if(typeof lieferwegTransportZeichnen==="function")lieferwegTransportZeichnen();
-      }catch(e){}
-    }
-    previousOff=off;
+    const off = motionOff();
+    if (off === previousOff) return;
+    previousOff = off;
+    zeichnen();
   }
 
-  syncMotion();
-  media?.addEventListener?.("change",()=>requestAnimationFrame(syncMotion));
+  media?.addEventListener("change", syncMotion);
 
   // The in-game animation setting is reflected on body[data-anim]. Observe only
   // that attribute so changing 0 <-> 1/2 immediately updates SVG motion too.
@@ -75,17 +53,6 @@
     bodyObserver.observe(document.body,{attributes:true,attributeFilter:["data-anim"]});
   }
 
-  // The route can be redrawn because game context changes while motion remains
-  // disabled. Observe only direct children of the world-map SVG and strip SMIL
-  // from a newly inserted transport group. No polling or render loop is added.
-  const map=document.querySelector("svg.weltkarte");
-  if(map&&typeof MutationObserver!=="undefined"){
-    const mapObserver=new MutationObserver(records=>{
-      if(!motionOff())return;
-      if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&(n.id==="didaktik-transport"||n.querySelector?.("#didaktik-transport")))))stripSmil();
-    });
-    mapObserver.observe(map,{childList:true,subtree:false});
-  }
 
   window.__erzweltReducedMotionFinal={version:4,mode:"os-or-game-setting",smil:true};
 })();

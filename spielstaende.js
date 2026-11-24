@@ -314,6 +314,7 @@
 
   function spieloberflaecheSchliessen(){
     window.__erzweltTutorialEnhance?.feedbackZuruecksetzen();
+    $("#hud .kasse-plus")?.remove();
     document.body.classList.remove("toast-history-open");
     $("#schleier").hidden = true;
     $("#lupe").hidden = true;

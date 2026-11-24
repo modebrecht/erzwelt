@@ -4631,7 +4631,7 @@ function einstFuellen(){
     <div class="unter">Alles wird sofort übernommen und gespeichert.</div>
     ${regler("schrift", "Schriftgrösse", "Verschiebt die Grösse aller Texte. Die kleinste Schrift im Spiel wächst mit.",
              90, 175, 5, OPT.schrift, OPT.schrift + " %")}
-    ${regler("tempo", "Spieltempo", "Wie schnell ein Spieltag vergeht. Die Knöpfe 1× und 4× oben rechnen darauf auf.",
+    ${regler("tempo", "Spieltempo", "Bei 1× und 100 % dauert ein Spieltag 3 Sekunden, bei 4× eine Dreiviertelsekunde.",
              50, 250, 10, OPT.tempo, OPT.tempo + " %")}
     ${regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
@@ -4639,7 +4639,7 @@ function einstFuellen(){
              50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())}
     ${regler("lernfeedbackdauer", "Dauer für Schrittfeedback", "Lesezeit für «Schritt abgeschlossen» und «Tutorial abgeschlossen».",
              50, 200, 25, OPT.lernfeedbackdauer, meldungsdauerAnzeige(OPT.lernfeedbackdauer))}
-    ${regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen bremst ab dem zweiten Meldungstag in Serie. Bei normalem Tempo dauert dieser Tag 2 Sekunden.",
+    ${regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen dauert ab dem zweiten Meldungstag in Serie jeder Meldungstag doppelt so lange.",
              0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])}
     <button type="button" class="cta still" data-tun="intro-wiederholung">Intro erneut ansehen</button>
     <div class="karte" style="margin-top:18px">
@@ -4936,13 +4936,14 @@ document.addEventListener("keydown", e => {
 
 /* ---------- Uhr ---------- */
 let spielAktiv = false;
+const SPIELTAG_MS = 3000;
 function spieltagPlanen(){
   if (!spielAktiv || tempo <= 0 || document.hidden) return;
-  const normal = Math.max(120, 1400 / tempo * (100 / OPT.tempo));
+  const normal = Math.max(120, SPIELTAG_MS / tempo * (100 / OPT.tempo));
   const meldung = letzterMeldungstag;
   const bremsen = meldung && meldung.spiel === S && meldung.tag === S.tag &&
     (OPT.meldungstakt === 2 || (OPT.meldungstakt === 1 && meldung.folge));
-  const wartezeit = bremsen ? Math.max(normal, Math.min(2000, 2*normal)) : normal;
+  const wartezeit = bremsen ? 2 * normal : normal;
   takt = setTimeout(spieltagWeiter, wartezeit);
 }
 function spieltagWeiter(){

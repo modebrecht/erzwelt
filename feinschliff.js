@@ -34,14 +34,5 @@
   `;
   document.head.appendChild(style);
 
-  /* 1. «+CHF 2'845» → «+2'845» (das Feld heisst schon «Kasse») */
-  const kasse = document.querySelector(".pille.kasse");
-  if (kasse && typeof MutationObserver === "function"){
-    new MutationObserver(liste => {
-      for (const m of liste) for (const n of m.addedNodes){
-        if (n.nodeType === 1 && n.classList.contains("kasse-plus")) n.textContent = n.textContent.replace(/CHF\s*/g, "");
-      }
-    }).observe(kasse, {childList:true, subtree:true});
-  }
   window.__erzweltFeinschliff = {version: VERSION};
 })();

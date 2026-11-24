@@ -120,11 +120,10 @@ Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
 
 - Rohstoff auf einen Blick: Auch nicht eröffnete Rohstoffquellen zeigen
   Kürzel und Farbe (Cu, Al, Sn …); im Aufgabentext steht «Kupfer (Cu)».
-- Lieferkette lebt: Von jeder fördernden Quelle fährt Ware zur nächsten
-  Raffinerie, von dort Material zu jeder laufenden Fabrik. Bei Pause steht
-  die Ware still; «Animationen: aus» zeigt nur die Wege.
-- Verkauf: Münzen fallen in die Kasse, der Betrag erscheint kurz im
-  Kassen-Feld.
+- Lieferwege zeigen jeweils einen langsamen Punkt von der Quelle zur
+  Raffinerie und weiter zur Fabrik. Bei Pause steht der Punkt still.
+  «Animationen: aus» zeigt die Wege statisch.
+- Beim Verkauf erscheint der Erlös grün im Kassen-Feld.
 - Monatsabschluss als kleine Bilanz: laufendes Geschäft (Einnahmen minus
   Löhne und Betrieb) mit Trendpfeil, dazu was investiert wurde.
 - Beispiel-Lieferweg als kleiner Knopf unter «Verlauf» statt Textkasten.
@@ -195,10 +194,10 @@ Auf dem Handy mehr Platz für die Karte (nur Darstellung):
 - Meldungen erscheinen einzeln, damit jede lesbar bleibt. Kurze Meldungen
   stehen standardmässig 6,7 Sekunden, lange 10,7 Sekunden. Unter
   **Einstellungen → Meldungsdauer** lässt sich die Lesezeit anpassen.
-- **Tempo bei Meldungen** verlängert standardmässig nur Folgen von
-  Meldungstagen, ab dem zweiten Tag. Bei 1× und 100 % dauert dieser Tag
-  2 Sekunden. Alternativ lassen sich alle Meldungstage bremsen oder das
-  Spieltempo gleich lassen.
+- Bei 1× und 100 % dauert ein Tag 3 Sekunden, bei 4× 0,75 Sekunden.
+  **Tempo bei Meldungen** verdoppelt standardmässig die Dauer ab dem
+  zweiten Meldungstag in Folge. Alternativ lassen sich alle Meldungstage
+  bremsen oder das Spieltempo gleich lassen.
 
 ## Ziel positiv (`ziel-positiv.js`)
 

@@ -12,7 +12,6 @@
     .pin:active{filter:none!important}
     .pin .knopf{box-shadow:0 3px 5px rgba(0,0,0,.32)}
     .pin .bez{box-shadow:0 2px 4px rgba(0,0,0,.28)}
-    .didaktik-truck,.didaktik-ship{will-change:transform}
     body[data-anim="1"] .pin.foerdert .staub.b,body[data-anim="1"] .pin.foerdert .staub.c{display:none}
     #sicht.zieht .pin.foerdert .knopf>svg,#sicht.zieht .pin.foerdert .knopf>span.sym,
     #sicht.zieht .pin.foerdert .staub{animation-play-state:paused!important}
@@ -202,28 +201,6 @@
   if(typeof seiteFuellen==="function"){
     const original=seiteFuellen;
     seiteFuellen=throttleTickRender(original,name=>String(name));
-  }
-
-  // "Ruhig" keeps the route readable but avoids the full decorative animation load.
-  if(typeof addFlowDot==="function"){
-    const original=addFlowDot;
-    let lastPath="",count=0;
-    addFlowDot=function(parent,path,...rest){
-      if(path!==lastPath){lastPath=path;count=0;}
-      count++;
-      if(OPT.anim===1&&count>1)return;
-      return original(parent,path,...rest);
-    };
-  }
-  if(typeof addNodePulse==="function"){
-    const original=addNodePulse;
-    addNodePulse=function(parent,p,color){
-      if(OPT.anim!==1)return original(parent,p,color);
-      const g=svgEl("g",{transform:`translate(${p[0]} ${p[1]})`});
-      g.appendChild(svgEl("circle",{r:7,fill:"none",stroke:color,"stroke-width":1.6,opacity:.35}));
-      g.appendChild(svgEl("circle",{r:3.2,fill:color,stroke:"#fffaf0","stroke-width":1.5}));
-      parent.appendChild(g);
-    };
   }
 
   window.__erzweltPerf={

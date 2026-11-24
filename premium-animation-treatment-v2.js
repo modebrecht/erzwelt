@@ -36,17 +36,8 @@
     .fabrik-prozess.aktiv .produktkarton::after{animation:premiumV2OutputGlint 2.6s 1.34s ease-in-out infinite}
     @keyframes premiumV2OutputGlint{0%,38%{opacity:0;transform:translateX(-55px) rotate(14deg)}48%{opacity:.82}67%{opacity:0;transform:translateX(58px) rotate(14deg)}100%{opacity:0}}
     .prozessszene.aktiv .prozesslinie{box-shadow:0 1px 0 #fff8,0 3px 6px #5b49311a}
-    .verkauf-paket{overflow:hidden;transform-origin:50% 82%;backface-visibility:hidden}
-    .verkauf-paket::before{content:"";position:absolute;inset:-12px -28px;background:linear-gradient(110deg,transparent 32%,#fff9 48%,transparent 64%);transform:translateX(-115%);animation:premiumV2ParcelGlint .85s .12s ease-out both;pointer-events:none}
-    @keyframes premiumV2ParcelGlint{0%,20%{transform:translateX(-115%);opacity:0}38%{opacity:.85}100%{transform:translateX(115%);opacity:0}}
-    .verkauf-geld{isolation:isolate;overflow:visible}
-    .verkauf-geld::before{content:"";position:absolute;inset:-7px;border-radius:999px;z-index:-1;border:1.5px solid #64d99a88;opacity:0;animation:premiumV2MoneyHalo .92s ease-out both}
-    @keyframes premiumV2MoneyHalo{0%{opacity:0;transform:scale(.65)}25%{opacity:.8}100%{opacity:0;transform:scale(1.4)}}
-    #didaktik-transport .didaktik-truck{filter:drop-shadow(0 3px 2px #0003)}
-    #didaktik-transport .didaktik-ship{filter:drop-shadow(0 4px 3px #0002)}
-    #didaktik-transport>circle{filter:drop-shadow(0 0 3px #fff8)}
     body[data-anim="1"] .pin.bau-status .pin-state-badge.status-bau::after,body[data-anim="1"] .prozess-reaktor::after,body[data-anim="1"] .fabrikmaschine::after,body[data-anim="1"] .raff-prozess.aktiv .prozess-reaktor svg,body[data-anim="1"] .fabrik-prozess.aktiv .fabrikmaschine svg,body[data-anim="1"] .materialblock::before,body[data-anim="1"] .produktkarton::after{animation:none!important}
-    @media(prefers-reduced-motion:reduce){.premium-v2-fx,.pin.bau-status .pin-state-badge.status-bau::after,.prozess-reaktor::after,.fabrikmaschine::after,.raff-prozess.aktiv .prozess-reaktor svg,.fabrik-prozess.aktiv .fabrikmaschine svg,.materialblock::before,.produktkarton::after,.verkauf-paket::before,.verkauf-geld::before{animation:none!important;transition:none!important}.premium-v2-fx{display:none!important}}
+    @media(prefers-reduced-motion:reduce){.premium-v2-fx,.pin.bau-status .pin-state-badge.status-bau::after,.prozess-reaktor::after,.fabrikmaschine::after,.raff-prozess.aktiv .prozess-reaktor svg,.fabrik-prozess.aktiv .fabrikmaschine svg,.materialblock::before,.produktkarton::after{animation:none!important;transition:none!important}.premium-v2-fx{display:none!important}}
   `;
   document.head.appendChild(style);
   const last=new Map(),cleanup=new WeakMap();

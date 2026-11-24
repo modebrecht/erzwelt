@@ -60,6 +60,9 @@ jobs:
       - name: Verify tutorial feedback duration
         run: node tests/e2e/lernfeedback.mjs
 
+      - name: Verify transport animations and day duration
+        run: node tests/e2e/transport-spieltempo.mjs
+
       - name: Verify intro and discoveries, including the offline build
         run: |
           node scripts/build-standalone.mjs --offline

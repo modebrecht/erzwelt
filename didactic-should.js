@@ -210,7 +210,7 @@ function beispielKette(){
   return best;
 }
 function lieferwegZeichnen(){
-  const svg=document.querySelector("svg.weltkarte");if(!svg)return;svg.querySelector("#didaktik-lieferweg")?.remove();
+  if(!document.querySelector("svg.weltkarte"))return;
   let note=document.getElementById("didaktik-route-note");
   if(!note){
     note=document.createElement("div");note.id="didaktik-route-note";
@@ -218,10 +218,6 @@ function lieferwegZeichnen(){
     document.getElementById("sicht")?.appendChild(note);
   }
   const r=beispielKette(),sichtbar=!!r&&aktiveSeite==="karte"&&!offenesBlatt;note.hidden=!sichtbar;if(!sichtbar)return;
-  const [x1,y1]=px(r.mineId),[x2,y2]=px(r.raffId),[x3,y3]=px(r.fabId),ns="http://www.w3.org/2000/svg",g=document.createElementNS(ns,"g");
-  g.id="didaktik-lieferweg";g.setAttribute("pointer-events","none");
-  const line=(a,b,c,d)=>{const l=document.createElementNS(ns,"line");l.setAttribute("x1",a);l.setAttribute("y1",b);l.setAttribute("x2",c);l.setAttribute("y2",d);l.setAttribute("stroke","#f08c2e");l.setAttribute("stroke-width","4");l.setAttribute("stroke-dasharray","9 7");l.setAttribute("opacity",".72");return l;};
-  g.appendChild(line(x1,y1,x2,y2));g.appendChild(line(x2,y2,x3,y3));svg.appendChild(g);
   const mine=MINEN.find(x=>x.id===r.mineId),raff=RAFF_ORTE.find(x=>x.id===r.raffId),km=(Math.round((r.d1+r.d2)/100)*100).toLocaleString("de-CH");
   note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
 }
