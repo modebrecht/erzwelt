@@ -270,6 +270,13 @@ die Einstellung «Animationen» im Spiel: Die Browser-Abfrage
 `prefers-reduced-motion` meldet immer «nein», und CSS-Regeln nur für
 «Bewegung reduzieren» werden entfernt. Lädt als erster Patch.
 
+## Blatt-Ordnung (`blatt-ordnung.js`)
+
+Im Blatt einer eigenen Rohstoffquelle steht die Lohnstufe direkt unter der
+Belegschaft, danach die Zufriedenheit. Jede Lohnstufe zeigt Lohnkosten pro
+Monat für die aktuelle Belegschaft und die Förderung pro Tag, sobald sich die
+Zufriedenheit eingependelt hat.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
