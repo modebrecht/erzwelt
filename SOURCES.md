@@ -78,7 +78,7 @@ Standortreferenzen für die Rohstoffkarte
 - [Antofagasta · Altonorte, Glencore](https://www.glencore.com/.rest/api/v1/documents/1bee35fd44a33fa1bde908afef97a901/GISTM%2Bdisclosure%2B2025%2BAltonorte%2BTSF.pdf)
 - [Distomo · Untertagebau von Bauxit, METLEN](https://www.metlen.com/what-we-do/metallurgy-sector/aluminium-of-greece/our-facilities/bauxite)
 - [Talnach · Kupfer-Nickel-Erze der Minen bei Norilsk, Nornickel](https://nornickel.com/news-and-media/press-releases-and-news/talnakh-concentrator-100-mln-t-milestone-and-a-new-stage-of-development/)
-- [Aktogay · Kupfertagebau, KAZ Minerals](https://www.kazminerals.com/our-locations/aktogay/)
+- [Aqtoghai · Kupfertagebau, beim Betreiber KAZ Minerals als «Aktogay» geführt](https://www.kazminerals.com/our-locations/aktogay/)
 - [Muruntau · Goldtagebau in der Kysylkum, NMMC](https://cms.ngmk.uz/en/home/pressa/154-surface-mining.html)
 - [Pori · Kupferraffinerie, Boliden](https://www.boliden.com/operations/smelters/boliden-harjavalta/)
 - [Pawlodar · Aluminiumoxidraffinerie, Eurasian Resources Group](https://www.erg.kz/en/enterprises/ao-aliuminii-kazaxstana)

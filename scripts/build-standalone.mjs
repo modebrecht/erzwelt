@@ -9,8 +9,14 @@ const corePath = path.join(root, "erzwelt-core.html");
 const manifestPath = path.join(root, "patches.json");
 const outputPath = path.join(root, "index.html");
 
-const core = await readFile(corePath, "utf8");
+const source = await readFile(corePath, "utf8");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+const sourceRedirect = '<meta data-erzwelt-source-redirect http-equiv="refresh" content="0;url=./index.html">';
+const inertCoreScript = '<script type="text/plain" data-erzwelt-core>';
+if (source.split(sourceRedirect).length !== 2 || source.split(inertCoreScript).length !== 2) {
+  throw new Error("Weiterleitung und Spielskript müssen in erzwelt-core.html genau einmal markiert sein");
+}
+const core = source.replace(sourceRedirect, "").replace(inertCoreScript, "<script>");
 
 function assertScriptSyntax(source, filename) {
   try {

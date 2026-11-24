@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile, mkdir, writeFile} from 'node:fs/promises';
 
 const core=await readFile('erzwelt-core.html','utf8');
-const script=core.match(/<script>([\s\S]*?)<\/script>/)[1];
+const script=core.match(/<script type="text\/plain" data-erzwelt-core>([\s\S]*?)<\/script>/)[1];
 const model=script.slice(script.indexOf('const ZIEL_GEWINN'),script.indexOf('/* ============================================================\n   Ereignisse'));
 const product=script.slice(script.indexOf('const PRODUKT ='),script.indexOf('const FAB_ORTE'));
 const should=await readFile('didactic-should.js','utf8');

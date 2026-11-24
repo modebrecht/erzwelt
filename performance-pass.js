@@ -173,7 +173,7 @@
     };
   }
 
-  function throttleTickRender(original,identity){
+  function throttleTickRender(original,identity,canSkipTick=()=>true){
     let lastIdentity="",lastTag=-1,lastPaint=0;
     return function(...args){
       const id=identity(...args);
@@ -182,7 +182,7 @@
       const isNewSimulationTick=S.tag!==lastTag;
       // At very high simulation speeds, numeric panels do not need to rebuild at 7–8 Hz.
       // User actions on the same game day still render immediately.
-      if(sameIdentity&&isNewSimulationTick&&now-lastPaint<480){
+      if(sameIdentity&&isNewSimulationTick&&now-lastPaint<480&&canSkipTick()){
         lastTag=S.tag;
         return;
       }
@@ -193,7 +193,7 @@
 
   if(typeof blattFuellen==="function"){
     const original=blattFuellen;
-    blattFuellen=throttleTickRender(original,(art,id)=>`${art}|${id}`);
+    blattFuellen=throttleTickRender(original,(art,id)=>`${art}|${id}`,()=>blatt.classList.contains("auf"));
   }
   if(typeof seiteFuellen==="function"){
     const original=seiteFuellen;

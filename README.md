@@ -26,6 +26,7 @@ node scripts/build-standalone.mjs
 ```
 
 Der Build erzeugt `index.html` aus `erzwelt-core.html` und allen Einträgen aus `patches.json`.
+Zum Spielen `index.html` öffnen. Ein direkter Aufruf von `erzwelt-core.html` leitet ebenfalls dorthin weiter.
 
 Der Builder prüft dabei automatisch:
 

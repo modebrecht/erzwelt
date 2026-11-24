@@ -12,7 +12,8 @@ const pageErrors = [];
 page.on('console', msg => consoleMessages.push({ type: msg.type(), text: msg.text() }));
 page.on('pageerror', err => pageErrors.push(String(err?.stack || err)));
 
-await page.goto('http://127.0.0.1:4173/index.html', { waitUntil: 'load' });
+await page.goto('http://127.0.0.1:4173/erzwelt-core.html', { waitUntil: 'load' });
+await page.waitForURL('http://127.0.0.1:4173/index.html');
 await page.waitForTimeout(2500);
 
 const snapshot = await page.evaluate(() => ({

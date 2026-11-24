@@ -2,6 +2,7 @@
 <html lang="de-CH">
 <head>
 <meta charset="utf-8">
+<meta data-erzwelt-source-redirect http-equiv="refresh" content="0;url=./index.html">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b3648">
 <title>Erzwelt — Rohstoffe &amp; Lieferketten</title>
@@ -106,6 +107,7 @@ svg{display:block}
   display:flex;flex-direction:column;align-items:center;gap:2px;
   filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))
 }
+.pin > *{pointer-events:none}
 .knopf{
   width:42px;height:42px;border-radius:50% 50% 50% 50%/55% 55% 45% 45%;
   display:grid;place-items:center;position:relative;
@@ -604,7 +606,7 @@ body[data-anim="0"] *{animation:none!important}
 
 <div id="funken"></div>
 
-<script>
+<script type="text/plain" data-erzwelt-core>
 "use strict";
 /* ============================================================
    2. DATEN
@@ -702,8 +704,8 @@ const MINEN = [
    info:"In der Gegend um Distomo wird Bauxit unter Tage gewonnen. Bauxit ist der Ausgangsstoff für Aluminium."},
   {id:"talnach",   ort:"Talnach",          land:"russland",    mat:"nickel", erschliessung:205000, ergiebigkeit:6.80, plaetze:42,
    info:"Bei Talnach in der Nähe von Norilsk wird unter Tage Erz gewonnen, das Nickel und Kupfer enthält."},
-  {id:"aktogay",   ort:"Aktogay",          land:"kasachstan",  mat:"kupfer", erschliessung:175000, ergiebigkeit:12.50, plaetze:48,
-   info:"In Aktogay in Ostkasachstan wird Kupfererz im Tagebau gewonnen und vor Ort aufbereitet."},
+  {id:"aktogay",   ort:"Aqtoghai",         land:"kasachstan",  mat:"kupfer", erschliessung:175000, ergiebigkeit:12.50, plaetze:48,
+   info:"In Aqtoghai in Ostkasachstan wird Kupfererz im Tagebau gewonnen und vor Ort aufbereitet."},
   {id:"muruntau",  ort:"Muruntau",         land:"usbekistan",  mat:"gold",   erschliessung:220000, ergiebigkeit:9.60, plaetze:46,
    info:"Muruntau ist ein grosser Goldtagebau in der usbekischen Wüste Kysylkum."}
 ];
@@ -1946,9 +1948,13 @@ const geo = ([lon,lat]) => [ (lon+180)/360*KARTE_B, (78-lat)/138*KARTE_H ];
    auseinandergeschoben, bis alle mindestens PIN_ABSTAND auseinander liegen.
    Die Standorte bleiben dadurch ungefaehr, aber tippbar. */
 const PIN_ABSTAND = 64;
+const PIN_RAND_OBEN = 94; // Platz für Symbol und Ortsname über dem Ankerpunkt
 const POS = {};
 (function pinsEntzerren(){
-  for (const k in ORT) POS[k] = geo(ORT[k]);
+  for (const k in ORT){
+    const [x,y] = geo(ORT[k]);
+    POS[k] = [x, Math.max(PIN_RAND_OBEN,y)];
+  }
   const ids = Object.keys(POS);
   for (let runde = 0; runde < 120; runde++){
     let bewegt = false;
@@ -1967,13 +1973,13 @@ const POS = {};
     for (const k of ids){
       const z = geo(ORT[k]);
       POS[k][0] += (z[0]-POS[k][0])*0.10;
-      POS[k][1] += (z[1]-POS[k][1])*0.10;
+      POS[k][1] = Math.max(PIN_RAND_OBEN, POS[k][1] + (z[1]-POS[k][1])*0.10);
     }
     if (!bewegt) break;
   }
   for (const k in POS){
     POS[k][0] = Math.max(22, Math.min(KARTE_B-22, POS[k][0]));
-    POS[k][1] = Math.max(26, Math.min(KARTE_H-14, POS[k][1]));
+    POS[k][1] = Math.min(KARTE_H-14, POS[k][1]);
   }
 })();
 const px = id => POS[id];
@@ -3582,7 +3588,43 @@ function zoomUm(f, mx, my){
 
 /* ---------- Pins ---------- */
 const frischePins = new Map();          // id -> Zeitpunkt des Kaufs (für die Pop-Animation)
+const pinVorlagen = new WeakMap();
 function pinFeiern(id){ frischePins.set(id, Date.now()); }
+
+function pinsAbgleichen(html){
+  const entwurf = document.createElement("template");
+  entwurf.innerHTML = html;
+  const neue = Array.from(entwurf.content.children);
+  const schluessel = pin => pin.dataset.pin + ":" + pin.dataset.id;
+  const neuSchluessel = new Set(neue.map(schluessel));
+  const vorhanden = new Map();
+  for (const pin of welt.querySelectorAll(".pin")){
+    const id = schluessel(pin);
+    if (neuSchluessel.has(id)) vorhanden.set(id,pin);
+    else pin.remove();
+  }
+
+  // Der Button bleibt zwischen Drücken und Loslassen dasselbe Element.
+  let naechster = welt.querySelector(".pin");
+  for (const vorlage of neue){
+    const markup = vorlage.outerHTML;
+    const pin = vorhanden.get(schluessel(vorlage));
+    if (!pin){
+      pinVorlagen.set(vorlage,markup);
+      welt.insertBefore(vorlage,naechster);
+      continue;
+    }
+    naechster = pin.nextElementSibling;
+    if (pinVorlagen.get(pin) === markup) continue;
+
+    for (const name of pin.getAttributeNames()){
+      if (!vorlage.hasAttribute(name)) pin.removeAttribute(name);
+    }
+    for (const attr of vorlage.attributes) pin.setAttribute(attr.name,attr.value);
+    pin.replaceChildren(...vorlage.childNodes);
+    pinVorlagen.set(pin,markup);
+  }
+}
 
 function pinsZeichnen(){
   const teile = [];
@@ -3634,8 +3676,7 @@ function pinsZeichnen(){
       <span class="bez">${flagge(land)}${fabrik || name}</span></button>`);
   }
 
-  welt.querySelectorAll(".pin").forEach(p => p.remove());
-  welt.insertAdjacentHTML("beforeend", teile.join(""));
+  pinsAbgleichen(teile.join(""));
   pinGroesse();
 }
 
