@@ -150,7 +150,7 @@
     const links = flussVerbindungen();
     const still = reduziert();
     const schnell = typeof tempo !== "undefined" && tempo >= 4 ? 1.8 : 1;
-    const schluessel = JSON.stringify([links.map(l => l.von + ">" + l.nach), still, schnell]);
+    const schluessel = JSON.stringify([links.map(l => l.von + ">" + l.nach), still, schnell, OPT.lieferanzeige]);
     const steht = typeof tempo !== "undefined" && tempo === 0;
     if (svg.pauseAnimations){ steht ? svg.pauseAnimations() : svg.unpauseAnimations(); }
     if (schluessel === flussSchluessel && svg.querySelector("#lieferfluss")) return;
@@ -162,7 +162,7 @@
       const {pfad, laenge} = lieferkurve(px(l.von), px(l.nach), l.k);
       g.appendChild(svgEl("path", {d:pfad, fill:"none", stroke:"#0b3648", "stroke-width":4.2, "stroke-linecap":"round", opacity:.18}));
       g.appendChild(svgEl("path", {class:"lieferlinie", d:pfad, fill:"none", stroke:l.farbe, "stroke-width":2.2, "stroke-linecap":"round", "stroke-dasharray":"1.5 6", opacity:.85}));
-      if (!still) lieferpunktZeichnen(g, pfad, Math.min(9, Math.max(2.4, laenge / 55)) / schnell, l.farbe);
+      if (!still) liefersymbolZeichnen(g, pfad, Math.min(9, Math.max(2.4, laenge / 55)) / schnell, l.farbe);
     }
     const transport = svg.querySelector("#didaktik-transport");
     if (transport) svg.insertBefore(g, transport); else svg.appendChild(g);

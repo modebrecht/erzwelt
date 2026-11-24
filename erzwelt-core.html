@@ -451,6 +451,10 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 @keyframes hochrein{from{transform:translateY(60px);opacity:.4}}
 .ueberlage h2{font-size:var(--f5);padding-right:52px}
 .ueberlage .unter{color:var(--grau);font-size:var(--f1);margin-bottom:12px}
+#lieferanzeige{min-height:44px;max-width:100%;padding:6px 10px;border:1px solid var(--linie);
+  border-radius:9px;background:#fff;color:var(--tinte);font:inherit}
+#lieferanzeige:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.reglerzeile .lieferanzeige-auswahl{gap:8px;flex-wrap:wrap}
 @media (min-width:820px){
   .ueberlage{align-items:center}
   .ueberlage .tafel{border-radius:26px;max-height:86vh}
@@ -1429,7 +1433,8 @@ function metaLaden(){
 function metaSpeichern(){ try { SPEICHER.schreib(META_SCHLUESSEL,JSON.stringify(META)); } catch(e){} }
 
 /* ---------- Einstellungen (Regler) ---------- */
-const OPT_STD = {schrift:106, tempo:100, anim:1, meldungsdauer:100, lernfeedbackdauer:100, meldungstakt:1};
+const LIEFERANZEIGEN = {punkt:"Punkte", schiff:"Schiffe", flugzeug:"Flugzeuge"};
+const OPT_STD = {schrift:106, tempo:100, anim:1, lieferanzeige:"punkt", meldungsdauer:100, lernfeedbackdauer:100, meldungstakt:1};
 let OPT = Object.assign({}, OPT_STD);
 
 function optLaden(){
@@ -1440,6 +1445,9 @@ function optLaden(){
   OPT.schrift = klemm(OPT.schrift, 90, 175);
   OPT.tempo   = klemm(OPT.tempo, 50, 250);
   OPT.anim    = klemm(OPT.anim, 0, 2);
+  if (typeof OPT.lieferanzeige !== "string" || !Object.hasOwn(LIEFERANZEIGEN, OPT.lieferanzeige)){
+    OPT.lieferanzeige = OPT_STD.lieferanzeige;
+  }
   OPT.meldungsdauer = klemm(OPT.meldungsdauer, 50, 200);
   OPT.lernfeedbackdauer = Number.isFinite(OPT.lernfeedbackdauer) ? klemm(OPT.lernfeedbackdauer, 50, 200) : OPT_STD.lernfeedbackdauer;
   OPT.meldungstakt = klemm(Math.round(OPT.meldungstakt), 0, 2);
@@ -4651,6 +4659,13 @@ function einstFuellen(){
              50, 250, 10, OPT.tempo, OPT.tempo + " %")}
     ${regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
+    <div class="reglerzeile">
+      <div class="kopf lieferanzeige-auswahl">
+        <label for="lieferanzeige"><b>Liefersymbole</b></label>
+        <select id="lieferanzeige">${Object.entries(LIEFERANZEIGEN).map(([art, label]) =>
+          `<option value="${art}"${OPT.lieferanzeige === art ? " selected" : ""}>${label}</option>`).join("")}</select>
+      </div>
+    </div>
     ${regler("meldungsdauer", "Meldungsdauer", "Lesezeit für kurze und lange Meldungen.",
              50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())}
     ${regler("lernfeedbackdauer", "Dauer für Schrittfeedback", "Lesezeit für «Schritt abgeschlossen» und «Tutorial abgeschlossen».",
@@ -4939,6 +4954,11 @@ document.addEventListener("input", e => {
   }
 });
 document.addEventListener("change", e => {
+  if (e.target.id === "lieferanzeige" && Object.hasOwn(LIEFERANZEIGEN, e.target.value)){
+    OPT.lieferanzeige = e.target.value;
+    optSpeichern();
+    zeichnen();
+  }
   if (e.target.closest("[data-regler]")) setTimeout(()=>{ reglerAktiv = false; }, 400);
 });
 document.addEventListener("pointerup", () => { if (reglerAktiv) setTimeout(()=>{ reglerAktiv = false; }, 400); });

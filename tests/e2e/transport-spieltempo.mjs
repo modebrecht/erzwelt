@@ -6,7 +6,8 @@ const page = await browser.newPage({viewport:{width:390,height:844}});
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 const tag = () => page.evaluate(() => S.tag);
-const lieferpunkte = page.locator('svg.weltkarte .lieferpunkt');
+const liefersymbole = page.locator('svg.weltkarte [data-lieferanzeige]');
+const auswahl = page.getByRole('combobox', {name:'Liefersymbole'});
 
 try {
   await page.goto('http://127.0.0.1:4173/index.html');
@@ -63,13 +64,30 @@ try {
   assert.equal(routes.pausiert, true);
   assert.doesNotMatch(await page.locator('#lieferweg-knopf').textContent(), /LKW|Lastwagen/);
 
+  await page.locator('#einstauf').evaluate(btn => btn.click());
+  assert.equal(await auswahl.inputValue(), 'punkt');
+  for (const art of ['schiff','flugzeug','punkt','flugzeug']){
+    await auswahl.selectOption(art);
+    assert.deepEqual(await liefersymbole.evaluateAll(els => els.map(el => el.dataset.lieferanzeige)), [art,art,art]);
+    if (art !== 'punkt') assert.ok(await liefersymbole.first().locator('path').evaluate(el => el.getTotalLength() > 0));
+    const anzeige = await page.evaluate(() => ({
+      pfade:[...document.querySelectorAll('[data-lieferanzeige] animateMotion')].map(el => el.getAttribute('path')).sort(),
+      dauern:[...document.querySelectorAll('#didaktik-transport animateMotion')].map(el => el.getAttribute('dur')),
+      tempo
+    }));
+    assert.deepEqual(anzeige.pfade, routes.linien);
+    assert.deepEqual(anzeige.dauern, routes.beispiel);
+    assert.equal(anzeige.tempo, 0);
+  }
+  await page.locator('[data-schliessen="einst"]').evaluate(btn => btn.click());
+
   await page.evaluate(() => { OPT.anim=0; optAnwenden(); });
-  assert.equal(await lieferpunkte.count(), 0);
+  assert.equal(await liefersymbole.count(), 0);
   assert.equal(await page.locator('svg.weltkarte .lieferlinie').count(), 3);
   await page.evaluate(() => { OPT.anim=1; optAnwenden(); });
-  assert.equal(await lieferpunkte.count(), 3);
+  assert.equal(await liefersymbole.count(), 3);
   await page.emulateMedia({reducedMotion:'reduce'});
-  await lieferpunkte.first().waitFor({state:'hidden'});
+  await liefersymbole.first().waitFor({state:'hidden'});
   await page.emulateMedia({reducedMotion:'no-preference'});
 
   const verkauf = await page.evaluate(() => {
@@ -86,8 +104,15 @@ try {
   await page.clock.runFor(1600);
   assert.equal(await kasse.count(), 0);
   assert.equal(await page.locator('.verkauf-paket,.verkauf-geld,.muenz-flug,#verkauf-visual-layer').count(), 0);
+  await page.evaluate(() => speichern(true));
+  await page.reload();
+  await page.locator('#spielmenue-weiter').click();
+  await page.evaluate(() => tempoSetzen(0));
+  await page.locator('#einstauf').evaluate(btn => btn.click());
+  assert.equal(await auswahl.inputValue(), 'flugzeug');
+  assert.deepEqual(await liefersymbole.evaluateAll(els => els.map(el => el.dataset.lieferanzeige)), Array(3).fill('flugzeug'));
   assert.deepEqual(errors, []);
-  console.log('PASS transport and pacing: one marker per route, motion settings, green sale amount and 3s/750ms days');
+  console.log('PASS transport and pacing: three persisted symbol modes, one marker per route, motion settings, green sale amount and 3s/750ms days');
 } finally {
   await browser.close();
 }

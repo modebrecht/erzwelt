@@ -120,8 +120,9 @@ Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
 
 - Rohstoff auf einen Blick: Auch nicht eröffnete Rohstoffquellen zeigen
   Kürzel und Farbe (Cu, Al, Sn …); im Aufgabentext steht «Kupfer (Cu)».
-- Lieferwege zeigen jeweils einen langsamen Punkt von der Quelle zur
-  Raffinerie und weiter zur Fabrik. Bei Pause steht der Punkt still.
+- Lieferwege zeigen jeweils ein Symbol von der Quelle zur Raffinerie und
+  weiter zur Fabrik. Unter **Einstellungen → Liefersymbole** lassen sich Punkte,
+  Schiffe oder Flugzeuge wählen. Bei Pause steht das Symbol still.
   «Animationen: aus» zeigt die Wege statisch.
 - Beim Verkauf erscheint der Erlös grün im Kassen-Feld.
 - Monatsabschluss als kleine Bilanz: laufendes Geschäft (Einnahmen minus
