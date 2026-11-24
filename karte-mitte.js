@@ -20,8 +20,8 @@
       background:var(--gold);color:#4a3000;border:2px solid #0b3648;display:grid;place-items:center;
       font-size:11px;font-weight:800;font-family:"Baloo 2",sans-serif;line-height:1}
 
-    .pin-arbeiter{position:absolute;right:-30px;top:14px;display:flex;gap:1px;pointer-events:none;z-index:4}
-    .pin-arbeiter svg{width:13px;height:17px;overflow:visible;filter:drop-shadow(0 1px 1px #0008)}
+    .knopf > .pin-arbeiter{position:absolute;left:calc(100% - 3px);bottom:-5px;display:flex;gap:0;pointer-events:none;z-index:4}
+    .knopf > .pin-arbeiter svg{width:12px;height:16px;overflow:visible;filter:drop-shadow(0 1px 1px #0008)}
     .pin-arbeiter .hacke{transform-origin:7px 9px;animation:hacken .9s ease-in-out infinite}
     .pin-arbeiter svg:nth-child(2) .hacke{animation-delay:-.3s}
     .pin-arbeiter svg:nth-child(3) .hacke{animation-delay:-.6s}
@@ -73,11 +73,13 @@
   function arbeiterZeigen(){
     for (const pin of document.querySelectorAll('#welt .pin[data-pin="mine"]')){
       const m = S.minen[pin.dataset.id];
-      let el = pin.querySelector(":scope > .pin-arbeiter");
+      const knopf = pin.querySelector(".knopf");
+      let el = knopf?.querySelector(":scope > .pin-arbeiter");
       if (!m || !(m.arbeiter > 0)){ el?.remove(); continue; }
       const n = m.arbeiter >= 30 ? 3 : m.arbeiter >= 10 ? 2 : 1;
       const steht = m.stillBis > S.tag;
-      if (!el){ el = document.createElement("span"); el.className = "pin-arbeiter"; pin.appendChild(el); }
+      if (!knopf) continue;
+      if (!el){ el = document.createElement("span"); el.className = "pin-arbeiter"; knopf.appendChild(el); }
       if (el.dataset.n !== String(n)){ el.innerHTML = figur.repeat(n); el.dataset.n = String(n); }
       el.classList.toggle("steht", steht);
     }
