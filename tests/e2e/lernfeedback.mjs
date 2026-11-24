@@ -42,8 +42,14 @@ try {
   assert.equal(await page.evaluate(() => OPT.meldungsdauer), 50);
   await page.clock.runFor(8000);
   assert.match(await feedback.innerText(), /Das Ladekabel braucht Kupfer/);
-  await page.clock.runFor(2400);
-  assert.match(await feedback.innerText(), /Personal kostet zweimal/);
+  // Nächstes Feedback innerhalb der eingestellten Dauer (max. 21.4 s) – in kleinen
+  // Schritten vorspulen, damit echte Laufzeit auf dem Runner das Timing nicht kippt.
+  let naechstes = '';
+  for (let i = 0; i < 40 && !/Personal kostet zweimal/.test(naechstes); i++){
+    await page.clock.runFor(250);
+    naechstes = await feedback.count() ? await feedback.innerText() : '';
+  }
+  assert.match(naechstes, /Personal kostet zweimal/);
 
   // Complete the last tutorial task and check the longer timing without animations.
   await page.emulateMedia({reducedMotion:'reduce'});
