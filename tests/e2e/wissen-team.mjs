@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-const browser = await chromium.launch({headless:true, chromiumSandbox:true});
+const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({viewport:{width:360,height:800}, reducedMotion:'reduce'});
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
-const browser = await chromium.launch({ headless:true, chromiumSandbox:true });
+const browser = await chromium.launch({ headless: true });
 const url = 'http://127.0.0.1:4173/index.html';
 const errors = [];
 const newPage = async (options, init) => {
