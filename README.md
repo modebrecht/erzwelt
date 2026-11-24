@@ -10,7 +10,7 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
-- `index.html` — generierte Standalone- und Einstiegdatei nach dem Build. Nicht von Hand bearbeiten.
+- `index.html` — generierter Einstieg mit eingebettetem Spielcode. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
 
 ## Standalone bauen
@@ -26,7 +26,11 @@ node scripts/build-standalone.mjs
 ```
 
 Der Build erzeugt `index.html` aus `erzwelt-core.html` und allen Einträgen aus `patches.json`.
-Zum Spielen `index.html` öffnen. Ein direkter Aufruf von `erzwelt-core.html` leitet ebenfalls dorthin weiter.
+Zum Spielen `index.html` öffnen. Die vier Intro-Bilder werden beim Anzeigen aus
+`assets/intro/` geladen. Ein direkter Aufruf von `erzwelt-core.html` leitet dorthin weiter.
+Für eine einzelne Offline-Datei inklusive aller Originalbilder
+`node scripts/build-standalone.mjs --offline` ausführen. Die Ausgabe liegt in
+`artifacts/erzwelt-offline.html`.
 
 Der Builder prüft dabei automatisch:
 
@@ -233,16 +237,22 @@ runder Bogen nach rechts oben wie in der Schulschrift. Es steht auf der Grundlin
 unabhängig von der Schrift. Das Symbol bleibt chemisch korrekt «Al»; Screenreader
 lesen weiterhin «Al».
 
-## Einstieg (`einstieg.js`)
+## Bilder-Intro und Produktentdeckungen
 
-Jede neue Runde beginnt mit einem Startbild **«Woher kommt dein Ladekabel?»**: ein
-aufgeschnittenes Kabel – Kupfer in der Leitung, Aluminium im Stecker, Zinn in der
-Lötstelle –, jedes mit dem Ort, an dem die Einführung danach die Quelle eröffnet
-(Katanga, Boké, Bangka). Darunter die Kette Quelle → Raffinerie → Fabrik → Markt und
-der Knopf «Firma gründen», danach die Schwierigkeitswahl. Einmal pro Runde
-(`S.einstiegGesehen`); ein einziger Ablauf beim Öffnen (Kabel zeichnen, dann die drei
-Materialien), bei «Animationen: aus» oder reduzierter Bewegung sofort vollständig.
-Escape oder «Firma gründen» schliesst es.
+Beim ersten neuen Spiel zeigt Erzwelt vier Originalbilder vor der
+Schwierigkeitswahl. Die Bilder sind auch mit Pfeiltasten und horizontalen
+Wischgesten bedienbar. **Intro erneut ansehen** in den Einstellungen pausiert
+das Spiel für die Dauer der Wiederholung.
+
+Beim ersten tatsächlich hergestellten Stück erscheint eine Entdeckungskarte.
+Das Ladekabel zeigt Claudes Querschnitt mit Kupfer, Aluminium und Zinn. Die
+anderen Karten lesen ihre Materialien aus dem Produktkatalog. Entdeckungen
+warten auf das Ende des Spieltags und auf Entscheidungen, die gerade offen sind.
+Offene und bereits gesehene Karten werden pro Speicherplatz und im JSON-Export
+gesichert. Ältere Spielstände übernehmen bekannte Produkte aus Buchungen und
+Lagerbeständen, bei lückenhaften Buchungen auch aus bestehenden besetzten Fabriken.
+Nach einer Karte läuft das bisherige Tempo weiter. Beim Laden eines Spielstands
+gilt die Fortsetzungsregel mit 1×.
 
 ## PDF-Leistungsnachweis
 

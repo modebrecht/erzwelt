@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { access } from "node:fs/promises";
 import path from "node:path";
 import vm from "node:vm";
@@ -7,10 +7,25 @@ import { gzipSync, gunzipSync } from "node:zlib";
 const root = process.cwd();
 const corePath = path.join(root, "erzwelt-core.html");
 const manifestPath = path.join(root, "patches.json");
-const outputPath = path.join(root, "index.html");
+const offline = process.argv[2] === "--offline";
+const outputPath = path.join(root, offline ? "artifacts/erzwelt-offline.html" : "index.html");
 
 const source = await readFile(corePath, "utf8");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+if (!Array.isArray(manifest.introBilder) || manifest.introBilder.length !== 4) {
+  throw new Error("Für das Intro müssen genau vier Bilder deklariert sein");
+}
+const introBilder = await Promise.all(manifest.introBilder.map(async ({datei, alt, text}) => {
+  if (!/^assets\/intro\/[a-z0-9-]+\.png$/.test(datei) || ![alt, text].every(s => typeof s === "string" && s.trim())) {
+    throw new Error("Ungültiger Intro-Bildeintrag");
+  }
+  const png = await readFile(path.join(root, datei));
+  if (png.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a" ||
+      png.readUInt32BE(16) !== 1672 || png.readUInt32BE(20) !== 941) {
+    throw new Error("Unerwartetes Bildformat: " + datei);
+  }
+  return {src:offline ? "data:image/png;base64," + png.toString("base64") : "./" + datei, alt, text};
+}));
 const sourceRedirect = '<meta data-erzwelt-source-redirect http-equiv="refresh" content="0;url=./index.html">';
 const inertCoreScript = '<script type="text/plain" data-erzwelt-core>';
 if (source.split(sourceRedirect).length !== 2 || source.split(inertCoreScript).length !== 2) {
@@ -81,7 +96,8 @@ const banner = [
   ""
 ].join("\n");
 
-const standalone = banner + core.replace("</body>", blocks.join("") + "</body>");
+const introDaten = `<script type="application/json" id="erzwelt-intro-bilder">${JSON.stringify(introBilder).replaceAll("<", "\\u003c")}</script>\n`;
+const standalone = banner + core.replace("</body>", introDaten + blocks.join("") + "</body>");
 
 // Packaging gates: the generated file must contain every patch exactly once,
 // in manifest order, and must not depend on the old HTTP loader at runtime.
@@ -157,6 +173,7 @@ if (bootstrap.includes('<script src="./')) {
 const bootstrapScripts = [...bootstrap.matchAll(/<script\b(?![^>]*\btype="application\/octet-stream")[^>]*>([\s\S]*?)<\/script>/gi)];
 bootstrapScripts.forEach((match, index) => assertScriptSyntax(match[1], `index.html#bootstrap-${index + 1}`));
 
+await mkdir(path.dirname(outputPath), {recursive:true});
 await writeFile(outputPath, bootstrap, "utf8");
 
 const written = await readFile(outputPath, "utf8");
@@ -167,4 +184,5 @@ if (written !== bootstrap) {
 console.log(`Generated ${path.relative(root, outputPath)} with ${entries.length} embedded patches.`);
 console.log(`JavaScript syntax passed: ${coreScripts.length} core script(s) + ${entries.length} patch scripts + ${bootstrapScripts.length} bootstrap script(s).`);
 console.log(`Packed standalone: ${Buffer.byteLength(standalone, "utf8")} bytes -> ${Buffer.byteLength(bootstrap, "utf8")} bytes.`);
-console.log("Standalone verification passed: lossless embedded payload, no runtime fetch, no local script dependencies, patch order exact.");
+console.log("Standalone verification passed: lossless payload, no external scripts, patch order exact.");
+console.log(offline ? "Intro: four original PNGs embedded." : "Intro: four local PNGs loaded when viewed.");

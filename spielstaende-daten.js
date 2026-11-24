@@ -151,6 +151,9 @@ function spielstandZustand(daten, alt = false){
   const optional = {
     startTeam:spielstandGanzzahl, einfuehrung:spielstandGanzzahl, investStartWert:spielstandZahl,
     einstiegGesehen:spielstandBoolean, didaktikVersion:spielstandGanzzahl, shouldDidaktikVersion:spielstandGanzzahl,
+    produktEntdeckungen:tab => spielstandTabelle(tab, produktIds, e => spielstandFelder(e, {
+      status:id => ["offen", "gesehen"].includes(id)
+    }, {ersterTag:n => spielstandTag(n) && n <= daten.tag}) && (e.status === "gesehen" || Object.hasOwn(e, "ersterTag"))),
     wissenGesehen:tab => spielstandTabelle(tab, wissenIds, spielstandBoolean),
     wissenQuestFlow:q => spielstandFelder(q, {}, {
       version:spielstandGanzzahl, flags:tab => spielstandTabelle(tab, null, spielstandBoolean),

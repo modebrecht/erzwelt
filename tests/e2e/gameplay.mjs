@@ -99,12 +99,10 @@ if (initial.scrollWidth > initial.width + 1) throw new Error(`Initial horizontal
 if (!initial.didactic?.declarativeCopy || initial.didactic?.stringReplacementLayer !== false) throw new Error('Clean Sek-B didactic module not active');
 if (!initial.knowledge || !initial.objective) throw new Error('Knowledge/objective modules missing');
 
-// New round opens with the intro «Woher kommt dein Ladekabel?»; it leads to the difficulty choice.
+// The story intro leads to the existing difficulty choice.
 await page.locator('#spielmenue-neu').click();
 await page.getByRole('button', { name: 'Hier starten · Spielstand 1' }).click();
-await page.locator('#einstieg .es-los').waitFor({ state: 'visible', timeout: 10000 });
-await page.locator('#einstieg .es-los').click();
-await page.waitForFunction(() => !document.getElementById('einstieg') && S.einstiegGesehen === true, null, { timeout: 5000 });
+await page.locator('#bilder-intro .intro-sprung').click();
 
 // Choose Mittel through the real modal.
 const mittel = page.getByRole('button', { name: /Mittel/ }).filter({ visible: true });
@@ -205,6 +203,8 @@ await checkpoint('factory-staffed');
 await goMap();
 await setTempo(4);
 await page.waitForFunction(() => (S.ware?.kabel || 0) > 0, null, { timeout: 30000 });
+await page.locator('#schleier .es-kabel').waitFor({state:'visible'});
+await page.locator('#d-wahlen').getByRole('button', {name:'Weiter', exact:true}).click();
 await setTempo(0);
 
 // 11: manual sale.

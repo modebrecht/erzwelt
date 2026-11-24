@@ -1,5 +1,11 @@
 {
   "version": 1,
+  "introBilder": [
+    {"datei":"assets/intro/01-alles-beginnt-mit-rohstoffen.png","alt":"Alles beginnt mit Rohstoffen. Zwei Jugendliche schauen auf eine Weltkarte, die Rohstoffe und Geräte verbindet.","text":"In unseren Geräten stecken Rohstoffe aus vielen Ländern."},
+    {"datei":"assets/intro/02-minen-foerdern-rohstoffe.png","alt":"Minen fördern Rohstoffe. Ein Bagger und Lastwagen arbeiten in einem Tagebau.","text":"Minen gewinnen Erze, aus denen später Kupfer, Aluminium oder Zinn entsteht."},
+    {"datei":"assets/intro/03-raffinerien-und-fabriken.png","alt":"Raffinerien und Fabriken. Das Bild zeigt den Weg vom Erz bis zum fertigen Produkt.","text":"Raffinerien gewinnen Materialien aus Erz. Fabriken bauen daraus Produkte."},
+    {"datei":"assets/intro/04-jetzt-bist-du-am-zug.png","alt":"Jetzt bist du am Zug. Die beiden Jugendlichen laden dich ein, deine Firma zu gründen.","text":"Baue deine Lieferkette auf und verkaufe deine Produkte."}
+  ],
   "groups": [
     {
       "name": "didactic",
@@ -65,11 +71,15 @@
     },
     {
       "name": "logic-fixes",
-      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "einstieg.js"]
+      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "ziel-positiv.js", "feinschliff.js", "stil.js"]
     },
     {
       "name": "map-labels",
       "files": ["karteninfo-daten.js", "karteninfo.js"]
+    },
+    {
+      "name": "intro-discoveries",
+      "files": ["bilder-intro.js", "kabel-querschnitt.js", "produktentdeckungen.js"]
     },
     {
       "name": "save-slots",

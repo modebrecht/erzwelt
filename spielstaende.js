@@ -61,8 +61,6 @@
     #spielmenue .sm-zurueck {margin:14px 0 0}
     .sm-karten .sm-hinweis {margin:0 0 3px}
     #schleier .dialog {max-height:calc(100dvh - 18px);overflow:auto}
-    #einstieg .sm-dialogaktionen {flex-direction:column}
-    #einstieg .sm-dialogaktionen .cta.still {background:#ffffff16;color:white;border:1px solid #ffffff66}
     .sm-dialogaktionen .notiz {flex:1 0 100%;margin:0}
     .sm-speicherwarnung {position:absolute;z-index:43;left:50%;bottom:calc(var(--dockh) + 6px);transform:translateX(-50%);
       max-width:min(90%,420px);width:max-content;color:#142a32;background:#ffe0a0;border-radius:10px;padding:6px 10px;
@@ -263,7 +261,7 @@
   function neu(slot){
     const state = neuerZustand();
     if (!slotErsetzen(slot, {name:slotStandardname(slot.id), savedAt:new Date().toISOString(), state})) return;
-    fortsetzen(slot.id);
+    fortsetzen(slot.id, true);
   }
 
   function umbenennen(id){
@@ -315,7 +313,6 @@
   }
 
   function spieloberflaecheSchliessen(){
-    $("#einstieg")?.remove();
     document.body.classList.remove("toast-history-open");
     $("#schleier").hidden = true;
     $("#lupe").hidden = true;
@@ -338,13 +335,14 @@
     return true;
   }
 
-  function fortsetzen(id){
+  function fortsetzen(id, neuBegonnen = false){
     const slot = slotLesen(id);
     if (!slot.state) return menueZeigen("verwalten", "Der Spielstand ist nicht verfügbar.");
     spieloberflaecheSchliessen();
     if (!laden(slot.state)) return menueZeigen("verwalten", "Der Spielstand konnte nicht geladen werden.");
     aktiv = slot;
     spielAktiv = true;
+    produktentdeckungenInitialisieren();
     sicherungStand = null;
     verlassenAngeboten = false;
     speicherMeldung("");
@@ -361,9 +359,13 @@
     zeigeAuf("obuasi", 1.15);
     masseMessen();
     zeichnen();
-    if (!S.schwierigkeit) schwierigkeitZeigen();
+    if (!S.schwierigkeit){
+      metaLaden();
+      if (neuBegonnen && !META.bilderIntroGesehen) bilderIntroZeigen(true);
+      else schwierigkeitZeigen();
+    }
     else if (S.ende) window.__erzweltLogikFixes.abschlussZeigen();
-    else if (!offenesEreignisZeigen()){
+    else if (!offenesEreignisZeigen() && !produktentdeckungZeigen(1)){
       tempoSetzen(1);
       $("#einstauf").focus({preventScroll:true});
     }
@@ -421,8 +423,10 @@
       b.onclick = () => {
         if (spielstand !== S || !spielAktiv) return;
         waehlen();
+        if (e.nachWahl){ e.nachWahl(); return; }
         if (!e.offenesEreignis) offenesEreignisZeigen();
         else if (!tempo) tempoSetzen(1);
+        produktentdeckungZeigen();
       };
     }
     if (aktiv) dialogAktionen($("#d-wahlen"));
@@ -432,8 +436,6 @@
   schwierigkeitZeigen = function(){
     schwierigkeitVorher();
     dialogAktionen($("#d-wahlen"));
-    const intro = $("#einstieg .es-innen");
-    if (intro) dialogAktionen(intro);
   };
 
   const einstVorher = einstFuellen;

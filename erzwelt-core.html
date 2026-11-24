@@ -489,7 +489,7 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 .dialog .art{display:inline-block;background:var(--alarm);color:#fff;border-radius:99px;
   padding:4px 13px;font-size:var(--f0);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .dialog h2{font-size:var(--f5);margin:10px 0 8px}
-.dialog p{font-size:var(--f2);font-weight:600;line-height:1.5;margin-bottom:16px}
+.dialog #d-text,.dialog p{font-size:var(--f2);font-weight:600;line-height:1.5;margin-bottom:16px}
 .wahl{display:block;width:100%;text-align:left;background:#fff;border-radius:17px;
   padding:14px 16px;margin-bottom:10px;box-shadow:0 3px 0 #e0d3b8}
 .wahl:active{transform:translateY(2px);box-shadow:0 1px 0 #e0d3b8}
@@ -499,6 +499,25 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 .wahl.schwierigkeit .schwierigkeitsicon{width:46px;height:46px;border-radius:14px;background:var(--papier2);display:grid;place-items:center;font-size:25px}
 .wahl.schwierigkeit .schwierigkeitsstatus{font-family:"Baloo 2",sans-serif;font-size:var(--f0);font-weight:800;color:var(--grau);white-space:nowrap}
 .wahl.schwierigkeit[disabled]{opacity:.52;cursor:not-allowed;transform:none;box-shadow:0 3px 0 #e0d3b8}
+
+/* ---------- Bilder-Intro ---------- */
+#bilder-intro{position:fixed;inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;
+  border:0;overflow:auto;overscroll-behavior:contain;color:#fff;background:radial-gradient(130% 110% at 50% 0%,#165676,#0b3648 55%,#082a39)}
+#bilder-intro::backdrop{background:#082a39}
+.intro-innen{width:min(100%,1000px);min-height:100%;margin:auto;display:flex;flex-direction:column;justify-content:safe center;
+  gap:12px;padding:calc(14px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right))
+  calc(18px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+.intro-innen header{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--gold);font-weight:800}
+.intro-innen h2{margin:0;font-size:var(--f2);text-transform:uppercase;letter-spacing:.06em}
+.intro-bild{display:block;width:100%;height:auto;max-height:62dvh;object-fit:contain;touch-action:pan-y;user-select:none}
+.intro-text{margin:0;color:#e6f0f7;font-size:var(--f1);font-weight:700;line-height:1.35}
+.intro-punkte{display:flex;justify-content:center;gap:8px;padding:4px 0}
+.intro-punkte span{width:9px;height:9px;border-radius:50%;border:1px solid #ffffffac}
+.intro-punkte .aktiv{background:var(--gold);border-color:var(--gold)}
+.intro-innen nav{display:flex;flex-wrap:wrap;gap:8px}
+.intro-innen .cta{flex:1 0 auto;width:auto;min-height:44px;margin:0;white-space:normal;box-shadow:none}
+.intro-innen .cta.still{background:#ffffff18;color:#fff;border:1px solid #ffffff6d}
+.intro-innen .cta:disabled{opacity:.45;cursor:default}
 
 /* ---------- Meldungen ---------- */
 #toasts{position:absolute;top:calc(var(--hudh) + 4px);left:10px;width:min(45%,300px);z-index:42;
@@ -589,10 +608,12 @@ body[data-anim="0"] *{animation:none!important}
   <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="d-titel">
     <span class="art" id="d-art">Ereignis</span>
     <h2 id="d-titel"></h2>
-    <p id="d-text"></p>
+    <div id="d-text"></div>
     <div id="d-wahlen"></div>
   </div>
 </div>
+
+<dialog id="bilder-intro" aria-labelledby="bilder-intro-titel"></dialog>
 
 <div id="einst" class="ueberlage" hidden>
   <div class="tafel" role="dialog" aria-modal="true" aria-label="Einstellungen">
@@ -4617,6 +4638,7 @@ function einstFuellen(){
              50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())}
     ${regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen bremst ab dem zweiten Meldungstag in Serie. Bei normalem Tempo dauert dieser Tag 2 Sekunden.",
              0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])}
+    <button type="button" class="cta still" data-tun="intro-wiederholung">Intro erneut ansehen</button>
     <div class="karte" style="margin-top:18px">
       <h3>Fortschritt</h3>
       <div class="zeile"><span>Spielstand</span><b id="aktiver-spielstand"></b></div>
@@ -4685,6 +4707,7 @@ function ueberlageZu(welche){
   $("#" + welche).hidden = true;
   if (welche === "lupe") offeneLupe = null;
   zeichnen();
+  produktentdeckungZeigen();
 }
 /* ESC / rotes X: immer das oberste offene Menü schliessen */
 function obersteSchliessen(){
@@ -4851,6 +4874,9 @@ document.addEventListener("click", e => {
     case "abschluss":
       if (S.ende) window.__erzweltLogikFixes?.abschlussZeigen();
       return;
+    case "intro-wiederholung":
+      bilderIntroZeigen();
+      return;
     case "reset":
       zuruecksetzen();
       return;
@@ -4922,6 +4948,7 @@ function spieltagWeiter(){
     letzterMeldungstag = neu ? {spiel:S, tag:S.tag, folge} : null;
   }
   zeichnen();
+  produktentdeckungZeigen();
   if (takt === null) spieltagPlanen();
 }
 function tempoSetzen(v){

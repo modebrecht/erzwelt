@@ -28,8 +28,7 @@ const manualSave = page => page.evaluate(() => speichern(true));
 async function newGame(page, id, difficulty){
   await open(page, 'neu');
   await act(slot(page, id), /^Hier starten/);
-  await page.locator('#einstieg .es-los').click();
-  await page.locator('#einstieg').waitFor({state:'hidden'});
+  if (await page.locator('#bilder-intro').isVisible()) await act(page.locator('#bilder-intro'), 'Überspringen');
   await act(page.locator('#d-wahlen'), new RegExp('^' + difficulty));
   await page.evaluate(() => tempoSetzen(0));
 }
@@ -87,6 +86,7 @@ try {
     S.wissenQuestFlow.flags.lohn = true;
     S.zertifikatProfil = {vorname:'André'};
     produktBuchen('kabel', 23, 12, 4567);
+    S.produktEntdeckungen.kabel.status = 'gesehen';
     notiz('Monatsabschluss: Löhne CHF 400, Betrieb CHF 300.', 'geld');
   });
   assert.ok(await manualSave(page));
@@ -197,7 +197,7 @@ try {
   const thirdRaw = await stored(page, 3);
   page.once('dialog', async d => { assert.match(d.message(), /Spielstand 2/); await d.accept(); });
   await act(slot(page, 2), /Mit neuem Spiel überschreiben/);
-  await visible(page.locator('#einstieg .es-los'));
+  await visible(page.locator('#d-wahlen').getByRole('button', {name:/^Mittel/}));
   assert.equal((await state(page)).schwierigkeit, null);
   assert.equal(await stored(page, 3), thirdRaw);
 
