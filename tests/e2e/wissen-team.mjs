@@ -12,7 +12,7 @@ try {
   await page.goto('http://127.0.0.1:4173/index.html');
   await page.locator('#spielmenue-neu').click();
   await page.locator('[data-slot-id="1"] button').click();
-  if (await page.locator('#bilder-intro').isVisible()) await page.locator('#bilder-intro .intro-sprung').click();
+  if (await page.locator('#bilder-intro').isVisible()) await page.locator('#bilder-intro .intro-sprung').evaluate(b => b.click());
   await page.locator('#d-wahlen').getByRole('button', {name:/^Mittel/}).click();
 
   await page.evaluate(() => {

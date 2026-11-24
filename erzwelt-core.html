@@ -507,24 +507,34 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 .wahl.schwierigkeit .schwierigkeitsstatus{font-family:"Baloo 2",sans-serif;font-size:var(--f0);font-weight:800;color:var(--grau);white-space:nowrap}
 .wahl.schwierigkeit[disabled]{opacity:.52;cursor:not-allowed;transform:none;box-shadow:0 3px 0 #e0d3b8}
 
-/* ---------- Bilder-Intro ---------- */
-#bilder-intro{position:fixed;inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;
-  border:0;overflow:auto;overscroll-behavior:contain;color:#fff;background:radial-gradient(130% 110% at 50% 0%,#165676,#0b3648 55%,#082a39)}
+/* ---------- Bilder-Intro (Vollbild) ---------- */
+#bilder-intro{position:fixed;inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;padding:0;
+  border:0;overflow:hidden;overscroll-behavior:contain;color:#fff;background:#082a39}
 #bilder-intro::backdrop{background:#082a39}
-.intro-innen{width:min(100%,1000px);min-height:100%;margin:auto;display:flex;flex-direction:column;justify-content:safe center;
-  gap:12px;padding:calc(14px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right))
-  calc(18px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
-.intro-innen header{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--gold);font-weight:800}
-.intro-innen h2{margin:0;font-size:var(--f2);text-transform:uppercase;letter-spacing:.06em}
-.intro-bild{display:block;width:100%;height:auto;max-height:62dvh;object-fit:contain;touch-action:pan-y;user-select:none}
-.intro-text{margin:0;color:#e6f0f7;font-size:var(--f1);font-weight:700;line-height:1.35}
-.intro-punkte{display:flex;justify-content:center;gap:8px;padding:4px 0}
+#bilder-intro::before{content:"";position:absolute;inset:-40px;background:var(--intro-bg,none) center/cover no-repeat;
+  filter:blur(28px) brightness(.55) saturate(1.15);transform:scale(1.1)}
+.intro-innen{position:relative;height:100%;display:flex;flex-direction:column;
+  padding:calc(10px + env(safe-area-inset-top)) 0 calc(14px + env(safe-area-inset-bottom))}
+.intro-innen header{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--gold);font-weight:800;
+  padding:0 max(14px,env(safe-area-inset-right)) 6px max(14px,env(safe-area-inset-left))}
+.intro-innen h2{margin:0;font-size:var(--f1);text-transform:uppercase;letter-spacing:.06em}
+.intro-bild{display:block;flex:1;min-height:0;width:100%;object-fit:contain;touch-action:pan-y;user-select:none;
+  filter:drop-shadow(0 10px 30px #0008)}
+.intro-text,.intro-punkte,.intro-innen nav{margin-left:max(14px,env(safe-area-inset-left));margin-right:max(14px,env(safe-area-inset-right))}
+.intro-text{margin-top:10px;margin-bottom:0;color:#f2f7fb;font-size:var(--f1);font-weight:700;line-height:1.35;text-shadow:0 1px 3px #0009;
+  width:min(100% - 28px,760px);align-self:center}
+.intro-punkte{display:flex;justify-content:center;gap:8px;padding:8px 0 6px}
 .intro-punkte span{width:9px;height:9px;border-radius:50%;border:1px solid #ffffffac}
 .intro-punkte .aktiv{background:var(--gold);border-color:var(--gold)}
-.intro-innen nav{display:flex;flex-wrap:wrap;gap:8px}
-.intro-innen .cta{flex:1 0 auto;width:auto;min-height:44px;margin:0;white-space:normal;box-shadow:none}
-.intro-innen .cta.still{background:#ffffff18;color:#fff;border:1px solid #ffffff6d}
+.intro-innen nav{display:flex;gap:8px;width:min(100% - 28px,760px);align-self:center}
+.intro-innen .cta{flex:1 0 auto;width:auto;min-height:48px;margin:0;white-space:normal;box-shadow:none}
+#bilder-intro .intro-innen .cta.still{background:#ffffff22;color:#fff;border:1px solid #ffffff8a;box-shadow:none}
 .intro-innen .cta:disabled{opacity:.45;cursor:default}
+.intro-innen .intro-sprung{display:none}
+@media (orientation:landscape) and (max-height:560px){
+  .intro-innen header{position:absolute;top:calc(8px + env(safe-area-inset-top));left:0;right:0;z-index:2}
+  .intro-text{font-size:var(--f0)}
+}
 
 /* ---------- Meldungen ---------- */
 #toasts{position:absolute;top:calc(var(--hudh) + 4px);left:10px;width:min(45%,300px);z-index:42;

@@ -262,6 +262,14 @@ An fördernden Rohstoffquellen arbeiten 1–3 kleine Figuren mit Spitzhacke
 (ab 10 bzw. 30 Personen mehr Figuren); bei Streik oder Stillstand stehen sie
 still. «Animationen: aus» stoppt sie.
 
+## Animationen immer an (`bewegung-immer.js`)
+
+Viele Schulgeräte melden «Bewegung reduzieren» (Windows-Einstellung,
+Remote-Desktop). Früher stand dann im Spiel alles still. Jetzt entscheidet nur
+die Einstellung «Animationen» im Spiel: Die Browser-Abfrage
+`prefers-reduced-motion` meldet immer «nein», und CSS-Regeln nur für
+«Bewegung reduzieren» werden entfernt. Lädt als erster Patch.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen

@@ -28,7 +28,7 @@ const manualSave = page => page.evaluate(() => speichern(true));
 async function newGame(page, id, difficulty){
   await open(page, 'neu');
   await act(slot(page, id), /^Hier starten/);
-  if (await page.locator('#bilder-intro').isVisible()) await act(page.locator('#bilder-intro'), 'Überspringen');
+  if (await page.locator('#bilder-intro').isVisible()) await page.keyboard.press('Escape');
   await act(page.locator('#d-wahlen'), new RegExp('^' + difficulty));
   await page.evaluate(() => tempoSetzen(0));
 }

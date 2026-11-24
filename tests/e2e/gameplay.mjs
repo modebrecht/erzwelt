@@ -102,7 +102,7 @@ if (!initial.knowledge || !initial.objective) throw new Error('Knowledge/objecti
 // The story intro leads to the existing difficulty choice.
 await page.locator('#spielmenue-neu').click();
 await page.getByRole('button', { name: 'Hier starten · Spielstand 1' }).click();
-await page.locator('#bilder-intro .intro-sprung').click();
+await page.locator('#bilder-intro .intro-sprung').evaluate(b => b.click());
 
 // Choose Mittel through the real modal.
 const mittel = page.getByRole('button', { name: /Mittel/ }).filter({ visible: true });

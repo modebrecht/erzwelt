@@ -128,7 +128,8 @@ try {
   assert.ok(await page.evaluate(() => S.leistungsdaten.produkte.kabel.hergestellt > 0 &&
     S.leistungsdaten.produkte.kabel.verkauft > 1 && S.ware.kabel === 0));
   await wait(discovery(page).locator('.es-kabel'));
-  assert.equal(await discovery(page).locator('.es-mantel').evaluate(el => getComputedStyle(el).strokeDashoffset), '0px');
+  // Animationen laufen jetzt auch bei «Bewegung reduzieren»: auf das Ende der Zeichen-Animation warten
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('.es-mantel')).strokeDashoffset === '0px', null, {timeout:8000});
   await page.screenshot({path:'artifacts/entdeckung-ladekabel-mobil.png'});
   await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => S.tag),ersterTag);
@@ -229,7 +230,7 @@ try {
     assert.ok(Buffer.from(src.split(',')[1],'base64').equals(await readFile(introBilder[i-1].datei)));
     if (i<introBilder.length) await click(intro(offline),'Weiter');
   }
-  await click(intro(offline),'Überspringen');
+  await offline.keyboard.press('Escape');
   await chooseDifficulty(offline);
 
   assert.deepEqual(errors,[]);

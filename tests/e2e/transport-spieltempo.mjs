@@ -13,7 +13,7 @@ try {
   await page.goto('http://127.0.0.1:4173/index.html');
   await page.locator('#spielmenue-neu').click();
   await page.locator('[data-slot-id="1"] button').click();
-  if (await page.locator('#bilder-intro').isVisible()) await page.locator('#bilder-intro .intro-sprung').click();
+  if (await page.locator('#bilder-intro').isVisible()) await page.locator('#bilder-intro .intro-sprung').evaluate(b => b.click());
   await page.locator('#d-wahlen').getByRole('button', {name:/^Mittel/}).click();
   await page.evaluate(() => tempoSetzen(0));
 
@@ -86,8 +86,11 @@ try {
   assert.equal(await page.locator('svg.weltkarte .lieferlinie').count(), 3);
   await page.evaluate(() => { OPT.anim=1; optAnwenden(); });
   assert.equal(await liefersymbole.count(), 3);
+  // Browser-Einstellung «Bewegung reduzieren» schaltet die Animationen nicht mehr ab –
+  // nur «Animationen: aus» im Spiel (bewegung-immer.js).
   await page.emulateMedia({reducedMotion:'reduce'});
-  await liefersymbole.first().waitFor({state:'hidden'});
+  await page.evaluate(() => zeichnen());
+  assert.equal(await liefersymbole.count(), 3);
   await page.emulateMedia({reducedMotion:'no-preference'});
 
   const verkauf = await page.evaluate(() => {

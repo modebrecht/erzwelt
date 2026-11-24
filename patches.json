@@ -9,7 +9,7 @@
   "groups": [
     {
       "name": "didactic",
-      "files": [
+      "files": ["bewegung-immer.js",
         "didactic-model.js",
         "didactic-events.js",
         "didactic-ui.js",

@@ -36,6 +36,7 @@ function bilderIntroZeigen(gruendung = false){
     index = nach;
     const {src, alt, text} = folien[index];
     bild.src = src;
+    dialog.style.setProperty("--intro-bg", `url("${src}")`);
     bild.alt = alt;
     begleittext.textContent = text;
     zaehler.textContent = `${index + 1} / ${folien.length}`;
