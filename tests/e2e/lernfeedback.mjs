@@ -32,7 +32,8 @@ try {
   await page.clock.runFor(3500);
   assert.match(await feedback.innerText(), /Das Ladekabel braucht Kupfer/);
   assert.equal(await feedback.evaluate(el => el.classList.contains('feedback-aus')), false);
-  assert.equal(await page.locator('#toasts').evaluate(el => getComputedStyle(el).opacity), '1');
+  // Opazität kann noch kurz überblenden – auf den Endwert warten statt sofort messen
+  await page.waitForFunction(() => getComputedStyle(document.getElementById('toasts')).opacity === '1', null, { timeout: 3000 });
 
   await page.locator('#einstauf').evaluate(btn => btn.click());
   assert.match(await page.locator('#w-lernfeedbackdauer').innerText(), /6[.,]7.*10[.,]7 s/);
