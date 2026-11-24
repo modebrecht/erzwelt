@@ -275,7 +275,8 @@ die Einstellung «Animationen» im Spiel: Die Browser-Abfrage
 Im Blatt einer eigenen Rohstoffquelle steht die Lohnstufe direkt unter der
 Belegschaft, danach die Zufriedenheit. Jede Lohnstufe zeigt Lohnkosten pro
 Monat für die aktuelle Belegschaft und die Förderung pro Tag, sobald sich die
-Zufriedenheit eingependelt hat.
+Zufriedenheit eingependelt hat. Bei jeder Änderung von Lohn, Belegschaft oder
+Ausbau steigen kurz rote/grüne Prozent-Zeichen auf (6 s).
 
 ## PDF-Leistungsnachweis
 
