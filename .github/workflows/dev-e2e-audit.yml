@@ -57,6 +57,9 @@ jobs:
       - name: Run save slot E2E
         run: node tests/e2e/spielstaende.mjs
 
+      - name: Verify tutorial feedback duration
+        run: node tests/e2e/lernfeedback.mjs
+
       - name: Verify intro and discoveries, including the offline build
         run: |
           node scripts/build-standalone.mjs --offline

@@ -45,11 +45,8 @@
     #didaktik-transport .didaktik-truck{filter:drop-shadow(0 3px 2px #0003)}
     #didaktik-transport .didaktik-ship{filter:drop-shadow(0 4px 3px #0002)}
     #didaktik-transport>circle{filter:drop-shadow(0 0 3px #fff8)}
-    #tutorial-lernfeedback{overflow:hidden}
-    #tutorial-lernfeedback::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#2fbe7e,#8ce6b5,#f5b73d);transform-origin:left;animation:premiumV2TutorialLine 2.72s linear both}
-    @keyframes premiumV2TutorialLine{from{transform:scaleX(0);opacity:.9}78%{transform:scaleX(1);opacity:.9}to{transform:scaleX(1);opacity:0}}
     body[data-anim="1"] .pin.bau-status .pin-state-badge.status-bau::after,body[data-anim="1"] .prozess-reaktor::after,body[data-anim="1"] .fabrikmaschine::after,body[data-anim="1"] .raff-prozess.aktiv .prozess-reaktor svg,body[data-anim="1"] .fabrik-prozess.aktiv .fabrikmaschine svg,body[data-anim="1"] .materialblock::before,body[data-anim="1"] .produktkarton::after{animation:none!important}
-    @media(prefers-reduced-motion:reduce){.premium-v2-fx,.pin.bau-status .pin-state-badge.status-bau::after,.prozess-reaktor::after,.fabrikmaschine::after,.raff-prozess.aktiv .prozess-reaktor svg,.fabrik-prozess.aktiv .fabrikmaschine svg,.materialblock::before,.produktkarton::after,.verkauf-paket::before,.verkauf-geld::before,#tutorial-lernfeedback::after{animation:none!important;transition:none!important}.premium-v2-fx{display:none!important}}
+    @media(prefers-reduced-motion:reduce){.premium-v2-fx,.pin.bau-status .pin-state-badge.status-bau::after,.prozess-reaktor::after,.fabrikmaschine::after,.raff-prozess.aktiv .prozess-reaktor svg,.fabrik-prozess.aktiv .fabrikmaschine svg,.materialblock::before,.produktkarton::after,.verkauf-paket::before,.verkauf-geld::before{animation:none!important;transition:none!important}.premium-v2-fx{display:none!important}}
   `;
   document.head.appendChild(style);
   const last=new Map(),cleanup=new WeakMap();

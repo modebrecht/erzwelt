@@ -1425,7 +1425,7 @@ function metaLaden(){
 function metaSpeichern(){ try { SPEICHER.schreib(META_SCHLUESSEL,JSON.stringify(META)); } catch(e){} }
 
 /* ---------- Einstellungen (Regler) ---------- */
-const OPT_STD = {schrift:106, tempo:100, anim:1, meldungsdauer:100, meldungstakt:1};
+const OPT_STD = {schrift:106, tempo:100, anim:1, meldungsdauer:100, lernfeedbackdauer:100, meldungstakt:1};
 let OPT = Object.assign({}, OPT_STD);
 
 function optLaden(){
@@ -1437,6 +1437,7 @@ function optLaden(){
   OPT.tempo   = klemm(OPT.tempo, 50, 250);
   OPT.anim    = klemm(OPT.anim, 0, 2);
   OPT.meldungsdauer = klemm(OPT.meldungsdauer, 50, 200);
+  OPT.lernfeedbackdauer = Number.isFinite(OPT.lernfeedbackdauer) ? klemm(OPT.lernfeedbackdauer, 50, 200) : OPT_STD.lernfeedbackdauer;
   OPT.meldungstakt = klemm(Math.round(OPT.meldungstakt), 0, 2);
 }
 function optSpeichern(){ try { SPEICHER.schreib(OPT_SCHLUESSEL, JSON.stringify(OPT)); } catch(e){} }
@@ -4620,8 +4621,8 @@ function regler(id, label, hilfe, min, max, step, wert, anzeige){
 }
 const ANIM_NAME = ["aus","ruhig","verspielt"];
 const MELDUNGSTAKT_NAME = ["Gleich lassen","Bei Folgen","Jeder Meldungstag"];
-function meldungsdauerAnzeige(){
-  const sekunden = ms => (ms*OPT.meldungsdauer/100000).toLocaleString("de-CH",{maximumFractionDigits:1});
+function meldungsdauerAnzeige(prozent = OPT.meldungsdauer){
+  const sekunden = ms => (ms*prozent/100000).toLocaleString("de-CH",{maximumFractionDigits:1});
   return sekunden(MELDUNG_KURZ_MS) + " / " + sekunden(MELDUNG_LANG_MS) + " s";
 }
 function einstFuellen(){
@@ -4636,6 +4637,8 @@ function einstFuellen(){
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
     ${regler("meldungsdauer", "Meldungsdauer", "Lesezeit für kurze und lange Meldungen.",
              50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())}
+    ${regler("lernfeedbackdauer", "Dauer für Schrittfeedback", "Lesezeit für «Schritt abgeschlossen» und «Tutorial abgeschlossen».",
+             50, 200, 25, OPT.lernfeedbackdauer, meldungsdauerAnzeige(OPT.lernfeedbackdauer))}
     ${regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen bremst ab dem zweiten Meldungstag in Serie. Bei normalem Tempo dauert dieser Tag 2 Sekunden.",
              0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])}
     <button type="button" class="cta still" data-tun="intro-wiederholung">Intro erneut ansehen</button>
@@ -4895,11 +4898,16 @@ document.addEventListener("input", e => {
   switch (r.dataset.regler){
     case "schrift": OPT.schrift = wert; if (anzeige) anzeige.textContent = wert + " %"; optAnwenden(); optSpeichern(); break;
     case "tempo":   OPT.tempo = wert;   if (anzeige) anzeige.textContent = wert + " %"; optAnwenden(); optSpeichern(); break;
-    case "anim":    OPT.anim = wert;    if (anzeige) anzeige.textContent = ANIM_NAME[wert]; optAnwenden(); optSpeichern(); break;
+    case "anim":    OPT.anim = wert;    if (anzeige) anzeige.textContent = ANIM_NAME[wert];
+      optAnwenden(); window.__erzweltTutorialEnhance?.dauerAnwenden(); optSpeichern(); break;
     case "meldungsdauer":
       OPT.meldungsdauer = wert;
       if (anzeige) anzeige.textContent = meldungsdauerAnzeige();
       meldungsdauerAnwenden(); optSpeichern(); break;
+    case "lernfeedbackdauer":
+      OPT.lernfeedbackdauer = wert;
+      if (anzeige) anzeige.textContent = meldungsdauerAnzeige(wert);
+      window.__erzweltTutorialEnhance?.dauerAnwenden(); optSpeichern(); break;
     case "meldungstakt":
       OPT.meldungstakt = wert;
       if (anzeige) anzeige.textContent = MELDUNGSTAKT_NAME[wert];

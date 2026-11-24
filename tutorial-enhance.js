@@ -23,11 +23,14 @@
     #tutorial-lernfeedback{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 68px);z-index:90;
       width:min(92vw,480px);transform:translateX(-50%);pointer-events:none;padding:10px 13px;border-radius:14px;
       background:#f5fff9;color:#214f3c;border:2px solid #69bf91;box-shadow:0 7px 22px #0003;
-      font-size:var(--f1);font-weight:700;text-align:center}
+      font-size:var(--f1);font-weight:700;text-align:center;overflow:hidden;
+      animation:tutorialFeedbackEin .22s ease-out both}
     #tutorial-lernfeedback b{font-family:"Baloo 2",sans-serif;color:#17613f}
-    #tutorial-lernfeedback.rein{animation:tutorialFeedback 2.8s ease both}
-    @keyframes tutorialFeedback{0%{opacity:0;transform:translate(-50%,-12px) scale(.96)}10%,78%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-7px) scale(.98)}}
-    @media(prefers-reduced-motion:reduce){#tutorial-lernfeedback.rein{animation:none}}
+    #tutorial-lernfeedback.feedback-aus{animation:tutorialFeedbackAus 240ms ease-in both}
+    .lernfeedback-zeit{position:absolute;left:0;right:0;bottom:0;height:3px;
+      transform-origin:left;background:linear-gradient(90deg,#2fbe7e,#8ce6b5,#f5b73d)}
+    @keyframes tutorialFeedbackEin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translateX(-50%)}}
+    @keyframes tutorialFeedbackAus{from{opacity:1}to{opacity:0}}
   `;
   document.head.appendChild(style);
 
@@ -161,15 +164,75 @@
     observer.observe(tutorialQuest);
   }
 
-  let feedbackTimer=0;
-  function feedback(html,finale){
-    let el=document.getElementById("tutorial-lernfeedback");
-    if(!el){el=document.createElement("div");el.id="tutorial-lernfeedback";document.body.appendChild(el);}
-    clearTimeout(feedbackTimer);el.classList.remove("rein");
-    el.innerHTML=finale?`<b>Tutorial abgeschlossen</b><br>${html}`:`<b>Schritt abgeschlossen</b><br>${html}`;
-    if(OPT.anim!==0&&!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches){requestAnimationFrame(()=>el.classList.add("rein"));feedbackTimer=setTimeout(()=>el.remove(),3000);}
-    else{el.style.opacity="1";feedbackTimer=setTimeout(()=>el.remove(),2200);}
+  const reduzierteBewegung = matchMedia("(prefers-reduced-motion: reduce)");
+  const bewegt = () => OPT.anim !== 0 && !reduzierteBewegung.matches;
+  const AUSBLENDEN_MS = 240;
+  const feedbackWarteschlange = [];
+  let feedbackAktuell = null, feedbackTimer = null;
+
+  function feedbackBeenden(){
+    clearTimeout(feedbackTimer);
+    feedbackTimer = null;
+    if (!feedbackAktuell) return;
+    feedbackAktuell.animation?.cancel();
+    feedbackAktuell.element.remove();
+    feedbackAktuell = null;
   }
+
+  function feedbackZuruecksetzen(){
+    feedbackWarteschlange.length = 0;
+    feedbackBeenden();
+  }
+
+  function dauerAnwenden(){
+    const aktuell = feedbackAktuell;
+    if (!aktuell) return;
+    if (aktuell.spiel !== S){ feedbackZuruecksetzen(); return; }
+    if (aktuell.element.classList.contains("feedback-aus")) return;
+    const dauer = aktuell.basis * OPT.lernfeedbackdauer / 100;
+    const rest = Math.max(0, dauer - (performance.now() - aktuell.seit));
+    aktuell.animation?.cancel();
+    const animiert = bewegt();
+    aktuell.zeit.hidden = !animiert;
+    if (animiert){
+      aktuell.animation = aktuell.zeit.animate(
+        [{transform:`scaleX(${rest/dauer})`}, {transform:"scaleX(0)"}],
+        {duration:rest, fill:"forwards"}
+      );
+    }
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => {
+      const weiter = () => { feedbackBeenden(); feedbackZeigen(); };
+      if (!bewegt()){ weiter(); return; }
+      aktuell.element.classList.add("feedback-aus");
+      feedbackTimer = setTimeout(weiter, AUSBLENDEN_MS);
+    }, rest);
+  }
+
+  function feedbackZeigen(){
+    if (feedbackAktuell) return;
+    const eintrag = feedbackWarteschlange.shift();
+    if (!eintrag || eintrag.spiel !== S) return;
+    const element = document.createElement("div");
+    element.id = "tutorial-lernfeedback";
+    element.setAttribute("role", "status");
+    const titel = document.createElement("b");
+    titel.textContent = eintrag.finale ? "Tutorial abgeschlossen" : "Schritt abgeschlossen";
+    const zeit = document.createElement("span");
+    zeit.className = "lernfeedback-zeit";
+    zeit.setAttribute("aria-hidden", "true");
+    element.append(titel, document.createElement("br"), eintrag.text, zeit);
+    document.body.append(element);
+    const basis = eintrag.finale || eintrag.text.length > 105 ? MELDUNG_LANG_MS : MELDUNG_KURZ_MS;
+    feedbackAktuell = {element, zeit, basis, seit:performance.now(), spiel:eintrag.spiel};
+    dauerAnwenden();
+  }
+
+  function feedback(text, finale){
+    feedbackWarteschlange.push({text, finale, spiel:S});
+    feedbackZeigen();
+  }
+  reduzierteBewegung.addEventListener("change", dauerAnwenden);
 
   if(typeof tutorialPruefen==="function"){
     const originalTutorialPruefen=tutorialPruefen;
@@ -195,5 +258,6 @@
   }
 
   if(typeof questZeichnen==="function")questZeichnen();
-  window.__erzweltTutorialEnhance={version:3,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),mobileToastStack:true,eventDrivenToastLayout:true};
+  window.__erzweltTutorialEnhance={version:4,steps:TUTORIAL.length,phases:PHASEN.map(p=>p.id),
+    mobileToastStack:true,eventDrivenToastLayout:true, dauerAnwenden, feedbackZuruecksetzen};
 })();

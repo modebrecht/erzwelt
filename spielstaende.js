@@ -313,6 +313,7 @@
   }
 
   function spieloberflaecheSchliessen(){
+    window.__erzweltTutorialEnhance?.feedbackZuruecksetzen();
     document.body.classList.remove("toast-history-open");
     $("#schleier").hidden = true;
     $("#lupe").hidden = true;

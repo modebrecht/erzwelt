@@ -20,9 +20,8 @@
     .pille.kasse > div:has(.kasse-plus) > small{visibility:hidden}
     .pille.kasse .kasse-plus{background:none!important;padding:0!important;top:1px!important}
 
-    /* 2. Rückmeldung auf der Karte unten; Meldungen treten solange zurück */
+    /* 2. Rückmeldung auf der Karte unterhalb der normalen Meldungen */
     body:not(.fensterauf) #tutorial-lernfeedback{top:auto!important;bottom:calc(var(--dockh) + 12px)}
-    body:not(.fensterauf):has(#tutorial-lernfeedback) #toasts{opacity:0;transition:opacity .2s}
 
     /* 3. Produktname nicht abschneiden */
     .produktkarton{width:auto!important;min-width:48px;padding:3px 7px!important;font-size:9.5px!important;white-space:nowrap}

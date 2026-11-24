@@ -64,15 +64,6 @@
     #tutorial-lernfeedback{
       box-shadow:inset 0 1px #ffffffc0,0 9px 24px #0003;
     }
-    #tutorial-lernfeedback.rein{
-      animation:premiumTutorialFeedback 2.9s cubic-bezier(.18,.85,.28,1) both!important;
-    }
-    @keyframes premiumTutorialFeedback{
-      0%{opacity:0;transform:translate(-50%,-10px) scale(.965)}
-      10%{opacity:1;transform:translate(-50%,1px) scale(1.025)}
-      16%,76%{opacity:1;transform:translate(-50%,0) scale(1)}
-      100%{opacity:0;transform:translate(-50%,-5px) scale(.99)}
-    }
 
     /* Quiet mode: retain hierarchy, remove secondary continuous polish. */
     body[data-anim="1"] .prozessszene.aktiv .prozess-meta-pfeil,
@@ -81,7 +72,7 @@
 
     @media(prefers-reduced-motion:reduce){
       .prozessszene,.prozessszene.aktiv .prozess-meta-pfeil,.prozessszene.aktiv .prozess-status i,
-      .prozess-materialliste span.fehlt,.pille.kasse.verkauf-puls,#tutorial-lernfeedback.rein{
+      .prozess-materialliste span.fehlt,.pille.kasse.verkauf-puls{
         animation:none!important;transition:none!important
       }
     }
