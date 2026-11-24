@@ -22,7 +22,7 @@
      perfektes Timing mit hohen Schulden. */
   const ZIEL_NACH_STUFE = {einfach:500000, mittel:3000000, schwer:3000000};
   const zielGewinn = () => ZIEL_NACH_STUFE[S && S.schwierigkeit] ?? ZIEL_GEWINN;
-  const START_TEAM = 10;
+  const START_TEAM = 10;   // ältere Spielstände; neue Runden: S.startTeam = 0 (einfuehrung.js)
 
   /* Wert aller bisherigen Investitionen, aus dem Spielstand berechnet:
      Erschliessung, Bau, Ausbau, Fabriken, Einstellungen, Verbesserungen. */
@@ -43,7 +43,7 @@
     }
     for (const f of S.fabriken || []) summe += (PRODUKT[f.produkt] || {}).kosten || 0;
     for (const id in S.perks || {}) summe += (PERK_INDEX[id] && PERK_INDEX[id].perk.kosten) || 0;
-    summe += Math.max(0, (S.arbeiterGesamt || 0) - START_TEAM) * LOHN_PRO_KOPF;
+    summe += Math.max(0, (S.arbeiterGesamt || 0) - (S.startTeam ?? START_TEAM)) * LOHN_PRO_KOPF;
     return summe;
   }
   function etappenInvestitionen(){
@@ -82,7 +82,7 @@
     }
 
     const freischaltText = mittelUnlock
-      ? `<br><br><b>🔥 Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
+      ? `<br><br><b>Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
     const bonusAngebot = !geschafft && S.schwierigkeit === "einfach" && !S.hilfsBonus;
     const wahlen = [
       {text:`Weiter · Etappe ${(S.etappe||1)+1}`, klein:`Nochmals ${ZIEL_TAGE} Tage mit derselben Firma`, tun:()=>{ etappeWeiter(vorherTempo); }}

@@ -69,7 +69,8 @@ Der Builder prüft dabei automatisch:
   Meldungen kurz ab.
 - Einheiten in Blättern: pro Person, pro Tag, pro Monat, pro Stück; HUD «Team frei».
 - Tutorial-Raffinerie zeigt Kupfer statt Seltener Erden, ohne Spezialisierungskarte.
-- Konkrete Engpass-Hinweise nach dem Tutorial, z. B. «Zinn fehlt für Ladekabel –
+- Konkrete Engpass-Hinweise nach dem Tutorial (nur wenn ein Material die Produktion
+  wirklich gebremst hat, nicht schon bei knappem Lager), z. B. «Zinn fehlt für Ladekabel –
   setze in San Rafael mehr Personal ein (jetzt 5 von 45)». Während einer
   Wissens-Quest erscheint der Engpass als Kasten in der Aufgabenkarte.
 - «Spielmodell»-Vorbehalte nur noch im Reiter Wissen, nicht mehr in jedem Blatt.
@@ -130,6 +131,113 @@ Lange Erklärsätze auf Markt, Team, Ziel, Wissen und in den Blättern kürzer;
 Rohstoffe ohne Quelle im Markt in einer Zeile; keine doppelte Meldungsliste
 im Ziel (dafür gibt es «Verlauf»). Lerninhalte in der Wissens-Lupe bleiben.
 
+## Einführung Schritt für Schritt (`einfuehrung.js`)
+
+Die Einführung nimmt an der Hand: **eine Aufgabe = eine Handlung an einem Ort**.
+Nur dieser Ort leuchtet auf der Karte, «Ziel zeigen» führt genau dorthin.
+
+1./2. Kupfer-Quelle (Katanga) eröffnen und mit 15 Personen besetzen ·
+3./4. Aluminium (Boké) eröffnen und mit 5 besetzen · 5./6. Zinn (Bangka) eröffnen
+und mit 10 besetzen · 7./8. Raffinerie (Guangdong) bauen und mit 5 besetzen ·
+9./10. Kabelfabrik (China) bauen und nach dem Bau mit 5 besetzen ·
+11. einmal selbst verkaufen · 12. Verkaufsteam mit 4 Personen.
+
+- **Neue Runde mit 0 Personen.** Eingestellt wird direkt an der Station mit dem
+  Regler (siehe unten). Schon die erste Aufgabe zeigt: Personal kostet einmalig
+  beim Einstellen und danach jeden Monat Lohn. Im Team-Reiter wird während der
+  Einführung nicht eingestellt; er zeigt den Stand pro Station.
+- **Nur so viel Personal wie nötig:** Jede Station lässt sich nur bis zum Bedarf
+  besetzen (Kupfer 15, Aluminium 5, Zinn 10, Raffinerie 5, Fabrik 5, Verkauf 4 –
+  zusammen 44, Lohn rund CHF 21'000 pro Monat). Am Ende sitzt niemand untätig.
+- **Die Kette läuft danach von selbst.** Die Zahlen sind durchgerechnet (Simulation
+  ohne Ereignisse, 120 Tage): Die Fabrik macht 16 Ladekabel pro Tag, Kupfer,
+  Aluminium und Zinn reichen dafür, das Verkaufsteam schafft 20 pro Tag. Kein
+  Engpass, das Lager bleibt leer, rund CHF 41'000 laufender Gewinn pro Monat
+  (Einfach). Vorher (10/5/5, Verkauf 2) fehlten sofort Zinn und Verkäufer.
+- Vorgeschlagen werden die günstigsten Orte. Hat ein Spielstand schon eine
+  passende Quelle oder Raffinerie, arbeitet die Einführung mit dieser weiter.
+- Kaufen geht nur am Zielort des aktuellen Schritts; andere Orte zeigen
+  «Noch nicht dran» und einen Knopf zum richtigen Ort. Verbesserungen im Wissen
+  gibt es erst nach der Einführung. So kann niemand alles Geld ausgeben und
+  dann feststecken (am Ende der Einführung bleiben rund CHF 0.67 Mio).
+- Sitzen anderswo zu viele Leute (alter Spielstand), schickt die Aufgabe zuerst
+  dorthin zum Umverteilen, statt neu einstellen zu lassen.
+- Ältere Spielstände werden übernommen (Marke `S.einfuehrung`): Fertige bleiben
+  fertig, laufende springen zum ersten offenen Schritt. Sie behalten ihre
+  10 Startleute (`S.startTeam`, zählt nicht als Investition).
+
+## Belegschaft per Regler (`belegschaft-regler.js`)
+
+Rohstoffquelle, Raffinerie, Fabrik und Verkaufsteam: statt −10/−/+/+10 eine Zeile
+**− · Zahl · +** für einzelne Personen und darunter ein Regler 0 … Plätze.
+
+- Blau: arbeitet hier. Hell: kommt aus dem freien Team. Gelb: wird beim Loslassen
+  **neu eingestellt**, soweit das Geld reicht. Schraffiert: geht nicht.
+- Zwei Kacheln zeigen live beim Ziehen, was das kostet: **Einmalig** (CHF 1'800
+  pro neue Person) und **Jeden Monat** (Lohn am Standort, je nach Land und Lohnstufe).
+- In der Einführung zeigt eine Marke («Ziel 10») die verlangte Zahl.
+- Im Team-Reiter heisst der Knopf «Stelle … Personen ein · CHF … einmalig»;
+  darunter steht der monatliche Lohn (je nach Land, Verkauf, ohne Aufgabe).
+
+## Aufgabe kompakt (`aufgabe-kompakt.js`)
+
+Auf dem Handy mehr Platz für die Karte (nur Darstellung):
+
+- Tutorial-Aufgabe ohne «Zusammenhang» (kommt als Rückmeldung nach dem Schritt),
+  Phase nur als Balken, «Ziel zeigen» niedriger – rund 30 % kleiner.
+- «Neues Wissen» (vorher «Wissen freigeschaltet») mit höchstens zwei Zeilen Text;
+  ein Engpass erscheint als einzeiliger Hinweis, Antippen führt hin.
+- Auf Markt, Team und Ziel ist «Neues Wissen» eine schmale Zeile mit «Ansehen».
+- Meldungen unten: auf dem Handy nur die neueste.
+
+## Ziel positiv (`ziel-positiv.js`)
+
+Der Ziel-Reiter beginnt mit dem **laufenden Geschäft pro Monat** (Einnahmen minus
+Löhne und Betrieb) als grosser Zahl, mit Trend und Balken der letzten Monate
+(`S.monatsVerlauf`). Darunter eine Prognose: «Bei diesem Tempo erreichst du das
+Ziel in etwa 17 Monaten – du hast noch 20» oder was noch fehlt und was hilft.
+Investitionen sind als Aufbau erklärt, nicht als Verlust.
+
+## Feinschliff (`feinschliff.js`)
+
+- Verkaufsbetrag ersetzt kurz das Wort «Kasse» («+2'845») statt darüberzuliegen.
+- «Schritt abgeschlossen» erscheint auf der Karte unten über der Leiste statt über
+  Kopfzeile und Aufgabe.
+- Fabrik-Szene: ganzer Produktname im Karton, Materialnamen nicht abgeschnitten.
+- Fehlendes Material im Rezept rot mit «· fehlt» statt grau durchgestrichen.
+
+## Ein Stil (`stil.js`)
+
+Erzwelt behält seine Identität (Tiefsee-Karte, Papier-Blätter, Baloo 2 und Nunito),
+aber jede Farbe hat eine feste Rolle:
+
+- **Gold** = tun: kaufen, bauen, einstellen, verkaufen, ausbauen (vorher teils grün).
+- **Weiss mit Rand** = zweitrangig: Ziel zeigen, Zum Team, − / +, Neue Runde, Entlassen.
+- **Grün** = Wissen und Erfolg (Ansehen, Gewinn), nie für Käufe.
+- **Rot** = Schliessen und Warnungen.
+
+Knöpfe mit drei Radien (12 / 14 / 18) und gleicher Kante. Keine gesperrten
+Grossbuchstaben mehr (vorher 34 Stellen); Knopftexte als Verb
+(«22 Personen einstellen», «Selbst verkaufen»). Keine Emojis mehr: Schwierigkeit als
+1–3 Erzbrocken, Warnung, Pause, Schloss und Lieferweg als Linien-Symbole.
+
+**«Al» statt «AI»:** In Baloo 2 sehen grosses I und kleines l gleich aus. Das l in
+«Al» wird darum als eigenes Zeichen gezeichnet: senkrecht nach unten, unten ein
+runder Bogen nach rechts oben wie in der Schulschrift. Es steht auf der Grundlinie,
+unabhängig von der Schrift. Das Symbol bleibt chemisch korrekt «Al»; Screenreader
+lesen weiterhin «Al».
+
+## Einstieg (`einstieg.js`)
+
+Jede neue Runde beginnt mit einem Startbild **«Woher kommt dein Ladekabel?»**: ein
+aufgeschnittenes Kabel – Kupfer in der Leitung, Aluminium im Stecker, Zinn in der
+Lötstelle –, jedes mit dem Ort, an dem die Einführung danach die Quelle eröffnet
+(Katanga, Boké, Bangka). Darunter die Kette Quelle → Raffinerie → Fabrik → Markt und
+der Knopf «Firma gründen», danach die Schwierigkeitswahl. Einmal pro Runde
+(`S.einstiegGesehen`); ein einziger Ablauf beim Öffnen (Kabel zeichnen, dann die drei
+Materialien), bei «Animationen: aus» oder reduzierter Bewegung sofort vollständig.
+Escape oder «Firma gründen» schliesst es.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
@@ -166,7 +274,7 @@ Vor einer finalen Freigabe:
 - [ ] Standalone-Build erfolgreich ausführen.
 - [ ] Generierte `index.html` direkt öffnen.
 - [ ] Mobile Zielgrösse 360×800 prüfen.
-- [ ] Tutorial Schritte 1–11 vollständig durchspielen.
+- [ ] Einführung Schritte 1–12 vollständig durchspielen.
 - [ ] Rohstoffquelle → Raffinerie → Fabrik → Verkauf prüfen.
 - [ ] Fabrikbau, Fortschrittsring und Abschlusszustand prüfen.
 - [ ] Streik, Stillstand und Sicherheitsstopp prüfen.

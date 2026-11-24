@@ -170,6 +170,9 @@
         if (q < quote){ quote = q; knapp = k; }
       }
       if (!knapp || quote >= 1) continue;
+      // Reicht der Rest nach der heutigen Produktion noch für ein weiteres Stück,
+      // hat das Material nicht gebremst – knappes Lager bei abgestimmter Kette ist kein Engpass.
+      if ((S.mat[knapp]||0) >= def.rezept[knapp]) continue;
       const mat = MATERIAL[knapp];
       const titel = `${mat.name} fehlt für ${def.name}`;
       const mineId = materialMine(knapp);
@@ -229,7 +232,8 @@
     if (!e) return;
     const b = document.createElement("button");
     b.type = "button"; b.className = "engpass-kasten";
-    b.innerHTML = `<b>⚠ ${e.titel}</b><span>${e.text}</span>`;
+    const warn = window.__erzweltStil ? window.__erzweltStil.ikon.warnung : "⚠";
+    b.innerHTML = `<b>${warn} ${e.titel}</b><span>${e.text}</span>`;
     b.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); engpassOeffnen(e); });
     const vor = q.querySelector(".objective-guide-action") || document.getElementById("q-punkte");
     if (vor) vor.insertAdjacentElement("beforebegin", b); else q.appendChild(b);
@@ -249,7 +253,10 @@
   function questGehoertZuSeite(q){
     const t = tutorialSchritt();
     if (t) return t.ziel() === "dock:" + aktiveSeite;
-    if (q.classList.contains("wissen-bereit")) return true;   // «Ansehen» geht überall
+    // «Ansehen» geht überall; ausserhalb von Wissen als schmale Zeile mit Knopf (aufgabe-kompakt.js)
+    if (q.classList.contains("wissen-bereit")){
+      return aktiveSeite === "wissen" || !window.matchMedia("(max-width:819px)").matches;
+    }
     return q.classList.contains("wissen-quest") && aktiveSeite === "wissen";
   }
   function questKompakt(){
@@ -262,7 +269,7 @@
   }
   document.getElementById("quest")?.addEventListener("click", ev => {
     const q = ev.currentTarget;
-    if (!q.classList.contains("kompakt") || q.classList.contains("map-link")) return;
+    if (!q.classList.contains("kompakt") || q.classList.contains("map-link") || ev.target.closest("button")) return;
     ev.preventDefault(); ev.stopPropagation();
     aufgeklapptAuf = aktiveSeite;
     questKompakt();

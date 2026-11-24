@@ -1,5 +1,5 @@
 "use strict";
-/* Didaktischer Qualitäts-Pass für das bestehende 11-Schritt-Tutorial.
+/* Didaktischer Qualitäts-Pass für das Tutorial (Schritte: einfuehrung.js).
    Keine neuen Lernziele: Aufgabe + Begründung + sichtbarer Platz in der Lieferkette. */
 
 (function(){
@@ -32,9 +32,11 @@
   document.head.appendChild(style);
 
   const PHASEN=[
-    {id:"rohstoff",nr:1,label:"Rohstoffe",steps:["mine1","minecrew","team","minen3","crew3"]},
+    // Alte Schritt-IDs bleiben für ältere Patches; einfuehrung.js nutzt die neuen.
+    {id:"rohstoff",nr:1,label:"Rohstoffe",steps:["mine1","minecrew","team","minen3","crew3",
+      "kupfer-auf","kupfer-crew","alu-auf","alu-crew","zinn-auf","zinn-crew"]},
     {id:"raff",nr:2,label:"Raffination",steps:["raff","raffcrew"]},
-    {id:"fab",nr:3,label:"Fertigung",steps:["fab","fabcrew"]},
+    {id:"fab",nr:3,label:"Fertigung",steps:["fab","fabcrew","fab-crew"]},
     {id:"verkauf",nr:4,label:"Verkauf",steps:["verkauf","verkaeufer"]}
   ];
 
