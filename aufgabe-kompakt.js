@@ -9,7 +9,7 @@
      Zeilen, Engpass als einzeiliger Hinweis (Antippen führt hin).
    - Auf Markt, Team und Ziel ist «Wissen freigeschaltet» eine schmale
      Zeile mit «Ansehen» (sek-b-klarheit.js: questGehoertZuSeite).
-   - Meldungen unten: auf dem Handy nur die neueste, damit die Karte frei bleibt.
+   - Meldungen werden einzeln am Kartenrand gezeigt.
    ============================================================ */
 (function(){
   const VERSION = 1;
@@ -44,8 +44,6 @@
       #quest.kompakt.wissen-bereit .quest-map-cue{display:none!important}
       #quest.kompakt.wissen-bereit::after{content:none}
 
-      /* Meldungen: nur die neueste */
-      #toasts .toast:not(:last-child){display:none}
     }
   `;
   document.head.appendChild(style);

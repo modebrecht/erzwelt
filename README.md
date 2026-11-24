@@ -188,7 +188,13 @@ Auf dem Handy mehr Platz für die Karte (nur Darstellung):
 - «Neues Wissen» (vorher «Wissen freigeschaltet») mit höchstens zwei Zeilen Text;
   ein Engpass erscheint als einzeiliger Hinweis, Antippen führt hin.
 - Auf Markt, Team und Ziel ist «Neues Wissen» eine schmale Zeile mit «Ansehen».
-- Meldungen unten: auf dem Handy nur die neueste.
+- Meldungen erscheinen einzeln, damit jede lesbar bleibt. Kurze Meldungen
+  stehen standardmässig 6,7 Sekunden, lange 10,7 Sekunden. Unter
+  **Einstellungen → Meldungsdauer** lässt sich die Lesezeit anpassen.
+- **Tempo bei Meldungen** verlängert standardmässig nur Folgen von
+  Meldungstagen, ab dem zweiten Tag. Bei 1× und 100 % dauert dieser Tag
+  2 Sekunden. Alternativ lassen sich alle Meldungstage bremsen oder das
+  Spieltempo gleich lassen.
 
 ## Ziel positiv (`ziel-positiv.js`)
 

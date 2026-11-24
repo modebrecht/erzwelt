@@ -196,26 +196,12 @@
     };
   }
 
-  // Preserve the original toast semantics: newest unseen messages, max two visible,
-  // but use a slower premium exit and keep history accessible through S.log.
+  // Die Anzeige steht im Spielkern. Der Verlauf liest weiterhin direkt aus S.log.
   if(typeof toastsErneuern==="function"){
+    const vorherToasts=toastsErneuern;
     toastsErneuern=function(){
       ensureUi();
-      const neu=S.log.filter(e=>!gezeigt.has(e.tag+e.text)).slice(0,2).reverse();
-      for(const e of neu){
-        gezeigt.add(e.tag+e.text);
-        const d=document.createElement("div");
-        d.className="toast "+(e.art||"");
-        d.innerHTML=e.text;
-        document.getElementById("toasts")?.appendChild(d);
-        setTimeout(()=>{
-          d.classList.add("toast-aus");
-          setTimeout(()=>d.remove(),760);
-        },4700);
-      }
-      const root=document.getElementById("toasts");
-      while(root&&root.children.length>2)root.firstChild.remove();
-      updateControl();
+      vorherToasts();
       if(document.body.classList.contains("toast-history-open"))renderHistory();
     };
   }

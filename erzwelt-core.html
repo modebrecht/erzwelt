@@ -1376,8 +1376,9 @@ const SCHWIERIGKEIT = {
 };
 
 let S;            // der gesamte Spielzustand
-let takt = null;  // Intervall-Handle
+let takt = null;
 let tempo = 1;
+let letzterMeldungstag = null;
 let modalOffen = false;
 let letzteFoerderung = {};     // nur für die Animation, wird nicht gespeichert
 
@@ -1399,7 +1400,7 @@ function metaLaden(){
 function metaSpeichern(){ try { SPEICHER.schreib(META_SCHLUESSEL,JSON.stringify(META)); } catch(e){} }
 
 /* ---------- Einstellungen (Regler) ---------- */
-const OPT_STD = {schrift:106, tempo:100, anim:1};
+const OPT_STD = {schrift:106, tempo:100, anim:1, meldungsdauer:100, meldungstakt:1};
 let OPT = Object.assign({}, OPT_STD);
 
 function optLaden(){
@@ -1410,6 +1411,8 @@ function optLaden(){
   OPT.schrift = klemm(OPT.schrift, 90, 175);
   OPT.tempo   = klemm(OPT.tempo, 50, 250);
   OPT.anim    = klemm(OPT.anim, 0, 2);
+  OPT.meldungsdauer = klemm(OPT.meldungsdauer, 50, 200);
+  OPT.meldungstakt = klemm(Math.round(OPT.meldungstakt), 0, 2);
 }
 function optSpeichern(){ try { SPEICHER.schreib(OPT_SCHLUESSEL, JSON.stringify(OPT)); } catch(e){} }
 function optAnwenden(){
@@ -3828,20 +3831,53 @@ function dockZeichnen(){
   ).join("");
 }
 
-/* ---------- Toasts statt Logliste ---------- */
+/* ---------- Meldungen ---------- */
+const MELDUNG_KURZ_MS = 6700;
+const MELDUNG_LANG_MS = 10700;
+const MELDUNG_AUSBLENDEN_MS = 760;
 const gezeigt = new Set();
+let toastSpiel = null;
+let toastUhr = null;
+let toastSeit = 0;
+const meldungsschluessel = e => e.tag + "|" + e.text;
+
+function toastsZuruecksetzen(){
+  clearTimeout(toastUhr);
+  toastUhr = null;
+  gezeigt.clear();
+  $("#toasts").replaceChildren();
+}
+function meldungsdauerAnwenden(){
+  const toast = $("#toasts").firstElementChild;
+  if (!toast || toast.classList.contains("toast-aus")) return;
+  const text = toast.textContent.replace(/\s+/g," ").trim();
+  const dauer = (text.length > 105 ? MELDUNG_LANG_MS : MELDUNG_KURZ_MS) * OPT.meldungsdauer/100;
+  clearTimeout(toastUhr);
+  toastUhr = setTimeout(() => {
+    toast.classList.add("toast-aus");
+    toastUhr = setTimeout(() => {
+      toast.remove();
+      toastUhr = null;
+      toastsErneuern();
+    }, MELDUNG_AUSBLENDEN_MS);
+  }, Math.max(0, dauer - (performance.now() - toastSeit)));
+}
 function toastsErneuern(){
-  const neu = S.log.filter(e => !gezeigt.has(e.tag + e.text)).slice(0, 2).reverse();
-  for (const e of neu){
-    gezeigt.add(e.tag + e.text);
-    const d = document.createElement("div");
-    d.className = "toast " + (e.art || "");
-    d.innerHTML = e.text;
-    $("#toasts").appendChild(d);
-    setTimeout(() => { d.style.transition = "opacity .4s"; d.style.opacity = 0;
-      setTimeout(()=>d.remove(), 400); }, 4200);
+  if (toastSpiel !== S){
+    toastSpiel = S;
+    toastsZuruecksetzen();
   }
-  while ($("#toasts").children.length > 2) $("#toasts").firstChild.remove();
+  const root = $("#toasts");
+  if (root.firstElementChild || document.body.classList.contains("fensterauf")) return;
+  const e = S.log.findLast(e => !gezeigt.has(meldungsschluessel(e)));
+  if (!e) return;
+  gezeigt.add(meldungsschluessel(e));
+  const toast = document.createElement("div");
+  toast.className = "toast " + (e.art || "");
+  toast.innerHTML = e.text;
+  root.appendChild(toast);
+  toastSeit = performance.now();
+  meldungsdauerAnwenden();
 }
 
 /* ---------- Funken: kleine Feier bei Käufen ---------- */
@@ -4549,6 +4585,11 @@ function regler(id, label, hilfe, min, max, step, wert, anzeige){
     <small>${hilfe}</small></div>`;
 }
 const ANIM_NAME = ["aus","ruhig","verspielt"];
+const MELDUNGSTAKT_NAME = ["Gleich lassen","Bei Folgen","Jeder Meldungstag"];
+function meldungsdauerAnzeige(){
+  const sekunden = ms => (ms*OPT.meldungsdauer/100000).toLocaleString("de-CH",{maximumFractionDigits:1});
+  return sekunden(MELDUNG_KURZ_MS) + " / " + sekunden(MELDUNG_LANG_MS) + " s";
+}
 function einstFuellen(){
   $("#einstinhalt").innerHTML = `
     <h2>Einstellungen</h2>
@@ -4559,6 +4600,10 @@ function einstFuellen(){
              50, 250, 10, OPT.tempo, OPT.tempo + " %")}
     ${regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
+    ${regler("meldungsdauer", "Meldungsdauer", "Lesezeit für kurze und lange Meldungen.",
+             50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())}
+    ${regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen bremst ab dem zweiten Meldungstag in Serie. Bei normalem Tempo dauert dieser Tag 2 Sekunden.",
+             0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])}
     <div class="karte" style="margin-top:18px">
       <h3>Fortschritt</h3>
       <div class="zeile"><span>Gespeichert</span><b>Tag ${S.tag}</b></div>
@@ -4807,6 +4852,15 @@ document.addEventListener("input", e => {
     case "schrift": OPT.schrift = wert; if (anzeige) anzeige.textContent = wert + " %"; optAnwenden(); optSpeichern(); break;
     case "tempo":   OPT.tempo = wert;   if (anzeige) anzeige.textContent = wert + " %"; optAnwenden(); optSpeichern(); break;
     case "anim":    OPT.anim = wert;    if (anzeige) anzeige.textContent = ANIM_NAME[wert]; optAnwenden(); optSpeichern(); break;
+    case "meldungsdauer":
+      OPT.meldungsdauer = wert;
+      if (anzeige) anzeige.textContent = meldungsdauerAnzeige();
+      meldungsdauerAnwenden(); optSpeichern(); break;
+    case "meldungstakt":
+      OPT.meldungstakt = wert;
+      if (anzeige) anzeige.textContent = MELDUNGSTAKT_NAME[wert];
+      if (tempo > 0) tempoSetzen(tempo);
+      optSpeichern(); break;
     case "anstell": anstellMenge = wert; if (anzeige) anzeige.textContent = wert + " Leute";
       { const knopf = document.querySelector('[data-tun="anstellen"]');
         const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF, geht = menge > 0 && S.kasse >= kosten;
@@ -4828,14 +4882,34 @@ document.addEventListener("keydown", e => {
 });
 
 /* ---------- Uhr ---------- */
+function spieltagPlanen(){
+  if (tempo <= 0) return;
+  const normal = Math.max(120, 1400 / tempo * (100 / OPT.tempo));
+  const meldung = letzterMeldungstag;
+  const bremsen = meldung && meldung.spiel === S && meldung.tag === S.tag &&
+    (OPT.meldungstakt === 2 || (OPT.meldungstakt === 1 && meldung.folge));
+  const wartezeit = bremsen ? Math.max(normal, Math.min(2000, 2*normal)) : normal;
+  takt = setTimeout(spieltagWeiter, wartezeit);
+}
+function spieltagWeiter(){
+  takt = null;
+  const spiel = S, tag = spiel.tag, bisher = spiel.log[0];
+  tagVor();
+  tutorialPruefen();
+  if (S === spiel && S.tag !== tag){
+    const neu = S.log[0] !== bisher && S.log[0]?.tag === S.tag;
+    const folge = letzterMeldungstag?.spiel === S && letzterMeldungstag.tag === S.tag - 1;
+    letzterMeldungstag = neu ? {spiel:S, tag:S.tag, folge} : null;
+  }
+  zeichnen();
+  if (takt === null) spieltagPlanen();
+}
 function tempoSetzen(v){
   tempo = v;
   document.querySelectorAll("[data-tempo]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.tempo === v));
-  if (takt) clearInterval(takt);
-  if (v > 0){
-    const ms = Math.max(120, 1400 / v * (100 / OPT.tempo));
-    takt = setInterval(() => { tagVor(); tutorialPruefen(); zeichnen(); }, ms);
-  }
+  clearTimeout(takt);
+  takt = null;
+  spieltagPlanen();
 }
 
 /* ---------- Speichern ---------- */

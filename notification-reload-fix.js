@@ -16,17 +16,14 @@
   try{persisted=JSON.parse(raw);}catch(e){return;}
   if(!persisted||!Array.isArray(persisted.log))return;
 
-  // The core has already drawn once before patch scripts execute, so its in-memory
-  // 'gezeigt' set contains the two replayed startup toasts. Rebuild it from the
-  // actually persisted log instead. Messages added by migrations during this load
-  // remain unseen and can still appear normally.
-  gezeigt.clear();
+  // Bereits gespeicherte Einträge gehören zum Verlauf. Neue Meldungen aus
+  // der Migration dürfen beim Laden weiterhin erscheinen.
+  toastsZuruecksetzen();
   for(const entry of persisted.log){
     if(!entry)continue;
-    gezeigt.add(String(entry.tag??"")+String(entry.text??""));
+    gezeigt.add(meldungsschluessel(entry));
   }
 
-  document.getElementById("toasts")?.replaceChildren();
   if(typeof toastsErneuern==="function")toastsErneuern();
 
   window.__erzweltNotificationReloadFix={version:1,source:"persisted S.log"};
