@@ -134,7 +134,7 @@
 
   /* HUD: «Frei» heisst freies Personal. */
   const hudLabel = document.querySelector("#hud .pille.crew small");
-  if (hudLabel){ hudLabel.textContent = "Team frei"; hudLabel.parentElement.parentElement.title = "Freies Personal im Team / Personal insgesamt"; }
+  if (hudLabel){ hudLabel.textContent = "Ohne Aufgabe"; hudLabel.parentElement.parentElement.title = "Leute ohne Aufgabe / Personal insgesamt"; }
 
   /* Fabrik-Materialliste: «Kupfer 303/2» → «Kupfer: 303 da · 2 pro Stück». */
   function materiallisteKlaeren(){

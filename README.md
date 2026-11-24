@@ -254,6 +254,14 @@ Lagerbeständen, bei lückenhaften Buchungen auch aus bestehenden besetzten Fabr
 Nach einer Karte läuft das bisherige Tempo weiter. Beim Laden eines Spielstands
 gilt die Fortsetzungsregel mit 1×.
 
+## Karte in der Mitte (`karte-mitte.js`)
+
+Der grosse runde Knopf unten führt zur Weltkarte; Team ist ein normaler Reiter
+mit einer kleinen Zahl für Leute ohne Aufgabe. Oben steht «Ohne Aufgabe 10/54».
+An fördernden Rohstoffquellen arbeiten 1–3 kleine Figuren mit Spitzhacke
+(ab 10 bzw. 30 Personen mehr Figuren); bei Streik oder Stillstand stehen sie
+still. «Animationen: aus» stoppt sie.
+
 ## PDF-Leistungsnachweis
 
 Im Reiter **Ziel** können Lernende ihren Vornamen eintragen und einen
