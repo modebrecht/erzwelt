@@ -177,6 +177,7 @@
         <button type="submit" class="cta gruen">${r.abschluss?"PDF-Abschluss herunterladen":"PDF-Zwischenstand herunterladen"}</button>
         <p id="zertifikat-status" role="status" aria-live="polite"></p>
       </form>
+      ${r.abschluss ? '<button type="button" class="cta still" data-tun="abschluss" aria-haspopup="dialog">Zurück zum Abschluss</button>' : ""}
     </section>`;
   }
   const originalZiel=seiteZiel;

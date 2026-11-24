@@ -144,7 +144,25 @@ try {
   assert.equal((await state(page)).offenesEreignis, undefined);
 
   for (const grund of ['etappe', 'insolvenz']){
-    await page.evaluate(g => rundeBeenden(g), grund);
+    await page.evaluate(g => {
+      if (g === 'etappe') S.tag = etappenEnde();
+      else S.kasse = -801000;
+      tagVor();
+    }, grund);
+    assert.equal((await state(page)).ende.grund, grund);
+    const tag = (await state(page)).tag;
+    await page.locator('[data-certificate-open]').click();
+    await visible(page.locator('#erzwelt-zertifikat-form'));
+    await page.getByRole('button', {name:'Zurück zum Abschluss'}).click();
+    await visible(page.locator('[data-certificate-open]'));
+    await page.locator('[data-certificate-open]').click();
+    await page.locator('button[data-seite="karte"]').click();
+    await visible(page.locator('#h-abschluss'));
+    assert.equal(await page.locator('#h-tempo').isVisible(), false);
+    assert.equal(await page.locator('#quest').isVisible(), false);
+    assert.deepEqual(await page.evaluate(() => [S.tag, tempo, takt]), [tag, 0, null]);
+    await page.locator('#h-abschluss').click();
+    await visible(page.locator('[data-certificate-open]'));
     await act(page.locator('#d-wahlen'), 'Speichern & zum Hauptmenü');
     await visible(menu(page));
     await open(page, 'weiter');
@@ -152,6 +170,9 @@ try {
     assert.equal((await state(page)).ende.grund, grund);
     if (grund === 'etappe'){
       await act(page.locator('#d-wahlen'), /^Weiter · Etappe/);
+      await visible(page.locator('#h-tempo'));
+      assert.equal(await page.locator('#h-abschluss').isVisible(), false);
+      assert.equal(await page.evaluate(() => tempo), 1);
       await page.evaluate(() => tempoSetzen(0));
       assert.equal((await state(page)).etappe, 2);
     }

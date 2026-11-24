@@ -82,6 +82,9 @@ svg{display:block}
 }
 .hudknopf svg{width:21px;height:21px}
 .tempo button[aria-pressed="true"]{background:var(--gold);color:#4a3000;border-color:#fff6}
+#h-abschluss{background:var(--gold);color:#4a3000;border-color:#fff6;white-space:nowrap}
+#h-tempo[hidden],#h-abschluss[hidden]{display:none}
+#spiel:has(#h-tempo[hidden]) #quest{display:none}
 
 /* ---------- Karte ---------- */
 #sicht{position:absolute;inset:0;overflow:hidden;background:
@@ -541,11 +544,12 @@ body[data-anim="0"] *{animation:none!important}
     <div class="pille crew"><i id="h-crew-i"></i><div><small>Frei</small><b id="h-crew">–</b></div></div>
     <div class="pille tag"><i id="h-tag-i"></i><div><small>Tag</small><b id="h-tag">1</b></div></div>
     <div class="hudrechts">
-      <div class="tempo" role="group" aria-label="Tempo">
+      <div id="h-tempo" class="tempo" role="group" aria-label="Tempo">
         <button data-tempo="0" aria-pressed="false" aria-label="Pause">❚❚</button>
         <button data-tempo="1" aria-pressed="true">1×</button>
         <button data-tempo="4" aria-pressed="false">4×</button>
       </div>
+      <button class="hudknopf" id="h-abschluss" type="button" data-tun="abschluss" aria-haspopup="dialog" hidden>Etappenabschluss</button>
       <button class="hudknopf" id="einstauf" data-tun="einst" aria-label="Einstellungen"></button>
     </div>
   </div>
@@ -4034,6 +4038,15 @@ function zeichnen(){
   $("#h-kasse").style.color = S.kasse < 0 ? "#ff9a95" : "#fff";
   $("#h-crew").textContent = freieArbeiter() + "/" + S.arbeiterGesamt;
   $("#h-tag").textContent = S.tag;
+  const tempoGruppe = $("#h-tempo"), abschluss = $("#h-abschluss");
+  const beendet = !!S.ende;
+  const abschlussName = S.ende?.grund === "insolvenz" ? "Insolvenz" : "Etappenabschluss";
+  if (abschluss.textContent !== abschlussName) abschluss.textContent = abschlussName;
+  if (tempoGruppe.hidden !== beendet){
+    tempoGruppe.hidden = beendet;
+    abschluss.hidden = !beendet;
+    masseMessen();
+  }
   pinsZeichnen();
   dockZeichnen();
   toastsErneuern();
@@ -4835,6 +4848,9 @@ document.addEventListener("click", e => {
       funkenAn(t, ["#f5b73d","#2fbe7e","#ffe9a8","#fff"], 28);
       speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
       return; }
+    case "abschluss":
+      if (S.ende) window.__erzweltLogikFixes?.abschlussZeigen();
+      return;
     case "reset":
       zuruecksetzen();
       return;
@@ -4909,8 +4925,8 @@ function spieltagWeiter(){
   if (takt === null) spieltagPlanen();
 }
 function tempoSetzen(v){
-  tempo = v;
-  document.querySelectorAll("[data-tempo]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.tempo === v));
+  tempo = S?.ende ? 0 : v;
+  document.querySelectorAll("[data-tempo]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.tempo === tempo));
   clearTimeout(takt);
   takt = null;
   spieltagPlanen();
