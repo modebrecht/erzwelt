@@ -64,7 +64,8 @@ try {
   await slider.fill('100');
   await page.clock.runFor(9500);
   assert.match(await feedback.innerText(), /Tutorial abgeschlossen/);
-  await page.clock.runFor(1300);
+  // Ende nach 10.7 s (+ Ausblenden): in kleinen Schritten abwarten statt fixem Fenster
+  for (let i = 0; i < 16 && await feedback.count(); i++) await page.clock.runFor(250);
   assert.equal(await feedback.count(), 0);
 
   await slider.fill('150');
