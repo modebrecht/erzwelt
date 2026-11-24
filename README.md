@@ -273,6 +273,24 @@ Prüft echte Tagesschritte, manuelle und automatische Verkäufe, Erlöse,
 Save/Reload, Etappenwechsel, Neustart, Altdatenmigration sowie die PDF-Erzeugung.
 Test-PDFs entstehen unter `artifacts/certificate/`.
 
+## Hauptmenü und Spielstände
+
+Erzwelt startet im Hauptmenü. Unter **Spielstände** lassen sich drei Firmen
+unabhängig voneinander fortsetzen, umbenennen, exportieren oder löschen.
+**Speichern & zum Hauptmenü** sichert den Fortschritt und stoppt die Uhr.
+Laufende Spielstände werden bei 1× fortgesetzt. Offene Entscheidungen und
+Etappenabschlüsse werden beim Laden erneut angezeigt. Im Hauptmenü und bei
+ausgeblendetem Browser-Tab vergeht kein Spieltag.
+
+Die JSON-Datei enthält den Spielstand mitsamt Wissensfortschritt und
+Produktbuchungen. Auf einem anderen Gerät zuerst **JSON importieren** wählen,
+die Vorschau prüfen und dann den Speicherplatz wählen. Ein importierter
+Schwer-Spielstand lässt sich direkt fortsetzen. Neue Schwer-Runden werden
+weiterhin über eine erfolgreich abgeschlossene Mittel-Etappe freigeschaltet.
+Frühere Browser-Spielstände werden einmalig übernommen und als Sicherung
+behalten. Bei blockiertem Browserspeicher bleiben Spielstände in der laufenden
+Sitzung verfügbar. Für die nächste Sitzung die JSON-Datei exportieren.
+
 ## Release-Gates
 
 Vor einer finalen Freigabe:

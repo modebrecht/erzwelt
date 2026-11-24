@@ -198,20 +198,6 @@
   /* ---------- Neue Runde: 0 Personen ---------- */
   const vorherNeu = neuerZustand;
   neuerZustand = function(){ const z = vorherNeu.apply(this, arguments); z.arbeiterGesamt = 0; z.startTeam = 0; return z; };
-  // Ältere Spielstände hatten 10 Startleute (zählen nicht als Investition).
-  const vorherLaden = laden;
-  laden = function(){
-    let roh = null;
-    try { roh = JSON.parse(SPEICHER.lies(SCHLUESSEL) || SPEICHER.lies("erzwelt_v1") || "null"); } catch (e){}
-    const ok = vorherLaden.apply(this, arguments);
-    if (ok && roh && roh.startTeam === undefined) S.startTeam = 10;
-    return ok;
-  };
-  // Beim Seitenstart wurde eine neue Runde noch mit dem alten Startzustand angelegt.
-  if (typeof geladen !== "undefined" && !geladen && S.tag === 1 && S.schwierigkeit === null
-      && !Object.keys(S.minen).length && S.startTeam === undefined){
-    S.arbeiterGesamt = 0; S.startTeam = 0;
-  }
 
   /* ---------- Spielstände übernehmen ---------- */
   const LAENGE_FRUEHER = {undefined: ALTE_LAENGE, 2: 13};

@@ -4606,12 +4606,13 @@ function einstFuellen(){
              0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])}
     <div class="karte" style="margin-top:18px">
       <h3>Fortschritt</h3>
-      <div class="zeile"><span>Gespeichert</span><b>Tag ${S.tag}</b></div>
-      <div class="zeile"><span>Speicherort</span><b style="font-size:var(--f0)">${SPEICHER.echt?"localStorage":"nur diese Sitzung"}</b></div>
+      <div class="zeile"><span>Spielstand</span><b id="aktiver-spielstand"></b></div>
       <div class="notiz">${SPEICHER.echt
-        ? "Dein Spielstand wird nach jedem Tag automatisch im Browser gespeichert. Schliess das Fenster ruhig – beim nächsten Öffnen geht es weiter."
-        : "Dieser Browser erlaubt kein Speichern. Der Spielstand bleibt nur, solange die Seite offen ist."}</div>
-      <button class="cta still" data-tun="reset">Spielstand löschen und neu starten</button>
+        ? "Dein Fortschritt wird automatisch in diesem Speicherplatz gesichert."
+        : "Der Browserspeicher ist nicht verfügbar. Sichere deinen Spielstand als Datei."}</div>
+      <p id="spielstand-fehler" class="notiz" role="alert" hidden></p>
+      <button class="cta" data-spielstand="menue">Speichern &amp; zum Hauptmenü</button>
+      <button class="cta still" data-spielstand="export">Spielstand exportieren</button>
     </div>`;
   $("#einst").hidden = false;
   fensterKlasse();
@@ -4648,6 +4649,7 @@ function schwierigkeitZeigen(){
 /* ---------- Ereignisdialog ---------- */
 function dialogZeigen(e){
   modalOffen = true;
+  if (e.offenesEreignis) S.offenesEreignis = e.offenesEreignis;
   $("#d-art").textContent = e.art || "Ereignis";
   $("#d-titel").innerHTML = (e.land ? `<span class="flz">${flagge(e.land,"gross")}<span>${e.titel||""}</span></span>` : (e.titel || ""));
   $("#d-text").innerHTML = e.text || "";
@@ -4656,7 +4658,7 @@ function dialogZeigen(e){
     const b = document.createElement("button");
     b.className = "wahl";
     b.innerHTML = `<b>${w.text}</b><small>${w.klein||""}</small>`;
-    b.onclick = () => { w.tun(); S.ruf = klemm(S.ruf,0,100);
+    b.onclick = () => { w.tun(); if (e.offenesEreignis) delete S.offenesEreignis; S.ruf = klemm(S.ruf,0,100);
       modalOffen = false; $("#schleier").hidden = true; speichern(); zeichnen(); };
     $("#d-wahlen").appendChild(b);
     if (!i) setTimeout(()=>b.focus(), 60);
@@ -4682,6 +4684,7 @@ function obersteSchliessen(){
 
 /* ---------- Steuerung ---------- */
 document.addEventListener("click", e => {
+  if (!spielAktiv || e.target.closest("#spielmenue")) return;
   const sch = e.target.closest("[data-schliessen]");
   if (sch){ const w = sch.dataset.schliessen;
     if (w === "seite") seiteWechseln("karte"); else ueberlageZu(w);
@@ -4833,8 +4836,7 @@ document.addEventListener("click", e => {
       speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
       return; }
     case "reset":
-      if (confirm("Neue Runde starten? Der bisherige Verlauf geht verloren.")){
-        $("#einst").hidden = true; zuruecksetzen(); }
+      zuruecksetzen();
       return;
   }
   tutorialPruefen(); speichern(); seitenStand = ""; zeichnen();
@@ -4876,14 +4878,16 @@ document.addEventListener("change", e => {
 document.addEventListener("pointerup", () => { if (reglerAktiv) setTimeout(()=>{ reglerAktiv = false; }, 400); });
 
 document.addEventListener("keydown", e => {
+  if (!spielAktiv) return;
   if (e.code === "Space" && !modalOffen && e.target === document.body){
     e.preventDefault(); tempoSetzen(tempo > 0 ? 0 : 1); }
   if (e.key === "Escape"){ e.preventDefault(); obersteSchliessen(); }
 });
 
 /* ---------- Uhr ---------- */
+let spielAktiv = false;
 function spieltagPlanen(){
-  if (tempo <= 0) return;
+  if (!spielAktiv || tempo <= 0 || document.hidden) return;
   const normal = Math.max(120, 1400 / tempo * (100 / OPT.tempo));
   const meldung = letzterMeldungstag;
   const bremsen = meldung && meldung.spiel === S && meldung.tag === S.tag &&
@@ -4913,39 +4917,34 @@ function tempoSetzen(v){
 }
 
 /* ---------- Speichern ---------- */
-function speichern(){ try { SPEICHER.schreib(SCHLUESSEL, JSON.stringify(S)); } catch(e){} }
-function laden(){
-  try { const roh = SPEICHER.lies(SCHLUESSEL) || SPEICHER.lies("erzwelt_v1");
-    if (!roh) return false;
-    const g = JSON.parse(roh); if (!g || typeof g.tag !== "number") return false;
-    S = Object.assign(neuerZustand(), g);
-    if (!g.leistungsdaten){ S.leistungsdaten = null; leistungsdatenSichern(); }
-    if (!S.perks || typeof S.perks !== "object") S.perks = {};
-    if (g.schwierigkeit === undefined) S.schwierigkeit = "mittel";
-    else if (g.schwierigkeit !== null && !SCHWIERIGKEIT[g.schwierigkeit]) S.schwierigkeit = "mittel";
-    if (typeof S.hilfsBonus !== "boolean") S.hilfsBonus = false;
-    if (!Number.isFinite(S.etappe) || S.etappe < 1) S.etappe = 1;
-    if (!Number.isFinite(S.etappeStartEingenommen)) S.etappeStartEingenommen = 0;
-    if (!Number.isFinite(S.etappeStartAusgegeben)) S.etappeStartAusgegeben = 0;
-    if (S.ende && S.ende.geschafft && S.schwierigkeit === "mittel" && !META.mittelGeschafft){ META.mittelGeschafft=true; metaSpeichern(); }
-    // Ältere Spielstände kennen den Verkauf noch nicht: Wer schon eine
-    // Fabrik hat, bekommt ein kleines Verkaufsteam, damit nichts stillsteht.
-    if (g.verkaeufer === undefined){
-      S.verkaeufer = S.fabriken.length ? 3 : 0;
-      if (S.verkaeufer) notiz("Neu: Ware verkauft sich nicht mehr von allein. Du hast ein kleines Verkaufsteam bekommen – im Markt kannst du es vergrössern.", "warn");
+let slotSpeichern = () => false;
+function speichern(){ return slotSpeichern(S); }
+function spielzustandAufbauen(g){
+  const zustand = Object.assign(neuerZustand(), g);
+  zustand.startTeam = g.startTeam ?? 10;
+  if (!g.leistungsdaten) zustand.leistungsdaten = {version:1, abTag:g.tag, vollstaendig:false, produkte:{}};
+  if (g.schwierigkeit === undefined) zustand.schwierigkeit = "mittel";
+  // Ältere Firmen mit einer Fabrik erhalten das bisherige kleine Verkaufsteam.
+  if (g.verkaeufer === undefined){
+    zustand.verkaeufer = zustand.fabriken.length ? 3 : 0;
+    if (zustand.verkaeufer){
+      const text = "Neu: Ware verkauft sich nicht mehr von allein. Du hast ein kleines Verkaufsteam bekommen – im Markt kannst du es vergrössern.";
+      zustand.log = [{tag:zustand.tag, text, art:"warn"}, ...zustand.log].slice(0, 60);
     }
+  }
+  return zustand;
+}
+function laden(g){
+  try {
+    if (!g || typeof g.tag !== "number") return false;
+    S = spielzustandAufbauen(g);
     return true;
   } catch(e){ return false; }
 }
 window.addEventListener("pagehide", () => { if (S) speichern(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden && S) speichern(); });
 
-function zuruecksetzen(){
-  SPEICHER.loesch(SCHLUESSEL); SPEICHER.loesch("erzwelt_v1"); S = neuerZustand();
-  wissenTempoVorher = null; modalOffen = false; $("#schleier").hidden = true; $("#lupe").hidden = true;
-  blattZu(); aktiveSeite="karte"; seite.hidden=true;
-  zeigeAuf("obuasi", 1.15); zeichnen(); schwierigkeitZeigen();
-}
+let zuruecksetzen = () => {};
 
 /* ---------- Start ---------- */
 metaLaden();
@@ -4958,16 +4957,12 @@ $("#h-kasse-i").innerHTML = IK.muenze;
 $("#h-crew-i").innerHTML = IK.person;
 $("#h-tag-i").innerHTML = IK.kalender;
 weltZeichnen();
-const geladen = laden();
-if (!geladen){ S = neuerZustand();
-  notiz("Willkommen in der Erzwelt. Wähle zuerst deine Schwierigkeit.", "gut"); }
-const brauchtSchwierigkeit = !SCHWIERIGKEIT[S.schwierigkeit];
+S = neuerZustand();
 letzterTagGezeigt = S.tag;
 dockZeichnen();
 ansicht.z = 1.15; zeigeAuf("obuasi", 1.15);
-tempoSetzen(brauchtSchwierigkeit ? 0 : 1);
+tempoSetzen(0);
 zeichnen();
-if (brauchtSchwierigkeit) schwierigkeitZeigen();
 masseMessen();
 setTimeout(masseMessen, 300);
 window.addEventListener("load", masseMessen);

@@ -50,6 +50,9 @@ jobs:
       - name: Run full gameplay E2E
         run: node tests/e2e/gameplay.mjs
 
+      - name: Run save slot E2E
+        run: node tests/e2e/spielstaende.mjs
+
       - name: Upload E2E artifacts
         if: always()
         uses: actions/upload-artifact@v4

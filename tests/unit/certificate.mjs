@@ -39,7 +39,8 @@ function dialogZeigen(){}
 `);
 run(product+script.slice(script.indexOf('const VERKAUF_LOHN'),script.indexOf('/* Lohnstufen'))+model);
 // Test the real load/migration code, not a reimplementation.
-run(script.slice(script.indexOf('function laden(){'),script.indexOf('window.addEventListener("pagehide"')));
+run(script.slice(script.indexOf('function spielzustandAufbauen(g){'),script.indexOf('window.addEventListener("pagehide"')));
+run('function testSpeicherLaden(){ return laden(JSON.parse(SPEICHER.lies(SCHLUESSEL))); }');
 run('S=neuerZustand();S.schwierigkeit="mittel";');
 run(effectiveDay);
 run(await readFile('vendor/pdf-lib-1.17.1.min.js','utf8'));
@@ -71,7 +72,7 @@ assert.equal(second.bilanz,second.einnahmen-second.ausgaben);
 assert.ok(Math.abs(second.kasse-second.startkapital-second.bilanz)<1e-7);
 
 // Saved totals survive load and stage continuation; new game resets them.
-run('speichern(); S=null; laden();');
+run('speichern(); S=null; testSpeicherLaden();');
 assert.equal(get().verkauft,9);
 run('tempoSetzen=()=>{};etappeWeiter(1);');
 assert.equal(get().verkauft,9);
@@ -80,13 +81,13 @@ run('S=neuerZustand();S.schwierigkeit="mittel";');
 assert.equal(get().hergestellt,0);
 
 // Old save: never invent historical output from inventory or total income.
-run('const old=neuerZustand();delete old.leistungsdaten;old.tag=200;old.eingenommen=9000;old.ware={kabel:50};SPEICHER.schreib(SCHLUESSEL,JSON.stringify(old));laden();');
+run('const old=neuerZustand();delete old.leistungsdaten;old.tag=200;old.eingenommen=9000;old.ware={kabel:50};laden(old);');
 assert.equal(get().vollstaendig,false);
 assert.equal(get().abTag,200);
 assert.equal(get().hergestellt,0);
 assert.equal(get().verkauft,0);
 assert.equal(get().lager,50);
-run('wareVerkaufen(2);speichern();laden();');
+run('wareVerkaufen(2);speichern();testSpeicherLaden();');
 assert.equal(get().verkauft,2);
 assert.equal(get().abTag,200);
 

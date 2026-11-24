@@ -71,7 +71,12 @@
     if (mittelUnlock){ META.mittelGeschafft = true; metaSpeichern(); }
     S.ende = {grund:grund||"etappe", etappe:S.etappe||1, gewinn, ruf:Math.round(S.ruf), geschafft};
     tempoSetzen(0);
+    abschlussZeigen(vorherTempo, mittelUnlock);
+  };
 
+  function abschlussZeigen(vorherTempo = 1, mittelUnlock = false){
+    const {grund, gewinn, geschafft} = S.ende;
+    const ziel = zielGewinn();
     if (grund === "insolvenz"){
       dialogZeigen({
         art:"Insolvenz", titel:"Die Firma ist zahlungsunfähig",
@@ -92,7 +97,7 @@
       klein:"Gleicher Run · Verkaufserlöse ab jetzt +50 %",
       tun:()=>{ etappeWeiter(vorherTempo, true); }
     });
-    wahlen.push({text:"Neue Runde starten", klein:"Schwierigkeit neu wählen · alles auf Anfang", tun:()=>{ setTimeout(zuruecksetzen,0); }});
+    wahlen.push({text:"Neue Runde starten", klein:"Speicherplatz und Schwierigkeit wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }});
     dialogZeigen({
       art:`Etappe ${S.etappe} · ${ZIEL_TAGE} Tage`,
       titel: geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt",
@@ -106,7 +111,7 @@
           + freischaltText,
       wahlen
     });
-  };
+  }
 
   /* ---------- 2. Herkunftsnachweise ---------- */
   const NACHWEIS_KOSTEN = 30000;
@@ -216,10 +221,10 @@
   /* ---------- 4. Recherche: Folge über den Ruf ---------- */
   const recherche = EREIGNISSE.find(e => e.id === "kinderarbeit");
   if (recherche){
-    recherche.bau = function(){
-      const id = offeneMinen().find(i => !S.minen[i].nachweis);
+    recherche.bau = function(id = offeneMinen().find(i => !S.minen[i].nachweis)){
       const def = MINEN.find(x => x.id === id);
       return {
+        offenesEreignis:{id:recherche.id, mine:id},
         art:"Recherche", titel:"Fragen zu deiner Lieferkette", land:def.land,
         text:`Eine Recherche stellt Fragen zu den Arbeitsbedingungen in ${def.ort}. Deine Firma kann für diese Rohstoffquelle noch keine unabhängige Prüfung vorlegen.`,
         wahlen:[
@@ -237,6 +242,6 @@
   style.textContent = `.nachweiskarte.offen{border:2px solid #e6b450}.nachweiskarte.sicher{border:2px solid #75aa93}`;
   document.head.appendChild(style);
 
-  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN};
+  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN, abschlussZeigen};
   seitenStand = ""; blattStand = "";
 })();

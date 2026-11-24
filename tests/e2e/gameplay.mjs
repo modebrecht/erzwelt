@@ -100,6 +100,8 @@ if (!initial.didactic?.declarativeCopy || initial.didactic?.stringReplacementLay
 if (!initial.knowledge || !initial.objective) throw new Error('Knowledge/objective modules missing');
 
 // New round opens with the intro «Woher kommt dein Ladekabel?»; it leads to the difficulty choice.
+await page.locator('#spielmenue-neu').click();
+await page.getByRole('button', { name: 'Hier starten · Spielstand 1' }).click();
 await page.locator('#einstieg .es-los').waitFor({ state: 'visible', timeout: 10000 });
 await page.locator('#einstieg .es-los').click();
 await page.waitForFunction(() => !document.getElementById('einstieg') && S.einstiegGesehen === true, null, { timeout: 5000 });
@@ -237,6 +239,7 @@ await checkpoint('knowledge-lohn');
 const beforeReload = await state();
 await page.reload({ waitUntil: 'load' });
 await page.waitForFunction(() => !!window.__erzweltKnowledgeQuestFlow && !!document.querySelector('#quest'), null, { timeout: 15000 });
+await page.locator('#spielmenue-weiter').click();
 const afterReload = await state();
 for (const key of ['tutorial','difficulty']) {
   if (JSON.stringify(beforeReload[key]) !== JSON.stringify(afterReload[key])) throw new Error(`Reload mismatch ${key}`);

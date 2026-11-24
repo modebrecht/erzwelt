@@ -28,11 +28,11 @@ if (taiwanEv){
 const protestEv = ereignis("protest");
 if (protestEv){
   protestEv.passt = function(){ return offeneMinen().some(id => S.minen[id].zufriedenheit < 32 && S.minen[id].stillBis <= S.tag); };
-  protestEv.bau = function(){
-    const id = offeneMinen().find(i => S.minen[i].zufriedenheit < 32 && S.minen[i].stillBis <= S.tag);
+  protestEv.bau = function(id = offeneMinen().find(i => S.minen[i].zufriedenheit < 32 && S.minen[i].stillBis <= S.tag)){
     const def = MINEN.find(x=>x.id===id);
     S.minen[id].stillBis = S.tag + 999;
     return {
+      offenesEreignis:{id:protestEv.id, mine:id},
       art:"Protest", titel:`Streik in ${def.ort}`, land:def.land,
       text:"Die Belegschaft streikt. Die Zufriedenheit ist wegen des gewählten Lohns sehr niedrig. Die Förderung steht still.",
       wahlen:[
@@ -53,11 +53,11 @@ if (unfallEv){
     if (tutorialLaeuft()) return false;
     return offeneMinen().some(id => !S.minen[id].sicherheit && S.minen[id].arbeiter > 20) && Math.random() < .18;
   };
-  unfallEv.bau = function(){
-    const id = offeneMinen().find(i => !S.minen[i].sicherheit && S.minen[i].arbeiter > 20);
+  unfallEv.bau = function(id = offeneMinen().find(i => !S.minen[i].sicherheit && S.minen[i].arbeiter > 20)){
     const def = MINEN.find(x=>x.id===id);
     S.minen[id].stillBis = S.tag + 999;
     return {
+      offenesEreignis:{id:unfallEv.id, mine:id},
       art:"Unfall", titel:`Unfall in ${def.ort}`, land:def.land,
       text:"In der Rohstoffquelle gab es einen schweren Unfall. Sie bleibt geschlossen, bis du über die Sicherheitsmassnahmen entscheidest.",
       wahlen:[
@@ -76,10 +76,10 @@ if (rechercheEv){
     if (tutorialLaeuft() || S.tag <= 90 || perkHat("ruf1") || perkHat("ruf2")) return false;
     return offeneMinen().some(id => !S.minen[id].nachweis);
   };
-  rechercheEv.bau = function(){
-    const id = offeneMinen().find(i => !S.minen[i].nachweis);
+  rechercheEv.bau = function(id = offeneMinen().find(i => !S.minen[i].nachweis)){
     const def = MINEN.find(x=>x.id===id);
     return {
+      offenesEreignis:{id:rechercheEv.id, mine:id},
       art:"Recherche", titel:"Fragen zu deiner Lieferkette", land:def.land,
       text:`Eine Recherche stellt Fragen zu den Arbeitsbedingungen in ${def.ort}. Deine Firma kann für diese Rohstoffquelle noch keine unabhängige Prüfung vorlegen.`,
       wahlen:[

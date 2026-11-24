@@ -50,15 +50,19 @@
   if(typeof speichern==="function"){
     const original=speichern;
     const SAVE_INTERVAL=600;
-    let dirty=false,timer=0,lastWrite=-1e9;
+    let ausstehend=null,timer=0,lastWrite=-1e9;
     const flushSave=()=>{
       if(timer){clearTimeout(timer);timer=0;}
-      if(!dirty)return;
-      dirty=false;lastWrite=performance.now();
+      const zustand=ausstehend;
+      ausstehend=null;
+      if(!zustand || zustand!==S)return false;
+      lastWrite=performance.now();
       return original();
     };
-    speichern=function(){
-      dirty=true;
+    speichern=function(sofort=false){
+      if(!spielAktiv)return false;
+      ausstehend=S;
+      if(sofort)return flushSave();
       const rest=SAVE_INTERVAL-(performance.now()-lastWrite);
       if(rest<=0)return flushSave();
       if(!timer)timer=setTimeout(flushSave,rest);
