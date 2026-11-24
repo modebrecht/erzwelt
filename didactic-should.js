@@ -185,7 +185,7 @@ tagVor=function(){
   }
   const kraft=verkaufsKraft();if(kraft>0)wareVerkaufen(kraft);
   if((S.tag-1)%30===0){
-    const lohn=lohnsumme(),betrieb=(Object.keys(S.raff).length*9000+S.fabriken.length*14000)*perkMult("betrieb");
+    const lohn=lohnsumme(),betrieb=betriebskostenMonat();
     S.kasse-=lohn+betrieb;S.ausgegeben+=lohn+betrieb;notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`,"geld");rufAnpassen();
     if(S.kasse<0)notiz("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.","alarm");
   }

@@ -125,7 +125,6 @@
     let html = vorherTeam();
     html = ersetze(html, `<div class="unter">Lohnkosten im Spielmodell</div>`, `<div class="unter">Personal einstellen und auf die Stationen verteilen</div>`);
     html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`, "");
-    html = ersetze(html, "<small>pro Tag</small>", "<small>Löhne pro Tag</small>");
     return html;
   };
 

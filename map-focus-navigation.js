@@ -81,12 +81,14 @@
     }
   }
 
-  function cameraTo(t){
+  function cameraTo(t, oeffnen=false, steuerung){
+    const spiel = S;
     ensureLayer(t.kind);
     if(typeof seiteWechseln==="function"&&typeof aktiveSeite!=="undefined"&&aktiveSeite!=="karte")seiteWechseln("karte");
     else if(typeof blattZu==="function"&&typeof offenesBlatt!=="undefined"&&offenesBlatt)blattZu();
 
     const run=()=>{
+      if (S !== spiel || !spielAktiv) return true;
       const pin=pinFor(t);if(!pin||typeof sicht==="undefined"||typeof welt==="undefined"||typeof ansicht==="undefined")return false;
       const px=pin.offsetLeft+pin.offsetWidth/2;
       const py=pin.offsetTop+Math.min(28,pin.offsetHeight/2);
@@ -103,6 +105,14 @@
       if(typeof ansichtAnwenden==="function")ansichtAnwenden();
       setTimeout(()=>welt.classList.remove("map-focus-moving"),650);
       showFocus(pin,t.suggestion);
+      if(oeffnen){
+        pin.querySelector(".knopf")?.click();
+        if(steuerung){
+          const feld = document.querySelector(`#blatt.auf [data-tun="${esc(steuerung)}"][aria-pressed="true"]`);
+          feld?.scrollIntoView({block:"nearest"});
+          feld?.focus({preventScroll:true});
+        }
+      }
       return true;
     };
     requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!run())setTimeout(run,80);}));
@@ -148,6 +158,8 @@
   }
 
   function questAction(){
+    const wissen = window.__erzweltKnowledgeQuestFlow;
+    if (wissen?.active()) return wissen.ziel();
     const direct=highlightedTarget();if(direct)return {type:"map",target:direct};
     const dock=dockAction();if(dock)return dock;
     const q=document.getElementById("quest");
@@ -182,10 +194,11 @@
 
   function perform(action){
     if(!action)return false;
-    if(action.type==="map"&&action.target){cameraTo(action.target);return true;}
+    if(action.type==="map"&&action.target){cameraTo(action.target, action.oeffnen, action.steuerung);return true;}
     if(action.type==="dock"&&action.seite){
-      if(typeof seiteWechseln==="function")seiteWechseln(action.seite);
-      else document.querySelector(`#dock button[data-seite="${esc(action.seite)}"]`)?.click();
+      const button = document.querySelector(`#dock button[data-seite="${esc(action.seite)}"]`);
+      if(button) button.click();
+      else if(typeof seiteWechseln==="function") seiteWechseln(action.seite);
       return true;
     }
     return false;

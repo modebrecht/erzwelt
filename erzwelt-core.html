@@ -350,6 +350,9 @@ body[data-anim="1"] .ausbaureihe i.naechst,body[data-anim="2"] .ausbaureihe i.na
   padding:8px 0;border-bottom:1px solid var(--linie);font-size:var(--f1)}
 .zeile:last-child{border:none}
 .zeile b{font-variant-numeric:tabular-nums;font-family:"Baloo 2",sans-serif;font-size:var(--f2);white-space:nowrap}
+#team-einsaetze .n{text-align:right}
+#team-einsaetze td:last-child{white-space:nowrap}
+#team-einsaetze .team-ausgaben-summe{margin-top:8px;border-top:2px solid var(--linie)}
 .karte{background:#fff;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #00000012}
 .karte h3{font-size:var(--f3);margin-bottom:3px}
 .karte .ort{color:var(--grau);font-size:var(--f0);font-weight:700;margin-bottom:7px}
@@ -1394,6 +1397,7 @@ const ZIEL_RUF    = 60;
 const ZIEL_TAGE   = 720;       // eine Etappe = 2 Spieljahre
 const STARTKAPITAL= 1250000;
 const LOHN_PRO_KOPF = 1800;    // einmalige Kosten beim Anstellen
+const LOHN_OHNE_EINSATZ = 200;
 const SCHWIERIGKEIT = {
   einfach:{name:"Einfach", icon:"🌱", verkauf:1.20, effekt:"Verkaufserlöse +20 %"},
   mittel: {name:"Mittel",  icon:"⚙️", verkauf:1.00, effekt:"Standard-Balancing"},
@@ -1549,8 +1553,11 @@ function lohnsumme(){
   for (const f of S.fabriken) summe += f.arbeiter * LAND[f.land].lohn;
   summe += (S.verkaeufer || 0) * VERKAUF_LOHN;
   // Arbeiter ohne Einteilung kosten trotzdem eine Grundpauschale
-  summe += freieArbeiter() * 200;
+  summe += freieArbeiter() * LOHN_OHNE_EINSATZ;
   return summe * perkMult("lohn");
+}
+function betriebskostenMonat(){
+  return (Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000) * perkMult("betrieb");
 }
 
 /* Wie viele Leute lassen sich gerade wirklich anstellen? */
@@ -1703,7 +1710,7 @@ function tagVor(){
   // 6) Monatsende: Löhne, Betriebskosten, Ruf
   if ((S.tag - 1) % 30 === 0){
     const lohn = lohnsumme();
-    const betrieb = (Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000) * perkMult("betrieb");
+    const betrieb = betriebskostenMonat();
     S.kasse -= lohn + betrieb; S.ausgegeben += lohn + betrieb;
     notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`, "geld");
     rufAnpassen();
@@ -4448,6 +4455,10 @@ function seiteTeam(){
   const kosten = menge * LOHN_PRO_KOPF;
   const geht = menge > 0 && S.kasse >= kosten;
   const frei = freieArbeiter();
+  if (frei > 0) rows.push([null, "Ohne Einsatz", frei, LOHN_OHNE_EINSATZ]);
+  const lohnFaktor = perkMult("lohn");
+  const lohn = lohnsumme();
+  const betrieb = betriebskostenMonat();
 
   return `<h1>Dein Team</h1><div class="unter">Lohnkosten im Spielmodell</div>
 
@@ -4467,17 +4478,22 @@ function seiteTeam(){
       <div class="werte">
         <div class="wert"><span class="wi">${IK.person}</span><span class="wt"><small>Angestellt</small><b>${S.arbeiterGesamt}</b></span></div>
         <div class="wert"><span class="wi">${IK.hacke}</span><span class="wt"><small>Ohne Aufgabe</small><b style="color:${frei>10?"var(--warn)":"inherit"}">${frei}</b></span></div>
-        <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohnsumme</small><b>${chf(lohnsumme())}</b></span></div>
-        <div class="wert"><span class="wi">${IK.kalender}</span><span class="wt"><small>pro Tag</small><b>${chf(lohnsumme()/30)}</b></span></div>
+        <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Löhne pro Monat</small><b>${chf(lohn)}</b></span></div>
+        <div class="wert"><span class="wi">${IK.kalender}</span><span class="wt"><small>Ø je Spieltag</small><b>${chf(lohn/30)}</b></span></div>
       </div>
-      <div class="notiz">Nicht eingeteilte Leute kosten CHF 200 pro Monat. Stell nur so viele an, wie du beschäftigen kannst.</div>
+      <div class="notiz">Nicht eingeteilte Leute kosten ${chf(LOHN_OHNE_EINSATZ * lohnFaktor)} pro Person und Monat. Stell nur so viele an, wie du beschäftigen kannst.</div>
     </div>
 
-    <div class="karte"><h3>Wer arbeitet wo?</h3>
-      ${rows.length ? `<table><tr><th>Ort</th><th class="n">Leute</th><th class="n">Lohn</th></tr>
+    <div class="karte" id="team-einsaetze"><h3>Wer arbeitet wo?</h3>
+      ${rows.length ? `<table><thead><tr><th scope="col">Ort</th><th scope="col" class="n">Leute</th><th scope="col" class="n">Lohn pro Monat</th></tr></thead><tbody>
         ${rows.map(r=>`<tr><td><span class="flz">${r[0]?flagge(r[0]):`<span style="width:1.7em;display:inline-block">${IK.muenze}</span>`}<span>${r[1]}</span></span></td>
-          <td class="n">${r[2]}</td><td class="n">${Math.round(r[3]).toLocaleString("de-CH")}</td></tr>`).join("")}</table>`
-      : `<p style="color:var(--grau)">Noch niemand eingeteilt.</p>`}</div>
+          <td class="n">${r[2]}</td><td class="n">${chf(r[2] * r[3] * lohnFaktor)}</td></tr>`).join("")}</tbody></table>`
+      : `<p style="color:var(--grau)">Noch niemand angestellt.</p>`}
+      <div class="zeile"><span>Personalkosten pro Monat</span><b id="team-personalkosten">${chf(lohn)}</b></div>
+      <div class="zeile"><span>Betriebskosten pro Monat</span><b id="team-betriebskosten">${chf(betrieb)}</b></div>
+      <div class="notiz">Laufende Kosten werden alle 30 Spieltage abgerechnet.</div>
+      <div class="zeile team-ausgaben-summe"><strong>Gesamtausgaben pro Monat</strong><b id="team-gesamtausgaben">${chf(lohn + betrieb)}</b></div>
+    </div>
     ${tutorialLaeuft()?"":`<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`}`;
 }
 

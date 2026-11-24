@@ -227,9 +227,12 @@ await checkpoint('knowledge-basis');
 
 // Knowledge 2: change wage in a real owned mine.
 await closeLupe();
+await goMap();
 s = await state();
 const firstMine = Object.keys(s.minen)[0];
-await clickMineById(firstMine);
+await page.evaluate(() => { ebenen.mine = false; zeichnen(); });
+await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+await page.waitForFunction(id => offenesBlatt?.id === id && ebenen.mine && document.activeElement.dataset.tun === 'lohn', firstMine);
 await clickVisible('button[data-tun="lohn"][aria-pressed="false"]');
 await goMap();
 await collectKnowledge('lohn');
@@ -250,7 +253,8 @@ await checkpoint('reload-ok');
 
 // Knowledge 3: post-tutorial manual market experience. Remove sellers, make stock, sell.
 await closeLupe();
-await dock('markt');
+await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+await page.waitForFunction(() => aktiveSeite === 'markt');
 while ((await state()).verkaeufer > 0) {
   const minus = page.locator('button[data-tun="vcrew"][data-n="-1"]:not([disabled])').first();
   if (!await minus.count()) break;
@@ -266,24 +270,25 @@ await clickVisible('button[data-tun="handverkauf"]:not([disabled])');
 await collectKnowledge('markt');
 await checkpoint('knowledge-market');
 
-// Knowledge 4: visit two mine locations.
+// Knowledge 4: the guide opens two distinct mine locations.
 await closeLupe();
-s = await state();
-const mineIds = Object.keys(s.minen).slice(0,2);
-if (mineIds.length < 2) throw new Error('Need two mines for geology quest');
-for (const id of mineIds) {
-  await clickMineById(id);
-  const close = page.locator('#zu:visible');
-  if (await close.count()) await close.evaluate(el => el.click());
+const geologieBesuche = [];
+for (let i = 0; i < 2; i++) {
+  await goMap();
+  await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+  await page.waitForFunction(() => offenesBlatt?.art === 'mine');
+  geologieBesuche.push(await page.evaluate(() => offenesBlatt.id));
 }
+if (new Set(geologieBesuche).size !== 2) throw new Error('Wissens-Quest zeigt denselben Standort zweimal');
 await goMap();
 await collectKnowledge('geologie');
 await checkpoint('knowledge-geology');
 
 // Knowledge 5: open Ziel.
 await closeLupe();
-await dock('ziel');
-await page.waitForTimeout(150);
+await goMap();
+await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+await page.waitForFunction(() => aktiveSeite === 'ziel' && S.wissenQuestFlow.flags.ruf);
 await collectKnowledge('ruf');
 await checkpoint('knowledge-reputation');
 

@@ -51,7 +51,10 @@
     {
       id:"lohn", seg:"leute", fields:["leute"],
       titel:"Lohn & Zufriedenheit beobachten",
-      aufgabe:"Ändere die Lohnstufe einer Rohstoffquelle. Beobachte danach den Zielwert der Zufriedenheit.",
+      aufgabe:() => eigeneLohnquelle()
+        ? "Ändere die Lohnstufe in einer deiner Rohstoffquellen. Beobachte danach den Zielwert der Zufriedenheit."
+        : "Eröffne eine eigene Rohstoffquelle, damit du dort die Lohnstufe ändern kannst.",
+      ziel:() => minenZiel(eigeneLohnquelle(), "lohn"),
       fertig:q=>!!q.flags.lohn,
       erfolg:"Du hast die Lohnstufe verändert. Im Spiel wirkt der Lohn auf die Zufriedenheit."
     },
@@ -59,6 +62,7 @@
       id:"markt", seg:"markt", fields:["markt"],
       titel:"Markt selbst ausprobieren",
       aufgabe:"Verkaufe nach dem Tutorial einmal selbst ein Produkt im Markt.",
+      ziel:() => ({type:"dock", seite:"markt"}),
       fertig:q=>!!q.flags.markt,
       erfolg:"Du hast selbst verkauft. Produkt → Verkauf → Geld ist jetzt sichtbar."
     },
@@ -66,6 +70,7 @@
       id:"geologie", seg:"geologie", fields:["geologie"],
       titel:"Rohstoffstandorte vergleichen",
       aufgabe:q=>`Öffne zwei verschiedene Rohstoffstandorte auf der Karte. ${Math.min(2,q.geologieBesucht.length)}/2 angesehen.`,
+      ziel:() => minenZiel(naechsterGeologieStandort()),
       fertig:q=>q.geologieBesucht.length>=2,
       erfolg:"Du hast zwei Rohstoffstandorte angesehen. Rohstoffe liegen nicht überall am selben Ort."
     },
@@ -73,6 +78,7 @@
       id:"ruf", seg:"ruf", fields:["ruf"],
       titel:"Ruf und Nachweise unterscheiden",
       aufgabe:"Öffne «Ziel». Vergleiche dort Ruf und Lieferkettennachweise.",
+      ziel:() => ({type:"dock", seite:"ziel"}),
       fertig:q=>!!q.flags.ruf,
       erfolg:"Du hast Ruf und Nachweise verglichen. Sie haben im Spiel unterschiedliche Aufgaben."
     },
@@ -91,6 +97,17 @@
     return QUESTS.find(x=>!q.collected[x.id])||null;
   }
   function questFertig(def){ return !!(def&&def.fertig(flowState())); }
+  function questZiel(){
+    const def = aktiveQuest();
+    return def?.ziel && !questFertig(def) ? def.ziel() : null;
+  }
+  function eigeneLohnquelle(){
+    const quellen = Object.keys(S.minen);
+    return quellen.find(id => S.minen[id].arbeiter > 0 && S.minen[id].stillBis <= S.tag) || quellen[0];
+  }
+  function minenZiel(id, steuerung){
+    return id ? {type:"map", target:{kind:"mine", id}, oeffnen:true, steuerung} : null;
+  }
   function feldFrei(segId){ return !!flowState().fields[segId]; }
   function aufgabeText(def){
     const q=flowState();
@@ -198,8 +215,8 @@
   function naechsterGeologieStandort(){
     const seen=flowState().geologieBesucht;
     const preferred=["kolwezi","greenbushes","atacama","bangka","boke","mountainpass"];
-    const ids=[...preferred,...MINEN.map(m=>m.id)].filter((id,i,a)=>a.indexOf(id)===i);
-    return ids.find(id=>!seen.includes(id))||null;
+    const ids=new Set(MINEN.map(m=>m.id));
+    return [...preferred,...ids].find(id=>ids.has(id)&&!seen.includes(id))||null;
   }
 
   document.addEventListener("click",e=>{
@@ -231,12 +248,12 @@
     if(s?.dataset.seite==="ziel") markieren("ruf");
   });
 
-  flowState();
-  if(typeof questZeichnen==="function") questZeichnen();
   window.__erzweltKnowledgeQuestFlow={
     version:FLOW_VERSION,
     quests:QUESTS.map(q=>q.id),
     active:()=>aktiveQuest()?.id||null,
-    nextGeologyTarget:naechsterGeologieStandort
+    ziel:questZiel
   };
+  flowState();
+  if(typeof questZeichnen==="function") questZeichnen();
 })();
