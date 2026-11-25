@@ -16,12 +16,14 @@
   const style = document.createElement("style");
   style.id = "erzwelt-aufgabe-kompakt-style";
   style.textContent = `
+    #quest:not(.breit) #q-titel{font-size:var(--f0)}
+
     @media (max-width:819px){
       #quest{padding:8px 11px 10px}
       #quest .kopf{white-space:nowrap;min-width:0;letter-spacing:.03em}
       #quest .kopf #q-art{overflow:hidden;text-overflow:ellipsis;min-width:0}
       #quest b#q-titel{margin:3px 0 1px}
-      #quest.kompakt #q-titel{white-space:normal}
+      #quest.kompakt #q-titel{font-size:var(--f0);white-space:normal}
 
       /* Tutorial auf der Karte */
       #quest:not(.breit) .tutorial-zusammenhang{display:none!important}

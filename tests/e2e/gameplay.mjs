@@ -119,6 +119,18 @@ for (const width of [320, 844, 390]) {
     return quest.width > 0 && quest.top >= settings.bottom &&
       Math.abs(quest.left - pause.left) < 1 && Math.abs(quest.right - settings.right) < 1;
   }, null, { timeout: 5000 });
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    const title = document.querySelector('#q-titel');
+    const titleStyle = getComputedStyle(title);
+    const textStyle = getComputedStyle(document.querySelector('#q-text'));
+    if (parseFloat(titleStyle.fontSize) < parseFloat(textStyle.fontSize)) {
+      throw new Error('The task title is smaller than the task text');
+    }
+    if (title.getBoundingClientRect().height > parseFloat(titleStyle.lineHeight) + 1) {
+      throw new Error(`The opening task title wraps at ${innerWidth}px`);
+    }
+  });
 }
 
 // Einführung: one action per step, exactly one highlighted target.
