@@ -128,6 +128,16 @@ for (const width of [320, 360, 844, 390]) {
         values.left < 0 || values.right > history.left || settings.right > innerWidth) {
       throw new Error(`HUD controls do not fit in one row at ${innerWidth}px: ${JSON.stringify({values, history, settings})}`);
     }
+    const cash = rect('.pille.kasse'), day = rect('.pille.tag');
+    if (rect('#h-kasse-i').width <= 0 || cash.right >= day.left ||
+        getComputedStyle(document.querySelector('.pille.kasse')).backgroundColor === 'rgba(0, 0, 0, 0)' ||
+        getComputedStyle(document.querySelector('.pille.tag')).backgroundColor === 'rgba(0, 0, 0, 0)') {
+      throw new Error('Cash icon or separate day pill missing at ' + innerWidth);
+    }
+    const historyLabel = document.querySelector('.toast-history-label');
+    if (innerWidth === 844 && getComputedStyle(historyLabel).display === 'none') {
+      throw new Error('History text missing despite available width');
+    }
     if (document.querySelector('#h-crew') || !document.querySelector('#dock [data-seite="team"]')) {
       throw new Error('Personnel overview belongs in the Team tab');
     }

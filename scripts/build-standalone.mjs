@@ -128,7 +128,20 @@ if (!standalone.includes("ERZWELT STANDALONE BUILD")) {
 // directly in index.html. At runtime the browser expands it in memory; there is no
 // network fetch and the decompressed document still contains every patch as its own
 // classic <script> execution unit.
-const compressed = gzipSync(Buffer.from(standalone, "utf8"), { level: 9, mtime: 0 });
+const sourceBytes = Buffer.from(standalone, "utf8");
+let compressed = gzipSync(sourceBytes, { level: 9, mtime: 0 });
+// Equivalent gzip streams can vary across zlib versions. Reuse an existing
+// stream only if its decoded bytes match the exact generated source.
+try {
+  const previous = await readFile(outputPath, "utf8");
+  const match = previous.match(/id="erzwelt-standalone-gzip" type="application\/octet-stream">([A-Za-z0-9+/=]+)<\/script>/);
+  if (match) {
+    const candidate = Buffer.from(match[1], "base64");
+    if (candidate.toString("base64") === match[1] && gunzipSync(candidate).equals(sourceBytes)) compressed = candidate;
+  }
+} catch {
+  // Missing or invalid old output: retain newly generated stream.
+}
 const payload = compressed.toString("base64");
 
 // Build-time round-trip gate: packing must be lossless before anything is written.

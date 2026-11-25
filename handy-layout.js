@@ -11,35 +11,42 @@
       Kasten, und nur ein Weg zum Ziel: «Ziel zeigen».
    Nur Darstellung: keine Änderung an Spielstand oder Wirtschaft. */
 (function(){
-  const VERSION = 1;
+  const VERSION = 2;
   const style = document.createElement("style");
   style.id = "erzwelt-handy-layout-style";
   style.textContent = `
-    /* 1. Verlauf in der oberen Leiste */
-    #hud #toast-history-control{height:40px;padding:0 11px 0 9px;border-radius:13px;
-      border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;font-size:var(--f1)}
-
+    /* 1. Getrennte Kasse und Tag; Verlauf nach verfügbarem Platz */
+    #hud{flex-wrap:nowrap}
+    #hud .hudwerte,#hud .pille.kasse,#hud .pille.kasse > div{min-width:0}
+    #hud .pille.tag,#hud .hudrechts{flex:none}
+    #hud #h-kasse{white-space:normal;overflow-wrap:anywhere}
+    #hud #toast-history-control{position:relative;height:40px;padding:0 11px 0 9px;border-radius:13px;
+      border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;font-size:var(--f1);flex:none;white-space:nowrap}
+    #hud #toast-history-control:not(.mit-text){width:40px;padding:0;display:grid;place-items:center}
+    #hud #toast-history-control:not(.mit-text) svg{width:18px;height:18px}
+    #hud #toast-history-control:not(.mit-text) .toast-history-label{display:none}
+    #hud #toast-history-control:not(.mit-text) .toast-history-count{position:absolute;top:-4px;right:-3px;min-width:14px;height:14px;padding:0 3px;
+      background:#f5b73d;color:#4a3000;font-size:9px}
+    #hud #toast-history-control:disabled .toast-history-count{display:none}
     @media (max-width:540px){
-      #hud{gap:4px;flex-wrap:nowrap;padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right))}
-      #hud .hudwerte{gap:4px;min-width:0;min-height:40px;padding:3px 4px;background:#0b3648ee;
-        border:2px solid #ffffff2e;border-radius:13px;box-shadow:0 3px 0 #00000030}
-      #hud .pille{padding:0;background:none;border:0;border-radius:0;box-shadow:none}
-      #hud .pille i{display:none}
+      #hud{gap:4px;padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right))}
+      #hud .hudwerte{gap:4px}
+      #hud .pille{min-height:40px;padding:3px 6px;gap:4px;border-radius:13px}
+      #hud .pille.kasse i{width:20px;height:20px}
+      #hud .pille.kasse i svg{width:13px;height:13px}
+      #hud .pille.tag i{display:none}
       #hud .pille b{display:block;font-size:var(--f1);line-height:1.05}
       #hud .pille small{margin-bottom:1px}
-      #hud .kasse{min-width:0}
-      #hud #h-kasse{white-space:normal;overflow-wrap:anywhere}
       #hud .tempo,#hud .hudrechts{gap:3px}
       #hud .tempo button,#hud #einstauf{padding-inline:5px}
-      #hud #toast-history-control{position:relative;width:40px;padding:0;display:grid;place-items:center;flex:none}
-      #hud #toast-history-control svg{width:18px;height:18px}
-      #hud .toast-history-label{display:none}
-      #hud .toast-history-count{position:absolute;top:-4px;right:-3px;min-width:14px;height:14px;padding:0 3px;
-        background:#f5b73d;color:#4a3000;font-size:9px}
-      #hud #toast-history-control:disabled .toast-history-count{display:none}
     }
     @media (max-width:360px){
+      #hud .hudwerte{gap:3px}
+      #hud .pille{padding-inline:4px;gap:3px}
       #hud .pille b{font-size:var(--f0)}
+      #hud .pille.kasse i{width:18px;height:18px}
+      #hud .tempo button,#hud #einstauf{min-width:32px;padding-inline:3px}
+      #hud #toast-history-control:not(.mit-text){width:34px}
     }
 
     /* 2. Meldungen links unten */
@@ -103,7 +110,26 @@
   const tempo = document.getElementById("h-tempo");
   const einstellungen = document.getElementById("einstauf");
   const spiel = document.getElementById("spiel");
+  const hudwerte = hud.querySelector(".hudwerte");
+  const hudrechts = hud.querySelector(".hudrechts");
+  const verlauf = document.getElementById("toast-history-control");
+  function verlaufAnpassen(){
+    if (!verlauf || !hudwerte || !hudrechts) return;
+    // First measure the compact layout; only add text when it fits.
+    verlauf.classList.remove("mit-text");
+    const werteBreite = hudwerte.getBoundingClientRect().width;
+    const rechtsBreite = hudrechts.getBoundingClientRect().width;
+    const css = getComputedStyle(hud);
+    const platz = hud.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
+    const abstand = 2 * (parseFloat(css.columnGap) || 0);
+    verlauf.classList.add("mit-text");
+    const voll = verlauf.getBoundingClientRect().width;
+    if (Math.ceil(werteBreite + rechtsBreite + voll + abstand) > Math.floor(platz)){
+      verlauf.classList.remove("mit-text");
+    }
+  }
   function aufgabeAusrichten(){
+    verlaufAnpassen();
     masseMessen();
     if (tempo.hidden) return;
     const rechts = einstellungen.getBoundingClientRect().right;
@@ -113,7 +139,10 @@
   }
   aufgabeAusrichten();
   const aufgabenLayout = new ResizeObserver(aufgabeAusrichten);
-  for (const element of [hud, tempo, einstellungen]) aufgabenLayout.observe(element);
+  for (const element of [hud, tempo, einstellungen, hudwerte, hudrechts, verlauf]){
+    if (element) aufgabenLayout.observe(element);
+  }
+  document.fonts?.ready.then(aufgabeAusrichten);
 
   /* ---------- 2. Meldungen: Höhe/Breite nicht mehr per Inline-Stil versetzen ---------- */
   const toasts = document.getElementById("toasts");
