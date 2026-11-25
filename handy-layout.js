@@ -53,10 +53,12 @@
 
     /* Gleicher Abstand: Leiste 1 → Leiste 2 → Aufgabe (je 7px) */
     #quest:not(.breit){top:calc(var(--hudh) - 1px)}
+    #spiel #quest:not(.breit){right:var(--aufgabe-rechts);width:var(--aufgabe-breite)}
+    #quest #q-titel,#quest #q-text{overflow-wrap:anywhere}
 
     /* Aufgabe auch auf Markt, Team, Ziel und Wissen rechts – wie auf der Karte */
     @media (max-width:819px){
-      #quest.breit{left:auto;right:10px;width:min(68%,300px)}
+      #spiel #quest.breit{left:auto;right:var(--aufgabe-rechts);width:var(--aufgabe-breite)}
     }
 
     /* 4. Aufgabenkasten kürzer */
@@ -75,10 +77,24 @@
   `;
   document.head.appendChild(style);
 
+  const hud = document.getElementById("hud");
+  const tempo = document.getElementById("h-tempo");
+  const einstellungen = document.getElementById("einstauf");
+  const spiel = document.getElementById("spiel");
+  function aufgabeAusrichten(){
+    if (tempo.hidden) return;
+    const rechts = einstellungen.getBoundingClientRect().right;
+    spiel.style.setProperty("--aufgabe-rechts", `${spiel.getBoundingClientRect().right - rechts}px`);
+    spiel.style.setProperty("--aufgabe-breite", `${rechts - tempo.getBoundingClientRect().left}px`);
+    questHoeheMessen();
+  }
+  aufgabeAusrichten();
+  const aufgabenLayout = new ResizeObserver(aufgabeAusrichten);
+  for (const element of [hud, tempo, einstellungen]) aufgabenLayout.observe(element);
+
   /* ---------- 1. Verlauf in die obere Leiste ---------- */
   function verlaufInHud(){
     const v = document.getElementById("toast-history-control");
-    const hud = document.getElementById("hud");
     const rechts = hud?.querySelector(".hudrechts");
     if (!v || !hud || !rechts) return false;
     if (v.parentElement !== hud){
@@ -89,7 +105,6 @@
     return true;
   }
   if (!verlaufInHud()){
-    const spiel = document.getElementById("spiel") || document.body;
     const mo = new MutationObserver(() => { if (verlaufInHud()) mo.disconnect(); });
     mo.observe(spiel, {childList:true});
   }

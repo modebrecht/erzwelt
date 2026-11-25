@@ -21,6 +21,7 @@
       #quest .kopf{white-space:nowrap;min-width:0;letter-spacing:.03em}
       #quest .kopf #q-art{overflow:hidden;text-overflow:ellipsis;min-width:0}
       #quest b#q-titel{margin:3px 0 1px}
+      #quest.kompakt #q-titel{white-space:normal}
 
       /* Tutorial auf der Karte */
       #quest:not(.breit) .tutorial-zusammenhang{display:none!important}
@@ -37,10 +38,10 @@
       #quest .engpass-kasten::after{content:"";position:absolute;right:11px;top:50%;width:7px;height:7px;
         border:solid currentColor;border-width:2px 2px 0 0;transform:translate(0,-50%) rotate(45deg)}
 
-      /* Schmale Zeile auf anderen Reitern: «Ansehen» bleibt sichtbar */
-      #quest.kompakt.wissen-bereit{padding-right:98px!important}
-      #quest.kompakt.wissen-bereit > button.wissen-quest-action:not(#_){display:block!important;position:absolute;
-        right:8px;top:50%;transform:translateY(-50%);width:auto;min-height:32px;margin:0;padding:3px 12px;font-size:var(--f0)}
+      /* Auf anderen Reitern bleibt die ganze Breite für den Titel frei. */
+      #quest.kompakt.wissen-bereit{padding-right:11px!important}
+      #quest.kompakt.wissen-bereit > button.wissen-quest-action:not(#_){display:block!important;
+        min-height:32px;padding:3px 12px;font-size:var(--f0)}
       #quest.kompakt.wissen-bereit .quest-map-cue{display:none!important}
       #quest.kompakt.wissen-bereit::after{content:none}
 

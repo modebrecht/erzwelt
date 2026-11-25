@@ -110,6 +110,17 @@ await mittel.first().click();
 await page.waitForFunction(() => S.schwierigkeit === 'mittel', null, { timeout: 5000 });
 await checkpoint('difficulty-selected');
 
+// The task card spans from Pause to Settings at each viewport width.
+for (const width of [320, 844, 390]) {
+  await page.setViewportSize({ width, height: 844 });
+  await page.waitForFunction(() => {
+    const rect = selector => document.querySelector(selector).getBoundingClientRect();
+    const quest = rect('#quest'), pause = rect('[data-tempo="0"]'), settings = rect('#einstauf');
+    return quest.width > 0 && quest.top >= settings.bottom &&
+      Math.abs(quest.left - pause.left) < 1 && Math.abs(quest.right - settings.right) < 1;
+  }, null, { timeout: 5000 });
+}
+
 // Einführung: one action per step, exactly one highlighted target.
 const winkPins = () => page.evaluate(() => [...document.querySelectorAll('#welt .pin.wink')].map(p => `${p.dataset.pin}:${p.dataset.id}`));
 const expectOnlyTarget = async expected => {
