@@ -115,8 +115,9 @@
       button.type="button";
       button.setAttribute("aria-haspopup","dialog");
       button.setAttribute("aria-controls","toast-history-panel");
-      button.innerHTML=`${clockSvg}<span>Verlauf</span><span class="toast-history-count">0</span>`;
-      document.getElementById("spiel")?.appendChild(button);
+      button.innerHTML=`${clockSvg}<span class="toast-history-label">Verlauf</span><span class="toast-history-count">0</span>`;
+      const hud=document.getElementById("hud");
+      hud.insertBefore(button,hud.querySelector(".hudrechts"));
       button.addEventListener("click",openHistory);
     }
 

@@ -61,6 +61,7 @@ svg{display:block}
   display:flex;gap:7px;align-items:center;flex-wrap:wrap;
   background:linear-gradient(#0a2f42f2,#0a2f4200);pointer-events:none
 }
+.hudwerte{display:flex;align-items:center;gap:7px}
 .pille{
   display:flex;align-items:center;gap:7px;pointer-events:auto;
   background:#0b3648ee;border:2px solid #ffffff2e;border-radius:99px;
@@ -71,7 +72,6 @@ svg{display:block}
 .pille b{font-family:"Baloo 2",sans-serif;font-size:var(--f2);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pille small{font-size:var(--f0);opacity:.75;display:block;line-height:1;margin-bottom:2px;letter-spacing:.04em}
 .pille.kasse i{background:var(--gold);color:#5a3c00}
-.pille.crew i{background:#6fb8e0;color:#0a3a55}
 .pille.tag i{background:#ffffff26;color:#fff}
 .hudrechts{margin-left:auto;display:flex;gap:5px;pointer-events:auto;align-items:center}
 .tempo{display:flex;gap:4px}
@@ -574,9 +574,10 @@ body[data-anim="0"] *{animation:none!important}
   </div>
 
   <div id="hud">
-    <div class="pille kasse"><i id="h-kasse-i"></i><div><small>Kasse</small><b id="h-kasse">–</b></div></div>
-    <div class="pille crew"><i id="h-crew-i"></i><div><small>Frei</small><b id="h-crew">–</b></div></div>
-    <div class="pille tag"><i id="h-tag-i"></i><div><small>Tag</small><b id="h-tag">1</b></div></div>
+    <div class="hudwerte">
+      <div class="pille kasse"><i id="h-kasse-i"></i><div><small>Kasse</small><b id="h-kasse">–</b></div></div>
+      <div class="pille tag"><i id="h-tag-i"></i><div><small>Tag</small><b id="h-tag">1</b></div></div>
+    </div>
     <div class="hudrechts">
       <div id="h-tempo" class="tempo" role="group" aria-label="Tempo">
         <button data-tempo="0" aria-pressed="false" aria-label="Pause">❚❚</button>
@@ -4081,7 +4082,6 @@ function zeichnen(){
   fensterKlasse();
   $("#h-kasse").textContent = kurz(S.kasse);
   $("#h-kasse").style.color = S.kasse < 0 ? "#ff9a95" : "#fff";
-  $("#h-crew").textContent = freieArbeiter() + "/" + S.arbeiterGesamt;
   $("#h-tag").textContent = S.tag;
   const tempoGruppe = $("#h-tempo"), abschluss = $("#h-abschluss");
   const beendet = !!S.ende;
@@ -5050,7 +5050,6 @@ $("#einstauf").innerHTML = IK.zahnrad;
 $("#zu").innerHTML = IK.x;
 document.querySelectorAll("[data-schliessen]").forEach(b => b.innerHTML = IK.x);
 $("#h-kasse-i").innerHTML = IK.muenze;
-$("#h-crew-i").innerHTML = IK.person;
 $("#h-tag-i").innerHTML = IK.kalender;
 weltZeichnen();
 S = neuerZustand();

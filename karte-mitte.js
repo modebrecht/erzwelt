@@ -2,7 +2,6 @@
 /* Karte in der Mitte, Arbeiter an den Quellen:
    - Der grosse runde Knopf unten führt zur Weltkarte (Weltkugel). Team ist
      ein normaler Reiter; eine kleine Zahl zeigt Leute ohne Aufgabe.
-   - Oben: «Ohne Aufgabe 10/54» statt «Team frei».
    - An jeder fördernden Rohstoffquelle arbeiten 1–3 kleine Figuren mit
      Spitzhacke (mehr Personal = mehr Figuren). Streik oder Stillstand:
      Figuren stehen still und grau. «Animationen: aus» stoppt sie.
@@ -55,13 +54,6 @@
     const schluessel = html.replace(/\s+/g, " ");
     if (dock.dataset.stand !== schluessel){ dock.innerHTML = html; dock.dataset.stand = schluessel; }
   };
-
-  /* ---------- Oben: «Ohne Aufgabe» ---------- */
-  const hudLabel = document.querySelector("#hud .pille.crew small");
-  if (hudLabel){
-    hudLabel.textContent = "Ohne Aufgabe";
-    hudLabel.closest(".pille").title = "Leute ohne Aufgabe / Personal insgesamt";
-  }
 
   /* ---------- Arbeiter an fördernden Quellen ---------- */
   const figur = `<svg viewBox="0 0 13 17" aria-hidden="true">

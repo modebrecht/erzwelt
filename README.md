@@ -94,15 +94,15 @@ Der Builder prüft dabei automatisch:
 
 ## Handy-Layout (`handy-layout.js`)
 
-Oben zwei Reihen Bedienung, darunter das Spiel:
+Oben eine kompakte Bedienleiste über der Karte:
 
-- «Verlauf» sitzt in der oberen Leiste (2. Reihe links, neben Tempo und
-  Einstellungen).
+- Kasse, Tag, Verlauf, Tempo und Einstellungen stehen nebeneinander. Auf
+  schmalen Displays zeigt der Verlauf ein Uhrsymbol mit Meldungszähler.
 - Meldungen docken links unten am Bildschirmrand über der Leiste an.
 - Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken im Filter-Knopf
   über + und − (gleiche Abstände). Ein Punkt am Knopf zeigt, wenn nicht alle Orte sichtbar sind.
-- Aufgabe steht auf allen Seiten rechts oben, wie auf der Karte; gleicher
-  Abstand zwischen den beiden oberen Leisten und dem Aufgabenkasten.
+- Die Aufgabe steht auf allen Seiten rechts oben. Auf der Karte sitzt sie
+  direkt unter der Bedienleiste.
 - Aufgabenkasten kürzer: Phase als schmale Leiste mit «Phase 1/4 · …» in einer
   Zeile, Zusammenhang ohne Kasten, nur «Ziel zeigen» als Weg zum Ziel.
 
@@ -259,7 +259,7 @@ gilt die Fortsetzungsregel mit 1×.
 ## Karte in der Mitte (`karte-mitte.js`)
 
 Der grosse runde Knopf unten führt zur Weltkarte; Team ist ein normaler Reiter
-mit einer kleinen Zahl für Leute ohne Aufgabe. Oben steht «Ohne Aufgabe 10/54».
+mit einer kleinen Zahl für Leute ohne Aufgabe.
 An fördernden Rohstoffquellen arbeiten 1–3 kleine Figuren mit Spitzhacke
 (ab 10 bzw. 30 Personen mehr Figuren); bei Streik oder Stillstand stehen sie
 still. «Animationen: aus» stoppt sie.

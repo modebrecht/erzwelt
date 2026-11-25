@@ -1,7 +1,6 @@
 "use strict";
-/* Handy-Layout: oben zwei Reihen Bedienung, darunter das Spiel.
-   1. «Verlauf» sitzt in der oberen Leiste (2. Reihe links, neben Tempo und
-      Einstellungen) statt auf der Karte.
+/* Handy-Layout: kompakte Bedienleiste über dem Spiel.
+   1. Kasse, Tag, «Verlauf», Tempo und Einstellungen stehen oben in einer Reihe.
    2. Meldungen docken links unten am Rand über der Leiste an, statt mitten über der
       Karte oder unter dem Aufgabenkasten zu schweben.
    3. Die Kartenebenen (Rohstoffquellen, Werke, Fabriken) stecken in einem
@@ -18,7 +17,25 @@
   style.textContent = `
     /* 1. Verlauf in der oberen Leiste */
     #hud #toast-history-control{position:static!important;height:40px;padding:0 11px 0 9px;border-radius:13px;
-      border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;font-size:var(--f1);pointer-events:auto}
+      border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;font-size:var(--f1)}
+
+    @media (max-width:540px){
+      #hud{gap:4px;padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right))}
+      #hud .hudwerte{gap:5px;min-height:40px;padding:3px 5px;background:#0b3648ee;
+        border:2px solid #ffffff2e;border-radius:13px;box-shadow:0 3px 0 #00000030}
+      #hud .pille{padding:0;background:none;border:0;border-radius:0;box-shadow:none}
+      #hud .pille i{display:none}
+      #hud .pille b{font-size:var(--f1);line-height:1.05}
+      #hud .pille small{margin-bottom:1px}
+      #hud .tempo,#hud .hudrechts{gap:3px}
+      #hud .tempo button,#hud #einstauf{padding-inline:5px}
+      #hud #toast-history-control{position:relative!important;width:40px;padding:0;display:grid;place-items:center;flex:none}
+      #hud #toast-history-control svg{width:18px;height:18px}
+      #hud .toast-history-label{display:none}
+      #hud .toast-history-count{position:absolute;top:-4px;right:-3px;min-width:14px;height:14px;padding:0 3px;
+        background:#f5b73d;color:#4a3000;font-size:9px}
+      #hud #toast-history-control:disabled .toast-history-count{display:none}
+    }
 
     /* 2. Meldungen links unten */
     html body #toasts#toasts#toasts{top:auto!important;bottom:calc(var(--dockh) + 12px)!important;left:0!important;
@@ -51,7 +68,7 @@
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
     #ebenen button[aria-pressed="false"]{color:var(--grau)!important}
 
-    /* Gleicher Abstand: Leiste 1 → Leiste 2 → Aufgabe (je 7px) */
+    /* Abstand zwischen Bedienleiste und Aufgabe: 7px. */
     #quest:not(.breit){top:calc(var(--hudh) - 1px)}
     #spiel #quest:not(.breit){right:var(--aufgabe-rechts);width:var(--aufgabe-breite)}
     #quest #q-titel,#quest #q-text{overflow-wrap:anywhere}
@@ -82,6 +99,7 @@
   const einstellungen = document.getElementById("einstauf");
   const spiel = document.getElementById("spiel");
   function aufgabeAusrichten(){
+    masseMessen();
     if (tempo.hidden) return;
     const rechts = einstellungen.getBoundingClientRect().right;
     spiel.style.setProperty("--aufgabe-rechts", `${spiel.getBoundingClientRect().right - rechts}px`);
@@ -91,23 +109,6 @@
   aufgabeAusrichten();
   const aufgabenLayout = new ResizeObserver(aufgabeAusrichten);
   for (const element of [hud, tempo, einstellungen]) aufgabenLayout.observe(element);
-
-  /* ---------- 1. Verlauf in die obere Leiste ---------- */
-  function verlaufInHud(){
-    const v = document.getElementById("toast-history-control");
-    const rechts = hud?.querySelector(".hudrechts");
-    if (!v || !hud || !rechts) return false;
-    if (v.parentElement !== hud){
-      hud.insertBefore(v, rechts);
-      if (typeof masseMessen === "function") masseMessen();
-      if (typeof questHoeheMessen === "function") questHoeheMessen();
-    }
-    return true;
-  }
-  if (!verlaufInHud()){
-    const mo = new MutationObserver(() => { if (verlaufInHud()) mo.disconnect(); });
-    mo.observe(spiel, {childList:true});
-  }
 
   /* ---------- 2. Meldungen: Höhe/Breite nicht mehr per Inline-Stil versetzen ---------- */
   const toasts = document.getElementById("toasts");

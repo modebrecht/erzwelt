@@ -111,7 +111,7 @@ await page.waitForFunction(() => S.schwierigkeit === 'mittel', null, { timeout: 
 await checkpoint('difficulty-selected');
 
 // The task card spans from Pause to Settings at each viewport width.
-for (const width of [320, 844, 390]) {
+for (const width of [320, 360, 844, 390]) {
   await page.setViewportSize({ width, height: 844 });
   await page.waitForFunction(() => {
     const rect = selector => document.querySelector(selector).getBoundingClientRect();
@@ -121,6 +121,16 @@ for (const width of [320, 844, 390]) {
   }, null, { timeout: 5000 });
   await page.evaluate(async () => {
     await document.fonts.ready;
+    const rect = selector => document.querySelector(selector).getBoundingClientRect();
+    const values = rect('.hudwerte'), history = rect('#toast-history-control'), settings = rect('#einstauf');
+    const center = box => box.top + box.height / 2;
+    if (Math.abs(center(values) - center(settings)) > 1 || Math.abs(center(history) - center(settings)) > 1 ||
+        values.left < 0 || values.right > history.left || settings.right > innerWidth) {
+      throw new Error(`HUD controls do not fit in one row at ${innerWidth}px`);
+    }
+    if (document.querySelector('#h-crew') || !document.querySelector('#dock [data-seite="team"]')) {
+      throw new Error('Personnel overview belongs in the Team tab');
+    }
     const title = document.querySelector('#q-titel');
     const titleStyle = getComputedStyle(title);
     const textStyle = getComputedStyle(document.querySelector('#q-text'));
