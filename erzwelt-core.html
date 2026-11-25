@@ -511,15 +511,13 @@ body[data-anim="2"] .wandern{animation:wandern 5s ease-in-out infinite alternate
 #bilder-intro{position:fixed;inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;padding:0;
   border:0;overflow:hidden;overscroll-behavior:contain;color:#fff;background:#082a39}
 #bilder-intro::backdrop{background:#082a39}
-#bilder-intro::before{content:"";position:absolute;inset:-40px;background:var(--intro-bg,none) center/cover no-repeat;
-  filter:blur(28px) brightness(.55) saturate(1.15);transform:scale(1.1)}
+#bilder-intro::before{content:"";position:absolute;inset:0;background:var(--intro-bg,none) center/cover no-repeat}
 .intro-innen{position:relative;height:100%;display:flex;flex-direction:column;
   padding:calc(10px + env(safe-area-inset-top)) 0 calc(14px + env(safe-area-inset-bottom))}
 .intro-innen header{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--gold);font-weight:800;
   padding:0 max(14px,env(safe-area-inset-right)) 6px max(14px,env(safe-area-inset-left))}
 .intro-innen h2{margin:0;font-size:var(--f1);text-transform:uppercase;letter-spacing:.06em}
-.intro-bild{display:block;flex:1;min-height:0;width:100%;object-fit:contain;touch-action:pan-y;user-select:none;
-  filter:drop-shadow(0 10px 30px #0008)}
+.intro-bild{display:block;flex:1;min-height:0;width:100%;object-fit:contain;touch-action:pan-y;user-select:none}
 .intro-text,.intro-punkte,.intro-innen nav{margin-left:max(14px,env(safe-area-inset-left));margin-right:max(14px,env(safe-area-inset-right))}
 .intro-text{margin-top:10px;margin-bottom:0;color:#f2f7fb;font-size:var(--f1);font-weight:700;line-height:1.35;text-shadow:0 1px 3px #0009;
   width:min(100% - 28px,760px);align-self:center}

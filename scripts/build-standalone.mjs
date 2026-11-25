@@ -15,6 +15,7 @@ const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 if (!Array.isArray(manifest.introBilder) || manifest.introBilder.length !== 4) {
   throw new Error("Für das Intro müssen genau vier Bilder deklariert sein");
 }
+const introBundle = JSON.parse(await readFile(path.join(root, "assets/intro/bilder.json"), "utf8"));
 const introBilder = await Promise.all(manifest.introBilder.map(async ({datei, alt, text}) => {
   if (!/^assets\/intro\/[a-z0-9-]+\.png$/.test(datei) || ![alt, text].every(s => typeof s === "string" && s.trim())) {
     throw new Error("Ungültiger Intro-Bildeintrag");
@@ -24,7 +25,11 @@ const introBilder = await Promise.all(manifest.introBilder.map(async ({datei, al
       png.readUInt32BE(16) !== 1672 || png.readUInt32BE(20) !== 941) {
     throw new Error("Unerwartetes Bildformat: " + datei);
   }
-  return {src:offline ? "data:image/png;base64," + png.toString("base64") : "./" + datei, alt, text};
+  const {src, hintergrund} = introBundle[datei] ?? {};
+  if (![src, hintergrund].every(url => typeof url === "string" && url.startsWith("data:image/webp;base64,"))) {
+    throw new Error("Intro-WebP fehlt im Bündel: " + datei);
+  }
+  return {src:offline ? "data:image/png;base64," + png.toString("base64") : "./" + datei, hintergrund, alt, text};
 }));
 const sourceRedirect = '<meta data-erzwelt-source-redirect http-equiv="refresh" content="0;url=./index.html">';
 const inertCoreScript = '<script type="text/plain" data-erzwelt-core>';
@@ -185,4 +190,4 @@ console.log(`Generated ${path.relative(root, outputPath)} with ${entries.length}
 console.log(`JavaScript syntax passed: ${coreScripts.length} core script(s) + ${entries.length} patch scripts + ${bootstrapScripts.length} bootstrap script(s).`);
 console.log(`Packed standalone: ${Buffer.byteLength(standalone, "utf8")} bytes -> ${Buffer.byteLength(bootstrap, "utf8")} bytes.`);
 console.log("Standalone verification passed: lossless payload, no external scripts, patch order exact.");
-console.log(offline ? "Intro: four original PNGs embedded." : "Intro: four local PNGs loaded when viewed.");
+console.log(offline ? "Intro: four original PNGs embedded." : "Intro: four WebP images in one on-demand bundle.");

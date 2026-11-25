@@ -31,11 +31,11 @@ async function chooseDifficulty(page){
 }
 async function checkImage(page, nummer){
   assert.equal(await image(page).count(),1);
-  await page.waitForFunction(() => {
+  await page.waitForFunction(nummer => {
     const img = document.querySelector('#bilder-intro img');
-    return img?.complete && img.naturalWidth === 1672 && img.naturalHeight === 941;
-  });
-  assert.equal(await intro(page).locator('.intro-zaehler').innerText(), `${nummer} / 4`);
+    return img?.complete && img.naturalWidth >= 1200 &&
+      document.querySelector('#bilder-intro .intro-zaehler').textContent === `${nummer} / 4`;
+  }, nummer);
   assert.equal(await image(page).getAttribute('alt'), introBilder[nummer-1].alt);
   assert.equal(await intro(page).locator('.intro-text').innerText(), introBilder[nummer-1].text);
   assert.equal(await image(page).evaluate(img => getComputedStyle(img).objectFit), 'contain');
@@ -62,12 +62,25 @@ try {
   const page = await newPage({width:360,height:800});
   const requested = [];
   page.on('request', req => { if (req.url().includes('/assets/intro/')) requested.push(req.url()); });
+  let bundleFreigeben;
+  const kalterCache = new Promise(resolve => { bundleFreigeben = resolve; });
+  await page.route('**/assets/intro/bilder.json', async route => {
+    await kalterCache;
+    await route.continue();
+  });
   await page.goto(url);
   await wait(page.locator('#spielmenue-neu'));
   assert.deepEqual(requested,[]);
-  await start(page, 1);
+  try {
+    await start(page, 1);
+    await wait(intro(page).getByText('Intro wird geladen …'));
+    assert.equal(await intro(page).getByRole('button',{name:'Weiter'}).isDisabled(),true);
+  } finally {
+    bundleFreigeben();
+  }
   await checkImage(page,1);
-  assert.equal(requested.length,1);
+  assert.deepEqual(requested,['http://127.0.0.1:4173/assets/intro/bilder.json']);
+  assert.ok((await image(page).getAttribute('src')).startsWith('data:image/webp;base64,'));
   assert.equal(await page.locator('#schleier').isVisible(),false);
   assert.equal(await intro(page).getByRole('button',{name:'Zurück'}).isDisabled(),true);
   await page.screenshot({path:'artifacts/intro-mobil.png'});
@@ -83,7 +96,7 @@ try {
   await checkImage(page,3);
   await page.keyboard.press('ArrowRight');
   await checkImage(page,4);
-  assert.equal(new Set(requested).size,4);
+  assert.equal(requested.length,1);
   await click(intro(page), 'Firma gründen');
   assert.equal(await page.evaluate(() => META.bilderIntroGesehen),true);
   await chooseDifficulty(page);
@@ -218,6 +231,14 @@ try {
   assert.equal(await imported.evaluate(() => META.bilderIntroGesehen),undefined);
   assert.equal(await imported.evaluate(() => S.produktEntdeckungen.kabel.status),'gesehen');
 
+  const fallback = await newPage({width:360,height:800});
+  await fallback.route('**/assets/intro/bilder.json', route => route.fulfill({status:503}));
+  await fallback.goto(url);
+  await start(fallback,1);
+  await checkImage(fallback,1);
+  assert.equal(await image(fallback).getAttribute('src'), `./${introBilder[0].datei}`);
+  await fallback.close();
+
   // The packaged HTML loads every exact original PNG with external requests blocked.
   const offline = await newPage({width:1280,height:800});
   await offline.route(/^https?:/, route => route.abort());
@@ -234,7 +255,7 @@ try {
   await chooseDifficulty(offline);
 
   assert.deepEqual(errors,[]);
-  console.log('PASS AP2: exact original images offline and on demand, intro controls and replay, real first production, queued cards, event priority, slots and JSON');
+  console.log('PASS AP2: one intro bundle request with a cold cache, original images as fallback and offline, intro controls and replay, production, events, slots and JSON');
 } finally {
   await browser.close();
 }

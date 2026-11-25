@@ -189,6 +189,7 @@
   }
 
   function menueZeigen(modus = "start", hinweis = ""){
+    if (modus === "neu" && !META.bilderIntroGesehen) bilderIntroVorbereiten();
     ansichtMenue = modus;
     if (modus !== "import"){ importVorschau = null; importAnfrage++; }
     menue.hidden = false;

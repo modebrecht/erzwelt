@@ -26,8 +26,10 @@ node scripts/build-standalone.mjs
 ```
 
 Der Build erzeugt `index.html` aus `erzwelt-core.html` und allen Einträgen aus `patches.json`.
-Zum Spielen `index.html` öffnen. Die vier Intro-Bilder werden beim Anzeigen aus
-`assets/intro/` geladen. Ein direkter Aufruf von `erzwelt-core.html` leitet dorthin weiter.
+Zum Spielen `index.html` öffnen. Online lädt Erzwelt die vier WebP-Intro-Bilder als
+ein Bündel, sobald «Neues Spiel» gewählt wird. Nach Änderungen an den Originalbildern
+das Bündel mit `python3 scripts/build-intro-bundle.py` (Pillow) neu erstellen.
+Ein direkter Aufruf von `erzwelt-core.html` leitet zu `index.html` weiter.
 Für eine einzelne Offline-Datei inklusive aller Originalbilder
 `node scripts/build-standalone.mjs --offline` ausführen. Die Ausgabe liegt in
 `artifacts/erzwelt-offline.html`.
