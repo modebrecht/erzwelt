@@ -6,7 +6,6 @@
   style.id="erzwelt-notification-history-style";
   style.textContent=`
     #toast-history-control{
-      position:absolute;left:10px;top:calc(var(--hudh) + 4px);z-index:43;
       display:flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 8px;
       border-radius:999px;background:#0b3648ee;color:#fff;border:1px solid #ffffff2f;
       box-shadow:0 2px 7px #0003;font-family:"Baloo 2",sans-serif;font-size:var(--f0);font-weight:800;

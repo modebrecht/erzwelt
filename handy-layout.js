@@ -16,12 +16,12 @@
   style.id = "erzwelt-handy-layout-style";
   style.textContent = `
     /* 1. Verlauf in der oberen Leiste */
-    #hud #toast-history-control{position:static!important;height:40px;padding:0 11px 0 9px;border-radius:13px;
+    #hud #toast-history-control{height:40px;padding:0 11px 0 9px;border-radius:13px;
       border:2px solid #ffffff2e;box-shadow:0 3px 0 #00000030;font-size:var(--f1)}
 
     @media (max-width:540px){
       #hud{gap:4px;padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right))}
-      #hud .hudwerte{gap:5px;min-height:40px;padding:3px 5px;background:#0b3648ee;
+      #hud .hudwerte{gap:4px;min-height:40px;padding:3px 4px;background:#0b3648ee;
         border:2px solid #ffffff2e;border-radius:13px;box-shadow:0 3px 0 #00000030}
       #hud .pille{padding:0;background:none;border:0;border-radius:0;box-shadow:none}
       #hud .pille i{display:none}
@@ -29,7 +29,7 @@
       #hud .pille small{margin-bottom:1px}
       #hud .tempo,#hud .hudrechts{gap:3px}
       #hud .tempo button,#hud #einstauf{padding-inline:5px}
-      #hud #toast-history-control{position:relative!important;width:40px;padding:0;display:grid;place-items:center;flex:none}
+      #hud #toast-history-control{position:relative;width:40px;padding:0;display:grid;place-items:center;flex:none}
       #hud #toast-history-control svg{width:18px;height:18px}
       #hud .toast-history-label{display:none}
       #hud .toast-history-count{position:absolute;top:-4px;right:-3px;min-width:14px;height:14px;padding:0 3px;
