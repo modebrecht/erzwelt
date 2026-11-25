@@ -126,7 +126,7 @@ for (const width of [320, 360, 844, 390]) {
     const center = box => box.top + box.height / 2;
     if (Math.abs(center(values) - center(settings)) > 1 || Math.abs(center(history) - center(settings)) > 1 ||
         values.left < 0 || values.right > history.left || settings.right > innerWidth) {
-      throw new Error(`HUD controls do not fit in one row at ${innerWidth}px`);
+      throw new Error(`HUD controls do not fit in one row at ${innerWidth}px: ${JSON.stringify({values, history, settings})}`);
     }
     if (document.querySelector('#h-crew') || !document.querySelector('#dock [data-seite="team"]')) {
       throw new Error('Personnel overview belongs in the Team tab');
