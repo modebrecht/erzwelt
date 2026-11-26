@@ -15,7 +15,16 @@ from PIL import Image, ImageChops
 
 def lade(ordner):
     with open(os.path.join(ordner, "zustaende.json"), encoding="utf-8") as f:
-        return json.load(f)
+        daten = json.load(f)
+    # Lernrückmeldungen erscheinen nacheinander mit Zeitablauf: In welchem Zustand eine
+    # gerade sichtbar wird, hängt von der Laufzeit ab. Verglichen wird darum die ganze
+    # Folge über alle Zustände, nicht die einzelne Aufnahme.
+    z = daten["ergebnis"]
+    folge = []
+    for name in sorted(z, key=lambda n: int(n.split("-")[0]) if n.split("-")[0].isdigit() else 10**9):
+        folge += z[name].pop("rueckmeldungen", None) or []
+    z["zz-rueckmeldungen-folge"] = {"folge": folge}
+    return daten
 
 KLASSEN = re.compile(r'class="([^"]*)"')
 def norm(t):
