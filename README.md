@@ -12,10 +12,12 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `texte.de.js` — sichtbare Texte als Schlüssel → Text, abgerufen mit
   `textVon(schluessel, werte)`. Wird beim Bauen vor dem Spielskript eingebettet.
   Stand und Rest: `docs/texte-offen.md`.
-- `karten-landschaft.js` — Landschaft auf der Karte (Schnee, verschneite Tannen,
-  Nadel- und Laubwald, Regenwald/Dschungel, Savanne, Wüste, Gebirge), grosse Flüsse
-  (Amazonas, Nil, Kongo, Jangtse, Rhein, Donau …) und Meereswellen;
-  in den Einstellungen «Landschaft» (aus/leicht/voll) und «Meereswellen» (an/aus).
+- `karten-landschaft.js` — Landschaft auf der Karte: dichte Wälder nach Klimazonen
+  (verschneite Taiga in Skandinavien, Russland und Kanada, Mischwald, Regenwald am
+  Amazonas, Kongo und in Südostasien), Savanne, Wüsten mit Dünen, Tundra, Eis,
+  Gebirgsketten, grosse Flüsse, heller Küstensaum und wenige Wellenkämme, die langsam
+  kommen und gehen. Gleiche Farben stehen in einem Pfad, so bleiben es wenige
+  Elemente. Einstellungen «Landschaft» (aus/leicht/voll) und «Meereswellen» (an/aus).
 - `karten-tiere.js` — Tiere auf der Karte: etwa alle 3 Minuten laufender Spielzeit
   (nach der Einführung) taucht im sichtbaren Kartenteil ein Tier auf, 3–5 pro Kontinent
   plus Arktis (Eisbär …), Pinguine und Meerestiere; Antippen bringt CHF 1’000–3’000,
