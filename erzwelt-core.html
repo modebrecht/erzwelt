@@ -1493,8 +1493,11 @@ const zufall = (a,b) => a + Math.random()*(b-a);
 const klemm = (v,a,b) => Math.max(a, Math.min(b, v));
 const monat = () => Math.floor((S.tag-1)/30) + 1;
 const schwierigkeitInfo = () => SCHWIERIGKEIT[S.schwierigkeit] || SCHWIERIGKEIT.mittel;
-const verkaufsMultiplikator = () => S.hilfsBonus ? 1.50 : schwierigkeitInfo().verkauf;
-const verkaufsEffektText = () => S.hilfsBonus ? "✨ Bonus aktiv · Verkaufserlöse +50 %" : schwierigkeitInfo().effekt;
+// Bonus: Runde mit +40/+60 % nach verfehltem Ziel auf Einfach (verkaufsBonus);
+// hilfsBonus (+50 %) stammt aus älteren Spielständen.
+const bonusProzent = () => S.verkaufsBonus || (S.hilfsBonus ? 50 : 0);
+const verkaufsMultiplikator = () => bonusProzent() ? 1 + bonusProzent() / 100 : schwierigkeitInfo().verkauf;
+const verkaufsEffektText = () => bonusProzent() ? `✨ Bonus aktiv · Verkaufserlöse +${bonusProzent()} %` : schwierigkeitInfo().effekt;
 const etappenEnde = () => Math.max(1,S.etappe||1) * ZIEL_TAGE;
 const etappenGewinn = () => (S.eingenommen-(S.etappeStartEingenommen||0)) - (S.ausgegeben-(S.etappeStartAusgegeben||0));
 const gesamtGewinn = () => S.eingenommen - S.ausgegeben;
