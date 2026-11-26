@@ -16,7 +16,8 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
   in den Einstellungen «Landschaft» (aus/leicht/voll) und «Meereswellen» (an/aus).
 - `karten-tiere.js` — Tiere auf der Karte: etwa alle 3 Minuten laufender Spielzeit
   (nach der Einführung) taucht im sichtbaren Kartenteil ein Tier auf, 3–5 pro Kontinent
-  plus Meerestiere; Antippen bringt CHF 1’000–3’000, nach 30 Sekunden zieht es weiter.
+  plus Arktis (Eisbär …), Pinguine und Meerestiere; Antippen bringt CHF 1’000–3’000,
+  nach 30 Sekunden zieht es weiter.
 - `module/` — zusammengeführte Bereiche: Hier wird eine Funktion genau einmal
   festgelegt statt in vielen Hüllen übereinander (siehe «Module» unten).
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.

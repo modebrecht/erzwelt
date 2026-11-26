@@ -3,7 +3,7 @@
    TIERE AUF DER KARTE
 
    Etwa alle drei Minuten laufender Spielzeit taucht im sichtbaren Teil der
-   Karte ein Tier auf (3–5 pro Kontinent, dazu Meerestiere). Wer es antippt,
+   Karte ein Tier auf (3–5 pro Kontinent, dazu Arktis, Pinguine und Meerestiere). Wer es antippt,
    bekommt einen kleinen Bonus: CHF 1’000, 1’500, 2’000, 2’500 oder 3’000.
    Nach 30 Sekunden zieht es weiter.
 
@@ -31,6 +31,10 @@
     asien: [["🐼", "Panda", "Sichuan", 103, 31], ["🐅", "Tiger", "Bengalen", 88, 23], ["🐫", "Kamel", "Gobi", 103, 43],
              ["🦧", "Orang-Utan", "Borneo", 114, 1], ["🐘", "Asiatischer Elefant", "Thailand", 101, 16]],
     australien: [["🦘", "Känguru", "Outback", 134, -25], ["🐨", "Koala", "New South Wales", 150, -31], ["🐊", "Krokodil", "Kakadu", 132.5, -13]],
+    arktis: [["🐻‍❄️", "Eisbär", "Hudson Bay", -92, 60], ["🦉", "Schneeeule", "Nunavut", -100, 67],
+             ["🦊", "Polarfuchs", "Grönland", -45, 70], ["🦌", "Rentier", "Lappland", 25, 68.5]],
+    // Die Antarktis liegt ausserhalb der Karte – Pinguine gibt es aber auch hier:
+    pinguine: [["🐧", "Magellan-Pinguin", "Patagonien", -66, -45], ["🐧", "Brillenpinguin", "Kap der Guten Hoffnung", 19.5, -33.5]],
     ozean: [["🐋", "Wal", "Atlantik", -38, 38], ["🐬", "Delfin", "Pazifik", -145, 12], ["🐢", "Meeresschildkröte", "Indischer Ozean", 75, -15],
              ["🦭", "Robbe", "Nordatlantik", -25, 58]]
   };
@@ -68,28 +72,48 @@
   }
   new MutationObserver(groesse).observe(welt, {attributes:true, attributeFilter:["style"]});
 
-  /* ---------- Wo darf ein Tier auftauchen? ---------- */
-  function sichtbereich(){
-    const z = ansicht.z, h = typeof kartenSichthoehe === "function" ? kartenSichthoehe() : sicht.clientHeight;
-    return {x0:-ansicht.x / z, y0:-ansicht.y / z, x1:(sicht.clientWidth - ansicht.x) / z, y1:(h - ansicht.y) / z};
-  }
-  function freierPlatz([x, y]){
-    for (const k in POS){ const [px, py] = POS[k]; if (Math.hypot(px - x, py - y) < 40) return false; }
+  /* ---------- Wo darf ein Tier auftauchen? ----------
+     In der Nähe seines Orts (bis ca. 45 Kartenpunkte daneben), Landtiere auf Land,
+     Meerestiere im Meer, mit Abstand zu den Pins und dort, wo man die Karte
+     wirklich sieht (nicht unter Kopfleiste, Aufgabenkarte oder Meldungen). */
+  const land = document.querySelector("#welt svg.weltkarte path.land:not(.kleine-inseln)");
+  const istLand = (x, y) => { try { return land.isPointInFill(new DOMPoint(x, y)); } catch (e){ return true; } };
+  const MEER = new Set(TIERE.ozean);
+  function freierPlatz(x, y){
+    for (const k in POS){ const [px, py] = POS[k]; if (Math.hypot(px - x, py - y) < 32) return false; }
     return true;
   }
-  function kandidaten(){
-    const b = sichtbereich(), rand = 30;
-    return ALLE.map(t => {
-      const [x, y] = kartenPunkt(t[3], t[4]);
+  function sichtbar(x, y){
+    const r = sicht.getBoundingClientRect();
+    const sx = r.left + ansicht.x + x * ansicht.z, sy = r.top + ansicht.y + y * ansicht.z;
+    // Mitte und Ränder des Abzeichens (es steht über dem Punkt)
+    return [[0, -24], [-22, -24], [22, -24], [0, -46], [0, 0]].every(([dx, dy]) => {
+      const el = document.elementFromPoint(sx + dx, sy + dy);
+      return !!el && sicht.contains(el);
+    });
+  }
+  function platz(t){
+    const [x0, y0] = kartenPunkt(t[3], t[4]), meer = MEER.has(t);
+    for (let i = 0; i < 14; i++){
+      const w = Math.random() * Math.PI * 2, r = i === 0 ? 0 : 8 + Math.random() * 37;
+      const x = x0 + Math.cos(w) * r, y = y0 + Math.sin(w) * r;
+      if (istLand(x, y) !== !meer || !freierPlatz(x, y) || !sichtbar(x, y)) continue;
       return {t, x, y};
-    }).filter(({x, y}) => x > b.x0 + rand && x < b.x1 - rand && y > b.y0 + 60 && y < b.y1 - rand && freierPlatz([x, y]));
+    }
+    return null;
+  }
+  function kandidaten(){
+    // zufällige Reihenfolge, das erste Tier mit freiem, sichtbarem Platz kommt
+    const liste = ALLE.slice().sort(() => Math.random() - .5);
+    for (const t of liste){ const p = platz(t); if (p) return [p]; }
+    return [];
   }
 
   /* ---------- Auftauchen, Antippen, Weiterziehen ---------- */
   function auftauchen(){
     const liste = kandidaten();
     if (!liste.length) return false;
-    const {t, x, y} = liste[Math.floor(Math.random() * liste.length)];
+    const {t, x, y} = liste[0];
     const [zeichen, name, ort] = t;
     const el = document.createElement("button");
     el.type = "button";
