@@ -7,21 +7,21 @@
   /* Teiltext → kürzere Fassung. Leere Fassung = Element weglassen. */
   const KUERZER = [
     // Wissen
-    ["Das Spiel pausiert hier automatisch. Beim Verlassen läuft es im vorherigen Tempo weiter.", "Die Zeit steht, solange du hier liest."],
-    ["Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist.", "Lesen ist gratis. Nur Verbesserungen kosten Geld."],
+    [textVon("kurztexte.das-spiel-pausiert-hier"), "Die Zeit steht, solange du hier liest."],
+    [textVon("kurztexte.wissen-ist-frei-zugaenglich"), "Lesen ist gratis. Nur Verbesserungen kosten Geld."],
     // Markt
-    ["Einmal pro Tag kannst du selbst verkaufen. Für den täglichen Verkauf setzt du Leute im Verkaufsteam ein.", "Selbst verkaufen: einmal pro Tag. Das Verkaufsteam verkauft jeden Tag."],
-    ["Einmal pro Tag kannst du selbst verkaufen. Wer das nicht jeden Tag machen will, stellt Verkäuferinnen an.", "Selbst verkaufen: einmal pro Tag. Das Verkaufsteam verkauft jeden Tag."],
-    ["Produzierst du deutlich mehr als nachgefragt wird, füllt sich das Lager und der Verkaufspreis sinkt.", "Mehr produziert als gekauft wird? Dann füllt sich das Lager und der Preis sinkt."],
+    [textVon("kurztexte.einmal-pro-tag-kannst"), "Selbst verkaufen: einmal pro Tag. Das Verkaufsteam verkauft jeden Tag."],
+    [textVon("kurztexte.einmal-pro-tag-kannst-2"), "Selbst verkaufen: einmal pro Tag. Das Verkaufsteam verkauft jeden Tag."],
+    [textVon("kurztexte.produzierst-du-deutlich-mehr"), textVon("kurztexte.mehr-produziert-als-gekauft")],
     // Team
-    ["Nicht eingeteilte Leute kosten CHF 200 pro Monat. Stell nur so viele an, wie du beschäftigen kannst.", "Leute ohne Aufgabe kosten trotzdem CHF 200 pro Monat."],
+    [textVon("kurztexte.nicht-eingeteilte-leute-kosten"), "Leute ohne Aufgabe kosten trotzdem CHF 200 pro Monat."],
     // Ziel
-    ["Tage kommt eine Abrechnung – danach kannst du weiterspielen", "Tage Abrechnung, danach geht es weiter"],
-    ["Ein niedriger Ruf senkt die Nachfrage nach allen deinen Produkten", "Tiefer Ruf = weniger Nachfrage"],
-    ["Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.", "Noch keine. Im Reiter Wissen siehst du, was dafür fehlt."],
+    [textVon("kurztexte.tage-kommt-eine-abrechnung"), textVon("kurztexte.tage-abrechnung-danach-geht")],
+    [textVon("kurztexte.ein-niedriger-ruf-senkt"), textVon("kurztexte.tiefer-ruf-weniger-nachfrage")],
+    ["Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.", textVon("kurztexte.noch-keine-im-reiter")],
     // Blatt Rohstoffquelle
-    ["Jede Stufe bringt +5 % und kostet mehr als die vorherige. Jede zehnte Stufe verdoppelt die Ausbringung.", "Jede Stufe +5 %, jede 10. Stufe verdoppelt."],
-    ["Sicherheitsmassnahmen senken das Unfallrisiko – unabhängig vom Lohn.", "Senkt das Unfallrisiko. Der Lohn ändert daran nichts."],
+    [textVon("kurztexte.jede-stufe-bringt-und"), textVon("kurztexte.jede-stufe-jede-stufe")],
+    [textVon("kurztexte.sicherheitsmassnahmen-senken-das-unfallrisiko"), textVon("kurztexte.senkt-das-unfallrisiko-der")],
     ["Lohn beeinflusst die Zufriedenheit.", ""],
     ["Sicherheitsmassnahmen beeinflussen das Unfallrisiko.", ""]
   ];
@@ -57,7 +57,7 @@
     }
     if (ohne){
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="4" style="color:var(--grau);font-weight:700">+ ${ohne} weitere Rohstoffe: noch keine Quelle</td>`;
+      tr.innerHTML = textVon("kurztexte.weitere-rohstoffe-noch-keine", {p1:(ohne)});
       tabelle.appendChild(tr);
     }
     tabelle.dataset.kurz = "1";

@@ -144,14 +144,14 @@
   function enhanceRaff(scene){
     const def=RAFF_ORTE.find(x=>x.id===scene.dataset.id);if(!def)return;
     const r=S.raff[def.id],k=raffMaterial(def),mat=MATERIAL[k];if(!mat)return;
-    const meta=ensureMeta(scene),raw=mat.rohstoff||"Rohstoff";
+    const meta=ensureMeta(scene),raw=mat.rohstoff||textVon("didacticmodel.rohstoff");
     const ein=meta.querySelector(".prozess-meta-ein"),aus=meta.querySelector(".prozess-meta-aus");
     const rawLager=Math.max(0,Math.round(S.erz[k]||0)),matLager=Math.max(0,Math.round(S.mat[k]||0));
-    setHtml(ein,`<b>${esc(raw)}</b><small>${rawLager} im Rohstofflager</small>`,`${raw}|${rawLager}`);
-    setHtml(aus,`<b>${esc(mat.name)}</b><small>${matLager} im Materiallager</small>`,`${mat.name}|${matLager}`);
+    setHtml(ein,textVon("transformation.im-rohstofflager", {p1:(esc(raw)), p2:(rawLager)}),`${raw}|${rawLager}`);
+    setHtml(aus,textVon("transformation.im-materiallager", {p1:(esc(mat.name)), p2:(matLager)}),`${mat.name}|${matLager}`);
     const active=!!r&&r.arbeiter>0&&(S.erz[k]||0)>.5;
     scene.classList.toggle("wartet",!!r&&!active);
-    scene.setAttribute("aria-label",active?`${raw} wird zu ${mat.name} raffiniert`:`Raffination pausiert: ${raw} zu ${mat.name}`);
+    scene.setAttribute("aria-label",active?textVon("transformation.wird-zu-raffiniert", {p1:(raw), p2:(mat.name)}):textVon("transformation.raffination-pausiert-zu", {p1:(raw), p2:(mat.name)}));
     markTick(scene);
   }
 
@@ -169,8 +169,8 @@
     const meta=ensureMeta(scene),keys=Object.keys(def.rezept||{});
     const ein=meta.querySelector(".prozess-meta-ein"),aus=meta.querySelector(".prozess-meta-aus");
     const names=keys.map(k=>MATERIAL[k]?.name||k),warehouse=Math.max(0,Math.round(S.ware[f.produkt]||0));
-    setHtml(ein,`<b>${esc(names.join(" + "))}</b><small>${keys.length} Material${keys.length===1?"":"ien"}</small>`,names.join("|"));
-    setHtml(aus,`<b>${esc(def.name)}</b><small>${warehouse} Stück im Lager</small>`,`f|${def.name}|${warehouse}`);
+    setHtml(ein,textVon("transformation.material", {p1:(esc(names.join(" + "))), p2:(keys.length), p3:(keys.length===1?"":"ien")}),names.join("|"));
+    setHtml(aus,textVon("transformation.stueck-im-lager", {p1:(esc(def.name)), p2:(warehouse)}),`f|${def.name}|${warehouse}`);
 
     const list=ensureMaterialList(scene);
     const chips=keys.map(k=>{
@@ -184,12 +184,12 @@
     scene.classList.toggle("wartet",f.restbau<=0&&!active);
     const st=scene.querySelector(".prozess-status-text");
     let text;
-    if(f.restbau>0)text=`Im Bau · noch ${f.restbau} Tage`;
-    else if(f.arbeiter<=0)text="Kein Personal zugewiesen";
-    else if(missing.length)text="Fehlt: "+missing.map(k=>MATERIAL[k]?.name||k).join(", ");
-    else text=`Produktion läuft · ${def.name}`;
+    if(f.restbau>0)text=textVon("transformation.im-bau-noch-tage", {p1:(f.restbau)});
+    else if(f.arbeiter<=0)text=textVon("transformation.kein-personal-zugewiesen");
+    else if(missing.length)text=textVon("transformation.fehlt")+missing.map(k=>MATERIAL[k]?.name||k).join(", ");
+    else text=textVon("transformation.produktion-laeuft", {p1:(def.name)});
     if(st&&st.textContent!==text)st.textContent=text;
-    scene.setAttribute("aria-label",active?`${names.join(", ")} werden zu ${def.name} verarbeitet`:`Fertigung pausiert: ${text}`);
+    scene.setAttribute("aria-label",active?textVon("transformation.werden-zu-verarbeitet", {p1:(names.join(", ")), p2:(def.name)}):textVon("transformation.fertigung-pausiert", {p1:(text)}));
     markTick(scene);
   }
 

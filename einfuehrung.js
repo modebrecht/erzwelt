@@ -70,9 +70,9 @@
     const fi = fabIndex();
     return [
       ...START_MATERIALIEN.map(k => { const id = materialMine(k); return {name: MAT_NAME(k), soll: BEDARF.quelle(k), ist: id ? S.minen[id].arbeiter : 0}; }),
-      {name:"Raffinerie", soll: BEDARF.raff, ist: Object.values(S.raff)[0]?.arbeiter || 0},
-      {name:"Fabrik", soll: BEDARF.fab, ist: fi >= 0 ? S.fabriken[fi].arbeiter : 0},
-      {name:"Verkauf", soll: BEDARF.verkauf, ist: S.verkaeufer || 0}
+      {name:textVon("einfuehrung.raffinerie"), soll: BEDARF.raff, ist: Object.values(S.raff)[0]?.arbeiter || 0},
+      {name:textVon("sekbklarheit.fabrik"), soll: BEDARF.fab, ist: fi >= 0 ? S.fabriken[fi].arbeiter : 0},
+      {name:textVon("tutorialenhanc.verkauf"), soll: BEDARF.verkauf, ist: S.verkaeufer || 0}
     ];
   }
   const offenerBedarf = () => bedarfListe().reduce((a, b) => a + Math.max(0, b.soll - b.ist), 0);
@@ -102,7 +102,7 @@
     const fehlt = n - ist;
     const v = fehlt > 0 && freieArbeiter() < fehlt ? zuViele(art + ":" + id) : null;
     if (v) return {
-      text: `In ${ortName(v.art, v.id)} arbeiten ${v.ist}, nötig sind ${v.brauch}. Öffne zuerst ${ortName(v.art, v.id)} und schieb den Regler auf ${v.brauch} – so musst du niemanden neu einstellen.`,
+      text: textVon("einfuehrung.in-arbeiten-noetig-sind", {p1:(ortName(v.art, v.id)), p2:(v.ist), p3:(v.brauch), p4:(ortName(v.art, v.id)), p5:(v.brauch)}),
       ziel: pinZiel(v.art, v.id), entlasten: v};
     return {text: normal, ziel: pinZiel(art, id)};
   }
@@ -115,22 +115,22 @@
     const name = MAT_NAME(k), n = BEDARF.quelle(k);
     return [
       { id: k + "-auf", ikon, titel: `${name} abbauen`,
-        get text(){ return `Tippe auf der Karte auf ${fett(ortName("mine", quelle(k)))} und eröffne die Rohstoffquelle.`; },
+        get text(){ return textVon("einfuehrung.tippe-auf-der-karte", {p1:(fett(ortName("mine", quelle(k))))}); },
         zusammenhang: zusammenhangAuf,
         ziel: () => pinZiel("mine", quelle(k)),
         kauf: () => ({art:"mine", id: quelle(k)}),
         fertig: () => !!materialMine(k) },
-      { id: k + "-crew", ikon:"person", get titel(){ return `Personal nach ${ortName("mine", quelle(k))}`; },
+      { id: k + "-crew", ikon:"person", get titel(){ return textVon("einfuehrung.personal-nach", {p1:(ortName("mine", quelle(k)))}); },
         get text(){
           const o = ortName("mine", quelle(k));
           const erst = k === START_MATERIALIEN[0] && !S.arbeiterGesamt
-            ? `Öffne ${fett(o)} und schieb den Regler auf ${n}. Die Leute werden dabei eingestellt.`
-            : `Öffne ${fett(o)} und schieb den Regler auf ${n} Personen.${warum ? " " + warum : ""}`;
+            ? textVon("einfuehrung.oeffne-und-schieb-den", {p1:(fett(o)), p2:(n)})
+            : textVon("einfuehrung.oeffne-und-schieb-den-2", {p1:(fett(o)), p2:(n), p3:(warum ? " " + warum : "")});
           return besetzen("mine", quelle(k), n, erst).text;
         },
         zusammenhang: k === START_MATERIALIEN[0]
           ? "Personal kostet zweimal: einmal beim Einstellen, danach jeden Monat Lohn."
-          : `Ohne Personal wird kein ${rohstoffName(k)} gefördert.`,
+          : textVon("einfuehrung.ohne-personal-wird-kein", {p1:(rohstoffName(k))}),
         ziel: () => besetzen("mine", quelle(k), n, "").ziel,
         crew: () => ({tun:"crew", ref: quelle(k), n}),
         fertig: () => { const id = materialMine(k); return !!id && S.minen[id].arbeiter >= n; } }
@@ -144,47 +144,47 @@
   const SCHRITTE = [
     ...quellenSchritte(CU, "hacke", "Das Ladekabel braucht Kupfer, Aluminium und Zinn. Jede Rohstoffquelle liefert einen Rohstoff.",
       "Kabel brauchen doppelt so viel Kupfer wie Aluminium."),
-    ...quellenSchritte(AL, "berg", "Bauxit wird später zu Aluminium."),
-    ...quellenSchritte(SN, "berg", "Zinnerz wird später zu Zinn. Jetzt hast du alle drei Rohstoffe.",
-      "Zinnerz enthält wenig Zinn – darum braucht es hier mehr Leute als in Boké."),
-    { id:"raff", ikon:"kolben", titel:"Raffinerie bauen",
-      get text(){ return `Rohstoff lässt sich nicht direkt verbauen. Tippe auf ${fett(ortName("raff", raffId()))} und baue die Raffinerie.`; },
-      zusammenhang:"Rohstoff → Raffinerie → Material",
+    ...quellenSchritte(AL, "berg", textVon("einfuehrung.bauxit-wird-spaeter-zu")),
+    ...quellenSchritte(SN, "berg", textVon("einfuehrung.zinnerz-wird-spaeter-zu"),
+      textVon("einfuehrung.zinnerz-enthaelt-wenig-zinn")),
+    { id:"raff", ikon:"kolben", titel:textVon("einfuehrung.raffinerie-bauen"),
+      get text(){ return textVon("einfuehrung.rohstoff-laesst-sich-nicht", {p1:(fett(ortName("raff", raffId())))}); },
+      zusammenhang:textVon("einfuehrung.rohstoff-raffinerie-material"),
       ziel: () => pinZiel("raff", raffId()),
       kauf: () => ({art:"raff", id: raffId()}),
       fertig: () => Object.keys(S.raff).length > 0 },
-    { id:"raffcrew", ikon:"person", get titel(){ return `Personal nach ${ortName("raff", raffId())}`; },
-      get text(){ const o = ortName("raff", raffId()); return besetzen("raff", raffId(), 5, `Öffne ${fett(o)} und schieb den Regler auf 5 Personen.`).text; },
+    { id:"raffcrew", ikon:"person", get titel(){ return textVon("einfuehrung.personal-nach", {p1:(ortName("raff", raffId()))}); },
+      get text(){ const o = ortName("raff", raffId()); return besetzen("raff", raffId(), 5, textVon("einfuehrung.oeffne-und-schieb-den-3", {p1:(fett(o))})).text; },
       zusammenhang:"Ohne Personal steht die Raffinerie still.",
       ziel: () => besetzen("raff", raffId(), 5, "").ziel,
       crew: () => ({tun:"rcrew", ref: raffId(), n:5}),
       fertig: () => Object.values(S.raff).some(r => r.arbeiter >= 5) },
-    { id:"fab", ikon:"fabrik", titel:"Kabelfabrik bauen",
-      get text(){ return `Tippe auf den Fabrikstandort ${fett(ortName("fab", fabLand()))} und baue die Fabrik für Ladekabel.`; },
-      zusammenhang:"Material → Fabrik → Produkt",
+    { id:"fab", ikon:"fabrik", titel:textVon("einfuehrung.kabelfabrik-bauen"),
+      get text(){ return textVon("einfuehrung.tippe-auf-den-fabrikstandort", {p1:(fett(ortName("fab", fabLand())))}); },
+      zusammenhang:textVon("einfuehrung.material-fabrik-produkt"),
       ziel: () => pinZiel("fab", fabLand()),
       kauf: () => ({art:"fab", id: fabLand()}),
       fertig: () => S.fabriken.length > 0 },
-    { id:"fab-crew", ikon:"zahnrad", titel:"Personal in die Fabrik",
+    { id:"fab-crew", ikon:"zahnrad", titel:textVon("einfuehrung.personal-in-die-fabrik"),
       get text(){
         const f = S.fabriken[fabIndex()];
-        if (f && f.restbau > 0) return `Die Fabrik wird gebaut. Noch ${f.restbau} ${f.restbau === 1 ? "Tag" : "Tage"} – lass die Zeit laufen.`;
-        return besetzen("fab", fabLand(), 5, `Die Fabrik ist fertig. Öffne ${fett(ortName("fab", fabLand()))} und schieb den Regler auf 5 Personen.`).text;
+        if (f && f.restbau > 0) return textVon("einfuehrung.die-fabrik-wird-gebaut", {p1:(f.restbau), p2:(f.restbau === 1 ? "Tag" : "Tage")});
+        return besetzen("fab", fabLand(), 5, textVon("einfuehrung.die-fabrik-ist-fertig", {p1:(fett(ortName("fab", fabLand())))})).text;
       },
-      zusammenhang:"Personal + Material → Ladekabel",
+      zusammenhang:textVon("einfuehrung.personal-material-ladekabel"),
       ziel: () => { const f = S.fabriken[fabIndex()]; return f && f.restbau > 0 ? pinZiel("fab", fabLand()) : besetzen("fab", fabLand(), 5, "").ziel; },
       crew: () => { const f = S.fabriken[fabIndex()]; return f && f.restbau <= 0 ? {tun:"fcrew", ref: fabIndex(), n:5} : null; },
       fertig: () => S.fabriken.some(f => f.restbau === 0 && f.arbeiter >= BEDARF.fab) },
-    { id:"verkauf", ikon:"markt", titel:"Ladekabel selbst verkaufen",
-      text:"Tippe unten auf «Markt» und dann auf «Selbst verkaufen».",
-      zusammenhang:"Produkt → Verkauf → Geld",
+    { id:"verkauf", ikon:"markt", titel:textVon("einfuehrung.ladekabel-selbst-verkaufen"),
+      text:textVon("einfuehrung.tippe-unten-auf-markt"),
+      zusammenhang:textVon("einfuehrung.produkt-verkauf-geld"),
       ziel: () => "dock:markt",
       fertig: () => S.verkauftSelber },
-    { id:"verkaeufer", ikon:"muenze", titel:"Verkaufsteam einsetzen",
+    { id:"verkaeufer", ikon:"muenze", titel:textVon("einfuehrung.verkaufsteam-einsetzen"),
       get text(){
-        return `Im Markt beim Verkaufsteam: Schieb den Regler auf ${BEDARF.verkauf} Personen. Jede verkauft ${STUECK_PRO_VERKAEUFER} Kabel pro Tag – zusammen mehr, als die Fabrik herstellt.`;
+        return textVon("einfuehrung.im-markt-beim-verkaufsteam", {p1:(BEDARF.verkauf), p2:(STUECK_PRO_VERKAEUFER)});
       },
-      zusammenhang:"Das Verkaufsteam verkauft jeden Tag – du musst nicht mehr selbst.",
+      zusammenhang:textVon("einfuehrung.das-verkaufsteam-verkauft-jeden"),
       ziel: () => "dock:markt",
       crew: () => ({tun:"vcrew", ref:null, n: BEDARF.verkauf}),
       fertig: () => (S.verkaeufer || 0) >= BEDARF.verkauf }
@@ -240,8 +240,8 @@
     const k = kaufZiel(), t = schritt();
     const ziel = k ? {art:k.art, id:k.id} : zielAusText(t && t.ziel());
     const wohin = ziel ? `<button class="einfuehrung-hin" data-einfuehrung-hin="${ziel.art}:${ziel.id}">Zu ${ortName(ziel.art, ziel.id)}</button>` : "";
-    const was = k ? `Hier noch nicht. In der Einführung ist jetzt <b>${ortName(k.art, k.id)}</b> dran.`
-                  : "Hier noch nicht. Folge Schritt für Schritt der Aufgabe – danach sind alle Orte offen.";
+    const was = k ? textVon("einfuehrung.hier-noch-nicht-in", {p1:(ortName(k.art, k.id))})
+                  : textVon("einfuehrung.hier-noch-nicht-folge");
     return `<div class="notiz einfuehrung-sperre">${was}${wohin}</div>`;
   }
   function zielAusText(z){
@@ -261,7 +261,7 @@
     let ersetzt = false;
     for (const re of ALTE_NOTIZEN) html = html.replace(re, () => { ersetzt = true; return sperrHinweis(); });
     html = html.replace(KAUF_KNOPF, (_, tun, attrs) =>
-      `<button class="cta" data-tun="${tun}"${attrs.replace(/\sdisabled\b/g, "")} disabled>Noch nicht dran</button>`);
+      textVon("einfuehrung.noch-nicht-dran", {p1:(tun), p2:(attrs.replace(/\sdisabled\b/g, ""))}));
     if (!ersetzt) html = html.replace(/(<div class="titelzeile">[\s\S]*?<\/div><\/div><\/div>)/, `$1${sperrHinweis()}`);
     return html;
   }
@@ -314,11 +314,7 @@
   (window.__erzweltSeitenTeile ||= {}).teamEinfuehrung = function(html){
     if (!tutorialLaeuft()) return html;
     const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.ist}/${b.soll}</b></span>`).join("");
-    return html.replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
-        <b>Eingestellt wird an der Station</b>
-        <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was einmalig und was jeden Monat kostet.</small>
-        <div class="bedarf-liste">${liste}</div>
-      </div>`);
+    return html.replace(textVon("einfuehrung.stelle-mehr-personen-ein"), textVon("einfuehrung.dein-personal-in-der")).replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, textVon("einfuehrung.eingestellt-wird-an-der", {p1:(liste)}));
   };
 
   /* ---------- Wissen: Verbesserungen erst nach der Einführung ---------- */
@@ -326,7 +322,7 @@
   (window.__erzweltWissenTeile ||= {}).lupeEinfuehrung = function(){
     if (tutorialLaeuft()) document.querySelectorAll('#lupe [data-tun="perk"]').forEach(b => {
       b.disabled = true; b.classList.remove("puls");
-      b.textContent = "Erst nach der Einführung";
+      b.textContent = textVon("einfuehrung.erst-nach-der-einfuehrung");
     });
   };
 

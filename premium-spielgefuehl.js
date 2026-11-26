@@ -174,7 +174,7 @@
     const ein = S.eingenommen - mb.ein, aus = S.ausgegeben - mb.aus;
     const laufend = ein - lohn - betrieb, investiert = Math.max(0, aus - lohn - betrieb);
     const trend = mb.letzt === null ? "" : laufend > mb.letzt ? "▲" : laufend < mb.letzt ? "▼" : "►";
-    const trendTitel = trend === "▲" ? "besser als im Vormonat" : trend === "▼" ? "schlechter als im Vormonat" : "gleich wie im Vormonat";
+    const trendTitel = trend === "▲" ? textVon("premiumspielge.besser-als-im-vormonat") : trend === "▼" ? textVon("premiumspielge.schlechter-als-im-vormonat") : textVon("premiumspielge.gleich-wie-im-vormonat");
     const besser = mb.letzt === null || laufend >= mb.letzt;
     S.monatsBilanz = {ein:S.eingenommen, aus:S.ausgegeben, letzt:laufend};
     const verlauf = Array.isArray(S.monatsVerlauf) ? S.monatsVerlauf : (S.monatsVerlauf = []);
@@ -184,10 +184,10 @@
     while (verlauf.length > 6) verlauf.shift();
     const monat = Math.max(1, Math.round((S.tag - 1) / 30));
     const betrag = v => `<span class="mb-zahl">${(v >= 0 ? "+" : "−") + chf(Math.abs(Math.round(v)))}</span>`;
-    return `<span class="mb-kopf"><b>Monat ${monat} · Laufendes Geschäft <span class="${laufend >= 0 ? "mb-plus" : "mb-minus"}">${betrag(laufend)}</span></b>`
+    return textVon("premiumspielge.monat-laufendes-geschaeft", {p1:(monat), p2:(laufend >= 0 ? "mb-plus" : "mb-minus"), p3:(betrag(laufend))})
       + (trend ? ` <span class="mb-trend ${besser ? "mb-plus" : "mb-minus"}" title="${trendTitel}">${trend}</span>` : "") + `</span>`
-      + ` <span class="mb-zeile">Einnahmen <span class="mb-plus">${betrag(ein)}</span> · Löhne und Betrieb <span class="mb-minus">${betrag(-(lohn + betrieb))}</span></span>`
-      + (investiert >= 1 ? ` <span class="mb-klein">Dazu investiert: <span class="mb-zahl">${chf(Math.round(investiert))}</span></span>` : "");
+      + textVon("premiumspielge.einnahmen-loehne-und-betrieb", {p1:(betrag(ein)), p2:(betrag(-(lohn + betrieb)))})
+      + (investiert >= 1 ? textVon("premiumspielge.dazu-investiert", {p1:(chf(Math.round(investiert)))}) : "");
   }
   /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
   const meldungenTeile = (window.__erzweltMeldungenTeile ||= {});
@@ -244,7 +244,7 @@
     if (!sichtbar){ lwKnopf.classList.remove("offen"); return; }
     const mine = MINEN.find(x => x.id === r.mineId), raff = RAFF_ORTE.find(x => x.id === r.raffId);
     const km = Math.round(((r.d1 || 0) + (r.d2 || 0)) / 100) * 100;
-    const inhalt = `<span class="lw-ikon" aria-hidden="true">${IK.karte}</span><span>Lieferweg<small>≈ ${km.toLocaleString("de-CH")} km</small>`
+    const inhalt = textVon("premiumspielge.lieferweg-km", {p1:(IK.karte), p2:(km.toLocaleString("de-CH"))})
       + `<span class="lw-mehr">${mine?.ort || ""} → ${raff?.ort || ""} → ${LAND[r.fabrik.land]?.name || ""}. `
       + `Nur zur Orientierung: Transportkosten und Lieferzeiten rechnet das Spiel nicht.</span></span>`;
     if (lwKnopf.dataset.inhalt !== inhalt){ lwKnopf.innerHTML = inhalt; lwKnopf.dataset.inhalt = inhalt; }

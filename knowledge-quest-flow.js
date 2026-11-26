@@ -43,51 +43,51 @@
   const QUESTS=[
     {
       id:"basis", seg:"kette", fields:["kette","chemie","fabrik"],
-      titel:"Deine Lieferkette steht",
+      titel:textVon("knowledgequest.deine-lieferkette-steht"),
       aufgabe:"Schliesse zuerst das Tutorial ab.",
       fertig:()=>!tutorialLaeuft(),
-      erfolg:"Du hast Rohstoffquelle → Raffinerie → Fabrik → Verkauf einmal vollständig erlebt."
+      erfolg:textVon("knowledgequest.du-hast-rohstoffquelle-raffinerie")
     },
     {
       id:"lohn", seg:"leute", fields:["leute"],
-      titel:"Lohn & Zufriedenheit beobachten",
+      titel:textVon("knowledgequest.lohn-zufriedenheit-beobachten"),
       aufgabe:() => eigeneLohnquelle()
-        ? "Ändere die Lohnstufe in einer deiner Rohstoffquellen. Beobachte danach den Zielwert der Zufriedenheit."
-        : "Eröffne eine eigene Rohstoffquelle, damit du dort die Lohnstufe ändern kannst.",
+        ? textVon("knowledgequest.aendere-die-lohnstufe-in")
+        : textVon("knowledgequest.eroeffne-eine-eigene-rohstoffquelle"),
       ziel:() => minenZiel(eigeneLohnquelle(), "lohn"),
       fertig:q=>!!q.flags.lohn,
-      erfolg:"Du hast die Lohnstufe verändert. Im Spiel wirkt der Lohn auf die Zufriedenheit."
+      erfolg:textVon("knowledgequest.du-hast-die-lohnstufe")
     },
     {
       id:"markt", seg:"markt", fields:["markt"],
-      titel:"Markt selbst ausprobieren",
+      titel:textVon("knowledgequest.markt-selbst-ausprobieren"),
       aufgabe:"Verkaufe nach dem Tutorial einmal selbst ein Produkt im Markt.",
       ziel:() => ({type:"dock", seite:"markt"}),
       fertig:q=>!!q.flags.markt,
-      erfolg:"Du hast selbst verkauft. Produkt → Verkauf → Geld ist jetzt sichtbar."
+      erfolg:textVon("knowledgequest.du-hast-selbst-verkauft")
     },
     {
       id:"geologie", seg:"geologie", fields:["geologie"],
-      titel:"Rohstoffstandorte vergleichen",
-      aufgabe:q=>`Öffne zwei verschiedene Rohstoffstandorte auf der Karte. ${Math.min(2,q.geologieBesucht.length)}/2 angesehen.`,
+      titel:textVon("knowledgequest.rohstoffstandorte-vergleichen"),
+      aufgabe:q=>textVon("knowledgequest.oeffne-zwei-verschiedene-rohstoffstandorte", {p1:(Math.min(2,q.geologieBesucht.length))}),
       ziel:() => minenZiel(naechsterGeologieStandort()),
       fertig:q=>q.geologieBesucht.length>=2,
-      erfolg:"Du hast zwei Rohstoffstandorte angesehen. Rohstoffe liegen nicht überall am selben Ort."
+      erfolg:textVon("knowledgequest.du-hast-zwei-rohstoffstandorte")
     },
     {
       id:"ruf", seg:"ruf", fields:["ruf"],
-      titel:"Ruf und Nachweise unterscheiden",
-      aufgabe:"Öffne «Ziel». Vergleiche dort Ruf und Lieferkettennachweise.",
+      titel:textVon("knowledgequest.ruf-und-nachweise-unterscheiden"),
+      aufgabe:textVon("knowledgequest.oeffne-ziel-vergleiche-dort"),
       ziel:() => ({type:"dock", seite:"ziel"}),
       fertig:q=>!!q.flags.ruf,
       erfolg:"Du hast Ruf und Nachweise verglichen. Sie haben im Spiel unterschiedliche Aufgaben."
     },
     {
       id:"modell", seg:"modell", fields:["modell"],
-      titel:"Das Spielmodell einordnen",
+      titel:textVon("knowledgequest.das-spielmodell-einordnen"),
       aufgabe:"Schliesse zuerst die vorherigen Wissens-Quests ab.",
       fertig:q=>QUESTS.slice(0,-1).every(x=>q.collected[x.id]),
-      erfolg:"Du hast die wichtigsten Spielzusammenhänge ausprobiert. Jetzt kannst du das vereinfachte Modell nochmals einordnen."
+      erfolg:textVon("knowledgequest.du-hast-die-wichtigsten")
     }
   ];
 
@@ -119,10 +119,10 @@
       kette:"Schliesse das Tutorial ab und erlebe die ganze Lieferkette.",
       chemie:"Schliesse das Tutorial ab und erlebe die Raffination.",
       fabrik:"Schliesse das Tutorial ab und produziere das erste Produkt.",
-      leute:"Ändere nach dem Tutorial einmal die Lohnstufe einer Rohstoffquelle.",
+      leute:textVon("knowledgequest.aendere-nach-dem-tutorial"),
       markt:"Verkaufe nach dem Tutorial einmal selbst ein Produkt.",
-      geologie:"Öffne zwei verschiedene Rohstoffstandorte auf der Karte.",
-      ruf:"Öffne «Ziel» und vergleiche Ruf mit Lieferkettennachweisen.",
+      geologie:textVon("knowledgequest.oeffne-zwei-verschiedene-rohstoffstandorte-2"),
+      ruf:textVon("knowledgequest.oeffne-ziel-und-vergleiche"),
       modell:"Schliesse die vorherigen Wissens-Quests ab."
     };
     return map[segId]||"Erlebe diesen Zusammenhang einmal im Spiel.";
@@ -166,7 +166,7 @@
     q.classList.add("wissen-quest");
     q.classList.toggle("wissen-bereit",ready);
     const art=document.getElementById("q-art");
-    if(art) art.textContent=ready?"Wissen freigeschaltet":`Wissens-Quest ${index+1}/${QUESTS.length}`;
+    if(art) art.textContent=ready?textVon("knowledgequest.wissen-freigeschaltet"):textVon("knowledgequest.wissens-quest", {p1:(index+1), p2:(QUESTS.length)});
     const emoji=document.getElementById("q-emoji");
     if(emoji) emoji.innerHTML=ready?(IK.gluehbirne||IK.wissen||IK.ziel):(IK.wissen||IK.ziel);
     const points=document.getElementById("q-punkte");
@@ -177,7 +177,7 @@
       button.type="button";
       button.className="wissen-quest-action";
       button.dataset.wissenQuest=def.id;
-      button.textContent="Ansehen";
+      button.textContent=textVon("knowledgequest.ansehen");
       points?.insertAdjacentElement("beforebegin",button);
       document.querySelectorAll('[data-seite="wissen"]').forEach(b=>b.classList.add("wink"));
     }

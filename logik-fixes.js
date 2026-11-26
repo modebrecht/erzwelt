@@ -87,31 +87,31 @@
       : null;
     if (grund === "insolvenz"){
       dialogZeigen({
-        art:"Insolvenz", titel:"Die Firma ist zahlungsunfähig",
-        text:`Deine Kasse ist unter −CHF 800’000 gefallen. Die laufende Reise endet an Tag ${S.tag}.`
+        art:textVon("abschlusszerti.insolvenz"), titel:textVon("logikfixes.die-firma-ist-zahlungsunfaehig"),
+        text:textVon("logikfixes.deine-kasse-ist-unter", {p1:(S.tag)})
           + (hilfeRunden ? "<br><br>" + textVon("bonus.frage") : ""),
-        wahlen: hilfeRunden || [{text:"Neue Runde starten", klein:"Schwierigkeit neu wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }}]
+        wahlen: hilfeRunden || [{text:textVon("logikfixes.neue-runde-starten"), klein:textVon("logikfixes.schwierigkeit-neu-waehlen"), tun:()=>{ setTimeout(zuruecksetzen,0); }}]
       });
       return;
     }
 
     const freischaltText = mittelUnlock
-      ? `<br><br><b>Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
+      ? textVon("logikfixes.schwer-freigeschaltet-du-kannst") : "";
     const wahlen = [
-      {text:`Weiter · Etappe ${(S.etappe||1)+1}`, klein:`Nochmals ${ZIEL_TAGE} Tage mit derselben Firma`, tun:()=>{ etappeWeiter(vorherTempo); }}
+      {text:textVon("logikfixes.weiter-etappe", {p1:((S.etappe||1)+1)}), klein:textVon("logikfixes.nochmals-tage-mit-derselben", {p1:(ZIEL_TAGE)}), tun:()=>{ etappeWeiter(vorherTempo); }}
     ];
     if (hilfeRunden) wahlen.push(...hilfeRunden);
-    else wahlen.push({text:"Neue Runde starten", klein:"Speicherplatz und Schwierigkeit wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }});
+    else wahlen.push({text:textVon("logikfixes.neue-runde-starten"), klein:textVon("logikfixes.speicherplatz-und-schwierigkeit-waehlen"), tun:()=>{ setTimeout(zuruecksetzen,0); }});
     dialogZeigen({
-      art:`Etappe ${S.etappe} · ${ZIEL_TAGE} Tage`,
-      titel: geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt",
-      text: `Etappengewinn: ${chf(gewinn)} (Ziel ${chf(ziel)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br>`
-          + `Schwierigkeit: ${schwierigkeitInfo().icon} <b>${schwierigkeitInfo().name}</b> · ${verkaufsEffektText()}.<br><br>`
+      art:textVon("logikfixes.etappe-tage", {p1:(S.etappe), p2:(ZIEL_TAGE)}),
+      titel: geschafft ? textVon("slot.zielErreicht") : textVon("abschlusszerti.etappenziel-verfehlt"),
+      text: textVon("logikfixes.etappengewinn-ziel-ruf-ziel", {p1:(chf(gewinn)), p2:(chf(ziel)), p3:(Math.round(S.ruf)), p4:(ZIEL_RUF)})
+          + textVon("logikfixes.schwierigkeit", {p1:(schwierigkeitInfo().icon), p2:(schwierigkeitInfo().name), p3:(verkaufsEffektText())})
           + (geschafft
-              ? "Du hast Geld verdient <b>und</b> den Ruf gehalten. Du kannst jetzt weiterbauen und dich der nächsten gleich langen Etappe stellen."
+              ? textVon("logikfixes.du-hast-geld-verdient")
               : (gewinn >= ziel
-                 ? "Der Gewinn stimmt, aber der Ruf nicht. Du darfst trotzdem weiterspielen und es in der nächsten Etappe erneut versuchen."
-                 : "Der Gewinn reicht noch nicht. Du darfst trotzdem weiterspielen und deine Lieferkette in der nächsten Etappe verbessern."))
+                 ? textVon("logikfixes.der-gewinn-stimmt-aber")
+                 : textVon("logikfixes.der-gewinn-reicht-noch")))
           + (hilfeRunden ? "<br><br>" + textVon("bonus.frageEtappe") : "")
           + freischaltText,
       wahlen
@@ -128,12 +128,12 @@
     const p1 = rufSeg.perks.find(p => p.id === "ruf1");
     const p2 = rufSeg.perks.find(p => p.id === "ruf2");
     if (p1){
-      p1.text = "Ein Transparenzbericht dokumentiert die Herkunft aller deiner Rohstoffquellen. Er stärkt auch Ruf und Nachfrage.";
-      p1.wirkung = ["Herkunftsnachweise für alle Quellen", "Ruf sofort +8", "Nachfrage +5 %"];
+      p1.text = textVon("logikfixes.ein-transparenzbericht-dokumentiert-die");
+      p1.wirkung = [textVon("logikfixes.herkunftsnachweise-fuer-alle-quellen"), textVon("logikfixes.ruf-sofort"), textVon("logikfixes.nachfrage")];
     }
     if (p2){
-      p2.text = "Unabhängige Stellen prüfen alle Rohstoffquellen. Das stärkt die Nachfrage und dämpft Rufverluste.";
-      p2.wirkung = ["Herkunftsnachweise zertifiziert", "Nachfrage +10 %", "Rufverluste −40 %"];
+      p2.text = textVon("logikfixes.unabhaengige-stellen-pruefen-alle");
+      p2.wirkung = [textVon("logikfixes.herkunftsnachweise-zertifiziert"), textVon("logikfixes.nachfrage-2"), textVon("logikfixes.rufverluste")];
     }
   }
 
@@ -142,14 +142,9 @@
     if (!m || tutorialLaeuft()) return "";
     const perk = nachweisDurchPerk();
     const ok = !!(perk || m.nachweis);
-    const status = perk ? `${perk} (Transparenzbericht)` : m.nachweis ? "geprüft" : "fehlt";
+    const status = perk ? `${perk} (Transparenzbericht)` : m.nachweis ? textVon("logikfixes.geprueft") : "fehlt";
     const genug = S.kasse >= NACHWEIS_KOSTEN;
-    return `<div class="karte nachweiskarte ${ok ? "sicher" : "offen"}">
-      <h3>Herkunftsnachweis</h3>
-      <div class="ort">Eine Prüfung zeigt, woher dein Rohstoff kommt. Das Lieferkettengesetz verlangt das für <b>jede</b> Quelle.</div>
-      <div class="zeile"><span>Status</span><b style="color:${ok ? "var(--gruen)" : "var(--warn)"}">${status}</b></div>
-      ${ok ? "" : `<button class="cta gruen" data-didaktik="nachweis" data-id="${id}" ${genug ? "" : "disabled"}>${IK.schild}${genug ? "Herkunft prüfen lassen · " + chf(NACHWEIS_KOSTEN) : "Zu wenig Geld · " + chf(NACHWEIS_KOSTEN)}</button>`}
-    </div>`;
+    return textVon("logikfixes.herkunftsnachweis-eine-pruefung-zeigt", {p1:(ok ? "sicher" : "offen"), p2:(ok ? "var(--gruen)" : "var(--warn)"), p3:(status), p4:(ok ? "" : `<button class="cta gruen" data-didaktik="nachweis" data-id="${id}" ${genug ? "" : "disabled"}>${IK.schild}${genug ? "Herkunft prüfen lassen · " + chf(NACHWEIS_KOSTEN) : "Zu wenig Geld · " + chf(NACHWEIS_KOSTEN)}</button>`)});
   }
 
   /* Rohstoffquelle: Nachweis-Karte vor der Zufriedenheit (Reihenfolge: module/blatt.js) */
@@ -168,7 +163,7 @@
     if (!m || m.nachweis || S.kasse < NACHWEIS_KOSTEN) return;
     S.kasse -= NACHWEIS_KOSTEN; S.ausgegeben += NACHWEIS_KOSTEN; m.nachweis = true;
     const n = offeneMinen().length, g = geprueft();
-    notiz(`<b>${MINEN.find(x => x.id === id).ort}</b>: Herkunft geprüft · ${g} von ${n} Rohstoffquellen haben einen Nachweis.`, "gut");
+    notiz(textVon("logikfixes.herkunft-geprueft-von-rohstoffquellen", {p1:(MINEN.find(x => x.id === id).ort), p2:(g), p3:(n)}), "gut");
     speichern(); blattStand = ""; seitenStand = ""; zeichnen();
   }, true);
 
@@ -179,21 +174,17 @@
     const invest = etappenInvestitionen();
     html = html.replace(/(<div class="leiste"><i style="width:)[\d.]+(%;background:var\(--gold\)"><\/i><\/div>)/,
       `$1${klemm(gewinn / ziel * 100, 0, 100)}$2`);
-    html = html.replace(`Ziel ${chf(ZIEL_GEWINN)} · Gesamtgewinn`, `Ziel ${chf(ziel)} · Gesamtgewinn`);
+    html = html.replace(textVon("logikfixes.ziel-gesamtgewinn", {p1:(chf(ZIEL_GEWINN))}), textVon("logikfixes.ziel-gesamtgewinn", {p1:(chf(ziel))}));
     html = html.replace(/(Gesamtgewinn seit Start [^<]*<\/div>)/,
-      `$1
-      <div class="zeile" style="margin-top:8px"><span>Davon Investitionen</span><b>${chf(-invest)}</b></div>
-      <div class="zeile"><span>Laufendes Geschäft</span><b style="color:${gewinn + invest >= 0 ? "var(--gruen)" : "var(--alarm)"}">${chf(gewinn + invest)}</b></div>
-      <div class="ort">Investitionen: Standorte, Ausbau, Leute, Verbesserungen. Sie lohnen sich erst über Verkäufe.</div>`);
+      textVon("logikfixes.davon-investitionen-laufendes-geschaeft", {p1:(chf(-invest)), p2:(gewinn + invest >= 0 ? "var(--gruen)" : "var(--alarm)"), p3:(chf(gewinn + invest))}));
 
     const n = offeneMinen().length, g = geprueft(), perk = nachweisDurchPerk();
     const hilfe = perk
-      ? `Der Transparenzbericht gilt für alle deine Rohstoffquellen.`
-      : `Nachweis holen: Quelle öffnen → <b>«Herkunft prüfen lassen»</b> (${chf(NACHWEIS_KOSTEN)}). Oder im Reiter Wissen den <b>Transparenzbericht</b> finanzieren: gilt für alle.`;
+      ? textVon("logikfixes.der-transparenzbericht-gilt-fuer")
+      : textVon("logikfixes.nachweis-holen-quelle-oeffnen", {p1:(chf(NACHWEIS_KOSTEN))});
     html = html.replace(
       '<div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div>',
-      `${perk ? "" : `<div class="zeile"><span>Geprüfte Rohstoffquellen</span><b>${g} von ${n}</b></div>`}
-      <div class="notiz">Das Lieferkettengesetz verlangt für jede Quelle einen Nachweis. ${hilfe}</div>`);
+      textVon("logikfixes.das-lieferkettengesetz-verlangt-fuer", {p1:(perk ? "" : `<div class="zeile"><span>Geprüfte Rohstoffquellen</span><b>${g} von ${n}</b></div>`), p2:(hilfe)}));
     return html;
   };
 
@@ -204,10 +195,10 @@
       if (status.stufe === 0){
         const n = offeneMinen().length, fehlen = n - geprueft();
         S.kasse -= 180000; S.ausgegeben += 180000;
-        return {passiv:true, text:`<b>Lieferkettengesetz</b> – für ${fehlen} von ${n} Rohstoffquellen fehlen Herkunftsnachweise. Busse: CHF 180'000.`, art:"alarm"};
+        return {passiv:true, text:textVon("logikfixes.lieferkettengesetz-fuer-von-rohstoffquellen", {p1:(fehlen), p2:(n)}), art:"alarm"};
       }
       for (const f of S.fabriken || []) S.nachfrageMod[f.produkt] = {faktor:1.3, bis:S.tag+90};
-      return {passiv:true, text:`<b>Lieferkettengesetz</b> – deine Nachweise sind ${status.text}. Grosskunden bestellen 90 Tage lang 30 % mehr von deinen Produkten.`, art:"gut"};
+      return {passiv:true, text:textVon("logikfixes.lieferkettengesetz-deine-nachweise-sind", {p1:(status.text)}), art:"gut"};
     };
   }
 
@@ -217,7 +208,7 @@
     taiwan.bau = function(){
       S.nachfrageMod.phone = {faktor:1.5, bis:S.tag+70};
       S.nachfrageMod.konsole = {faktor:1.5, bis:S.tag+70};
-      return {passiv:true, text:"<b>Erdbeben bei Taiwan</b> – andere Firmen können weniger Elektronik liefern. Die Nachfrage nach Smartphones und Konsolen steigt 70 Tage lang um 50 %.", art:"warn"};
+      return {passiv:true, text:textVon("logikfixes.erdbeben-bei-taiwan-andere"), art:"warn"};
     };
   }
 
@@ -228,13 +219,13 @@
       const def = MINEN.find(x => x.id === id);
       return {
         offenesEreignis:{id:recherche.id, mine:id},
-        art:"Recherche", titel:"Fragen zu deiner Lieferkette", land:def.land,
-        text:`Eine Recherche stellt Fragen zu den Arbeitsbedingungen in ${def.ort}. Deine Firma kann für diese Rohstoffquelle noch keine unabhängige Prüfung vorlegen.`,
+        art:textVon("didacticevents.recherche"), titel:textVon("didacticevents.fragen-zu-deiner-lieferkette"), land:def.land,
+        text:textVon("didacticevents.eine-recherche-stellt-fragen", {p1:(def.ort)}),
         wahlen:[
-          {text:"Unabhängige Prüfung beauftragen", klein:"CHF 90'000 · unter Zeitdruck teurer · Nachweis für diese Quelle",
-           tun(){ S.kasse-=90000; S.ausgegeben+=90000; S.minen[id].nachweis=true; notiz(`${def.ort}: unabhängige Prüfung abgeschlossen.`,"gut"); }},
-          {text:"Keine Prüfung vorlegen", klein:"Kostet nichts · Ruf sinkt deutlich · ein tiefer Ruf senkt die Nachfrage nach allen Produkten",
-           tun(){ rufAendern(-18); notiz("Keine unabhängigen Nachweise vorgelegt. Dein Ruf sinkt.","alarm"); }}
+          {text:textVon("didacticevents.unabhaengige-pruefung-beauftragen"), klein:textVon("logikfixes.chf-unter-zeitdruck-teurer"),
+           tun(){ S.kasse-=90000; S.ausgegeben+=90000; S.minen[id].nachweis=true; notiz(textVon("didacticevents.unabhaengige-pruefung-abgeschlossen", {p1:(def.ort)}),"gut"); }},
+          {text:textVon("didacticevents.keine-pruefung-vorlegen"), klein:textVon("logikfixes.kostet-nichts-ruf-sinkt"),
+           tun(){ rufAendern(-18); notiz(textVon("logikfixes.keine-unabhaengigen-nachweise-vorgelegt"),"alarm"); }}
         ]
       };
     };

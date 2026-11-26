@@ -9,74 +9,74 @@
 (function(){
   const mineInfo={
     kolwezi:"In der DR Kongo wird viel Kobalt gewonnen. Ein Teil stammt aus kleinen Minen mit Handarbeit.",
-    katanga:"Im Kupfergürtel der DR Kongo werden Kupfer und oft auch Kobalt gewonnen.",
+    katanga:textVon("didacticcomple.im-kupferguertel-der-dr"),
     rubaya:"Coltan liefert Tantal. Der Abbau kann mit Konflikten und illegalem Handel verbunden sein.",
-    kigali:"Ruanda fördert und exportiert Tantal. Lieferketten in der Region sind nicht immer leicht zu prüfen.",
-    bayanobo:"Bayan Obo ist eine grosse Lagerstätte für Seltene Erden in China.",
+    kigali:textVon("didacticcomple.ruanda-foerdert-und-exportiert"),
+    bayanobo:textVon("didacticcomple.bayan-obo-ist-eine"),
     jiangxi:"In China wird viel Rohsilizium hergestellt. Die Verarbeitung braucht viel elektrische Energie.",
-    liuzhou:"Indium entsteht meist als Nebenprodukt der Zinkgewinnung. Es wird unter anderem für Displays genutzt.",
-    sprucepine:"Der Standort steht im Spiel für besonders reinen Quarz als Ausgangsstoff für Silizium.",
-    mountainpass:"Mountain Pass ist eine grosse Lagerstätte für Seltene Erden in den USA.",
+    liuzhou:textVon("didacticcomple.indium-entsteht-meist-als"),
+    sprucepine:textVon("didacticcomple.der-standort-steht-im"),
+    mountainpass:textVon("didacticcomple.mountain-pass-ist-eine"),
     greenbushes:"Greenbushes ist eine grosse Lithium-Mine in Australien. Das Lithium stammt aus Hartgestein.",
     kalgoorlie:"Gold kommt oft nur in kleinen Mengen im Gestein vor. Deshalb muss viel Material bewegt werden.",
     atacama:"Im Salar de Atacama wird Lithium aus Salzlake gewonnen. Wasser ist in der trockenen Region ein wichtiges Thema.",
     escondida:"Escondida in Chile ist eine sehr grosse Kupfermine.",
-    fresnillo:"Mexiko ist ein wichtiger Standort für Silberabbau.",
-    sanrafael:"Zinn wird für Lötverbindungen in Elektronik gebraucht.",
-    bangka:"Auf Bangka wird Zinn auch im Meer gewonnen. Die Arbeit kann gefährlich sein und die Umwelt belasten.",
-    sulawesi:"Auf Sulawesi wird viel Nickel gewonnen. Der Abbau kann grosse Flächen beanspruchen.",
-    obuasi:"In der Region gibt es grosse und kleine Goldminen. Kleine Minen können schwer zu kontrollieren sein.",
-    boke:"Bauxit ist der wichtigste Rohstoff für Aluminium. Guinea besitzt grosse Bauxitvorkommen.",
+    fresnillo:textVon("didacticcomple.mexiko-ist-ein-wichtiger"),
+    sanrafael:textVon("didacticcomple.zinn-wird-fuer-loetverbindungen"),
+    bangka:textVon("didacticcomple.auf-bangka-wird-zinn"),
+    sulawesi:textVon("didacticcomple.auf-sulawesi-wird-viel"),
+    obuasi:textVon("didacticcomple.in-der-region-gibt"),
+    boke:textVon("didacticcomple.bauxit-ist-der-wichtigste"),
     potosi:"Am Cerro Rico bei Potosí wird seit Jahrhunderten Silber abgebaut."
   };
   for(const m of MINEN){ if(mineInfo[m.id]) m.info=mineInfo[m.id]; }
 
   const raffInfo={
-    r_china:"China ist ein wichtiger Standort für die Verarbeitung vieler Rohstoffe.",
+    r_china:textVon("didacticcomple.china-ist-ein-wichtiger"),
     r_malay:"In Malaysia werden unter anderem Seltene Erden verarbeitet.",
     r_chile:"Dieser Standort liegt nahe an wichtigen Rohstoffgebieten in Chile.",
-    r_de:"Dieser Standort zeigt im Spiel eine europäische Raffinerie mit hohen Kosten.",
+    r_de:textVon("didacticcomple.dieser-standort-zeigt-im"),
     r_usa:"Dieser Standort zeigt im Spiel eine US-Raffinerie mit hohen Kosten."
   };
   for(const r of RAFF_ORTE){ if(raffInfo[r.id]) r.info=raffInfo[r.id]; }
 
   const produktInfo={
     kabel:"Ein Ladekabel braucht mehrere Materialien. Kupfer leitet den Strom.",
-    phone:"Ein Smartphone braucht viele verschiedene Materialien aus mehreren Ländern.",
-    board:"Eine Leiterplatte verbindet elektronische Bauteile. Kupfer und Lötmetalle sind dabei wichtig.",
+    phone:textVon("didacticcomple.ein-smartphone-braucht-viele"),
+    board:textVon("didacticcomple.eine-leiterplatte-verbindet-elektronische"),
     konsole:"Eine Spielkonsole braucht unter anderem Kupfer, Silizium und Magnete.",
-    tv:"Displays brauchen verschiedene Materialien. Indium kann in leitfähigen Schichten eingesetzt werden.",
+    tv:textVon("didacticcomple.displays-brauchen-verschiedene-materialien"),
     akku:"Ein E-Bike-Akku braucht unter anderem Lithium, Nickel, Kobalt, Kupfer und Aluminium."
   };
   for(const [id,text] of Object.entries(produktInfo)){ if(PRODUKT[id]) PRODUKT[id].info=text; }
 
   const materialVerwendung={
-    zinn:"Lötverbindungen auf Leiterplatten",
-    lithium:"Lithium-Ionen-Akkus",
-    kobalt:"Kathodenmaterial in Akkus",
-    silber:"Elektrische Kontakte und Lötpasten",
-    seltene:"Permanentmagnete in Lautsprechern und Motoren",
-    tantal:"Kondensatoren in elektronischen Geräten",
-    indium:"Transparente leitfähige Schichten in Displays (ITO)",
-    gold:"Korrosionsbeständige elektrische Kontakte"
+    zinn:textVon("didacticcomple.loetverbindungen-auf-leiterplatten"),
+    lithium:textVon("didacticcomple.lithium-ionen-akkus"),
+    kobalt:textVon("didacticcomple.kathodenmaterial-in-akkus"),
+    silber:textVon("didacticcomple.elektrische-kontakte-und-loetpasten"),
+    seltene:textVon("didacticcomple.permanentmagnete-in-lautsprechern-und"),
+    tantal:textVon("didacticcomple.kondensatoren-in-elektronischen-geraeten"),
+    indium:textVon("didacticcomple.transparente-leitfaehige-schichten-in"),
+    gold:textVon("didacticcomple.korrosionsbestaendige-elektrische-kontakte")
   };
   for(const [id,text] of Object.entries(materialVerwendung)){ if(MATERIAL[id]) MATERIAL[id].wofuer=text; }
 
   const wissen={
     kette:{
-      kurz:"Rohstoffquelle → Raffinerie → Fabrik → Markt.",
+      kurz:textVon("didacticcomple.rohstoffquelle-raffinerie-fabrik-markt"),
       text:["Eine Lieferkette verbindet mehrere Orte.","Im Spiel siehst du einen Beispielweg. Transportkosten und Lieferzeiten werden nicht berechnet."],
-      fakten:["Rohstoffe werden zuerst gewonnen und danach verarbeitet.","Fehlt eine Station, kann die nächste Station nicht weiterarbeiten."]
+      fakten:["Rohstoffe werden zuerst gewonnen und danach verarbeitet.",textVon("didacticcomple.fehlt-eine-station-kann")]
     },
     geologie:{
       kurz:"Rohstoffe kommen aus verschiedenen Regionen der Welt.",
-      text:["Nicht jeder Rohstoff kommt überall vor.","Darum liegen Rohstoffquellen in verschiedenen Ländern und Regionen."],
-      fakten:["Lagerstätten entstehen durch geologische Prozesse.","Rohstoffe sind weltweit ungleich verteilt."]
+      text:[textVon("didacticcomple.nicht-jeder-rohstoff-kommt"),textVon("didacticcomple.darum-liegen-rohstoffquellen-in")],
+      fakten:[textVon("didacticcomple.lagerstaetten-entstehen-durch-geologische"),"Rohstoffe sind weltweit ungleich verteilt."]
     },
     leute:{
       kurz:"Lohn und Sicherheit wirken auf verschiedene Dinge.",
-      text:["Der Lohn beeinflusst im Spiel die Zufriedenheit. Sehr niedrige Zufriedenheit kann zu einem Streik führen.","Sicherheitsmassnahmen senken das Unfallrisiko. Ein hoher Lohn ersetzt keine Sicherheit."],
-      fakten:["Lohn → Zufriedenheit → Streik","Sicherheit → Unfallrisiko"]
+      text:[textVon("didacticcomple.der-lohn-beeinflusst-im"),"Sicherheitsmassnahmen senken das Unfallrisiko. Ein hoher Lohn ersetzt keine Sicherheit."],
+      fakten:[textVon("didacticcomple.lohn-zufriedenheit-streik"),textVon("didacticcomple.sicherheit-unfallrisiko")]
     },
     chemie:{
       kurz:"Rohstoff wird zu nutzbarem Material.",
@@ -89,19 +89,19 @@
       fakten:["Leiterplatten brauchen unter anderem Kupfer und Zinn.","Akkus brauchen mehrere Metalle, zum Beispiel Lithium, Nickel und Kobalt."]
     },
     markt:{
-      kurz:"Produkte brauchen Käuferinnen und Käufer.",
+      kurz:textVon("didacticcomple.produkte-brauchen-kaeuferinnen-und"),
       text:["Fertige Produkte liegen zuerst im Lager.","Du verkaufst sie selbst oder mit einem Verkaufsteam. Die Nachfrage begrenzt den Verkauf."],
-      fakten:["Nachfrage kann sich durch Ereignisse ändern.","Ein grosses Lager kann den Verkaufspreis senken.","Der US-Dollar kann Fertigwarenpreise verändern."]
+      fakten:[textVon("didacticcomple.nachfrage-kann-sich-durch"),"Ein grosses Lager kann den Verkaufspreis senken.",textVon("didacticcomple.der-us-dollar-kann")]
     },
     ruf:{
       kurz:"Ruf und Nachweise sind zwei verschiedene Dinge.",
       text:["Der Ruf beeinflusst im Spiel die Nachfrage.","Nachweise zeigen, ob die Herkunft von Rohstoffen dokumentiert ist. Ein guter Ruf ersetzt keine Nachweise."],
-      fakten:["Ruf → Nachfrage","Nachweise → Lieferkettenprüfung"]
+      fakten:[textVon("didacticcomple.ruf-nachfrage"),textVon("didacticcomple.nachweise-lieferkettenpruefung")]
     },
     modell:{
       kurz:"Erzwelt ist ein vereinfachtes Modell.",
-      text:["Kosten, Löhne, Mengen und Rezepte sind Spielwerte. Sie sind keine aktuellen Statistiken.","Das Spiel zeigt nur einige Zusammenhänge einer echten Lieferkette."],
-      fakten:["Ortsinfos sind für den Unterricht gekürzt und vereinfacht.","Quellenstand der Hintergrundinfos: 2026. Details stehen in SOURCES.md."]
+      text:[textVon("didacticcomple.kosten-loehne-mengen-und"),textVon("didacticcomple.das-spiel-zeigt-nur")],
+      fakten:[textVon("didacticcomple.ortsinfos-sind-fuer-den"),"Quellenstand der Hintergrundinfos: 2026. Details stehen in SOURCES.md."]
     }
   };
   for(const [id,copy] of Object.entries(wissen)){
@@ -111,20 +111,20 @@
   }
 
   const perkTexte={
-    kette1:"Bessere Planung erhöht den Raffineriedurchsatz.",
-    kette2:"Die Verbesserung erhöht den Durchsatz und senkt die Betriebskosten.",
-    geo1:"Bessere Kartierung erhöht die Förderung.",
-    geo2:"Tiefenbohrungen erhöhen die Förderung.",
-    leute1:"Ein gemeinsamer Standard senkt die Kosten für Sicherheitsausbauten.",
-    leute2:"Mitbestimmung erhöht Zufriedenheit und Ruf.",
-    chem1:"Bessere Prozesse erhöhen die Ausbeute.",
-    chem2:"Rückgewinnung erhöht die Ausbeute.",
-    fab1:"Bessere Abläufe erhöhen den Fabrikausstoss.",
-    fab2:"Vorfertigung erhöht den Ausstoss und verkürzt die Bauzeit.",
-    markt1:"Schulung erhöht die Verkaufskapazität.",
-    markt2:"Direktvertrieb erhöht Preis und Verkaufskapazität.",
-    ruf1:"Ein Transparenzbericht stärkt im Spiel Ruf und Nachfrage.",
-    ruf2:"Prüfungen stärken die Nachfrage und dämpfen Rufverluste.",
+    kette1:textVon("didacticcomple.bessere-planung-erhoeht-den"),
+    kette2:textVon("didacticcomple.die-verbesserung-erhoeht-den"),
+    geo1:textVon("didacticcomple.bessere-kartierung-erhoeht-die"),
+    geo2:textVon("didacticcomple.tiefenbohrungen-erhoehen-die-foerderung"),
+    leute1:textVon("didacticcomple.ein-gemeinsamer-standard-senkt"),
+    leute2:textVon("didacticcomple.mitbestimmung-erhoeht-zufriedenheit-und"),
+    chem1:textVon("didacticcomple.bessere-prozesse-erhoehen-die"),
+    chem2:textVon("didacticcomple.rueckgewinnung-erhoeht-die-ausbeute"),
+    fab1:textVon("didacticcomple.bessere-ablaeufe-erhoehen-den"),
+    fab2:textVon("didacticcomple.vorfertigung-erhoeht-den-ausstoss"),
+    markt1:textVon("didacticcomple.schulung-erhoeht-die-verkaufskapazitaet"),
+    markt2:textVon("didacticcomple.direktvertrieb-erhoeht-preis-und"),
+    ruf1:textVon("didacticcomple.ein-transparenzbericht-staerkt-im"),
+    ruf2:textVon("didacticcomple.pruefungen-staerken-die-nachfrage"),
     mod1:"Controlling senkt die Betriebskosten.",
     mod2:"Personalplanung senkt die Lohnsumme."
   };
@@ -132,7 +132,7 @@
     for(const p of seg.perks||[]){ if(perkTexte[p.id]) p.text=perkTexte[p.id]; }
   }
 
-  if(SCHWIERIGKEIT?.mittel) SCHWIERIGKEIT.mittel.effekt="Standard";
+  if(SCHWIERIGKEIT?.mittel) SCHWIERIGKEIT.mittel.effekt=textVon("didacticcomple.standard");
 
   /* Event semantics are explicit here rather than hidden in copy replacements. */
   const taiwan=EREIGNISSE.find(e=>e.id==="taiwan");
@@ -141,7 +141,7 @@
       S.preisMod.silizium={faktor:2.4,bis:S.tag+70};
       S.nachfrageMod.phone={faktor:1.5,bis:S.tag+70};
       S.nachfrageMod.konsole={faktor:1.5,bis:S.tag+70};
-      return {passiv:true,text:"<b>Erdbeben bei Taiwan</b> – andere Firmen können weniger Elektronik liefern. Silizium wird 70 Tage deutlich teurer; die Nachfrage nach Smartphones und Konsolen steigt um 50 %.",art:"warn"};
+      return {passiv:true,text:textVon("didacticcomple.erdbeben-bei-taiwan-andere"),art:"warn"};
     };
   }
 
@@ -152,10 +152,10 @@
       if(status.stufe===0){
         S.kasse-=180000;
         S.ausgegeben+=180000;
-        return {passiv:true,text:"<b>Lieferkettengesetz</b> – Herkunftsnachweise fehlen. Im Spiel fällt eine Busse von CHF 180'000 an.",art:"alarm"};
+        return {passiv:true,text:textVon("didacticcomple.lieferkettengesetz-herkunftsnachweise-fehlen-im"),art:"alarm"};
       }
       S.nachfrageMod.board={faktor:1.3,bis:S.tag+90};
-      return {passiv:true,text:`<b>Lieferkettengesetz</b> – deine Nachweise sind ${status.text}. Grosskunden können bestellen; die Mainboard-Nachfrage steigt 90 Tage lang.`,art:"gut"};
+      return {passiv:true,text:textVon("didacticcomple.lieferkettengesetz-deine-nachweise-sind", {p1:(status.text)}),art:"gut"};
     };
   }
 
@@ -164,7 +164,7 @@
     const original=protest.bau;
     protest.bau=function(...args){
       const d=original.apply(this,args);
-      if(d) d.text="Die Zufriedenheit ist wegen des Lohns sehr niedrig. Deshalb streikt die Belegschaft und die Förderung steht still.";
+      if(d) d.text=textVon("didacticcomple.die-zufriedenheit-ist-wegen");
       return d;
     };
   }
@@ -174,7 +174,7 @@
     const original=unfall.bau;
     unfall.bau=function(...args){
       const d=original.apply(this,args);
-      if(d) d.text="Es gab einen schweren Unfall. Die Rohstoffquelle bleibt geschlossen, bis du über die Sicherheit entscheidest.";
+      if(d) d.text=textVon("didacticcomple.es-gab-einen-schweren");
       return d;
     };
   }

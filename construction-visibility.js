@@ -59,7 +59,7 @@
   }
 
   function baseAria(pin){
-    if(!pin.dataset.baseAria)pin.dataset.baseAria=pin.getAttribute("aria-label")||"Standort";
+    if(!pin.dataset.baseAria)pin.dataset.baseAria=pin.getAttribute("aria-label")||textVon("constructionvi.standort");
     return pin.dataset.baseAria;
   }
 
@@ -81,14 +81,14 @@
       pin.classList.add("bau-status");pin.style.setProperty("--pin-status","#f5b73d");
       pin.querySelector(".knopf")?.insertAdjacentHTML("beforeend",ringSvg(state.progress));
       pin.querySelector(".knopf")?.insertAdjacentHTML("beforeend",`<span class="pin-state-badge status-bau">${state.count>1?state.count+"× · ":""}${state.rest} T</span><span class="pin-build-tool">${toolSvg()}</span>`);
-      pin.insertAdjacentHTML("beforeend",`<span class="pin-status-hint">Im Bau</span>`);
+      pin.insertAdjacentHTML("beforeend",textVon("constructionvi.im-bau"));
       pin.setAttribute("aria-label",`${base}. Im Bau, noch ${state.rest} ${state.rest===1?"Tag":"Tage"}${state.count>1?`, ${state.count} Bauprojekte`:""}.`);
       return;
     }
     if(state.kind==="neu"){
       pin.classList.add("neu-status");
-      pin.querySelector(".knopf")?.insertAdjacentHTML("beforeend",`<span class="pin-state-badge">Neu</span><span class="pin-build-tool">${toolSvg()}</span>`);
-      pin.insertAdjacentHTML("beforeend",`<span class="pin-status-hint">Neu eröffnet</span>`);
+      pin.querySelector(".knopf")?.insertAdjacentHTML("beforeend",textVon("constructionvi.neu", {p1:(toolSvg())}));
+      pin.insertAdjacentHTML("beforeend",textVon("constructionvi.neu-eroeffnet"));
       pin.setAttribute("aria-label",`${base}. Neu eröffnet.`);return;
     }
     if(state.kind==="warn"){
@@ -129,8 +129,8 @@
     const m=S.minen[def.id];if(!m)return;
     const pin=welt.querySelector(`.pin[data-pin="mine"][data-id="${def.id}"]`);if(!pin)return;
     if(recent(def.id))return applyState(pin,{kind:"neu"});
-    if(m.stillBis>S.tag)return applyState(pin,{kind:"warn",label:"Förderung gestoppt"});
-    if(m.arbeiter<=0)return applyState(pin,{kind:"inaktiv",badge:"0 P",label:"Kein Personal"});
+    if(m.stillBis>S.tag)return applyState(pin,{kind:"warn",label:textVon("constructionvi.foerderung-gestoppt")});
+    if(m.arbeiter<=0)return applyState(pin,{kind:"inaktiv",badge:"0 P",label:textVon("constructionvi.kein-personal")});
     return applyState(pin,{kind:"aktiv"});
   }
 
@@ -138,9 +138,9 @@
     const r=S.raff[def.id];if(!r)return;
     const pin=welt.querySelector(`.pin[data-pin="raff"][data-id="${def.id}"]`);if(!pin)return;
     if(recent(def.id))return applyState(pin,{kind:"neu"});
-    if(r.arbeiter<=0)return applyState(pin,{kind:"inaktiv",badge:"0 P",label:"Kein Personal"});
+    if(r.arbeiter<=0)return applyState(pin,{kind:"inaktiv",badge:"0 P",label:textVon("constructionvi.kein-personal")});
     const raw=Object.values(S.erz||{}).some(v=>v>.5);
-    if(!raw)return applyState(pin,{kind:"inaktiv",badge:"0 R",label:"Kein Rohstoff"});
+    if(!raw)return applyState(pin,{kind:"inaktiv",badge:"0 R",label:textVon("constructionvi.kein-rohstoff")});
     return applyState(pin,{kind:"aktiv"});
   }
 
@@ -156,8 +156,8 @@
     const built=list.filter(f=>f.restbau<=0);
     if(!built.length)return;
     if(built.some(factoryCanRun))return applyState(pin,{kind:"aktiv"});
-    if(built.every(f=>f.arbeiter<=0))return applyState(pin,{kind:"inaktiv",badge:"0 P",label:"Kein Personal"});
-    return applyState(pin,{kind:"inaktiv",badge:"0 M",label:"Material fehlt"});
+    if(built.every(f=>f.arbeiter<=0))return applyState(pin,{kind:"inaktiv",badge:"0 P",label:textVon("constructionvi.kein-personal")});
+    return applyState(pin,{kind:"inaktiv",badge:"0 M",label:textVon("constructionvi.material-fehlt")});
   }
 
   function updateWorldStates(){

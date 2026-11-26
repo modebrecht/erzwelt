@@ -13,7 +13,7 @@ RAFF_ORTE.forEach(r=>{r.spezial=RAFF_SPEZIAL[r.id]||[];});
 
 const ketteShould=WISSEN.find(s=>s.id==="kette");
 if(ketteShould){
-  ketteShould.kurz="Rohstoff → Raffinerie → Fabrik → Markt – und wo diese Orte liegen.";
+  ketteShould.kurz=textVon("didacticshould.rohstoff-raffinerie-fabrik-markt");
   ketteShould.text=[
     "Eine Lieferkette verbindet mehrere Orte. Auf der Karte siehst du nach dem Tutorial einen <b>Beispielweg</b> zwischen einer eigenen Rohstoffquelle, einer Raffinerie und einer Fabrik.",
     "Die Entfernung ist geografische Orientierung. <b>Transportkosten und Lieferzeiten werden in Erzwelt nicht berechnet.</b> So bleibt klar, was das Spiel wirklich simuliert."
@@ -22,14 +22,14 @@ if(ketteShould){
 const chemShould=WISSEN.find(s=>s.id==="chemie");
 if(chemShould){
   chemShould.text=[
-    "Die <b>Ausbeute</b> ist ein vereinfachter Spielwert dafür, wie viel nutzbares Material aus einer Einheit Rohstoff entsteht.",
-    "Jede Raffinerie kann im Spiel alle Rohstoffe verarbeiten. Sie hat zusätzlich einen sichtbaren <b>Spezialisierung im Spiel</b>: passende Rohstoffe werden dort 25 % schneller verarbeitet. Diese Spezialisierung ist eine Spielregel und beschreibt keine reale Anlage."
+    textVon("didacticshould.die-ausbeute-ist-ein"),
+    textVon("didacticshould.jede-raffinerie-kann-im")
   ];
 }
 
 const modellShould=WISSEN.find(s=>s.id==="modell");
 if(modellShould&&modellShould.text){
-  modellShould.text[1]="Der Kern des Modells steht in <code>erzwelt-core.html</code>. Die didaktischen Korrekturen sind bewusst in <code>didactic-model.js</code>, <code>didactic-events.js</code>, <code>didactic-ui.js</code> und <code>didactic-should.js</code> getrennt. Vergleiche: Welche Regeln wurden vereinfacht, damit Ursache und Wirkung klar bleiben?";
+  modellShould.text[1]=textVon("didacticshould.der-kern-des-modells");
 }
 function shouldMigration(){
   if(!S||typeof S!=="object")return;
@@ -53,11 +53,11 @@ function wissenPraxis(segId,stufe){
     ],
     geologie:[
       [materialien.size>=2,"Erschliesse zwei verschiedene Rohstoffe und vergleiche ihre Standorte."],
-      [materialien.size>=5,"Erschliesse fünf verschiedene Rohstoffe auf der Weltkarte."]
+      [materialien.size>=5,textVon("didacticshould.erschliesse-fuenf-verschiedene-rohstoffe")]
     ],
     leute:[
       [aktiveMinen.some(id=>S.minen[id].arbeiter>=10),"Betreibe eine Mine mit mindestens 10 Personen."],
-      [aktiveMinen.length>=2&&S.tag>=60,"Beobachte mindestens zwei besetzte Minen über zwei Spielmonate."]
+      [aktiveMinen.length>=2&&S.tag>=60,textVon("didacticshould.beobachte-mindestens-zwei-besetzte")]
     ],
     chemie:[
       [aktiveRaff.length>=1&&matGesamt>0,"Raffiniere erstmals Rohstoff zu nutzbarem Material."],
@@ -65,7 +65,7 @@ function wissenPraxis(segId,stufe){
     ],
     fabrik:[
       [fertigeFab.length>=1&&(warenLager()>0||S.eingenommen>0),"Produziere dein erstes fertiges Produkt."],
-      [produktArten.size>=2,"Baue zwei verschiedene Produkte und vergleiche ihre Materialengpässe."]
+      [produktArten.size>=2,textVon("didacticshould.baue-zwei-verschiedene-produkte")]
     ],
     markt:[
       [!!S.verkauftSelber||(S.verkaeufer||0)>0,"Verkaufe selbst oder setze erstmals ein Verkaufsteam ein."],
@@ -73,14 +73,14 @@ function wissenPraxis(segId,stufe){
     ],
     ruf:[
       [!tutorialLaeuft()&&S.tag>=60,"Spiele nach dem Tutorial mindestens zwei Monate und beobachte Ruf und Nachfrage."],
-      [S.tag>=120&&minen.length>=2,"Führe eine Lieferkette mit mindestens zwei Rohstoffquellen über vier Monate."]
+      [S.tag>=120&&minen.length>=2,textVon("didacticshould.fuehre-eine-lieferkette-mit")]
     ],
     modell:[
-      [!tutorialLaeuft(),"Schliesse das geführte Tutorial ab und beobachte die ganze Kette einmal."],
+      [!tutorialLaeuft(),textVon("didacticshould.schliesse-das-gefuehrte-tutorial")],
       [ausbauIrgendwo&&Object.keys(S.perks).length>=2,"Nutze mindestens einen Ausbau und zwei bereits umgesetzte Verbesserungen."]
     ]
   };
-  const r=regeln[segId]?.[stufe]||[true,"Voraussetzung erfüllt."];
+  const r=regeln[segId]?.[stufe]||[true,textVon("didacticshould.voraussetzung-erfuellt")];
   return {ok:!!r[0],text:r[1]};
 }
 /* Lupe: vor und nach dem Füllen (Reihenfolge: module/wissen.js) */
@@ -98,7 +98,7 @@ function wissenPraxis(segId,stufe){
     card.querySelector(".didaktik-praxis")?.remove();
     const note=document.createElement("div");
     note.className="notiz didaktik-praxis";
-    note.innerHTML=`<b>Voraussetzung:</b> ${praxis.text}<br>${praxis.ok?"✓ Voraussetzung erfüllt. Die Verbesserung kann jetzt finanziert werden.":"Voraussetzung noch nicht erfüllt."}`;
+    note.innerHTML=textVon("didacticshould.voraussetzung", {p1:(praxis.text), p2:(praxis.ok?"✓ Voraussetzung erfüllt. Die Verbesserung kann jetzt finanziert werden.":"Voraussetzung noch nicht erfüllt.")});
     button?.before(note);
   }
   if(button){
@@ -107,7 +107,7 @@ function wissenPraxis(segId,stufe){
     const geht=praxis.ok&&!vorherGesperrt&&genug;
     button.disabled=!geht;
     button.classList.toggle("puls",geht);
-    button.innerHTML=vorherGesperrt?"Vorherige Verbesserung fehlt":!praxis.ok?"Voraussetzung noch nicht erfüllt":!genug?"Zu wenig Geld · "+chf(next.kosten):IK.gluehbirne+"Verbesserung finanzieren · "+chf(next.kosten);
+    button.innerHTML=vorherGesperrt?textVon("didacticshould.vorherige-verbesserung-fehlt"):!praxis.ok?textVon("didacticshould.voraussetzung-noch-nicht-erfuellt"):!genug?textVon("didacticshould.zu-wenig-geld")+chf(next.kosten):IK.gluehbirne+textVon("didacticshould.verbesserung-finanzieren")+chf(next.kosten);
   }
   speichern();
 };
@@ -115,32 +115,32 @@ function wissenPraxis(segId,stufe){
    ersetzt die Fassung des Kerns (Reihenfolge: module/wissen.js) */
 (window.__erzweltWissenTeile ||= {}).hinweis=function(){
   const minen=offeneMinen();
-  if(!minen.length)return["Noch keine Rohstoffquelle","Welches Material brauchst du für dein nächstes Produkt? Suche dafür eine passende Quelle auf der Karte."];
+  if(!minen.length)return[textVon("didacticshould.noch-keine-rohstoffquelle"),textVon("didacticshould.welches-material-brauchst-du")];
   const ohne=minen.find(id=>S.minen[id].arbeiter===0);
-  if(ohne)return["Eine Rohstoffquelle steht still",`${MINEN.find(x=>x.id===ohne).ort} hat kein Personal. Prüfe deine Personalverteilung.`];
+  if(ohne)return[textVon("didacticshould.eine-rohstoffquelle-steht-still"),textVon("didacticshould.hat-kein-personal-pruefe", {p1:(MINEN.find(x=>x.id===ohne).ort)})];
   const gefahr=minen.find(id=>S.minen[id].zufriedenheit<35&&S.minen[id].arbeiter>0);
-  if(gefahr)return["Niedrige Zufriedenheit in "+MINEN.find(x=>x.id===gefahr).ort,"Die Zufriedenheit ist niedrig. Prüfe dort die Lohnentscheidung."];
-  if(!Object.keys(S.raff).length)return["Noch keine Raffinerie vorhanden","In deiner Lieferkette fehlt die Verarbeitung zwischen Rohstoffquelle und Fabrik."];
+  if(gefahr)return[textVon("didacticshould.niedrige-zufriedenheit-in")+MINEN.find(x=>x.id===gefahr).ort,textVon("didacticshould.die-zufriedenheit-ist-niedrig")];
+  if(!Object.keys(S.raff).length)return[textVon("didacticshould.noch-keine-raffinerie-vorhanden"),"In deiner Lieferkette fehlt die Verarbeitung zwischen Rohstoffquelle und Fabrik."];
   const aktiveRaff=Object.keys(S.raff).filter(id=>S.raff[id].arbeiter>0);
-  if(!aktiveRaff.length)return["Die Verarbeitung steht still","Du hast eine Raffinerie, aber aktuell keinen aktiven Durchsatz. Prüfe Personal und Rohstofflager."];
+  if(!aktiveRaff.length)return[textVon("didacticshould.die-verarbeitung-steht-still"),textVon("didacticshould.du-hast-eine-raffinerie")];
   const kapa=aktiveRaff.reduce((a,id)=>{const d=RAFF_ORTE.find(x=>x.id===id);return a+d.kapazitaet*ausbauFaktor(S.raff[id].ausbau)*(S.raff[id].arbeiter/d.plaetze);},0);
-  if(Object.values(S.erz).reduce((a,b)=>a+(+b||0),0)>kapa*5)return["Rohstoffbestand ist hoch","Vergleiche Förderung und Raffineriedurchsatz. Wo liegt der Engpass?"];
-  if(!S.fabriken.length)return["Noch keine Fabrik vorhanden","Welche Produkte passen zu den Materialien, die deine Lieferkette bereits bereitstellt?"];
+  if(Object.values(S.erz).reduce((a,b)=>a+(+b||0),0)>kapa*5)return[textVon("didacticshould.rohstoffbestand-ist-hoch"),textVon("didacticshould.vergleiche-foerderung-und-raffineriedurchsatz")];
+  if(!S.fabriken.length)return[textVon("didacticshould.noch-keine-fabrik-vorhanden"),textVon("didacticshould.welche-produkte-passen-zu")];
   const leer=S.fabriken.find(f=>f.restbau===0&&f.arbeiter===0);
-  if(leer)return["Eine Fabrik steht still","Die Anlage ist fertig. Prüfe, ob Personal oder Material fehlt."];
+  if(leer)return[textVon("didacticshould.eine-fabrik-steht-still"),textVon("didacticshould.die-anlage-ist-fertig")];
   for(const f of S.fabriken){
     if(f.restbau>0)continue;
     const fehlt=Object.keys(PRODUKT[f.produkt].rezept).filter(k=>(S.mat[k]||0)<PRODUKT[f.produkt].rezept[k]*3);
-    if(fehlt.length)return["Produktion stockt: "+fehlt.map(k=>MATERIAL[k].name).join(", "),"Finde heraus, ob Rohstoffquelle, Raffination oder Lagerbestand den Engpass verursacht."];
+    if(fehlt.length)return[textVon("didacticshould.produktion-stockt")+fehlt.map(k=>MATERIAL[k].name).join(", "),"Finde heraus, ob Rohstoffquelle, Raffination oder Lagerbestand den Engpass verursacht."];
   }
-  if(warenLager()>0&&verkaufsKraft()===0)return["Fertige Ware liegt im Lager","Vergleiche Lager, Nachfrage und deine Verkaufskapazität."];
-  if(warenLager()>verkaufsKraft()*12&&verkaufsKraft()>0)return["Warenbestand ist hoch","Produktion und Verkauf sind nicht im Gleichgewicht. Entscheide, welche Seite du anpassen willst."];
-  if(freieArbeiter()>15)return[freieArbeiter()+" Personen ohne Aufgabe","Prüfe, ob du dieses Personal noch brauchst oder an einem Engpass einsetzen kannst."];
-  if(S.ruf<55)return["Ein niedriger Ruf senkt die Nachfrage","Prüfe Meldungen und frühere Entscheidungen. Ruf und Lieferkettennachweise sind dabei zwei verschiedene Dinge."];
+  if(warenLager()>0&&verkaufsKraft()===0)return[textVon("didacticshould.fertige-ware-liegt-im"),textVon("didacticshould.vergleiche-lager-nachfrage-und")];
+  if(warenLager()>verkaufsKraft()*12&&verkaufsKraft()>0)return[textVon("didacticshould.warenbestand-ist-hoch"),"Produktion und Verkauf sind nicht im Gleichgewicht. Entscheide, welche Seite du anpassen willst."];
+  if(freieArbeiter()>15)return[freieArbeiter()+textVon("didacticshould.personen-ohne-aufgabe"),textVon("didacticshould.pruefe-ob-du-dieses")];
+  if(S.ruf<55)return[textVon("didacticshould.ein-niedriger-ruf-senkt"),textVon("didacticshould.pruefe-meldungen-und-fruehere")];
   const praxisOffen=WISSEN.filter(seg=>{const p=naechsterPerk(seg);return p&&wissenPraxis(seg.id,seg.perks.indexOf(p)).ok;});
-  if(praxisOffen.length)return["Voraussetzung für eine Verbesserung erfüllt","Im Reiter Wissen findest du Verbesserungen, deren Praxisbezug du bereits erfüllt hast."];
+  if(praxisOffen.length)return[textVon("didacticshould.voraussetzung-fuer-eine-verbesserung"),textVon("didacticshould.im-reiter-wissen-findest")];
   const nahe=minen.find(id=>ausbauVerdoppelt(S.minen[id].ausbau||0));
-  if(nahe)return["Nächste Ausbaustufe mit grösserer Wirkung","Vergleiche Kosten und Wirkung deiner Ausbauten. Nicht jeder Engpass braucht dieselbe Lösung."];
+  if(nahe)return[textVon("didacticshould.naechste-ausbaustufe-mit-groesserer"),textVon("didacticshould.vergleiche-kosten-und-wirkung")];
   return null;
 };
 /* Aufgabenkarte: Kopf «Hinweis» ausserhalb des Tutorials setzt module/quest.js. */
@@ -182,8 +182,8 @@ tagVor=function(){
   const kraft=verkaufsKraft();if(kraft>0)wareVerkaufen(kraft);
   if((S.tag-1)%30===0){
     const lohn=lohnsumme(),betrieb=betriebskostenMonat();
-    S.kasse-=lohn+betrieb;S.ausgegeben+=lohn+betrieb;notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`,"geld");rufAnpassen();
-    if(S.kasse<0)notiz("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.","alarm");
+    S.kasse-=lohn+betrieb;S.ausgegeben+=lohn+betrieb;notiz(textVon("didacticshould.monatsabschluss-loehne-betrieb", {p1:(chf(lohn)), p2:(chf(betrieb))}),"geld");rufAnpassen();
+    if(S.kasse<0)notiz(textVon("didacticshould.die-kasse-ist-im"),"alarm");
   }
   if(S.tag%5===0)marktBewegen();ereignisPruefen();if(S.kasse<-800000)rundeBeenden("insolvenz");else if(S.tag>etappenEnde())rundeBeenden("etappe");speichern();
 };
@@ -215,7 +215,7 @@ function lieferwegZeichnen(){
   }
   const r=beispielKette(),sichtbar=!!r&&aktiveSeite==="karte"&&!offenesBlatt;note.hidden=!sichtbar;if(!sichtbar)return;
   const mine=MINEN.find(x=>x.id===r.mineId),raff=RAFF_ORTE.find(x=>x.id===r.raffId),km=(Math.round((r.d1+r.d2)/100)*100).toLocaleString("de-CH");
-  note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
+  note.innerHTML=textVon("didacticshould.beispielweg-auf-der-karte", {p1:(mine.ort), p2:(raff.ort), p3:(LAND[r.fabrik.land].name), p4:(km)});
 }
 /* Vor jedem Zeichnen shouldMigration, danach Lieferweg (Reihenfolge: module/karte.js) */
 Object.assign((window.__erzweltKarteTeile ||= {}), {shouldVor:() => shouldMigration(), lieferweg:() => lieferwegZeichnen()});

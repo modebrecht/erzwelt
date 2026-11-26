@@ -49,8 +49,8 @@
     button.type="button";
     button.className="objective-guide-action";
     button.dataset.objectiveGuide="1";
-    button.innerHTML=`${arrowSvg}<span>Ziel zeigen</span>`;
-    button.setAttribute("aria-label","Aktuelles Ziel anzeigen");
+    button.innerHTML=textVon("objectiveguide.ziel-zeigen", {p1:(arrowSvg)});
+    button.setAttribute("aria-label",textVon("objectiveguide.aktuelles-ziel-anzeigen"));
     button.addEventListener("click",e=>{
       e.preventDefault();
       e.stopPropagation();
@@ -74,5 +74,5 @@
   });
 
   syncGuide();
-  window.__erzweltObjectiveGuide={version:VERSION,label:"Ziel zeigen"};
+  window.__erzweltObjectiveGuide={version:VERSION,label:textVon("objectiveguide.ziel-zeigen-2")};
 })();

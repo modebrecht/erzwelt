@@ -22,6 +22,8 @@ const context=vm.createContext({console,setTimeout,clearTimeout,Uint8Array,Array
   window:{},
 });
 const run=source=>vm.runInContext(source,context);
+// Sichtbare Texte (textVon) laden, bevor Kern- und Patch-Code laufen.
+run(await readFile('texte.de.js','utf8'));
 run(`
 const MATERIAL={kupfer:{preis:1,ausbeute:1},alu:{preis:1,ausbeute:1},zinn:{preis:1,ausbeute:1}};
 const MINEN=[],RAFF_ORTE=[],PERK_INDEX={},WISSEN=[{id:'kette'}];

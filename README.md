@@ -10,7 +10,8 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
 - `texte.de.js` — sichtbare Texte als Schlüssel → Text, abgerufen mit
-  `textVon(schluessel, werte)`. Noch nicht alle Texte umgestellt (`docs/texte-offen.md`).
+  `textVon(schluessel, werte)`. Wird beim Bauen vor dem Spielskript eingebettet.
+  Stand und Rest: `docs/texte-offen.md`.
 - `karten-landschaft.js` — Landschaft auf der Karte (Schnee, verschneite Tannen,
   Nadel- und Laubwald, Regenwald/Dschungel, Savanne, Wüste, Gebirge) und Meereswellen;
   in den Einstellungen «Landschaft» (aus/leicht/voll) und «Meereswellen» (an/aus).
