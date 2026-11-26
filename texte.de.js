@@ -86,6 +86,16 @@ const TEXTE_DE = Object.freeze({
   "alt.uebernommen": "Dein bisheriger Spielstand wurde übernommen. Das Original bleibt als Sicherung im Browser.",
   "alt.fehler": "Der alte Spielstand konnte nicht übernommen werden. Die bisherigen Daten wurden behalten.",
 
+  /* ---------- Hilfe nach verfehltem Ziel auf Einfach ---------- */
+  "bonus.frage": "Möchtest du neu starten? Du kannst mehr Verkaufserlös wählen.",
+  "bonus.frageEtappe": "Oder starte neu – auf Wunsch mit mehr Verkaufserlös.",
+  "bonus.rundeOhne": "Neue Runde · Verkauf +20 %",
+  "bonus.rundeOhneKlein": "Von vorn auf Einfach, wie bisher",
+  "bonus.rundeMit": "Neue Runde · Verkauf +{prozent} %",
+  "bonus.rundeMitKlein": "Von vorn auf Einfach, mit Bonus (steht im Zertifikat)",
+  "bonus.gestartetOhne": "Neue Runde auf <b>Einfach</b> · Verkaufserlöse +20 %.",
+  "bonus.gestartetMit": "✨ Neue Runde auf <b>Einfach</b> mit Bonus · Verkaufserlöse +{prozent} %.",
+
   /* ---------- Bilder-Intro ---------- */
   "intro.titel": "Erzwelt · Intro",
   "intro.laedt": "Intro wird geladen …",

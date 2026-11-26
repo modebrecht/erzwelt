@@ -20,7 +20,7 @@
       datum:new Date().toLocaleDateString("de-CH"), tag:S.tag, etappe:S.etappe || 1,
       abschluss:!!S.ende, status:S.ende ? (S.ende.grund === "insolvenz" ? "Insolvenz" :
         S.ende.geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt") : "Zwischenstand",
-      schwierigkeit:schwierigkeitInfo().name, bonus:!!S.hilfsBonus,
+      schwierigkeit:schwierigkeitInfo().name, bonus:S.verkaufsBonus || (S.hilfsBonus ? 50 : 0),
       abTag:daten.abTag, vollstaendig:daten.vollstaendig,
       produkte, hergestellt:total("hergestellt"), verkauft:total("verkauft"), erloes:total("erloes"), lager:total("lager"),
       startkapital:STARTKAPITAL, einnahmen:S.eingenommen, ausgaben:S.ausgegeben,
@@ -103,7 +103,7 @@
     const nameLines=wrap(r.name,width,17,bold);
     nameLines.forEach(line=>{space(22);text(line,margin,y,17,bold);y+=22;});
     paragraph(`Datum: ${r.datum}   ·   Spieltag ${number(r.tag)}`,9);
-    paragraph(`${r.schwierigkeit}${r.bonus?" · Hilfsbonus +50 % aktiv":""}   ·   Etappe ${r.etappe}   ·   ${r.status}`,9);
+    paragraph(`${r.schwierigkeit}${r.bonus?` · Bonus Verkaufserlöse +${r.bonus} %`:""}   ·   Etappe ${r.etappe}   ·   ${r.status}`,9);
     y+=7;
     const metrics=[["HERGESTELLT",number(r.hergestellt)+" Stück"],["VERKAUFT",number(r.verkauft)+" Stück"],["VERKAUFSERLÖS",money(r.erloes)]];
     space(54);

@@ -150,6 +150,7 @@ function spielstandZustand(daten, alt = false){
   };
   const optional = {
     startTeam:spielstandGanzzahl, einfuehrung:spielstandGanzzahl, investStartWert:spielstandZahl,
+    verkaufsBonus:n => [40, 60].includes(n),
     einstiegGesehen:spielstandBoolean, didaktikVersion:spielstandGanzzahl, shouldDidaktikVersion:spielstandGanzzahl,
     produktEntdeckungen:tab => spielstandTabelle(tab, produktIds, e => spielstandFelder(e, {
       status:id => ["offen", "gesehen"].includes(id)

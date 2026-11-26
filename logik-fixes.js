@@ -77,27 +77,31 @@
   function abschlussZeigen(vorherTempo = 1, mittelUnlock = false){
     const {grund, gewinn, geschafft} = S.ende;
     const ziel = zielGewinn();
+    // Auf Einfach verfehlt: neue Runde von vorn, wahlweise mit mehr Verkaufserlös
+    const hilfeRunden = S.schwierigkeit === "einfach" && !geschafft && window.__erzweltSpielstaende
+      ? [0, 40, 60].map(prozent => ({
+          text: textVon(prozent ? "bonus.rundeMit" : "bonus.rundeOhne", {prozent}),
+          klein: textVon(prozent ? "bonus.rundeMitKlein" : "bonus.rundeOhneKlein"),
+          tun: () => { setTimeout(() => window.__erzweltSpielstaende.neueRundeEinfach(prozent), 0); }
+        }))
+      : null;
     if (grund === "insolvenz"){
       dialogZeigen({
         art:"Insolvenz", titel:"Die Firma ist zahlungsunfähig",
-        text:`Deine Kasse ist unter −CHF 800’000 gefallen. Die laufende Reise endet an Tag ${S.tag}.`,
-        wahlen:[{text:"Neue Runde starten", klein:"Schwierigkeit neu wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }}]
+        text:`Deine Kasse ist unter −CHF 800’000 gefallen. Die laufende Reise endet an Tag ${S.tag}.`
+          + (hilfeRunden ? "<br><br>" + textVon("bonus.frage") : ""),
+        wahlen: hilfeRunden || [{text:"Neue Runde starten", klein:"Schwierigkeit neu wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }}]
       });
       return;
     }
 
     const freischaltText = mittelUnlock
       ? `<br><br><b>Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
-    const bonusAngebot = !geschafft && S.schwierigkeit === "einfach" && !S.hilfsBonus;
     const wahlen = [
       {text:`Weiter · Etappe ${(S.etappe||1)+1}`, klein:`Nochmals ${ZIEL_TAGE} Tage mit derselben Firma`, tun:()=>{ etappeWeiter(vorherTempo); }}
     ];
-    if (bonusAngebot) wahlen.push({
-      text:"✨ Weiter mit Bonus",
-      klein:"Gleicher Run · Verkaufserlöse ab jetzt +50 %",
-      tun:()=>{ etappeWeiter(vorherTempo, true); }
-    });
-    wahlen.push({text:"Neue Runde starten", klein:"Speicherplatz und Schwierigkeit wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }});
+    if (hilfeRunden) wahlen.push(...hilfeRunden);
+    else wahlen.push({text:"Neue Runde starten", klein:"Speicherplatz und Schwierigkeit wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }});
     dialogZeigen({
       art:`Etappe ${S.etappe} · ${ZIEL_TAGE} Tage`,
       titel: geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt",
@@ -108,6 +112,7 @@
               : (gewinn >= ziel
                  ? "Der Gewinn stimmt, aber der Ruf nicht. Du darfst trotzdem weiterspielen und es in der nächsten Etappe erneut versuchen."
                  : "Der Gewinn reicht noch nicht. Du darfst trotzdem weiterspielen und deine Lieferkette in der nächsten Etappe verbessern."))
+          + (hilfeRunden ? "<br><br>" + textVon("bonus.frageEtappe") : "")
           + freischaltText,
       wahlen
     });

@@ -407,6 +407,22 @@
   }
   zuruecksetzen = () => speichernUndVerlassen(true);
 
+  /* Neue Runde im selben Speicherplatz, direkt auf «Einfach» – nach verfehltem Ziel,
+     wahlweise mit +40 % oder +60 % Verkaufserlös (0 = ohne Bonus, also +20 %). */
+  function neueRundeEinfach(prozent){
+    if (!aktiv) return;
+    const slot = slotLesen(aktiv.id);
+    const state = neuerZustand();
+    state.schwierigkeit = "einfach";
+    if (prozent) state.verkaufsBonus = prozent;
+    try { slotSchreiben(slot, {name:aktiv.name, savedAt:new Date().toISOString(), state}); }
+    catch (e){ return speicherMeldung(e.message); }
+    modalOffen = false; $("#schleier").hidden = true;
+    fortsetzen(slot.id);
+    notiz(textVon(prozent ? "bonus.gestartetMit" : "bonus.gestartetOhne", {prozent}), "gut");
+  }
+  window.__erzweltSpielstaende = {version:1, neueRundeEinfach};
+
   function dialogAktionen(bereich){
     const div = document.createElement("div");
     div.className = "sm-dialogaktionen";
