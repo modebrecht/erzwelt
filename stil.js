@@ -57,9 +57,8 @@
     return vorherNotiz.call(this, text, art);
   };
 
-  const vorherSchwierigkeit = schwierigkeitZeigen;
-  schwierigkeitZeigen = function(){
-    const out = vorherSchwierigkeit.apply(this, arguments);
+  /* Stufen-Symbole in der Schwierigkeitswahl (Reihenfolge: module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).stufenIkonen = function(){
     const ids = ["einfach", "mittel", "schwer"];
     document.querySelectorAll("#d-wahlen .wahl.schwierigkeit").forEach((b, i) => {
       const ic = b.querySelector(".schwierigkeitsicon");
@@ -67,7 +66,6 @@
       const sp = b.querySelector(".sperre");
       if (sp) sp.innerHTML = sp.innerHTML.replace("🔒", IKON.schloss);
     });
-    return out;
   };
   if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 

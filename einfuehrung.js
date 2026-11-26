@@ -214,8 +214,8 @@
   }
   migrieren();
 
-  const vorherPruefen = tutorialPruefen;
-  tutorialPruefen = function(){ migrieren(); return vorherPruefen.apply(this, arguments); };
+  /* Vor tutorialPruefen (module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).migrieren = migrieren;
   /* Vor jedem Zeichnen (module/karte.js) */
   (window.__erzweltKarteTeile ||= {}).einfuehrungMigrieren = migrieren;
 

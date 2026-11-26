@@ -26,7 +26,8 @@
   SCHWIERIGKEIT.mittel.effekt  = "normale Verkaufspreise";
   SCHWIERIGKEIT.schwer.effekt  = "Verkauf bringt 30 % weniger";
 
-  schwierigkeitZeigen = function(){
+  /* Schwierigkeitswahl: ersetzt die Fassung des Kerns (Reihenfolge: module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).schwierigkeitWahl = function(){
     modalOffen = true; tempoSetzen(0);
     $("#d-art").textContent = "Neue Runde";
     $("#d-titel").textContent = "Wähle die Schwierigkeit";

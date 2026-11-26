@@ -350,6 +350,8 @@ listet, welcher Teil woher kommt.
   `seiteZiel`, `seiteWissen`, `seiteFuellen`.
 - `module/blatt.js` — **Blätter** Rohstoffquelle, Raffinerie, Fabrik: `blattMine`,
   `blattRaff`, `blattFab`, `blattFuellen`, `blattZu`, `szeneRaff`.
+- `module/einfuehrung.js` — **Einführung**: `schwierigkeitZeigen`, `tutorialPruefen`.
+  Schritte, Sperren und Zielort bleiben in `einfuehrung.js`.
 
 Prüfung bei jedem Schritt: `tests/vergleich/` nimmt rund 490 Zustände auf (Text,
 Spielstand, Screenshot) und vergleicht sie mit Aufnahmen des Stands vor dem Umbau

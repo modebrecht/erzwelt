@@ -435,11 +435,8 @@
     if (aktiv) dialogAktionen($("#d-wahlen"));
   };
 
-  const schwierigkeitVorher = schwierigkeitZeigen;
-  schwierigkeitZeigen = function(){
-    schwierigkeitVorher();
-    dialogAktionen($("#d-wahlen"));
-  };
+  /* Speichern/Export unter der Schwierigkeitswahl (Reihenfolge: module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).spielstandAktionen = () => dialogAktionen($("#d-wahlen"));
 
   const einstVorher = einstFuellen;
   einstFuellen = function(){

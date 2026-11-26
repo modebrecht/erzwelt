@@ -97,15 +97,8 @@
   }
 
   /* ---------- Auslöser: Tutorial-Schritt erledigt ---------- */
-  if (typeof tutorialPruefen === "function"){
-    const vorher = tutorialPruefen;
-    tutorialPruefen = function(){
-      const davor = S.tutorial;
-      const out = vorher.apply(this, arguments);
-      if (S.tutorial > davor) feiern(S.tutorial >= TUTORIAL.length);
-      return out;
-    };
-  }
+  /* Nach tutorialPruefen (module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).feiern = feiern;
 
   /* ---------- Auslöser: Kaufen und selbst verkaufen ---------- */
   let vorAus = 0, vorEin = 0;

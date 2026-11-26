@@ -136,20 +136,15 @@
   }
   reduzierteBewegung.addEventListener("change", dauerAnwenden);
 
-  if(typeof tutorialPruefen==="function"){
-    const originalTutorialPruefen=tutorialPruefen;
-    tutorialPruefen=function(){
-      const before=S.tutorial,step=TUTORIAL[before];
-      const out=originalTutorialPruefen();
-      const after=S.tutorial;
-      if(after>before){
-        if(after>=TUTORIAL.length)feedback("Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",true);
-        else if(step?.zusammenhang)feedback(step.zusammenhang,false);
-        window.__erzweltQuest?.tutorialNeu();if(typeof questZeichnen==="function")questZeichnen();
-      }
-      return out;
-    };
-  }
+  /* Nach tutorialPruefen: Rückmeldung zum erledigten Schritt (module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).lernRueckmeldung=function(before,step){
+    const after=S.tutorial;
+    if(after>before){
+      if(after>=TUTORIAL.length)feedback("Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",true);
+      else if(step?.zusammenhang)feedback(step.zusammenhang,false);
+      window.__erzweltQuest?.tutorialNeu();if(typeof questZeichnen==="function")questZeichnen();
+    }
+  };
 
   if(typeof notiz==="function"){
     const originalNotiz=notiz;
