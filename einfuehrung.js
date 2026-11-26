@@ -114,7 +114,7 @@
   function quellenSchritte(k, ikon, zusammenhangAuf, warum){
     const name = MAT_NAME(k), n = BEDARF.quelle(k);
     return [
-      { id: k + "-auf", ikon, titel: `${name}-Quelle eröffnen`,
+      { id: k + "-auf", ikon, titel: `${name} abbauen`,
         get text(){ return `Tippe auf der Karte auf ${fett(ortName("mine", quelle(k)))} und eröffne die Rohstoffquelle.`; },
         zusammenhang: zusammenhangAuf,
         ziel: () => pinZiel("mine", quelle(k)),
