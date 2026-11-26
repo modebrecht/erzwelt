@@ -4,7 +4,7 @@
 
    Leichte Vegetation und Gelände auf dem Land: Schnee und Eis, verschneite
    Tannenwälder, Nadel- und Laubwald, Regenwald und Dschungel, Savanne, Wüste
-   mit Dünen, Gebirge. Dazu leichte Wellen auf dem Ozean.
+   mit Dünen, Gebirge, die grossen Flüsse. Dazu leichte Wellen auf dem Ozean.
 
    Alles ist Dekoration: unter den Pins, ohne Klicks (pointer-events:none),
    fest verteilt (gleicher Zufall bei jedem Laden). Die Gebiete sind grob nach
@@ -133,7 +133,30 @@
       gesetzt++;
     }
   });
-  ebene.append(flaechen, leicht, voll);
+  /* Grosse Flüsse: grobe Linien von der Quelle zur Mündung, auf das Land zugeschnitten */
+  const FLUESSE = [
+    [[-78,-4.5],[-73,-4],[-70,-3.5],[-65,-3.5],[-60,-3.2],[-55,-2.4],[-52,-1.5],[-50,-.5]],          // Amazonas
+    [[-47,-20],[-52,-22],[-55,-27],[-58.5,-31],[-58.4,-34]],                                         // Paraná
+    [[26,1],[24,1.5],[22,2],[19,1],[17,-1],[16,-3],[15,-4.3],[13,-5.8]],                             // Kongo
+    [[33,-1],[32.5,4],[31.5,9],[32.5,15.5],[33,19],[31,22],[32.8,24],[31.3,28],[31.2,30],[31,31.5]], // Nil
+    [[-10,10],[-6,13],[-3,16.5],[0,16],[3,13],[6,9],[6.5,5]],                                        // Niger
+    [[-95,47],[-91.5,43],[-91,39],[-89.5,36],[-91,32],[-90,30],[-89.4,29]],                          // Mississippi
+    [[-117,61],[-123,64],[-130,67.5],[-135,69]],                                                     // Mackenzie
+    [[9.5,46.8],[8,47.6],[8.4,49],[7.6,50.3],[6.8,51.3],[4.2,51.9]],                                 // Rhein
+    [[8.5,48],[12,48.5],[16.5,48],[19,47.5],[19,45],[22,44],[26,43.8],[28.5,45],[29.7,45.2]],        // Donau
+    [[86,52],[83,55],[77,61],[69,61],[66,64],[66.5,66.5]],                                           // Ob
+    [[106,54],[115,58],[127,62],[128,66],[127,71]],                                                  // Lena
+    [[91,33],[98,30],[102,28],[105,29.5],[110,30.5],[114,30.5],[118,31.5],[121.5,31.4]],             // Jangtse
+    [[98,30],[100,23],[102,18],[105,15],[105.5,11],[106.5,10]],                                      // Mekong
+    [[79,30],[81,26],[84.5,25.5],[88,24],[90,22.5]],                                                 // Ganges
+    [[148,-36],[144,-35.5],[140,-34],[139,-35.5]]                                                    // Murray
+  ];
+  const fluesse = el("g", {class:"landschaft-fluesse", "clip-path":"url(#landschaft-clip)"});
+  for (const lauf of FLUESSE){
+    fluesse.append(el("path", {d:"M" + lauf.map(([lon, lat]) => punkt(lon, lat).map(v => v.toFixed(1)).join(",")).join(" L"),
+      fill:"none", stroke:"#6aa6c8", "stroke-width":"1.4", "stroke-linecap":"round", "stroke-linejoin":"round", opacity:".85"}));
+  }
+  ebene.append(flaechen, fluesse, leicht, voll);
 
   // Direkt über die Landflächen, unter Linien, Routen und Pins
   const inseln = svg.querySelector("path.land.kleine-inseln") || land;

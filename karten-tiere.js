@@ -39,6 +39,7 @@
              ["🦭", "Robbe", "Nordatlantik", -25, 58]]
   };
   const ALLE = Object.values(TIERE).flat();
+  const ALLE_NAMEN = [...new Set(ALLE.map(t => t[1]))];
 
   const kartenPunkt = (lon, lat) => [(lon + 180) / 360 * KARTE_B, (78 - lat) / 138 * KARTE_H];
   let gelaufen = 0, tier = null, tierRest = 0;
@@ -153,7 +154,11 @@
     setTimeout(() => bonus.remove(), 1500);
     weg();
     window.__erzweltErfolgFeier?.verkaufTon?.();
-    notiz(textVon("tiere.gefunden", {zeichen, tier:name, ort, betrag:chf(betrag)}), "gut");
+    const album = (S.tierAlbum ||= {});
+    const neu = !album[name];
+    album[name] = Math.min(9999, (album[name] || 0) + 1);
+    notiz(textVon("tiere.gefunden", {zeichen, tier:name, ort, betrag:chf(betrag)})
+      + (neu ? " " + textVon("tiere.neuImAlbum", {anzahl:Object.keys(album).length, gesamt:ALLE_NAMEN.length}) : ""), "gut");
     speichern();
     zeichnen();
   }
@@ -171,6 +176,32 @@
     gelaufen++;
     if (gelaufen >= ABSTAND_S && aktiveSeite === "karte" && !offenesBlatt && auftauchen()) gelaufen = 0;
   }, 1000);
+
+  /* ---------- Tieralbum im Wissen-Reiter (module/seiten.js) ---------- */
+  const GRUPPE = {afrika:"Afrika", suedamerika:"Südamerika", nordamerika:"Nordamerika", europa:"Europa",
+    asien:"Asien", australien:"Australien", arktis:"Arktis", pinguine:"Pinguine", ozean:"Ozean"};
+  (window.__erzweltSeitenTeile ||= {}).tierAlbum = function(html){
+    const album = S.tierAlbum || {};
+    const gefunden = ALLE_NAMEN.filter(n => album[n]).length;
+    const gesehen = new Set();
+    const gruppen = Object.entries(TIERE).map(([g, liste]) => {
+      const zellen = liste.filter(t => !gesehen.has(t[1]) && gesehen.add(t[1])).map(([zeichen, name]) => album[name]
+        ? `<li class="tier-karte gefunden" title="${name}"><span aria-hidden="true">${zeichen}</span><small>${name}${album[name] > 1 ? " ×" + album[name] : ""}</small></li>`
+        : `<li class="tier-karte" aria-label="${textVon("tiere.albumOffen")}"><span aria-hidden="true">?</span></li>`).join("");
+      return zellen ? `<h4>${GRUPPE[g]}</h4><ul class="tier-album">${zellen}</ul>` : "";
+    }).join("");
+    return html + `<div class="karte tieralbum"><h3>${textVon("tiere.albumTitel")}</h3>
+      <div class="unter">${textVon("tiere.albumStand", {anzahl:gefunden, gesamt:ALLE_NAMEN.length})}</div>${gruppen}</div>`;
+  };
+  stil.textContent += `
+    .tieralbum h4{margin:12px 0 6px;font-size:calc(13px*var(--fs,1))}
+    .tier-album{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
+    .tier-karte{display:grid;justify-items:center;align-content:center;gap:2px;min-height:58px;padding:6px 4px;border-radius:10px;background:#00000010;
+      color:#7a6a55;text-align:center}
+    .tier-karte span{font-size:26px;line-height:1.1;filter:grayscale(1);opacity:.45}
+    .tier-karte small{font-size:calc(11px*var(--fs,1));line-height:1.2}
+    .tier-karte.gefunden{background:#fff7e0;color:inherit;box-shadow:inset 0 0 0 1.5px #ffd666}
+    .tier-karte.gefunden span{filter:none;opacity:1}`;
 
   window.__erzweltKartenTiere = {version:1, tiere:TIERE, auftauchen, fangen, stand: () => ({gelaufen, tier: tier && tier.name, rest: tierRest})};
 })();

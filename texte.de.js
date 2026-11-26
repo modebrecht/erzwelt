@@ -123,6 +123,10 @@ const TEXTE_DE = Object.freeze({
   /* ---------- Tiere auf der Karte ---------- */
   "tiere.antippen": "{tier} ({ort}) antippen: Bonus",
   "tiere.gefunden": "{zeichen} <b>{tier}</b> entdeckt ({ort}) · Bonus +{betrag}.",
+  "tiere.neuImAlbum": "Neu im Tieralbum ({anzahl}/{gesamt}).",
+  "tiere.albumTitel": "Tieralbum",
+  "tiere.albumStand": "{anzahl} von {gesamt} Tieren entdeckt. Tiere tauchen etwa alle drei Minuten auf der Karte auf.",
+  "tiere.albumOffen": "noch nicht entdeckt",
 
   /* ---------- didactic-model.js ---------- */
   "didacticmodel.kupfererz": "Kupfererz",
