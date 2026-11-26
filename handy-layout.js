@@ -164,7 +164,7 @@
     if (!filterKnopf || typeof ebenen === "undefined" || !ebenen) return;
     const aus = Object.values(ebenen).some(v => !v);
     filterKnopf.querySelector(".filter-punkt").hidden = !aus;
-    filterKnopf.setAttribute("aria-label", aus ? "Karte filtern (nicht alle Orte sichtbar)" : "Karte filtern");
+    filterKnopf.setAttribute("aria-label", aus ? textVon("handylayout.karte-filtern-nicht-alle") : textVon("handylayout.karte-filtern"));
   }
   function filterZu(){
     document.body.classList.remove("filter-offen");
@@ -174,7 +174,7 @@
     if (!ebenenEl.querySelector(".filter-titel")){
       const titel = document.createElement("p");
       titel.className = "filter-titel";
-      titel.textContent = "Auf der Karte zeigen";
+      titel.textContent = textVon("handylayout.auf-der-karte-zeigen");
       ebenenEl.prepend(titel);
     }
     filterKnopf = document.createElement("button");

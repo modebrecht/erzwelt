@@ -114,7 +114,7 @@
       button.type="button";
       button.setAttribute("aria-haspopup","dialog");
       button.setAttribute("aria-controls","toast-history-panel");
-      button.innerHTML=`${clockSvg}<span class="toast-history-label">Verlauf</span><span class="toast-history-count">0</span>`;
+      button.innerHTML=textVon("notificationhi.verlauf", {p1:(clockSvg)});
       const hud=document.getElementById("hud");
       hud.insertBefore(button,hud.querySelector(".hudrechts"));
       button.addEventListener("click",openHistory);
@@ -134,7 +134,7 @@
       panel.setAttribute("role","dialog");
       panel.setAttribute("aria-modal","true");
       panel.setAttribute("aria-labelledby","toast-history-title");
-      panel.innerHTML=`<div class="toast-history-head"><span class="hist-icon">${clockSvg}</span><div><h2 id="toast-history-title">Meldungsverlauf</h2><small id="toast-history-subtitle">Vergangene Meldungen</small></div><button id="toast-history-close" type="button" aria-label="Verlauf schliessen">×</button></div><div id="toast-history-list"></div>`;
+      panel.innerHTML=textVon("notificationhi.meldungsverlauf-vergangene-meldungen", {p1:(clockSvg)});
       document.body.appendChild(panel);
       panel.querySelector("#toast-history-close")?.addEventListener("click",closeHistory);
     }
@@ -148,7 +148,7 @@
     const badge=button.querySelector(".toast-history-count");
     if(badge)badge.textContent=String(count);
     button.disabled=count===0;
-    button.setAttribute("aria-label",count?`Meldungsverlauf öffnen, ${count} Meldungen`:"Meldungsverlauf, noch keine Meldungen");
+    button.setAttribute("aria-label",count?textVon("notificationhi.meldungsverlauf-oeffnen-meldungen", {p1:(count)}):textVon("notificationhi.meldungsverlauf-noch-keine-meldungen"));
   }
 
   function renderHistory(){
@@ -156,7 +156,7 @@
     const subtitle=document.getElementById("toast-history-subtitle");
     if(!list)return;
     const entries=(S?.log||[]).slice(0,60);
-    if(subtitle)subtitle.textContent=entries.length===1?"1 vergangene Meldung":`${entries.length} vergangene Meldungen`;
+    if(subtitle)subtitle.textContent=entries.length===1?textVon("notificationhi.vergangene-meldung"):textVon("notificationhi.vergangene-meldungen", {p1:(entries.length)});
     list.replaceChildren();
     if(!entries.length){
       const empty=document.createElement("div");empty.className="toast-history-empty";empty.textContent="Noch keine Meldungen vorhanden.";list.appendChild(empty);return;
@@ -165,9 +165,9 @@
       const item=document.createElement("article");
       item.className=`toast-history-item ${entry.art||""}`.trim();
       const meta=document.createElement("div");meta.className="toast-history-meta";
-      const tag=document.createElement("span");tag.textContent=`Tag ${entry.tag??"–"}`;
+      const tag=document.createElement("span");tag.textContent=textVon("notificationhi.tag", {p1:(entry.tag??"–")});
       const type=document.createElement("span");
-      type.textContent=entry.art==="alarm"?"Warnung":entry.art==="warn"?"Hinweis":entry.art==="gut"?"Erfolg":"Meldung";
+      type.textContent=entry.art==="alarm"?textVon("notificationhi.warnung"):entry.art==="warn"?textVon("notificationhi.hinweis"):entry.art==="gut"?textVon("notificationhi.erfolg"):textVon("notificationhi.meldung");
       meta.append(tag,type);
       const msg=document.createElement("div");msg.className="toast-history-message";msg.textContent=plainText(entry.text);
       item.append(meta,msg);list.appendChild(item);

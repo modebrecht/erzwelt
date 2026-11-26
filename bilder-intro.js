@@ -15,7 +15,7 @@ function bilderIntroVorbereiten(){
   if (!/^https?:$/.test(location.protocol)) return null;
   introBilderBereit ??= fetch("./assets/intro/bilder.json")
     .then(antwort => {
-      if (!antwort.ok) throw new Error("Intro-Bilder nicht verfügbar");
+      if (!antwort.ok) throw new Error(textVon("bilderintro.intro-bilder-nicht-verfuegbar"));
       return antwort.json();
     })
     .then(bundle => Object.fromEntries(Object.entries(bundle).map(([datei, {src}]) => [

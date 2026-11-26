@@ -7,8 +7,8 @@
   knopf.type = "button";
   knopf.id = "kartennamen-knopf";
   knopf.textContent = "Aa";
-  knopf.title = "Kartennamen (Strg halten oder einschalten)";
-  knopf.setAttribute("aria-label", "Kartennamen");
+  knopf.title = textVon("karteninfo.kartennamen-strg-halten-oder");
+  knopf.setAttribute("aria-label", textVon("karteninfo.kartennamen"));
   knopf.setAttribute("aria-pressed", "false");
   zoom.prepend(knopf);
 

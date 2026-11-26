@@ -70,7 +70,7 @@ function ensureTransportLegend(sichtbar){
     legend = document.createElement("div");
     legend.id = "didaktik-transport-legende";
     legend.style.cssText = "position:absolute;right:10px;bottom:calc(var(--dockh) + 10px);z-index:12;background:#0b3648e8;color:white;border:1px solid #ffffff30;border-radius:13px;padding:7px 9px;font-size:var(--f0);font-weight:800;line-height:1.25;pointer-events:none";
-    legend.innerHTML = "<b>Beispiel-Lieferweg</b><br>Rohstoffquelle → Raffinerie → Fabrik";
+    legend.innerHTML = textVon("didactictransp.beispiel-lieferweg-rohstoffquelle-raffinerie");
     document.getElementById("sicht")?.append(legend);
   }
   legend.hidden = !sichtbar;

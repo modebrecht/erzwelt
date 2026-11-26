@@ -13,6 +13,7 @@
      regler, teamKosten      belegschaft-regler.js
      teamVor, teamEinfuehrung   einfuehrung.js     Team in der Einführung
      knopfText, wissenPause  stil.js
+     tierAlbum               karten-tiere.js       Tieralbum unter dem Wissen
      zielZertifikat, formularOffen   abschluss-zertifikat.js
      zielEtappe              logik-fixes.js        Ziel pro Schwierigkeit, Nachweise
      zielPositiv             ziel-positiv.js
@@ -44,7 +45,8 @@
     return T.zielPositiv(html);
   };
   seiteWissen = function(){
-    return T.wissenPause(kern.wissen.apply(this, arguments));
+    const html = T.wissenPause(kern.wissen.apply(this, arguments));
+    return T.tierAlbum ? T.tierAlbum(html) : html;
   };
 
   const gedrosselt = T.drossel(kern.fuellen, name => String(name));

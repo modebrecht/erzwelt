@@ -36,10 +36,10 @@
 
   const PHASEN=[
     // Schritt-IDs aus einfuehrung.js.
-    {id:"rohstoff",nr:1,label:"Rohstoffe",steps:["kupfer-auf","kupfer-crew","alu-auf","alu-crew","zinn-auf","zinn-crew"]},
-    {id:"raff",nr:2,label:"Raffination",steps:["raff","raffcrew"]},
-    {id:"fab",nr:3,label:"Fertigung",steps:["fab","fab-crew"]},
-    {id:"verkauf",nr:4,label:"Verkauf",steps:["verkauf","verkaeufer"]}
+    {id:"rohstoff",nr:1,label:textVon("tutorialenhanc.rohstoffe"),steps:["kupfer-auf","kupfer-crew","alu-auf","alu-crew","zinn-auf","zinn-crew"]},
+    {id:"raff",nr:2,label:textVon("tutorialenhanc.raffination"),steps:["raff","raffcrew"]},
+    {id:"fab",nr:3,label:textVon("tutorialenhanc.fertigung"),steps:["fab","fab-crew"]},
+    {id:"verkauf",nr:4,label:textVon("tutorialenhanc.verkauf"),steps:["verkauf","verkaeufer"]}
   ];
 
   function phaseFor(id){return PHASEN.findIndex(p=>p.steps.includes(id));}
@@ -54,8 +54,8 @@
         if(fab.arbeiter<=0)return "Noch entstehen keine Ladekabel. Der Fabrik ist noch kein Personal zugewiesen.";
         const def=PRODUKT[START_PRODUKT];
         const fehlt=Object.keys(def.rezept||{}).filter(k=>(S.mat[k]||0)<def.rezept[k]);
-        if(fehlt.length)return `Noch entstehen keine Ladekabel. Es fehlt ${fehlt.map(k=>MATERIAL[k].name).join(", ")}. Prüfe Rohstoffquellen und Raffinerie.`;
-        return "Die Fabrik kann produzieren. Lass die Zeit laufen, bis mindestens ein Ladekabel im Lager liegt; verkaufe es danach im Markt.";
+        if(fehlt.length)return textVon("tutorialenhanc.noch-entstehen-keine-ladekabel", {p1:(fehlt.map(k=>MATERIAL[k].name).join(", "))});
+        return textVon("tutorialenhanc.die-fabrik-kann-produzieren");
       }
       return `Im Lager liegen ${Math.round(lager)} Ladekabel. Verkaufe einmal selbst im Markt und beobachte, wie aus Ware Geld wird.`;
     }
@@ -119,7 +119,7 @@
     element.id = "tutorial-lernfeedback";
     element.setAttribute("role", "status");
     const titel = document.createElement("b");
-    titel.textContent = eintrag.finale ? "Tutorial abgeschlossen" : "Schritt abgeschlossen";
+    titel.textContent = eintrag.finale ? textVon("tutorialenhanc.tutorial-abgeschlossen") : textVon("tutorialenhanc.schritt-abgeschlossen");
     const zeit = document.createElement("span");
     zeit.className = "lernfeedback-zeit";
     zeit.setAttribute("aria-hidden", "true");
@@ -140,16 +140,18 @@
   (window.__erzweltEinfuehrungTeile ||= {}).lernRueckmeldung=function(before,step){
     const after=S.tutorial;
     if(after>before){
-      if(after>=TUTORIAL.length)feedback("Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",true);
+      if(after>=TUTORIAL.length)feedback(textVon("tutorialenhanc.rohstoffquelle-raffinerie-fabrik-verkauf"),true);
       else if(step?.zusammenhang)feedback(step.zusammenhang,false);
       window.__erzweltQuest?.tutorialNeu();if(typeof questZeichnen==="function")questZeichnen();
     }
   };
 
   if(typeof notiz==="function"){
-    /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+    /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js).
+       «Tutorial abgeschlossen» zeigt schon die grüne Rückmeldung; die Meldung nennt
+       darum nur, was neu frei ist, statt die Überschrift zu wiederholen. */
     (window.__erzweltMeldungenTeile ||= {}).tutorialText=function(text){
-      if(typeof text==="string"&&text.startsWith("Tutorial geschafft –"))text="Tutorial abgeschlossen – du hast die Lieferkette einmal vollständig aufgebaut. Weitere Standorte, Produkte und Ausbauten sind jetzt verfügbar.";
+      if(typeof text==="string"&&text.startsWith("Tutorial geschafft –"))text=textVon("tutorial.freigeschaltet");
       return text;
     };
   }

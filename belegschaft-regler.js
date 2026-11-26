@@ -51,14 +51,11 @@
     const d = v - wert;
     if (d > 0){
       const neu = Math.max(0, d - frei), ausTeam = d - neu;
-      const wer = [ausTeam ? `${ausTeam} aus dem Team` : "", neu ? `${neu} neu eingestellt` : ""].filter(Boolean).join(" · ");
-      return `<div class="kachel einmalig ${neu ? "" : "leer"}"><small>Einmalig</small><b>${neu ? chf(neu * LOHN_PRO_KOPF) : "CHF 0"}</b><span>${neu ? `${neu} × ${chf(LOHN_PRO_KOPF)} Einstellen` : "niemand neu"}</span></div>
-        <div class="kachel monatlich"><small>Jeden Monat</small><b>+ ${chf(d * lohn)}</b><span>Lohn · ${wer}</span></div>`;
+      const wer = [ausTeam ? textVon("belegschaftreg.aus-dem-team", {p1:(ausTeam)}) : "", neu ? `${neu} neu eingestellt` : ""].filter(Boolean).join(" · ");
+      return textVon("belegschaftreg.einmalig-jeden-monat-lohn", {p1:(neu ? "" : "leer"), p2:(neu ? chf(neu * LOHN_PRO_KOPF) : "CHF 0"), p3:(neu ? `${neu} × ${chf(LOHN_PRO_KOPF)} Einstellen` : "niemand neu"), p4:(chf(d * lohn)), p5:(wer)});
     }
-    if (d < 0) return `<div class="kachel einmalig leer"><small>Einmalig</small><b>CHF 0</b><span>${-d} zurück ins Team</span></div>
-        <div class="kachel monatlich"><small>Jeden Monat</small><b>− ${chf(-d * lohn)}</b><span>Lohn · im Team ohne Aufgabe je ${chf(200)}</span></div>`;
-    return `<div class="kachel einmalig"><small>Einmalig</small><b>${chf(LOHN_PRO_KOPF)}</b><span>pro neue Person</span></div>
-        <div class="kachel monatlich"><small>Jeden Monat</small><b>${chf(wert * lohn)}</b><span>Lohn hier · ${chf(lohn)} pro Person</span></div>`;
+    if (d < 0) return textVon("belegschaftreg.einmalig-chf-zurueck-ins", {p1:(-d), p2:(chf(-d * lohn)), p3:(chf(200))});
+    return textVon("belegschaftreg.einmalig-pro-neue-person", {p1:(chf(LOHN_PRO_KOPF)), p2:(chf(wert * lohn)), p3:(chf(lohn))});
   }
 
   function bauen(tun, attrs, wert, klein){
@@ -80,9 +77,9 @@
     }
     const ausTeam = Math.min(max, wert + frei);
     const ziel = zielFuer(tun, r);
-    const zielMarke = ziel && ziel <= max ? `<span class="besetzung-ziel ${wert >= ziel ? "ok" : ""}" style="--z:${(ziel / max).toFixed(4)}"><i></i><b>${wert >= ziel ? "✓ " : ""}Ziel ${ziel}</b></span>` : "";
-    const unten = tun === "vcrew" ? "im Verkauf" : `von ${plaetze}`;
-    const hinweis = frei > 0 ? `${frei} frei im Team` : erreichbar > wert ? "Mehr = neu einstellen" : "Zu wenig Geld zum Einstellen";
+    const zielMarke = ziel && ziel <= max ? textVon("belegschaftreg.ziel", {p1:(wert >= ziel ? "ok" : ""), p2:((ziel / max).toFixed(4)), p3:(wert >= ziel ? "✓ " : ""), p4:(ziel)}) : "";
+    const unten = tun === "vcrew" ? textVon("belegschaftreg.im-verkauf") : `von ${plaetze}`;
+    const hinweis = frei > 0 ? textVon("belegschaftreg.frei-im-team", {p1:(frei)}) : erreichbar > wert ? textVon("belegschaftreg.mehr-neu-einstellen") : textVon("belegschaftreg.zu-wenig-geld-zum");
     return `<div class="besetzung" data-art="${tun}" ${ref} data-wert="${wert}" data-max="${max}" data-erreichbar="${erreichbar}" data-frei="${frei}" data-lohn="${lohn}">
       <div class="besetzung-zeile">
         <button class="besetzung-schritt" data-tun="${tun}" ${ref} data-n="-1" ${wert <= 0 ? "disabled" : ""} aria-label="Eine Person weniger">−</button>
@@ -117,8 +114,7 @@
   const EINMALIG = /(STELLE \d+ PERSONEN EIN · CHF[^<]*?)(?=\s*<\/button>)/;
   (window.__erzweltSeitenTeile ||= {}).teamKosten = function(html){
     html = html.replace(EINMALIG, "$1 einmalig");
-    const monat = `<div class="notiz monatskosten"><b>Danach jeden Monat Lohn:</b> je nach Land ${lohnSpanne()} pro Person,
-      im Verkauf ${chf(VERKAUF_LOHN)}. Wer keine Aufgabe hat, kostet ${chf(200)}.</div>`;
+    const monat = textVon("belegschaftreg.danach-jeden-monat-lohn", {p1:(lohnSpanne()), p2:(chf(VERKAUF_LOHN)), p3:(chf(200))});
     return html.replace(/(<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>)/, `$1${monat}`);
   };
   /* Der Kern schreibt den Knopf beim Ziehen des Reglers neu – «einmalig» wieder anhängen. */
@@ -138,7 +134,7 @@
     if (+r.value > erreichbar) r.value = erreichbar;
     const v = +r.value;
     r.style.setProperty("--p", prozent(v, max));
-    r.setAttribute("aria-valuetext", `${v} von ${max} Personen`);
+    r.setAttribute("aria-valuetext", textVon("belegschaftreg.von-personen", {p1:(v), p2:(max)}));
     const b = box.querySelector(".zahl b");
     if (b) b.textContent = v;
     const k = box.querySelector(".besetzung-kosten");
@@ -147,7 +143,7 @@
     if (z){
       const ziel = Math.round(+z.style.getPropertyValue("--z") * max);
       z.classList.toggle("ok", v >= ziel);
-      z.querySelector("b").textContent = (v >= ziel ? "✓ " : "") + "Ziel " + ziel;
+      z.querySelector("b").textContent = (v >= ziel ? "✓ " : "") + textVon("belegschaftreg.ziel-2") + ziel;
     }
   }
 
@@ -186,7 +182,7 @@
     if (neu > 0){
       const kosten = neu * LOHN_PRO_KOPF;
       S.kasse -= kosten; S.ausgegeben += kosten; S.arbeiterGesamt += neu;
-      notiz(`<b>${neu} ${neu === 1 ? "Person" : "Personen"}</b> eingestellt · einmalig ${chf(kosten)}, danach Lohn jeden Monat.`, "geld");
+      notiz(textVon("belegschaftreg.eingestellt-einmalig-danach-lohn", {p1:(neu), p2:(neu === 1 ? "Person" : "Personen"), p3:(chf(kosten))}), "geld");
     }
   }, true);
 

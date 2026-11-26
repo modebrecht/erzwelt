@@ -162,6 +162,6 @@
 
   window.__erzweltPerf={
     version:5,
-    note:"Memoized map UI/migrations; rAF-batched pan/zoom; synchronous saves coalesced; fast-tick panels capped near 2 Hz; quiet-mode continuous effects reduced."
+    note:textVon("performancepas.memoized-map-ui-migrations")
   };
 })();

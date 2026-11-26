@@ -18,24 +18,24 @@
 
 (function(){
   const ziele = (window.__erzweltLogikFixes && window.__erzweltLogikFixes.ziele) || {einfach:500000, mittel:3000000, schwer:3000000};
-  const kurzChf = n => (n >= 1e6 ? `CHF ${(n/1e6).toLocaleString("de-CH")} Mio` : chf(n)).replace(/ /g, "&nbsp;");
+  const kurzChf = n => (n >= 1e6 ? textVon("sekbklarheit.chf-mio", {p1:((n/1e6).toLocaleString("de-CH"))}) : chf(n)).replace(/ /g, "&nbsp;");
   const ersetze = (html, alt, neu) => html.split(alt).join(neu);
 
   /* ---------- 1. Schwierigkeit ---------- */
-  SCHWIERIGKEIT.einfach.effekt = "Verkauf bringt 20 % mehr";
-  SCHWIERIGKEIT.mittel.effekt  = "normale Verkaufspreise";
-  SCHWIERIGKEIT.schwer.effekt  = "Verkauf bringt 30 % weniger";
+  SCHWIERIGKEIT.einfach.effekt = textVon("sekbklarheit.verkauf-bringt-mehr");
+  SCHWIERIGKEIT.mittel.effekt  = textVon("sekbklarheit.normale-verkaufspreise");
+  SCHWIERIGKEIT.schwer.effekt  = textVon("sekbklarheit.verkauf-bringt-weniger");
 
   /* Schwierigkeitswahl: ersetzt die Fassung des Kerns (Reihenfolge: module/einfuehrung.js) */
   (window.__erzweltEinfuehrungTeile ||= {}).schwierigkeitWahl = function(){
     modalOffen = true; tempoSetzen(0);
-    $("#d-art").textContent = "Neue Runde";
-    $("#d-titel").textContent = "Wähle die Schwierigkeit";
-    $("#d-text").innerHTML = `Die Schwierigkeit bestimmt, wie viel dir ein Verkauf einbringt und wie hoch dein Ziel ist. Für den Start empfehlen wir <b>Einfach</b>.`;
+    $("#d-art").textContent = textVon("sekbklarheit.neue-runde");
+    $("#d-titel").textContent = textVon("sekbklarheit.waehle-die-schwierigkeit");
+    $("#d-text").innerHTML = textVon("sekbklarheit.die-schwierigkeit-bestimmt-wie");
     const optionen = [
-      ["einfach","🌱","Einfach",`Verkauf bringt 20&nbsp;% mehr<br>Ziel: ${kurzChf(ziele.einfach)}`,false,"Empfohlen"],
-      ["mittel","⚙️","Mittel",`Normale Verkaufspreise<br>Ziel: ${kurzChf(ziele.mittel)}`,false,""],
-      ["schwer","🔥","Schwer",`Verkauf bringt 30&nbsp;% weniger<br>Ziel: ${kurzChf(ziele.schwer)}`,!META.mittelGeschafft,"🔒 Erst Mittel schaffen"]
+      ["einfach","🌱",textVon("sekbklarheit.einfach"),textVon("sekbklarheit.verkauf-bringt-mehr-ziel", {p1:(kurzChf(ziele.einfach))}),false,textVon("sekbklarheit.empfohlen")],
+      ["mittel","⚙️",textVon("sekbklarheit.mittel"),textVon("sekbklarheit.normale-verkaufspreise-ziel", {p1:(kurzChf(ziele.mittel))}),false,""],
+      ["schwer","🔥",textVon("sekbklarheit.schwer"),textVon("sekbklarheit.verkauf-bringt-weniger-ziel", {p1:(kurzChf(ziele.schwer))}),!META.mittelGeschafft,textVon("sekbklarheit.erst-mittel-schaffen")]
     ];
     $("#d-wahlen").innerHTML = "";
     optionen.forEach(([id,icon,name,klein,gesperrt,status])=>{
@@ -47,7 +47,7 @@
       if (!gesperrt) b.onclick = () => {
         S.schwierigkeit = id; S.etappe = 1; S.etappeStartEingenommen = S.eingenommen; S.etappeStartAusgegeben = S.ausgegeben; S.ende = null;
         modalOffen = false; $("#schleier").hidden = true;
-        notiz(`${icon} Schwierigkeit <b>${name}</b> gewählt · ${SCHWIERIGKEIT[id].effekt}.`, "gut");
+        notiz(textVon("sekbklarheit.schwierigkeit-gewaehlt", {p1:(icon), p2:(name), p3:(SCHWIERIGKEIT[id].effekt)}), "gut");
         speichern(); tempoSetzen(1); zeichnen();
       };
       $("#d-wahlen").appendChild(b);
@@ -65,14 +65,14 @@
     const def = MINEN.find(x => x.id === id);
     if (!def) return html;
     const land = LAND[def.land];
-    html = ersetze(html, `<small>Ergiebigkeit</small><b>${def.ergiebigkeit} Rohstoff</b>`,
-      `<small>Förderung pro Person</small><b>≈ ${proTag(def.ergiebigkeit)} pro Tag</b>`);
-    html = ersetze(html, `<small>Plätze</small><b>${def.plaetze}</b>`, `<small>Arbeitsplätze</small><b>${def.plaetze}</b>`);
-    html = ersetze(html, `<small>Üblicher Lohn</small><b>${chf(land.lohn)}</b>`,
-      `<small>Üblicher Lohn</small><b>${chf(land.lohn)}</b><small class="einheit">pro Person und Monat</small>`);
-    html = html.replace(/(<small>Förderung<\/small><b>[^<]*)\/Tag<\/b>/, "$1 pro Tag</b>");
-    html = html.replace(/(<small>Lohnkosten<\/small><b>[^<]*)<\/b>/, `$1</b><small class="einheit">pro Monat</small>`);
-    html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Mengen und Löhne sind vereinfachte Spielwerte.</div>`, "");
+    html = ersetze(html, textVon("sekbklarheit.ergiebigkeit-rohstoff", {p1:(def.ergiebigkeit)}),
+      textVon("sekbklarheit.foerderung-pro-person-pro", {p1:(proTag(def.ergiebigkeit))}));
+    html = ersetze(html, textVon("sekbklarheit.plaetze", {p1:(def.plaetze)}), textVon("sekbklarheit.arbeitsplaetze", {p1:(def.plaetze)}));
+    html = ersetze(html, textVon("sekbklarheit.ueblicher-lohn", {p1:(chf(land.lohn))}),
+      textVon("sekbklarheit.ueblicher-lohn-pro-person", {p1:(chf(land.lohn))}));
+    html = html.replace(/(<small>Förderung<\/small><b>[^<]*)\/Tag<\/b>/, textVon("sekbklarheit.pro-tag"));
+    html = html.replace(/(<small>Lohnkosten<\/small><b>[^<]*)<\/b>/, textVon("sekbklarheit.pro-monat"));
+    html = ersetze(html, textVon("sekbklarheit.spielmodell-mengen-und-loehne"), "");
     return html;
   };
 
@@ -81,36 +81,36 @@
     if (!def) return html;
     const land = LAND[def.land];
     const spezial = (def.spezial||[]).map(k => MATERIAL[k] && MATERIAL[k].name).filter(Boolean);
-    const alteKarte = `<div class="karte"><h3>Spezialisierung im Spiel</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.</div></div>`;
-    const neueKarte = tutorialLaeuft() ? "" : `<div class="karte"><h3>Spezialisierung</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz">Diese Rohstoffe verarbeitet die Raffinerie <b>25 % schneller</b>. Alle anderen Rohstoffe verarbeitet sie normal.</div></div>`;
+    const alteKarte = textVon("sekbklarheit.spezialisierung-im-spiel-durchsatz", {p1:(spezial.join(" · ")||"keine Spezialisierung")});
+    const neueKarte = tutorialLaeuft() ? "" : textVon("sekbklarheit.spezialisierung-diese-rohstoffe-verarbeitet", {p1:(spezial.join(" · ")||"keine Spezialisierung")});
     html = ersetze(html, alteKarte, neueKarte);
-    html = ersetze(html, `<small>Kapazität</small><b>${def.kapazitaet}/Tag</b>`,
-      `<small>Verarbeitet bis zu</small><b>${def.kapazitaet}</b><small class="einheit">Rohstoff pro Tag, voll besetzt</small>`);
-    html = ersetze(html, `<small>Plätze</small><b>${def.plaetze}</b>`, `<small>Arbeitsplätze</small><b>${def.plaetze}</b>`);
-    html = ersetze(html, `<small>Lohn</small><b>${chf(land.lohn)}</b>`,
-      `<small>Lohn</small><b>${chf(land.lohn)}</b><small class="einheit">pro Person und Monat</small>`);
-    html = ersetze(html, `<small>Betrieb</small><b>${chf(9000)}/Mt.</b>`,
-      `<small>Betriebskosten</small><b>${chf(9000)}</b><small class="einheit">pro Monat</small>`);
-    html = html.replace(/<small>Durchsatz<\/small><b>(\d+)\/Tag<\/b>/, `<small>Verarbeitet</small><b>$1</b><small class="einheit">Rohstoff pro Tag</small>`);
-    html = ersetze(html, "Der Rest steht im Spielmodell für Abraum und Verluste.", "Der Rest ist Abraum: Gestein und Abfall.");
+    html = ersetze(html, textVon("sekbklarheit.kapazitaet-tag", {p1:(def.kapazitaet)}),
+      textVon("sekbklarheit.verarbeitet-bis-zu-rohstoff", {p1:(def.kapazitaet)}));
+    html = ersetze(html, textVon("sekbklarheit.plaetze", {p1:(def.plaetze)}), textVon("sekbklarheit.arbeitsplaetze", {p1:(def.plaetze)}));
+    html = ersetze(html, textVon("sekbklarheit.lohn", {p1:(chf(land.lohn))}),
+      textVon("sekbklarheit.lohn-pro-person-und", {p1:(chf(land.lohn))}));
+    html = ersetze(html, textVon("sekbklarheit.betrieb-mt", {p1:(chf(9000))}),
+      textVon("sekbklarheit.betriebskosten-pro-monat", {p1:(chf(9000))}));
+    html = html.replace(/<small>Durchsatz<\/small><b>(\d+)\/Tag<\/b>/, textVon("sekbklarheit.verarbeitet-rohstoff-pro-tag"));
+    html = ersetze(html, textVon("sekbklarheit.der-rest-steht-im"), "Der Rest ist Abraum: Gestein und Abfall.");
     return html;
   };
 
   /* Raffinerie-Szene in der Einführung mit dem Start-Rohstoff: module/blatt.js */
 
   blattTeile.fabTexte = function(html, land){
-    html = ersetze(html, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat`, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)} pro Person und Monat`);
-    html = ersetze(html, "Vereinfachtes Rezept · Spielmodell", "Rezept: Material pro Stück");
+    html = ersetze(html, textVon("sekbklarheit.fabrikstandort-lohn-monat", {p1:(chf(LAND[land].lohn))}), textVon("sekbklarheit.fabrikstandort-lohn-pro-person", {p1:(chf(LAND[land].lohn))}));
+    html = ersetze(html, textVon("sekbklarheit.vereinfachtes-rezept-spielmodell"), textVon("sekbklarheit.rezept-material-pro-stueck"));
     const e = engpass();
-    const tipp = e && e.fab === land ? e.text : "Sichere dafür eine eigene Rohstoffquelle oder setze dort mehr Personal ein.";
-    html = ersetze(html, "Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.", tipp);
+    const tipp = e && e.fab === land ? e.text : textVon("sekbklarheit.sichere-dafuer-eine-eigene");
+    html = ersetze(html, textVon("sekbklarheit.zukaufen-geht-nicht-sichere"), tipp);
     return html;
   };
 
   /* Texte im Team- und Markt-Reiter (Reihenfolge: module/seiten.js) */
   const seitenTeile = (window.__erzweltSeitenTeile ||= {});
   seitenTeile.teamTexte = function(html){
-    html = ersetze(html, `<div class="unter">Lohnkosten im Spielmodell</div>`, `<div class="unter">Personal einstellen und auf die Stationen verteilen</div>`);
+    html = ersetze(html, textVon("sekbklarheit.lohnkosten-im-spielmodell"), textVon("sekbklarheit.personal-einstellen-und-auf"));
     html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`, "");
     return html;
   };
@@ -127,7 +127,7 @@
       const m = sp.textContent.match(/^(.+?) (\d+)\/(\d+)$/);
       if (!m) return;
       sp.dataset.klar = "1";
-      sp.innerHTML = `${m[1]}: <b>${m[2]}</b> da · ${m[3]} pro Stück`;
+      sp.innerHTML = textVon("sekbklarheit.da-pro-stueck", {p1:(m[1]), p2:(m[2]), p3:(m[3])});
     });
   }
 
@@ -154,17 +154,17 @@
       // hat das Material nicht gebremst – knappes Lager bei abgestimmter Kette ist kein Engpass.
       if ((S.mat[knapp]||0) >= def.rezept[knapp]) continue;
       const mat = MATERIAL[knapp];
-      const titel = `${mat.name} fehlt für ${def.name}`;
+      const titel = textVon("sekbklarheit.fehlt-fuer", {p1:(mat.name), p2:(def.name)});
       const mineId = materialMine(knapp);
       if (!mineId){
         const frei = freieQuelleFuer(knapp);
         const d = frei && MINEN.find(x => x.id === frei);
-        return {titel, text: d ? `Du hast noch keine Quelle für ${mat.name}. Eröffne zum Beispiel ${d.ort}.` : `Du hast noch keine Quelle für ${mat.name}.`,
+        return {titel, text: d ? textVon("sekbklarheit.du-hast-noch-keine", {p1:(mat.name), p2:(d.ort)}) : textVon("sekbklarheit.du-hast-noch-keine-2", {p1:(mat.name)}),
                 ziel: frei ? {art:"mine", id:frei} : null, fab:f.land};
       }
       const m = S.minen[mineId], d = MINEN.find(x => x.id === mineId);
       if (m.stillBis > S.tag)
-        return {titel, text:`${d.ort} steht gerade still. Öffne die Rohstoffquelle und schau nach dem Grund.`, ziel:{art:"mine", id:mineId}, fab:f.land};
+        return {titel, text:textVon("sekbklarheit.steht-gerade-still-oeffne", {p1:(d.ort)}), ziel:{art:"mine", id:mineId}, fab:f.land};
       const raffIds = Object.keys(S.raff || {});
       if ((S.erz[knapp]||0) > 150 && raffIds.length){
         const rid = raffIds.find(id => S.raff[id].arbeiter < RAFF_ORTE.find(x => x.id === id).plaetze) || raffIds[0];
@@ -173,12 +173,12 @@
       }
       if (m.arbeiter < d.plaetze)
         return {titel, text:`Setze in ${d.ort} mehr Personal ein (jetzt ${m.arbeiter} von ${d.plaetze}).`, ziel:{art:"mine", id:mineId}, fab:f.land};
-      return {titel, text:`${d.ort} ist voll besetzt. Baue die Rohstoffquelle aus oder eröffne eine zweite Quelle für ${mat.name}.`, ziel:{art:"mine", id:mineId}, fab:f.land};
+      return {titel, text:textVon("sekbklarheit.ist-voll-besetzt-baue", {p1:(d.ort), p2:(mat.name)}), ziel:{art:"mine", id:mineId}, fab:f.land};
     }
     const kraft = verkaufsKraft(), lager = warenLager();
     if (produktion > 0 && lager > Math.max(40, kraft * 6) && kraft < produktion * 0.9){
-      return {titel:"Dein Lager wird voll",
-              text:`Deine Fabriken schaffen etwa ${produktion} Stück pro Tag, dein Verkaufsteam verkauft ${kraft}. Setze im Markt mehr Leute in den Verkauf.`,
+      return {titel:textVon("sekbklarheit.dein-lager-wird-voll"),
+              text:textVon("sekbklarheit.deine-fabriken-schaffen-etwa", {p1:(produktion), p2:(kraft)}),
               ziel:{art:"seite", id:"markt"}};
     }
     return null;
@@ -316,15 +316,15 @@
   /* «Das Modell im Code» → «Das Spielmodell», Zusammenhänge in Worten statt Formeln. */
   const modellSeg = WISSEN.find(seg => seg.id === "modell");
   if (modellSeg){
-    modellSeg.titel = "Das Spielmodell";
+    modellSeg.titel = textVon("sekbklarheit.das-spielmodell");
     modellSeg.formeln = null;
-    modellSeg.fakten = ["Ortsinfos sind für den Unterricht gekürzt und vereinfacht.", "Die Hintergrundinfos wurden 2026 geprüft."];
+    modellSeg.fakten = [textVon("didacticcomple.ortsinfos-sind-fuer-den"), textVon("sekbklarheit.die-hintergrundinfos-wurden-geprueft")];
     const REGELN = [
-      ["Förderung", "Mehr Personal und zufriedenere Leute holen mehr Rohstoff aus der Quelle."],
-      ["Raffination", "Aus Rohstoff wird Material. Ein Teil bleibt als Abraum zurück."],
-      ["Fabrik", "Das knappste Material bestimmt, wie viele Produkte entstehen."],
-      ["Nachfrage", "Saison, Ereignisse und dein Ruf verändern, wie viel gekauft wird."],
-      ["Preis", "Ein volles Lager senkt den Preis. Der Dollarkurs kann ihn heben oder senken."]
+      [textVon("sekbklarheit.foerderung"), "Mehr Personal und zufriedenere Leute holen mehr Rohstoff aus der Quelle."],
+      [textVon("tutorialenhanc.raffination"), textVon("sekbklarheit.aus-rohstoff-wird-material")],
+      [textVon("sekbklarheit.fabrik"), "Das knappste Material bestimmt, wie viele Produkte entstehen."],
+      [textVon("didacticmodel.nachfrage"), textVon("sekbklarheit.saison-ereignisse-und-dein")],
+      [textVon("sekbklarheit.preis"), "Ein volles Lager senkt den Preis. Der Dollarkurs kann ihn heben oder senken."]
     ];
     /* Lupe «Modell»: Regeln als Tabelle (Reihenfolge: module/wissen.js) */
     wissenTeile.modellRegeln = function(segId){
@@ -332,7 +332,7 @@
         const merken = [...document.querySelectorAll("#lupeinhalt .karte > h3")].find(h => h.textContent.trim() === "Zum Merken");
         const karte = document.createElement("div");
         karte.className = "karte modell-regeln";
-        karte.innerHTML = `<h3>So hängt es zusammen</h3><table>${REGELN.map(([a, t]) => `<tr><td><b>${a}</b></td><td>${t}</td></tr>`).join("")}</table>`;
+        karte.innerHTML = textVon("sekbklarheit.so-haengt-es-zusammen", {p1:(REGELN.map(([a, t]) => `<tr><td><b>${a}</b></td><td>${t}</td></tr>`).join(""))});
         if (merken) merken.closest(".karte").before(karte);
         else document.getElementById("lupeinhalt")?.appendChild(karte);
       }
@@ -359,7 +359,7 @@
   };
   /* Kaufblatt: Bild flacher, Kaufknopf klebt unten im Blatt und ist ohne
      Scrollen sichtbar. Der Pause-Hinweis steht direkt über dem Knopf. */
-  const PAUSE_TEXT = "❚❚ Die Zeit steht, solange du dich entscheidest.";
+  const PAUSE_TEXT = textVon("sekbklarheit.die-zeit-steht-solange");
   function kaufLayout(kauf, pausiert){
     const inhalt = document.getElementById("blattinhalt");
     if (!inhalt) return;
@@ -368,7 +368,7 @@
     if (!kauf) return;
     const svg = inhalt.querySelector(":scope > .szene svg.buehne");
     if (svg){
-      svg.setAttribute("preserveAspectRatio", "xMidYMax slice");
+      svg.setAttribute("preserveAspectRatio", textVon("sekbklarheit.xmidymax-slice"));
       const leer = [...svg.querySelectorAll("text")].find(t => /Noch niemand/.test(t.textContent));
       if (leer) leer.setAttribute("y", "68");
     }

@@ -49,7 +49,7 @@
     const out = kernQuest();
     if (!tutorialLaeuft()){
       const q = document.getElementById("quest");
-      if (q && !q.hidden){ const art = document.getElementById("q-art"); if (art) art.textContent = "Hinweis"; }
+      if (q && !q.hidden){ const art = document.getElementById("q-art"); if (art) art.textContent = textVon("notificationhi.hinweis"); }
     }
     return out;
   }
@@ -59,7 +59,7 @@
   function ensureExtras(q){
     let chain=q.querySelector(".tutorial-kette");
     if(!chain){
-      chain=document.createElement("div");chain.className="tutorial-kette";chain.setAttribute("aria-label","Fortschritt in der Lieferkette");
+      chain=document.createElement("div");chain.className="tutorial-kette";chain.setAttribute("aria-label",textVon("quest.fortschritt-in-der-lieferkette"));
       chain.innerHTML=PHASEN.map(p=>`<div class="tutorial-phase" data-phase="${p.id}"><b>${p.nr}</b><span>${p.label}</span></div>`).join("");
       const progress=q.querySelector(".fortschritt");if(progress)progress.insertAdjacentElement("beforebegin",chain);else q.appendChild(chain);
     }
@@ -105,8 +105,8 @@
     const {chain,phaseName,relation}=ensureExtras(q);chain.hidden=phaseName.hidden=relation.hidden=false;
     const current=phaseFor(t.id);
     chain.querySelectorAll(".tutorial-phase").forEach((el,i)=>{el.classList.toggle("erledigt",i<current);el.classList.toggle("aktiv",i===current);});
-    phaseName.textContent=`Phase ${current+1}/4 · ${PHASEN[current]?.label||"Lieferkette"}`;
-    relation.innerHTML=`<b>Zusammenhang:</b> ${t.zusammenhang||""}`;
+    phaseName.textContent=textVon("quest.phase", {p1:(current+1), p2:(PHASEN[current]?.label||"Lieferkette")});
+    relation.innerHTML=textVon("quest.zusammenhang", {p1:(t.zusammenhang||"")});
     if(typeof questHoeheMessen==="function")questHoeheMessen();
     requestAnimationFrame(()=>syncTutorialToastLayout(q,t));
   }
@@ -142,7 +142,7 @@
     wissenBisher = jetzt;
     T.kuerzel(document.getElementById("q-text"));
     const art = document.getElementById("q-art");
-    if (art && art.textContent === "Wissen freigeschaltet") art.textContent = "Neues Wissen";
+    if (art && art.textContent === "Wissen freigeschaltet") art.textContent = textVon("quest.neues-wissen");
     return out;
   };
 

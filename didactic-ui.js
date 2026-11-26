@@ -19,20 +19,7 @@
   }).join("");
   const eff = S.globalMod.filter(m => m.bis > S.tag);
 
-  return `<h1>Markt &amp; Verkauf</h1><div class="unter">Fertige Produkte müssen verkauft werden</div>
-    <div class="verkauf-kette-mini"><span>Produkt</span><b>→</b><span>Verkauf</span><b>→</b><span>Geld</span></div>
-    <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
-      <h3>Verkauf</h3><div class="ort">Im Lager liegen <b>${lager}</b> Stück</div>
-      <button class="cta riesig ${(!heuteSchon&&handStueck>0)?"puls":""}" data-tun="handverkauf" ${(heuteSchon||handStueck<=0)?"disabled":""}>${IK.muenze}${handStueck<=0?"Nichts zu verkaufen":heuteSchon?"Heute schon verkauft":"SELBST VERKAUFEN · "+handStueck+" Stück"}</button>
-      <div class="notiz">Einmal pro Tag kannst du selbst verkaufen. Für den täglichen Verkauf setzt du Leute im Verkaufsteam ein.</div>
-      <h3 style="margin-top:14px">Dein Verkaufsteam</h3><div class="ort">${frei} Personen frei · Lohn ${chf(VERKAUF_LOHN)} pro Person und Monat</div>
-      <div class="crewzeile"><button data-tun="vcrew" data-n="-5" ${(S.verkaeufer||0)<=0?"disabled":""}>−5</button><button data-tun="vcrew" data-n="-1" ${(S.verkaeufer||0)<=0?"disabled":""}>−</button><div class="zahl"><b>${S.verkaeufer||0}</b><small>Verkauf</small></div><button data-tun="vcrew" data-n="1" ${(frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""}>+</button><button data-tun="vcrew" data-n="5" ${(frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""}>+5</button></div>
-      <div class="zeile"><span>Verkaufskapazität</span><b>${kraft} Stück/Tag</b></div><div class="zeile"><span>Lohnkosten</span><b>${chf((S.verkaeufer||0)*VERKAUF_LOHN)}/Mt.</b></div>
-      ${frei<=0?`<div class="notiz rot">Niemand ist frei. Stelle im Team weitere Personen ein.<button class="cta" data-tun="zumteam">${IK.person}Zum Team</button></div>`:""}
-    </div>
-    <div class="karte"><h3>Deine Produkte</h3><table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>${prod}</table><div class="notiz">Produzierst du deutlich mehr als nachgefragt wird, füllt sich das Lager und der Verkaufspreis sinkt.</div></div>
-    <div class="karte"><h3>Deine Rohstoffquellen</h3><table><tr><th>Material</th><th>Quelle</th><th class="n">Bereit</th><th class="n">Rohstoff</th></tr>${roh}</table><div class="notiz">Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.</div></div>
-    ${eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
+  return textVon("didacticui.markt-verkauf-fertige-produkte", {p1:(lager), p2:((!heuteSchon&&handStueck>0)?"puls":""), p3:((heuteSchon||handStueck<=0)?"disabled":""), p4:(IK.muenze), p5:(handStueck<=0?"Nichts zu verkaufen":heuteSchon?"Heute schon verkauft":"SELBST VERKAUFEN · "+handStueck+" Stück"), p6:(frei), p7:(chf(VERKAUF_LOHN)), p8:((S.verkaeufer||0)<=0?"disabled":""), p9:((S.verkaeufer||0)<=0?"disabled":""), p10:(S.verkaeufer||0), p11:((frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""), p12:((frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""), p13:(kraft), p14:(chf((S.verkaeufer||0)*VERKAUF_LOHN)), p15:(frei<=0?`<div class="notiz rot">Niemand ist frei. Stelle im Team weitere Personen ein.<button class="cta" data-tun="zumteam">${IK.person}Zum Team</button></div>`:""), p16:(prod), p17:(roh), p18:(eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:"")});
 };
 
 /* Vor jedem Zeichnen (Reihenfolge: module/karte.js) */

@@ -27,8 +27,8 @@ const produktEntdeckungsText = {
   motor:"Beim E-Bike wandelt der Motor Strom aus dem Akku in Bewegung um.",
   phone:"Im Smartphone arbeiten Bildschirm, Akku und winzige Schaltkreise zusammen.",
   board:"Das Mainboard verbindet die elektronischen Bauteile miteinander.",
-  konsole:"Chips berechnen das Spielbild. Ein Lüfter führt die Wärme ab.",
-  tv:"Der Bildschirm nutzt sehr dünne, durchsichtige Schichten, die Strom leiten.",
+  konsole:textVon("produktentdeck.chips-berechnen-das-spielbild"),
+  tv:textVon("produktentdeck.der-bildschirm-nutzt-sehr"),
   akku:"Der Akku speichert Energie und versorgt den E-Bike-Motor mit Strom."
 };
 
@@ -39,7 +39,7 @@ function entdeckungsRezept(rezept){
     return `<li><span style="--materialfarbe:${m.farbe}">${m.sym}</span>${m.name}</li>`;
   }).join("")}</ul>`;
   return liste(materialien.slice(0, 4)) + (materialien.length > 4
-    ? `<details><summary>Alle Materialien anzeigen</summary>${liste(materialien.slice(4))}</details>` : "");
+    ? textVon("produktentdeck.alle-materialien-anzeigen", {p1:(liste(materialien.slice(4)))}) : "");
 }
 
 function produktentdeckungZeigen(tempoDanach = tempo, fokusDanach = document.activeElement){
@@ -51,17 +51,17 @@ function produktentdeckungZeigen(tempoDanach = tempo, fokusDanach = document.act
   const [id, eintrag] = offen;
   const produkt = PRODUKT[id];
   const kabel = id === "kabel";
-  const titel = kabel ? `Dein erstes ${produkt.name}!` : `${produkt.name} erstmals hergestellt`;
+  const titel = kabel ? textVon("produktentdeck.dein-erstes", {p1:(produkt.name)}) : `${produkt.name} erstmals hergestellt`;
   const beschreibung = kabel
-    ? "Aus drei Materialien hast du dein erstes Produkt hergestellt. Deine Lieferkette ist bereit für den Verkauf."
-    : produktEntdeckungsText[id] || produkt.info || "Deine Fabrik hat das erste Stück hergestellt.";
+    ? textVon("produktentdeck.aus-drei-materialien-hast")
+    : produktEntdeckungsText[id] || produkt.info || textVon("produktentdeck.deine-fabrik-hat-das");
   const rezept = kabel ? kabelQuerschnitt() : entdeckungsRezept(produkt.rezept);
   tempoSetzen(0);
   $("#spiel").inert = true;
   dialogZeigen({
-    art:"Produkt entdeckt", titel,
+    art:textVon("produktentdeck.produkt-entdeckt"), titel,
     text:`<div class="entdeckung" data-produkt="${id}"><p>${beschreibung}</p>${rezept}</div>`,
-    wahlen:[{text:"Weiter", tun:() => { eintrag.status = "gesehen"; }}],
+    wahlen:[{text:textVon("intro.weiter"), tun:() => { eintrag.status = "gesehen"; }}],
     nachWahl:() => {
       if (produktentdeckungZeigen(tempoDanach, fokusDanach)) return;
       $("#spiel").inert = false;

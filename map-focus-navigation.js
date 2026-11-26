@@ -76,7 +76,7 @@
     pin.querySelector(".knopf")?.appendChild(ring);
     setTimeout(()=>ring.remove(),1050);
     if(suggestion){
-      const label=document.createElement("span");label.className="map-focus-suggestion";label.textContent="Vorschlag";
+      const label=document.createElement("span");label.className="map-focus-suggestion";label.textContent=textVon("mapfocusnaviga.vorschlag");
       pin.appendChild(label);setTimeout(()=>label.remove(),2400);
     }
   }
@@ -212,7 +212,7 @@
     let cue=q.querySelector(".quest-map-cue");
     if(action&&!cue){cue=document.createElement("span");cue.className="quest-map-cue";cue.innerHTML=locateSvg();q.appendChild(cue);}
     if(!action&&cue)cue.remove();
-    if(action)q.setAttribute("aria-label",`${q.textContent.trim()} · Ziel anzeigen`);
+    if(action)q.setAttribute("aria-label",textVon("mapfocusnaviga.ziel-anzeigen", {p1:(q.textContent.trim())}));
   }
 
   const quest=document.getElementById("quest");

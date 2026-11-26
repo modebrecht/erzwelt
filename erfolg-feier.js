@@ -122,10 +122,10 @@
   (window.__erzweltMeldungenTeile ||= {}).toene = function(){
     const anim = document.getElementById("r-anim")?.closest(".reglerzeile");
     if (anim && !document.getElementById("r-ton") && typeof regler === "function"){
-      anim.insertAdjacentHTML("afterend", regler("ton", "Töne",
-        "Kurze Töne bei Kauf, eigenem Verkauf und erledigter Aufgabe. Im Schulzimmer: Kopfhörer oder aus.",
+      anim.insertAdjacentHTML("afterend", regler("ton", textVon("erfolgfeier.toene"),
+        textVon("erfolgfeier.kurze-toene-bei-kauf"),
         0, 1, 1, tonAn() ? 1 : 0, tonAn() ? "an" : "aus")
-        + (kannVibrieren ? regler("vib", "Vibration",
+        + (kannVibrieren ? regler("vib", textVon("erfolgfeier.vibration"),
         "Kurzes Vibrieren bei Kauf, eigenem Verkauf und erledigter Aufgabe.",
         0, 1, 1, vibAn() ? 1 : 0, vibAn() ? "an" : "aus") : ""));
     }
@@ -143,5 +143,5 @@
     if (art === "vib" && OPT.vib) vibrieren(22);
   });
 
-  window.__erzweltErfolgFeier = {version:VERSION, feiern, kaufTon, verkaufTon, kannVibrieren, tonStatus: () => ctx ? ctx.state : "kein Ton bisher"};
+  window.__erzweltErfolgFeier = {version:VERSION, feiern, kaufTon, verkaufTon, kannVibrieren, tonStatus: () => ctx ? ctx.state : textVon("erfolgfeier.kein-ton-bisher")};
 })();

@@ -1,67 +1,39 @@
-# Texte: noch nicht in `texte.de.js`
+# Texte in `texte.de.js`
 
-Ziel (Auftrag Schritt 6): alle sichtbaren Texte als Schlüssel → Text in `texte.de.js`,
-abgerufen mit `textVon(schluessel, werte)`. Erledigt sind Hauptmenü, Spielstände und
-Bilder-Intro (`spielstaende.js`, `spielstaende-daten.js`, `bilder-intro.js`, rund 75 Texte;
-Feldnamen in Fehlermeldungen wie «(Name)» stehen noch im Code). Der Prüfstand zeigt
-dafür 0 Unterschiede.
+Sichtbare Texte stehen als Schlüssel → Text in `texte.de.js` (990 Einträge) und werden
+mit `textVon(schluessel, werte)` geholt. Platzhalter heissen `{name}` bzw. bei
+umgestellten Template-Texten `{p1}`, `{p2}` … in der Reihenfolge im Code.
 
-Grobe Zählung der übrigen Textstellen (Zeichenketten mit mindestens zwei Wörtern, ohne
-Klassen- und Stilangaben): **rund 1166**, davon:
+`texte.de.js` wird beim Bauen vor dem Spielskript eingebettet (nicht mehr als Patch),
+damit auch `erzwelt-core.html` seine Texte daraus holt.
 
-| Textstellen | Datei |
-|---:|---|
-| 379 | `erzwelt-core.html` |
-| 183 | `karteninfo-daten.js` |
-| 95 | `didactic-complexity.js` |
-| 62 | `didactic-should.js` |
-| 50 | `sek-b-klarheit.js` |
-| 37 | `logik-fixes.js` |
-| 36 | `einfuehrung.js` |
-| 35 | `abschluss-zertifikat.js` |
-| 33 | `didactic-model.js` |
-| 31 | `didactic-events.js` |
-| 30 | `knowledge-quest-flow.js` |
-| 25 | `kurztexte.js` |
-| 18 | `belegschaft-regler.js` |
-| 15 | `spielstaende-daten.js` |
-| 13 | `map-focus-navigation.js` |
-| 12 | `produktentdeckungen.js` |
-| 10 | `stop-safety-visual.js` |
-| 10 | `didactic-ui.js` |
-| 9 | `tutorial-enhance.js` |
-| 9 | `construction-visibility.js` |
-| 7 | `transformation-enhance.js` |
-| 7 | `transformation-animations.js` |
-| 6 | `ziel-positiv.js` |
-| 6 | `bilder-intro.js` |
-| 5 | `spielstaende.js` |
-| 5 | `notification-history.js` |
-| 5 | `handy-layout.js` |
-| 5 | `erfolg-feier.js` |
-| 4 | `stil.js` |
-| 4 | `premium-spielgefuehl.js` |
-| 4 | `objective-guide.js` |
-| 3 | `karteninfo.js` |
-| 3 | `karte-mitte.js` |
-| 3 | `blatt-ordnung.js` |
-| 2 | `premium-animation-treatment-v2.js` |
-| 2 | `kabel-querschnitt.js` |
-| 1 | `performance-pass.js` |
-| 1 | `interaction-focus-final-fix.js` |
-| 1 | `didactic-transport.js` |
+## Wie umgestellt wurde
 
-## Worauf es beim Weitermachen ankommt
+Hauptmenü, Spielstände, Intro, Bonus, Landschaft und Tiere sind von Hand benannt
+(`menue.…`, `slot.…`, `bonus.…`). Den Rest hat `scripts/texte_migration.py`
+umgestellt: Jede Zeichenkette mit sichtbarem deutschem Text wird zu
+`textVon("datei.erste-woerter")`; der Text wird **roh** übernommen, damit `textVon`
+zeichengenau dasselbe liefert. Nicht umgestellt werden Vergleiche
+(`=== "…"`, `startsWith("…")`), Selektoren, Objektschlüssel, `case`-Marken,
+CSS, Klassen- und Schrittnamen, Gebietsschemas (`"de-CH"`).
+`scripts/texte_zurueck.py <schluessel>` macht einen Eintrag rückgängig.
 
-- **Kern zuerst ermöglichen.** `texte.de.js` lädt heute als erster Patch, also *nach*
-  dem Spielkern. Für die rund 380 Texte in `erzwelt-core.html` muss
-  `scripts/build-standalone.mjs` die Datei vor dem Kern-Skript einbetten.
-- **Ersetzungsketten beachten.** Mehrere Patches suchen Kerntexte wörtlich und ersetzen
-  sie (z. B. `ersetze(html, alt, neu)` in `sek-b-klarheit.js`, `kurztexte.js`). Wird nur
-  eine Seite einer solchen Kette umgestellt, greift die Ersetzung nicht mehr. Besser: den
-  Endtext direkt als Schlüssel ablegen und die Ersetzung entfernen – das ist aber schon
-  ein Umbau der Texte, nicht nur ein Verschieben, und braucht den Prüfstand pro Datei.
-- **Daten mit Text** (`karteninfo-daten.js`, Ereignisse, Wissen) sind Inhalt, nicht
-  Oberfläche. Sinnvoll als eigene Datei je Sprache (z. B. `karteninfo.de.js`) statt
-  einzeln in `texte.de.js`.
-- Pro Datei: umstellen, bauen, Prüfstand = 0 Unterschiede, dann Commit.
+Geprüft mit dem Prüfstand: 490 Zustände ohne Unterschied (ausser dem bewusst
+geänderten Text am Ende der Einführung), E2E-Tests grün.
+
+## Was noch nicht in `texte.de.js` steht
+
+- **Feste HTML-Texte im Kern** (rund 20): Kopfleiste «Kasse», «Tag», Knopf-Beschriftungen
+  wie «Pause», «Einstellungen», «Näher», «Weiter weg», der Seitentitel. Sie stehen im
+  HTML vor dem Skript; für eine zweite Sprache bräuchten sie ein `data-text`-Attribut,
+  das beim Start ersetzt wird.
+- **Inhaltsdateien:** `karteninfo-daten.js` (Ortsinfos) und die Tiernamen in
+  `karten-tiere.js` sind schon eigene Datenblöcke. Für eine zweite Sprache am besten
+  als eigene Datei je Sprache (z. B. `karteninfo.fr.js`).
+- **Vergleichstexte:** Stellen, an denen Code einen Text vergleicht (z. B.
+  `art.textContent === "Wissen freigeschaltet"`), sind bewusst Literale geblieben.
+  Bei einer Übersetzung müssen sie mitgezogen werden – besser wäre dann ein
+  Vergleich über den Schlüssel.
+- **Schlüsselnamen** der automatisch umgestellten Texte sind aus den ersten Wörtern
+  gebildet (`sekbklarheit.lohnkosten-im-spielmodell`). Sie sind eindeutig, aber nicht
+  schön; Umbenennen geht jederzeit, wenn Code und `texte.de.js` gleich geändert werden.

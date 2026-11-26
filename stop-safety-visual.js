@@ -108,7 +108,7 @@
   function restText(m){
     if(!m||m.stillBis<=S.tag)return "";
     const rest=Math.max(0,Math.round(m.stillBis-S.tag));
-    if(rest>300)return "Entscheidung offen";
+    if(rest>300)return textVon("stopsafetyvisu.entscheidung-offen");
     return `${rest} ${rest===1?"Tag":"Tage"}`;
   }
 
@@ -144,12 +144,12 @@
     const badge=pin.querySelector(".pin-state-badge.status-warn");
     if(badge){badge.textContent=cause==="streik"?"II":cause==="sicherheit"?"!":"II";}
     const hint=pin.querySelector(".pin-status-hint");
-    const label=cause==="streik"?`Streik${rest?" · "+rest:""}`:cause==="sicherheit"?`Sicherheitsstopp${rest?" · "+rest:""}`:`Stillstand${rest?" · "+rest:""}`;
+    const label=cause==="streik"?textVon("stopsafetyvisu.streik", {p1:(rest?" · "+rest:"")}):cause==="sicherheit"?textVon("stopsafetyvisu.sicherheitsstopp", {p1:(rest?" · "+rest:"")}):textVon("stopsafetyvisu.stillstand", {p1:(rest?" · "+rest:"")});
     if(hint)hint.textContent=label;
     let kind=pin.querySelector(".pin-stop-kind");
     if(!kind){kind=document.createElement("span");kind.className="pin-stop-kind";pin.querySelector(".knopf")?.appendChild(kind);}
     kind.innerHTML=cause==="sicherheit"?shieldSvg():cause==="streik"?pauseSvg():stopSvg();
-    const base=pin.dataset.baseAria||pin.getAttribute("aria-label")||"Rohstoffquelle";
+    const base=pin.dataset.baseAria||pin.getAttribute("aria-label")||textVon("stopsafetyvisu.rohstoffquelle");
     pin.setAttribute("aria-label",`${base.split(". Förderung gestoppt")[0]}. ${label}. Förderung gestoppt.`);
     if(!before)emit(pin,"stop");
     priorStop.set(def.id,true);
@@ -163,14 +163,14 @@
   function stopCard(def,m){
     if(!m||m.stillBis<=S.tag)return "";
     const cause=latestCause(def,m),rest=restText(m);
-    const title=cause==="streik"?"Streik / Stillstand":cause==="sicherheit"?"Sicherheitsstopp":"Stillstand";
+    const title=cause==="streik"?textVon("stopsafetyvisu.streik-stillstand"):cause==="sicherheit"?textVon("stopsafetyvisu.sicherheitsstopp-2"):textVon("stopsafetyvisu.stillstand-2");
     const body=cause==="streik"
-      ?"Die Förderung steht wegen der Lohn- und Zufriedenheitssituation still. Sicherheitsmassnahmen sind davon getrennt."
+      ?textVon("stopsafetyvisu.die-foerderung-steht-wegen")
       :cause==="sicherheit"
-        ?"Die Förderung steht wegen eines Sicherheitsereignisses still. Der Lohn ist nicht die Ursache des Unfallrisikos."
-        :"Die Förderung steht vorübergehend still.";
+        ?textVon("stopsafetyvisu.die-foerderung-steht-wegen-2")
+        :textVon("stopsafetyvisu.die-foerderung-steht-voruebergehend");
     const icon=cause==="sicherheit"?shieldSvg():cause==="streik"?pauseSvg():stopSvg();
-    return `<div class="karte mine-stillstand-card ${cause}"><div class="mine-stillstand-head"><span class="mine-stillstand-icon">${icon}</span><div><h3>${title}</h3><small>Förderung gestoppt${rest?" · "+rest:""}</small></div></div><div class="ort">${body}</div></div>`;
+    return textVon("stopsafetyvisu.foerderung-gestoppt", {p1:(cause), p2:(icon), p3:(title), p4:(rest?" · "+rest:""), p5:(body)});
   }
 
   function decorateMineDetail(){
@@ -189,7 +189,7 @@
         const h3=safety.querySelector("h3");
         const head=document.createElement("div");
         head.className="sicherheitskopf";
-        head.innerHTML=`<span class="sicherheits-symbol">${sicher?safeShieldSvg():shieldSvg()}</span><div><h3>Sicherheit</h3><small>${sicher?"Sicherheitsmassnahmen verbessert":"Sicherheitsmassnahmen nicht verbessert"}</small></div>`;
+        head.innerHTML=textVon("stopsafetyvisu.sicherheit", {p1:(sicher?safeShieldSvg():shieldSvg()), p2:(sicher?"Sicherheitsmassnahmen verbessert":"Sicherheitsmassnahmen nicht verbessert")});
         if(h3)h3.replaceWith(head);else safety.prepend(head);
       }
     }
@@ -199,8 +199,8 @@
       const satisfaction=root.querySelector(".zufriedenheitskarte");
       relations=document.createElement("div");
       relations.className="mine-ursachen";
-      relations.setAttribute("aria-label","Getrennte Zusammenhänge");
-      relations.innerHTML='<div class="mine-ursache lohn"><b>Lohn → Zufriedenheit → Streik</b><span>Lohn beeinflusst die Zufriedenheit.</span></div><div class="mine-ursache sicherheit"><b>Sicherheit → Unfallrisiko</b><span>Sicherheitsmassnahmen beeinflussen das Unfallrisiko.</span></div>';
+      relations.setAttribute("aria-label",textVon("stopsafetyvisu.getrennte-zusammenhaenge"));
+      relations.innerHTML=textVon("stopsafetyvisu.lohn-zufriedenheit-streik-lohn");
       if(satisfaction)satisfaction.before(relations);else root.appendChild(relations);
     }
 

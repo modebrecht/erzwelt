@@ -45,21 +45,20 @@ Mit dem Modul am Ende fehlten vor dem Spielstart Rohstoff-Marken an den Pins.
 
 ## Offen
 
-- **Texte (Schritt 6):** `texte.de.js` mit `textVon()` steht; umgestellt sind Hauptmenü,
-  Spielstände und Bilder-Intro. Rund 1100 Textstellen fehlen noch, siehe `docs/texte-offen.md`.
+- **Texte (Schritt 6):** erledigt bis auf rund 20 feste HTML-Texte im Kern und die
+  Inhaltsdateien, siehe `docs/texte-offen.md`.
 - **Stile** stehen weiter als eigene `<style>`-Blöcke in den Dateien. Zusammenlegen
-  ändert die Reihenfolge der Regeln und braucht einen eigenen Schritt.
+  ändert die Reihenfolge der Regeln (spätere Blöcke überschreiben frühere) und damit
+  möglicherweise das Aussehen; bewusst nicht gemacht.
 - **Zwischenspeicher in `performance-pass.js`** (`beispielKette`, `lieferwegZeichnen`,
   `didaktikMigration`, `shouldMigration`, `speichern`) sind weiter je eine Hülle.
-- **Toter Code:** `wissenPraxis` in `didactic-should.js` wird von
-  `knowledge-quest-flow.js` ersetzt; ebenso die Kern-Fassungen von `seiteMarkt` und
-  `dockZeichnen`. Entfernen wäre ein eigener kleiner Schritt.
-- **Verdacht «Tutorial abgeschlossen» doppelt** (nur festgehalten, nicht behoben): Die
-  Lernrückmeldung wird beim letzten Schritt **einmal** in die Warteschlange gelegt.
-  Gleichzeitig erscheint die Meldung «Tutorial abgeschlossen – du hast die Lieferkette
-  einmal vollständig aufgebaut …» (aus `notiz`, Text von `tutorial-enhance.js`). Wer
-  spielt, liest «Tutorial abgeschlossen» also zweimal: als grüne Rückmeldung und als
-  Meldung.
+- **Toter Code:** entfernt. Die überschriebenen Fassungen von `rundeBeenden` und
+  `seiteMarkt` im Kern und `wissenPraxis` in `didactic-should.js` sind nur noch leere
+  Platzhalter mit Verweis auf die geltende Datei; der alte Bonus-Zweig von
+  `etappeWeiter` und 12 unbenutzte Texte sind weg. Vergleich: 491 Zustände, 0
+  Unterschiede. `dockZeichnen` im Kern bleibt (kurz, Grundfassung für `module/karte.js`).
+- **«Tutorial abgeschlossen» doppelt:** behoben. Die Meldung am Ende der Einführung
+  nennt nur noch, was neu frei ist; die grüne Rückmeldung bleibt.
 - Draft-PR und Merge auf main: nicht gemacht (kein GitHub-Login in der
   Arbeitsumgebung; Merge auf Wunsch des Auftraggebers nicht automatisch, weil main
   direkt auf Vercel geht).

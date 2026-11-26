@@ -105,32 +105,14 @@
   (window.__erzweltBlattTeile ||= {}).szeneRaff=function(def,r){
     const first=(def.spezial||[])[0]||Object.keys(MATERIAL)[0];
     const mat=MATERIAL[first]||{};
-    return `<div class="szene prozessszene raff-prozess" data-szene="prozess-raff-${esc(def.id)}" data-prozess="raff" data-id="${esc(def.id)}">
-      <div class="prozess-kopf"><span>Rohstoff</span><b>Raffination</b><span>Material</span></div>
-      <div class="prozessbahn"><div class="prozesslinie"></div>
-        <div class="prozess-roh"><span class="rohbrocken"></span><span class="rohbrocken"></span><span class="rohbrocken"></span></div>
-        <div class="prozess-reaktor">${reaktorSvg()}</div>
-        <div class="prozess-ausgang"><div class="materialblock"><span class="prozess-mat-sym">${esc(mat.sym||"")}</span></div></div>
-      </div>
-      <div class="prozess-status"><i></i><span class="prozess-status-text">Rohstoff → Material</span></div>
-      <div class="schweber"></div>
-    </div>`;
+    return textVon("transformation.rohstoff-raffination-material-rohstoff", {p1:(esc(def.id)), p2:(esc(def.id)), p3:(reaktorSvg()), p4:(esc(mat.sym||""))});
   };
 
   szeneFabrik=function(f,def){
     const idx=Math.max(0,S.fabriken.indexOf(f));
     const keys=Object.keys(def.rezept||{}).slice(0,4);
     const chips=keys.map(k=>`<span class="rezeptchip" style="--chip:${MATERIAL[k]?.farbe||"#8c8c8c"}">${esc(MATERIAL[k]?.sym||k)}</span>`).join("");
-    return `<div class="szene prozessszene fabrik-prozess ${f.restbau>0?"im-bau":""}" data-szene="prozess-fab-${idx}" data-prozess="fab" data-index="${idx}" data-product="${esc(f.produkt)}">
-      <div class="prozess-kopf"><span>Materialien</span><b>Fertigung</b><span>Produkt</span></div>
-      <div class="prozessbahn"><div class="prozesslinie"></div>
-        <div class="rezeptchips">${chips}</div>
-        <div class="fabrikmaschine">${fabrikSvg()}</div>
-        <div class="prozess-ausgang"><div class="produktkarton">${esc(def.name)}</div></div>
-      </div>
-      <div class="prozess-status"><i></i><span class="prozess-status-text">Materialien → ${esc(def.name)}</span></div>
-      <div class="schweber"></div>
-    </div>`;
+    return textVon("transformation.materialien-fertigung-produkt-materialien", {p1:(f.restbau>0?"im-bau":""), p2:(idx), p3:(idx), p4:(esc(f.produkt)), p5:(chips), p6:(fabrikSvg()), p7:(esc(def.name)), p8:(esc(def.name))});
   };
 
   function bestesRaffMaterial(def){
@@ -161,7 +143,7 @@
       scene.classList.toggle("aktiv",active);
       scene.style.setProperty("--prozess-farbe",mat?.farbe||"#5b8f7a");
       const sym=scene.querySelector(".prozess-mat-sym");if(sym&&sym.textContent!==String(mat?.sym||""))sym.textContent=mat?.sym||"";
-      const status=!r?"Vorschau: Rohstoff → Material":r.arbeiter<=0?"Kein Personal zugewiesen":(S.erz[k]||0)<=.5?"Kein Rohstoff im Lager":`${mat?.rohstoff||"Rohstoff"} → ${mat?.name||"Material"}`;
+      const status=!r?textVon("transformation.vorschau-rohstoff-material"):r.arbeiter<=0?textVon("transformation.kein-personal-zugewiesen"):(S.erz[k]||0)<=.5?textVon("transformation.kein-rohstoff-im-lager"):`${mat?.rohstoff||"Rohstoff"} → ${mat?.name||"Material"}`;
       const st=scene.querySelector(".prozess-status-text");if(st&&st.textContent!==status)st.textContent=status;
     });
     document.querySelectorAll(".fabrik-prozess[data-index]").forEach(scene=>{
@@ -170,7 +152,7 @@
       const active=factoryCanRun(f);
       scene.classList.toggle("aktiv",active);
       scene.classList.toggle("im-bau",f.restbau>0);
-      const status=f.restbau>0?`Im Bau · noch ${f.restbau} Tage`:f.arbeiter<=0?"Kein Personal zugewiesen":active?`Materialien → ${def.name}`:"Mindestens ein Material fehlt";
+      const status=f.restbau>0?textVon("transformation.im-bau-noch-tage", {p1:(f.restbau)}):f.arbeiter<=0?textVon("transformation.kein-personal-zugewiesen"):active?textVon("transformation.materialien", {p1:(def.name)}):textVon("transformation.mindestens-ein-material-fehlt");
       const st=scene.querySelector(".prozess-status-text");if(st&&st.textContent!==status)st.textContent=status;
     });
   }

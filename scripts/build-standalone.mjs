@@ -36,7 +36,10 @@ const inertCoreScript = '<script type="text/plain" data-erzwelt-core>';
 if (source.split(sourceRedirect).length !== 2 || source.split(inertCoreScript).length !== 2) {
   throw new Error("Weiterleitung und Spielskript müssen in erzwelt-core.html genau einmal markiert sein");
 }
-const core = source.replace(sourceRedirect, "").replace(inertCoreScript, "<script>");
+// Sichtbare Texte (textVon) laden vor dem Spielskript: auch der Kern holt seine Texte dort.
+const texte = await readFile(path.join(root, "texte.de.js"), "utf8");
+const core = source.replace(sourceRedirect, "").replace(inertCoreScript,
+  `<script data-erzwelt-texte="texte.de.js">\n${texte.replace(/<\/script/gi, "<\\/script")}\n<\/script>\n<script>`);
 
 function assertScriptSyntax(source, filename) {
   try {

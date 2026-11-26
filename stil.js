@@ -71,9 +71,9 @@
 
   /* ---------- Knopftexte als Verb, normale Schreibweise ---------- */
   const knopfText = html => html
-    .replace(/STELLE (\d+) PERSONEN EIN/g, "$1 Personen einstellen")
-    .replace(/SELBST VERKAUFEN/g, "Selbst verkaufen")
-    .replace(/VERDOPPELN · /g, "Verdoppeln · ");
+    .replace(/STELLE (\d+) PERSONEN EIN/g, textVon("stil.personen-einstellen"))
+    .replace(/SELBST VERKAUFEN/g, textVon("stil.selbst-verkaufen"))
+    .replace(/VERDOPPELN · /g, textVon("stil.verdoppeln"));
   /* Knopftexte im Team- und Markt-Reiter: module/seiten.js */
   (window.__erzweltSeitenTeile ||= {}).knopfText = knopfText;
   /* Knopftexte in Rohstoffquelle und Raffinerie: module/blatt.js */

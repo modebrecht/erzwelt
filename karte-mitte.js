@@ -37,18 +37,18 @@
     <ellipse cx="24" cy="24" rx="7.5" ry="17" fill="none" stroke="#fff" stroke-width="2.2"/>
     <path d="M7.5 18.5h33M7.5 29.5h33M24 7v34" fill="none" stroke="#fff" stroke-width="2.2"/></svg>`;
   const REIHE = [
-    {s:"markt", t:"Markt", ik:() => IK.markt},
-    {s:"team", t:"Team", ik:() => ikonTeam(2, 26, .72)},
-    {s:"karte", t:"Karte", orb:true},
-    {s:"ziel", t:"Ziel", ik:() => IK.ziel},
-    {s:"wissen", t:"Wissen", ik:() => IK.wissen}
+    {s:"markt", t:textVon("kartemitte.markt"), ik:() => IK.markt},
+    {s:"team", t:textVon("kartemitte.team"), ik:() => ikonTeam(2, 26, .72)},
+    {s:"karte", t:textVon("kartemitte.karte"), orb:true},
+    {s:"ziel", t:textVon("kartemitte.ziel"), ik:() => IK.ziel},
+    {s:"wissen", t:textVon("kartemitte.wissen"), ik:() => IK.wissen}
   ];
   /* Leiste unten: ersetzt die Fassung des Kerns (module/karte.js) */
   const karteTeile = (window.__erzweltKarteTeile ||= {});
   karteTeile.dock = function(){
     const frei = freieArbeiter();
     const html = REIHE.map(d => d.orb
-      ? `<button class="orb" role="tab" data-seite="karte" aria-selected="${aktiveSeite === "karte"}" aria-label="Weltkarte"><span class="orbring globus">${globus}</span>Karte</button>`
+      ? textVon("kartemitte.karte-2", {p1:(aktiveSeite === "karte"), p2:(globus)})
       : `<button role="tab" data-seite="${d.s}" aria-selected="${aktiveSeite === d.s}"${d.s === "team" && frei > 0 ? ` aria-label="Team – ${frei} ohne Aufgabe"` : ""}>${d.ik()}${d.t}`
         + (d.s === "team" && frei > 0 ? `<span class="dock-zahl">${frei}</span>` : "") + `</button>`).join("");
     const dock = $("#dock");

@@ -45,8 +45,8 @@
   function ordnen(id){
     const inhalt = document.getElementById("blattinhalt");
     if (!inhalt) return;
-    const beleg = karte(inhalt, "Belegschaft"), lohn = karte(inhalt, "Lohnstufe"),
-          zuf = karte(inhalt, "Zufriedenheit");
+    const beleg = karte(inhalt, textVon("blattordnung.belegschaft")), lohn = karte(inhalt, textVon("blattordnung.lohnstufe")),
+          zuf = karte(inhalt, textVon("blattordnung.zufriedenheit"));
     if (beleg && lohn && beleg.nextElementSibling !== lohn) beleg.after(lohn);
     if (lohn && zuf && lohn.nextElementSibling !== zuf) lohn.after(zuf);
     inhalt.querySelector(":scope > .mine-ursachen")?.remove();
@@ -64,7 +64,7 @@
     if (!lohn.querySelector(".lohn-hinweis")){
       const h = document.createElement("div");
       h.className = "lohn-hinweis";
-      h.textContent = "Kosten für deine Belegschaft · Förderung, sobald sich die Zufriedenheit eingependelt hat.";
+      h.textContent = textVon("blattordnung.kosten-fuer-deine-belegschaft");
       lohn.querySelector(".segment")?.after(h);
     }
   }
@@ -95,15 +95,15 @@
     if (!vor || vor.id !== id) return;
     if (vor.stufe === jetzt.stufe && vor.arbeiter === jetzt.arbeiter && vor.ausbau === jetzt.ausbau) return;
     const inhalt = document.getElementById("blattinhalt");
-    const ziel = vor.stufe !== jetzt.stufe ? karte(inhalt, "Lohnstufe")
-      : vor.arbeiter !== jetzt.arbeiter ? karte(inhalt, "Belegschaft") : karte(inhalt, "Ausbau");
+    const ziel = vor.stufe !== jetzt.stufe ? karte(inhalt, textVon("blattordnung.lohnstufe"))
+      : vor.arbeiter !== jetzt.arbeiter ? karte(inhalt, textVon("blattordnung.belegschaft")) : karte(inhalt, textVon("blattordnung.ausbau"));
     const blatt = document.getElementById("blatt").getBoundingClientRect();
     const r = (ziel || inhalt).getBoundingClientRect();
     const x = Math.min(r.right, blatt.right) - 12;
     let y = Math.max(r.top, blatt.top + 40) + 10;
     const dk = prozent(vor.kosten, jetzt.kosten), df = prozent(vor.foerd, jetzt.foerd);
-    if (df){ chip(`Förderung ${df}`, jetzt.foerd >= vor.foerd, x, y); y += 30; }
-    if (dk) chip(`Lohnkosten ${dk}`, jetzt.kosten <= vor.kosten, x, y);
+    if (df){ chip(textVon("blattordnung.foerderung", {p1:(df)}), jetzt.foerd >= vor.foerd, x, y); y += 30; }
+    if (dk) chip(textVon("blattordnung.lohnkosten", {p1:(dk)}), jetzt.kosten <= vor.kosten, x, y);
   }
 
   /* Nach jedem Füllen (module/blatt.js) */

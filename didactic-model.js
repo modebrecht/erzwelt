@@ -14,45 +14,45 @@ const DIDAKTIK_VERSION = 2;
 const SICHERHEIT_BASIS_KOSTEN = 60000;
 
 const ROHSTOFF_STANDARD = {
-  kupfer: "Kupfererz",
-  alu: "Bauxit",
-  silizium: "Quarz / Rohsilizium",
-  zinn: "Zinnerz (Kassiterit)",
-  nickel: "Nickelerz",
-  lithium: "Lithiumerz / Sole",
-  kobalt: "Kupfer-/Kobalterz",
-  silber: "Silbererz",
-  seltene: "Erz mit Seltenen Erden",
-  tantal: "Coltan",
-  indium: "Zinkerz (Indium als Nebenprodukt)",
-  gold: "Golderz"
+  kupfer: textVon("didacticmodel.kupfererz"),
+  alu: textVon("didacticmodel.bauxit"),
+  silizium: textVon("didacticmodel.quarz-rohsilizium"),
+  zinn: textVon("didacticmodel.zinnerz-kassiterit"),
+  nickel: textVon("didacticmodel.nickelerz"),
+  lithium: textVon("didacticmodel.lithiumerz-sole"),
+  kobalt: textVon("didacticmodel.kupfer-kobalterz"),
+  silber: textVon("didacticmodel.silbererz"),
+  seltene: textVon("didacticmodel.erz-mit-seltenen-erden"),
+  tantal: textVon("didacticmodel.coltan"),
+  indium: textVon("didacticmodel.zinkerz-indium-als-nebenprodukt"),
+  gold: textVon("didacticmodel.golderz")
 };
 
 const ROHSTOFF_ORT = {
-  kolwezi: "Kupfer-/Kobalterz",
-  katanga: "Kupfererz",
-  rubaya: "Coltan",
-  kigali: "Coltan",
-  bayanobo: "Erz mit Seltenen Erden",
-  jiangxi: "Quarz → Rohsilizium",
-  liuzhou: "Zinkerz (Indium als Nebenprodukt)",
-  sprucepine: "Quarz (Spielmodell)",
-  mountainpass: "Erz mit Seltenen Erden",
-  greenbushes: "Lithiumerz (Spodumen)",
-  kalgoorlie: "Golderz",
-  atacama: "Lithium-Sole",
-  escondida: "Kupfererz",
-  fresnillo: "Silbererz",
-  sanrafael: "Zinnerz (Kassiterit)",
-  bangka: "Zinnerz (Kassiterit)",
-  sulawesi: "Nickelerz",
-  obuasi: "Golderz",
-  boke: "Bauxit",
-  potosi: "Silbererz"
+  kolwezi: textVon("didacticmodel.kupfer-kobalterz"),
+  katanga: textVon("didacticmodel.kupfererz"),
+  rubaya: textVon("didacticmodel.coltan"),
+  kigali: textVon("didacticmodel.coltan"),
+  bayanobo: textVon("didacticmodel.erz-mit-seltenen-erden"),
+  jiangxi: textVon("didacticmodel.quarz-rohsilizium-2"),
+  liuzhou: textVon("didacticmodel.zinkerz-indium-als-nebenprodukt"),
+  sprucepine: textVon("didacticmodel.quarz-spielmodell"),
+  mountainpass: textVon("didacticmodel.erz-mit-seltenen-erden"),
+  greenbushes: textVon("didacticmodel.lithiumerz-spodumen"),
+  kalgoorlie: textVon("didacticmodel.golderz"),
+  atacama: textVon("didacticmodel.lithium-sole"),
+  escondida: textVon("didacticmodel.kupfererz"),
+  fresnillo: textVon("didacticmodel.silbererz"),
+  sanrafael: textVon("didacticmodel.zinnerz-kassiterit"),
+  bangka: textVon("didacticmodel.zinnerz-kassiterit"),
+  sulawesi: textVon("didacticmodel.nickelerz"),
+  obuasi: textVon("didacticmodel.golderz"),
+  boke: textVon("didacticmodel.bauxit"),
+  potosi: textVon("didacticmodel.silbererz")
 };
 
 function rohstoffDerMine(def){
-  return ROHSTOFF_ORT[def.id] || ROHSTOFF_STANDARD[def.mat] || "Rohstoff";
+  return ROHSTOFF_ORT[def.id] || ROHSTOFF_STANDARD[def.mat] || textVon("didacticmodel.rohstoff");
 }
 
 Object.entries(ROHSTOFF_STANDARD).forEach(([id, rohstoff]) => {
@@ -63,7 +63,7 @@ Object.entries(ROHSTOFF_STANDARD).forEach(([id, rohstoff]) => {
 Object.values(LAND).forEach(land => { land.risiko = 1; });
 
 /* Lohn ist Lohn. Schutzhelm und Gefahrensymbol gehören nicht in die Lohnwahl. */
-LOHNSTUFE[2].name = "deutlich über üblichem Lohn";
+LOHNSTUFE[2].name = textVon("didacticmodel.deutlich-ueber-ueblichem-lohn");
 ikonLohn = function(stufe, aktiv){
   const n = stufe + 1;
   const gold = aktiv ? "#f5b73d" : "#cfc0a4";
@@ -81,22 +81,22 @@ ikonLohn = function(stufe, aktiv){
    Das Wissens-Upgrade macht diese Entscheidung günstiger, statt sie automatisch zu setzen. */
 const leuteSeg = WISSEN.find(s => s.id === "leute");
 if (leuteSeg){
-  leuteSeg.titel = "Menschen, Löhne & Sicherheit";
+  leuteSeg.titel = textVon("didacticmodel.menschen-loehne-sicherheit");
   leuteSeg.kurz = "Lohn und Sicherheit sind zwei verschiedene Entscheidungen.";
   leuteSeg.text = [
     "Im Spiel beeinflusst der <b>Lohn</b> vor allem die Zufriedenheit. Sinkt sie stark, kann es zum Streik kommen.",
-    "<b>Sicherheit ist separat:</b> Schutz, Ausrüstung und Schulung senken das Unfallrisiko. Ein hoher Lohn ersetzt keine Sicherheitsmassnahmen – und gute Sicherheit ersetzt keinen fairen Lohn."
+    textVon("didacticmodel.sicherheit-ist-separat-schutz")
   ];
   leuteSeg.fakten = [
-    "Sicherheitsmassnahmen wie geeignete Ausrüstung, Schulung und klare Arbeitsabläufe können Unfallrisiken senken.",
-    "Im Spiel beeinflusst die Zufriedenheit die Förderleistung. Die Stärke dieses Effekts ist eine vereinfachte Spielregel.",
+    textVon("didacticmodel.sicherheitsmassnahmen-wie-geeignete-ausruestung"),
+    textVon("didacticmodel.im-spiel-beeinflusst-die"),
     "Lohn und Sicherheit werden im Spiel getrennt dargestellt, damit ihre unterschiedlichen Wirkungen sichtbar bleiben."
   ];
   const sicherPerk = leuteSeg.perks.find(p => p.id === "leute1");
   if (sicherPerk){
-    sicherPerk.titel = "Sicherheitsprogramm";
-    sicherPerk.text = "Ein gemeinsamer Standard macht Sicherheitsausbauten in deinen Rohstoffquellen einfacher und günstiger.";
-    sicherPerk.wirkung = ["Sicherheitsausbau −50 % Kosten"];
+    sicherPerk.titel = textVon("didacticmodel.sicherheitsprogramm");
+    sicherPerk.text = textVon("didacticmodel.ein-gemeinsamer-standard-macht");
+    sicherPerk.wirkung = [textVon("didacticmodel.sicherheitsausbau-kosten")];
     delete sicherPerk.plus;
     sicherPerk.mult = {sicherheit:0.50};
   }
@@ -106,47 +106,47 @@ const marktSeg = WISSEN.find(s => s.id === "markt");
 if (marktSeg){
   marktSeg.kurz = "Nachfrage, Lager und Dollarkurs bei Fertigwaren.";
   marktSeg.text = [
-    "Fertige Produkte müssen verkauft werden. Entweder du verkaufst selber, oder dein Verkaufsteam erledigt das jeden Tag.",
-    "Das Spiel simuliert Preis und Nachfrage deiner <b>Fertigwaren</b>. Weltmarktpreise der Rohstoffe sind Hintergrundwissen – du kaufst und verkaufst im Spiel keine Rohstoffe am Markt."
+    textVon("didacticmodel.fertige-produkte-muessen-verkauft"),
+    textVon("didacticmodel.das-spiel-simuliert-preis")
   ];
 }
 
 const rufSeg = WISSEN.find(s => s.id === "ruf");
 if (rufSeg){
-  rufSeg.titel = "Ruf & Nachweise";
+  rufSeg.titel = textVon("didacticmodel.ruf-nachweise");
   rufSeg.kurz = "Ruf beeinflusst Nachfrage. Nachweise belegen deine Lieferkette.";
   rufSeg.text = [
     "Dein <b>Ruf</b> zeigt, wie Kundinnen und Kunden deine Firma wahrnehmen. Ein niedriger Ruf senkt die Nachfrage nach deinen Produkten.",
-    "<b>Nachweise</b> sind etwas anderes: Sie zeigen, ob du die Herkunft deiner Rohstoffe dokumentieren kannst. Ein Lieferkettengesetz prüft diese Nachweise – nicht deinen Ruf."
+    textVon("didacticmodel.nachweise-sind-etwas-anderes")
   ];
 }
 
 const modellSeg = WISSEN.find(s => s.id === "modell");
 if (modellSeg){
   modellSeg.text = [
-    "Erzwelt ist ein <b>Spielmodell</b>. Mengen, Kosten, Löhne und Rezepte sind bewusst vereinfacht und dienen dem Spiel – sie sind keine aktuellen Statistiken.",
-    "Das Modell zeigt nur ausgewählte Zusammenhänge. Vergleiche beim Spielen: Welche Faktoren sind sichtbar dargestellt, und welche zusätzlichen Einflüsse gäbe es in einer realen Lieferkette?"
+    textVon("didacticmodel.erzwelt-ist-ein-spielmodell"),
+    textVon("didacticmodel.das-modell-zeigt-nur")
   ];
   modellSeg.fakten = [
     "Die Werte sind gerundet und vereinfacht. Reale Lieferketten umfassen weitere Einflussfaktoren.",
-    "Ein Spieltag folgt der Reihenfolge: fördern, raffinieren, produzieren, verkaufen.",
+    textVon("didacticmodel.ein-spieltag-folgt-der"),
     "Rohstoffpreise am Weltmarkt werden im Spiel nicht berechnet."
   ];
   modellSeg.formeln = [
-    ["Förderung / Tag","Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)"],
-    ["Material aus Rohstoff","Rohstoff × Ausbeute"],
-    ["Fabrik-Ausstoss","Arbeiter × Ausstoss, begrenzt vom knappsten Material"],
-    ["Nachfrage","Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)"],
-    ["Verkaufspreis","Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs"]
+    [textVon("didacticmodel.foerderung-tag"),textVon("didacticmodel.arbeiter-ergiebigkeit-zufriedenheit")],
+    [textVon("didacticmodel.material-aus-rohstoff"),textVon("didacticmodel.rohstoff-ausbeute")],
+    [textVon("didacticmodel.fabrik-ausstoss"),textVon("didacticmodel.arbeiter-ausstoss-begrenzt-vom")],
+    [textVon("didacticmodel.nachfrage"),textVon("didacticmodel.grundwert-saison-ereignis-ruf")],
+    [textVon("didacticmodel.verkaufspreis"),textVon("didacticmodel.grundpreis-ueberangebot-dollarkurs")]
   ];
 }
 
 const ketteSeg = WISSEN.find(s => s.id === "kette");
 if (ketteSeg){
-  ketteSeg.kurz = "Rohstoff → Raffinerie → Material → Fabrik → Markt.";
+  ketteSeg.kurz = textVon("didacticmodel.rohstoff-raffinerie-material-fabrik");
   ketteSeg.text = [
-    "Aus einer Rohstoffquelle kommt zunächst <b>Rohstoff</b>: zum Beispiel Bauxit, Coltan oder Kupfererz. Die <b>Raffinerie</b> macht daraus nutzbares Material wie Aluminium, Tantal oder Kupfer. Erst die <b>Fabrik</b> baut daraus ein Produkt.",
-    "Reisst ein Glied, steht die Kette. Eine Rohstoffquelle ohne Raffinerie liefert noch kein Material für die Fabrik."
+    textVon("didacticmodel.aus-einer-rohstoffquelle-kommt"),
+    textVon("didacticmodel.reisst-ein-glied-steht")
   ];
 }
 
@@ -154,7 +154,7 @@ const chemieSeg = WISSEN.find(s => s.id === "chemie");
 if (chemieSeg){
   chemieSeg.kurz = "Aus Rohstoffen werden nutzbare Materialien.";
   chemieSeg.text = [
-    "Die <b>Ausbeute</b> ist im Spiel ein vereinfachter Wert: Sie bestimmt, wie viel nutzbares Material aus einer Einheit Rohstoff entsteht. Der Rest steht für Abraum und Verluste der Verarbeitung.",
+    textVon("didacticmodel.die-ausbeute-ist-im"),
     "Nicht nur der Abbau, auch die Raffination kann zum Engpass einer Lieferkette werden."
   ];
 }

@@ -657,115 +657,115 @@ body[data-anim="0"] *{animation:none!important}
    ausbeute = wie viel Material aus 1 Einheit Roherz entsteht.
    Je tiefer die Ausbeute, desto mehr Gestein muss bewegt werden. */
 const MATERIAL = {
-  kupfer:  {name:"Kupfer",        sym:"Cu", farbe:"#cc7a45", preis:  9, ausbeute:.35, wofuer:"Leiterbahnen, Kabel, Spulen"},
-  alu:     {name:"Aluminium",     sym:"Al", farbe:"#9fb0c4", preis:  7, ausbeute:.50, wofuer:"Gehäuse, Kühlkörper"},
-  silizium:{name:"Silizium",      sym:"Si", farbe:"#4bb6ca", preis: 15, ausbeute:.70, wofuer:"Chips, Prozessoren, Speicher"},
-  zinn:    {name:"Zinn",          sym:"Sn", farbe:"#8394a7", preis: 30, ausbeute:.40, wofuer:"Lötzinn – hält jede Platine zusammen"},
-  nickel:  {name:"Nickel",        sym:"Ni", farbe:"#7cae66", preis: 18, ausbeute:.40, wofuer:"Akku-Kathode, Kontakte"},
-  lithium: {name:"Lithium",       sym:"Li", farbe:"#9a6ce4", preis: 28, ausbeute:.45, wofuer:"Akku – speichert die Ladung"},
-  kobalt:  {name:"Kobalt",        sym:"Co", farbe:"#4a6cf7", preis: 34, ausbeute:.40, wofuer:"Akku-Kathode, macht sie stabil"},
-  silber:  {name:"Silber",        sym:"Ag", farbe:"#9fa9b6", preis: 58, ausbeute:.15, wofuer:"Bester Leiter: Kontakte, Lötpaste"},
-  seltene: {name:"Seltene Erden", sym:"SE", farbe:"#d94a80", preis: 72, ausbeute:.25, wofuer:"Magnete: Lautsprecher, Vibration, Motoren"},
-  tantal:  {name:"Tantal",        sym:"Ta", farbe:"#7a5ad8", preis: 88, ausbeute:.20, wofuer:"Kondensatoren – winzig, aber unersetzlich"},
-  indium:  {name:"Indium",        sym:"In", farbe:"#22b98a", preis:118, ausbeute:.10, wofuer:"Touchscreen & Display (ITO-Schicht)"},
-  gold:    {name:"Gold",          sym:"Au", farbe:"#d9a516", preis:150, ausbeute:.08, wofuer:"Kontakte, die nicht rosten dürfen"}
+  kupfer:  {name:textVon("kern.kupfer"),        sym:"Cu", farbe:"#cc7a45", preis:  9, ausbeute:.35, wofuer:textVon("kern.leiterbahnen-kabel-spulen")},
+  alu:     {name:textVon("kern.aluminium"),     sym:"Al", farbe:"#9fb0c4", preis:  7, ausbeute:.50, wofuer:textVon("kern.gehaeuse-kuehlkoerper")},
+  silizium:{name:textVon("kern.silizium"),      sym:"Si", farbe:"#4bb6ca", preis: 15, ausbeute:.70, wofuer:textVon("kern.chips-prozessoren-speicher")},
+  zinn:    {name:textVon("kern.zinn"),          sym:"Sn", farbe:"#8394a7", preis: 30, ausbeute:.40, wofuer:textVon("kern.loetzinn-haelt-jede-platine")},
+  nickel:  {name:textVon("kern.nickel"),        sym:"Ni", farbe:"#7cae66", preis: 18, ausbeute:.40, wofuer:textVon("kern.akku-kathode-kontakte")},
+  lithium: {name:textVon("kern.lithium"),       sym:"Li", farbe:"#9a6ce4", preis: 28, ausbeute:.45, wofuer:textVon("kern.akku-speichert-die-ladung")},
+  kobalt:  {name:textVon("kern.kobalt"),        sym:"Co", farbe:"#4a6cf7", preis: 34, ausbeute:.40, wofuer:textVon("kern.akku-kathode-macht-sie")},
+  silber:  {name:textVon("kern.silber"),        sym:"Ag", farbe:"#9fa9b6", preis: 58, ausbeute:.15, wofuer:textVon("kern.bester-leiter-kontakte-loetpaste")},
+  seltene: {name:textVon("kern.seltene-erden"), sym:"SE", farbe:"#d94a80", preis: 72, ausbeute:.25, wofuer:textVon("kern.magnete-lautsprecher-vibration-motoren")},
+  tantal:  {name:textVon("kern.tantal"),        sym:"Ta", farbe:"#7a5ad8", preis: 88, ausbeute:.20, wofuer:textVon("kern.kondensatoren-winzig-aber-unersetzlich")},
+  indium:  {name:textVon("kern.indium"),        sym:"In", farbe:"#22b98a", preis:118, ausbeute:.10, wofuer:textVon("kern.touchscreen-display-ito-schicht")},
+  gold:    {name:textVon("kern.gold"),          sym:"Au", farbe:"#d9a516", preis:150, ausbeute:.08, wofuer:textVon("kern.kontakte-die-nicht-rosten")}
 };
 
 /* Länder: monatslohn = Lohnkosten pro Arbeiter bei Lohnstufe "üblich".
    Die Unterschiede sind der Kern der Lektion. */
 const LAND = {
-  kongo:     {name:"DR Kongo",    lohn: 130, risiko:1.6},
-  ruanda:    {name:"Ruanda",      lohn: 160, risiko:1.3},
-  guinea:    {name:"Guinea",      lohn: 170, risiko:1.3},
-  ghana:     {name:"Ghana",       lohn: 260, risiko:1.1},
-  indonesien:{name:"Indonesien",  lohn: 320, risiko:1.1},
-  peru:      {name:"Peru",        lohn: 470, risiko:1.0},
-  mexiko:    {name:"Mexiko",      lohn: 540, risiko:1.0},
-  bolivien:  {name:"Bolivien",    lohn: 420, risiko:1.2},
-  china:     {name:"China",       lohn: 950, risiko:0.8},
-  chile:     {name:"Chile",       lohn:1150, risiko:0.9},
-  vietnam:   {name:"Vietnam",     lohn: 400, risiko:0.9},
-  malaysia:  {name:"Malaysia",    lohn: 700, risiko:0.8},
-  usa:       {name:"USA",         lohn:5000, risiko:0.4},
-  kanada:    {name:"Kanada",      lohn:4800, risiko:0.4},
-  australien:{name:"Australien",  lohn:5600, risiko:0.4},
-  deutschland:{name:"Deutschland",lohn:4600, risiko:0.4},
-  griechenland:{name:"Griechenland",lohn:1500, risiko:0.6},
-  finnland:  {name:"Finnland",    lohn:3900, risiko:0.4},
-  russland:  {name:"Russland",    lohn:1100, risiko:0.9},
-  kasachstan:{name:"Kasachstan", lohn: 850, risiko:0.8},
-  usbekistan:{name:"Usbekistan", lohn: 560, risiko:0.9},
-  portugal:  {name:"Portugal",   lohn:1700, risiko:0.5, fabrik:"Braga",
-    fabrikInfo:"In Braga werden Elektronik und Sensoren für Fahrzeuge gefertigt. Im Spiel kannst du am Standort verschiedene Produkte herstellen."}
+  kongo:     {name:textVon("kern.dr-kongo"),    lohn: 130, risiko:1.6},
+  ruanda:    {name:textVon("kern.ruanda"),      lohn: 160, risiko:1.3},
+  guinea:    {name:textVon("kern.guinea"),      lohn: 170, risiko:1.3},
+  ghana:     {name:textVon("kern.ghana"),       lohn: 260, risiko:1.1},
+  indonesien:{name:textVon("kern.indonesien"),  lohn: 320, risiko:1.1},
+  peru:      {name:textVon("kern.peru"),        lohn: 470, risiko:1.0},
+  mexiko:    {name:textVon("kern.mexiko"),      lohn: 540, risiko:1.0},
+  bolivien:  {name:textVon("kern.bolivien"),    lohn: 420, risiko:1.2},
+  china:     {name:textVon("kern.china"),       lohn: 950, risiko:0.8},
+  chile:     {name:textVon("kern.chile"),       lohn:1150, risiko:0.9},
+  vietnam:   {name:textVon("kern.vietnam"),     lohn: 400, risiko:0.9},
+  malaysia:  {name:textVon("kern.malaysia"),    lohn: 700, risiko:0.8},
+  usa:       {name:textVon("kern.usa"),         lohn:5000, risiko:0.4},
+  kanada:    {name:textVon("kern.kanada"),      lohn:4800, risiko:0.4},
+  australien:{name:textVon("kern.australien"),  lohn:5600, risiko:0.4},
+  deutschland:{name:textVon("kern.deutschland"),lohn:4600, risiko:0.4},
+  griechenland:{name:textVon("kern.griechenland"),lohn:1500, risiko:0.6},
+  finnland:  {name:textVon("kern.finnland"),    lohn:3900, risiko:0.4},
+  russland:  {name:textVon("kern.russland"),    lohn:1100, risiko:0.9},
+  kasachstan:{name:textVon("kern.kasachstan"), lohn: 850, risiko:0.8},
+  usbekistan:{name:textVon("kern.usbekistan"), lohn: 560, risiko:0.9},
+  portugal:  {name:textVon("kern.portugal"),   lohn:1700, risiko:0.5, fabrik:textVon("kern.braga"),
+    fabrikInfo:textVon("kern.in-braga-werden-elektronik")}
 };
 
 /* Minen: erschliessung = einmalige Kosten. ergiebigkeit = Roherz pro Arbeiter und Tag. */
 const MINEN = [
-  {id:"kolwezi",   ort:"Kolwezi",          land:"kongo",      mat:"kobalt",   erschliessung: 90000, ergiebigkeit:4.0, plaetze:60,
-   info:"Rund 70 % des weltweiten Kobalts kommt aus der DR Kongo. Ein Teil davon stammt aus Kleinstminen, in denen von Hand gegraben wird."},
-  {id:"katanga",   ort:"Katanga",          land:"kongo",      mat:"kupfer",   erschliessung: 70000, ergiebigkeit:7.37, plaetze:70,
-   info:"Der kongolesische Kupfergürtel gehört zu den reichsten der Welt – Kobalt fällt oft als Nebenprodukt an."},
-  {id:"rubaya",    ort:"Rubaya",           land:"kongo",      mat:"tantal",   erschliessung:120000, ergiebigkeit:2.39, plaetze:45,
-   info:"Coltan-Erz liefert Tantal. Es zählt zu den vier «Konfliktmineralien», weil bewaffnete Gruppen am Abbau mitverdienen."},
-  {id:"kigali",    ort:"Gatumba",          land:"ruanda",     mat:"tantal",   erschliessung:105000, ergiebigkeit:2.65, plaetze:35,
-   info:"Ruanda exportiert viel Tantal – ein Teil stammt nachweislich aus dem Nachbarland Kongo."},
-  {id:"bayanobo",  ort:"Bayan Obo",        land:"china",      mat:"seltene",  erschliessung:260000, ergiebigkeit:2.96, plaetze:70,
-   info:"Die grösste Lagerstätte Seltener Erden der Welt liegt in der Inneren Mongolei. China fördert rund 60 % – und verarbeitet fast 90 %."},
-  {id:"jiangxi",   ort:"Jiangxi",          land:"china",      mat:"silizium", erschliessung:150000, ergiebigkeit:4.65, plaetze:70,
-   info:"China stellt etwa 70 % des Rohsiliziums her. Der Prozess braucht viel elektrische Energie."},
-  {id:"liuzhou",   ort:"Liuzhou",          land:"china",      mat:"indium",   erschliessung:230000, ergiebigkeit:9.07, plaetze:50,
-   info:"Indium wird fast nur als Nebenprodukt der Zinkgewinnung gewonnen. Indium wird unter anderem für transparente leitfähige Schichten in Displays verwendet."},
-  {id:"sprucepine",ort:"Spruce Pine",      land:"usa",        mat:"silizium", erschliessung:340000, ergiebigkeit:23.02, plaetze:30,
-   info:"Hochreiner Quarz für Chip-Schmelztiegel kommt fast ausschliesslich aus diesem einen Tal in North Carolina."},
-  {id:"mountainpass",ort:"Mountain Pass",  land:"usa",        mat:"seltene",  erschliessung:380000, ergiebigkeit:13.59, plaetze:30,
-   info:"Mountain Pass ist die einzige grosse Mine für Seltene Erden in den USA. Ihr Erz wurde jahrelang zur Verarbeitung nach China verschifft."},
-  {id:"greenbushes",ort:"Greenbushes",     land:"australien", mat:"lithium",  erschliessung:300000, ergiebigkeit:21.11, plaetze:32,
-   info:"Australien fördert etwa die Hälfte des weltweit gewonnenen Lithiums – aus hartem Gestein, nicht aus Salzseen."},
-  {id:"kalgoorlie",ort:"Kalgoorlie",       land:"australien", mat:"gold",     erschliessung:330000, ergiebigkeit:23.29, plaetze:30,
-   info:"Für 1 Gramm Gold werden oft über 1 Tonne Gestein bewegt. Im Spiel ist die Ausbeute deshalb niedrig angesetzt."},
-  {id:"atacama",   ort:"Salar de Atacama", land:"chile",      mat:"lithium",  erschliessung:210000, ergiebigkeit:4.44, plaetze:40,
-   info:"Im «Lithiumdreieck» wird Salzlake verdunstet. Die Gewinnung benötigt viel Wasser in einer der trockensten Wüsten der Erde."},
-  {id:"escondida", ort:"Escondida",        land:"chile",      mat:"kupfer",   erschliessung:190000, ergiebigkeit:21.93, plaetze:45,
-   info:"Escondida ist die grösste Kupfermine der Welt. Chile liefert rund ein Viertel des Weltkupfers."},
-  {id:"fresnillo", ort:"Fresnillo",        land:"mexiko",     mat:"silber",   erschliessung:150000, ergiebigkeit:3.27, plaetze:50,
-   info:"Mexiko ist seit Jahrhunderten grösster Silberproduzent der Welt."},
-  {id:"sanrafael", ort:"San Rafael",       land:"peru",       mat:"zinn",     erschliessung:140000, ergiebigkeit:6.16, plaetze:45,
-   info:"Zinn wirkt unspektakulär – aber ohne Lötzinn hält keine einzige Platine zusammen."},
-  {id:"bangka",    ort:"Bangka",           land:"indonesien", mat:"zinn",     erschliessung:110000, ergiebigkeit:5.08, plaetze:55,
-   info:"Auf Bangka wird Zinn teils von Tauchern aus dem Meeresboden gesaugt – gefährlich und ökologisch heikel."},
-  {id:"sulawesi",  ort:"Sulawesi",         land:"indonesien", mat:"nickel",   erschliessung:130000, ergiebigkeit:2.75, plaetze:60,
-   info:"Indonesien ist mit Abstand grösster Nickelproduzent – dafür wird Regenwald gerodet."},
-  {id:"obuasi",    ort:"Obuasi",           land:"ghana",      mat:"gold",     erschliessung:120000, ergiebigkeit:3.35, plaetze:55,
-   info:"Neben der Grossmine gibt es viele illegale Kleinminen («Galamsey»), oft mit Quecksilber und Kinderarbeit."},
+  {id:"kolwezi",   ort:textVon("kern.kolwezi"),          land:"kongo",      mat:"kobalt",   erschliessung: 90000, ergiebigkeit:4.0, plaetze:60,
+   info:textVon("kern.rund-des-weltweiten-kobalts")},
+  {id:"katanga",   ort:textVon("kern.katanga"),          land:"kongo",      mat:"kupfer",   erschliessung: 70000, ergiebigkeit:7.37, plaetze:70,
+   info:textVon("kern.der-kongolesische-kupferguertel-gehoert")},
+  {id:"rubaya",    ort:textVon("kern.rubaya"),           land:"kongo",      mat:"tantal",   erschliessung:120000, ergiebigkeit:2.39, plaetze:45,
+   info:textVon("kern.coltan-erz-liefert-tantal")},
+  {id:"kigali",    ort:textVon("kern.gatumba"),          land:"ruanda",     mat:"tantal",   erschliessung:105000, ergiebigkeit:2.65, plaetze:35,
+   info:textVon("kern.ruanda-exportiert-viel-tantal")},
+  {id:"bayanobo",  ort:textVon("kern.bayan-obo"),        land:"china",      mat:"seltene",  erschliessung:260000, ergiebigkeit:2.96, plaetze:70,
+   info:textVon("kern.die-groesste-lagerstaette-seltener")},
+  {id:"jiangxi",   ort:textVon("kern.jiangxi"),          land:"china",      mat:"silizium", erschliessung:150000, ergiebigkeit:4.65, plaetze:70,
+   info:textVon("kern.china-stellt-etwa-des")},
+  {id:"liuzhou",   ort:textVon("kern.liuzhou"),          land:"china",      mat:"indium",   erschliessung:230000, ergiebigkeit:9.07, plaetze:50,
+   info:textVon("kern.indium-wird-fast-nur")},
+  {id:"sprucepine",ort:textVon("kern.spruce-pine"),      land:"usa",        mat:"silizium", erschliessung:340000, ergiebigkeit:23.02, plaetze:30,
+   info:textVon("kern.hochreiner-quarz-fuer-chip")},
+  {id:"mountainpass",ort:textVon("kern.mountain-pass"),  land:"usa",        mat:"seltene",  erschliessung:380000, ergiebigkeit:13.59, plaetze:30,
+   info:textVon("kern.mountain-pass-ist-die")},
+  {id:"greenbushes",ort:textVon("kern.greenbushes"),     land:"australien", mat:"lithium",  erschliessung:300000, ergiebigkeit:21.11, plaetze:32,
+   info:textVon("kern.australien-foerdert-etwa-die")},
+  {id:"kalgoorlie",ort:textVon("kern.kalgoorlie"),       land:"australien", mat:"gold",     erschliessung:330000, ergiebigkeit:23.29, plaetze:30,
+   info:textVon("kern.fuer-gramm-gold-werden")},
+  {id:"atacama",   ort:textVon("kern.salar-de-atacama"), land:"chile",      mat:"lithium",  erschliessung:210000, ergiebigkeit:4.44, plaetze:40,
+   info:textVon("kern.im-lithiumdreieck-wird-salzlake")},
+  {id:"escondida", ort:textVon("kern.escondida"),        land:"chile",      mat:"kupfer",   erschliessung:190000, ergiebigkeit:21.93, plaetze:45,
+   info:textVon("kern.escondida-ist-die-groesste")},
+  {id:"fresnillo", ort:textVon("kern.fresnillo"),        land:"mexiko",     mat:"silber",   erschliessung:150000, ergiebigkeit:3.27, plaetze:50,
+   info:textVon("kern.mexiko-ist-seit-jahrhunderten")},
+  {id:"sanrafael", ort:textVon("kern.san-rafael"),       land:"peru",       mat:"zinn",     erschliessung:140000, ergiebigkeit:6.16, plaetze:45,
+   info:textVon("kern.zinn-wirkt-unspektakulaer-aber")},
+  {id:"bangka",    ort:textVon("kern.bangka"),           land:"indonesien", mat:"zinn",     erschliessung:110000, ergiebigkeit:5.08, plaetze:55,
+   info:textVon("kern.auf-bangka-wird-zinn")},
+  {id:"sulawesi",  ort:textVon("kern.sulawesi"),         land:"indonesien", mat:"nickel",   erschliessung:130000, ergiebigkeit:2.75, plaetze:60,
+   info:textVon("kern.indonesien-ist-mit-abstand")},
+  {id:"obuasi",    ort:textVon("kern.obuasi"),           land:"ghana",      mat:"gold",     erschliessung:120000, ergiebigkeit:3.35, plaetze:55,
+   info:textVon("kern.neben-der-grossmine-gibt")},
   {id:"boke",      ort:"Boké",             land:"guinea",     mat:"alu",      erschliessung: 85000, ergiebigkeit:8.8, plaetze:60,
-   info:"Guinea hat die grössten Bauxitvorkommen der Welt. Aus Bauxit wird Aluminium."},
+   info:textVon("kern.guinea-hat-die-groessten")},
   {id:"potosi",    ort:"Potosí",           land:"bolivien",   mat:"silber",   erschliessung:100000, ergiebigkeit:2.88, plaetze:45,
    info:"Der Cerro Rico wird seit 1545 abgebaut. Er gilt als der Berg, der die halbe Welt mit Silber versorgte."},
-  {id:"distomo",   ort:"Distomo",          land:"griechenland", mat:"alu",    erschliessung:155000, ergiebigkeit:13.20, plaetze:36,
-   info:"In der Gegend um Distomo wird Bauxit unter Tage gewonnen. Bauxit ist der Ausgangsstoff für Aluminium."},
-  {id:"talnach",   ort:"Talnach",          land:"russland",    mat:"nickel", erschliessung:205000, ergiebigkeit:6.80, plaetze:42,
-   info:"Bei Talnach in der Nähe von Norilsk wird unter Tage Erz gewonnen, das Nickel und Kupfer enthält."},
-  {id:"aktogay",   ort:"Aqtoghai",         land:"kasachstan",  mat:"kupfer", erschliessung:175000, ergiebigkeit:12.50, plaetze:48,
+  {id:"distomo",   ort:textVon("kern.distomo"),          land:"griechenland", mat:"alu",    erschliessung:155000, ergiebigkeit:13.20, plaetze:36,
+   info:textVon("kern.in-der-gegend-um")},
+  {id:"talnach",   ort:textVon("kern.talnach"),          land:"russland",    mat:"nickel", erschliessung:205000, ergiebigkeit:6.80, plaetze:42,
+   info:textVon("kern.bei-talnach-in-der")},
+  {id:"aktogay",   ort:textVon("kern.aqtoghai"),         land:"kasachstan",  mat:"kupfer", erschliessung:175000, ergiebigkeit:12.50, plaetze:48,
    info:"In Aqtoghai in Ostkasachstan wird Kupfererz im Tagebau gewonnen und vor Ort aufbereitet."},
-  {id:"muruntau",  ort:"Muruntau",         land:"usbekistan",  mat:"gold",   erschliessung:220000, ergiebigkeit:9.60, plaetze:46,
-   info:"Muruntau ist ein grosser Goldtagebau in der usbekischen Wüste Kysylkum."}
+  {id:"muruntau",  ort:textVon("kern.muruntau"),         land:"usbekistan",  mat:"gold",   erschliessung:220000, ergiebigkeit:9.60, plaetze:46,
+   info:textVon("kern.muruntau-ist-ein-grosser")}
 ];
 
 /* Raffinerie-Standorte: Erz wird zu Material. */
 const RAFF_ORTE = [
-  {id:"r_china",  land:"china",       ort:"Guangdong", bau:180000, kapazitaet:2400, plaetze:20,
-   info:"China verarbeitet fast 90 % der Seltenen Erden. Nicht der Abbau ist der Engpass, sondern die Raffination."},
-  {id:"r_malay",  land:"malaysia",    ort:"Kuantan",   bau:220000, kapazitaet:1700, plaetze:16,
-   info:"Malaysia ist zweitgrösster Standort für Seltene-Erden-Raffination – mit Streit um radioaktive Rückstände."},
-  {id:"r_chile",  land:"chile",       ort:"Antofagasta",bau:250000, kapazitaet:1500, plaetze:16,
+  {id:"r_china",  land:"china",       ort:textVon("kern.guangdong"), bau:180000, kapazitaet:2400, plaetze:20,
+   info:textVon("kern.china-verarbeitet-fast-der")},
+  {id:"r_malay",  land:"malaysia",    ort:textVon("kern.kuantan"),   bau:220000, kapazitaet:1700, plaetze:16,
+   info:textVon("kern.malaysia-ist-zweitgroesster-standort")},
+  {id:"r_chile",  land:"chile",       ort:textVon("kern.antofagasta"),bau:250000, kapazitaet:1500, plaetze:16,
    info:"Nahe an den Minen zu raffinieren spart Transport, kostet aber mehr Lohn."},
-  {id:"r_de",     land:"deutschland", ort:"Freiberg",  bau:420000, kapazitaet:1400, plaetze:14,
-   info:"Europa baut Raffinerien auf, um weniger abhängig zu sein. Teuer, aber politisch gewollt."},
-  {id:"r_usa",    land:"usa",         ort:"Texas",     bau:440000, kapazitaet:1500, plaetze:14,
-   info:"Die USA fördern eigene Raffinerien mit Subventionen – Stichwort Rohstoffsicherheit."},
-  {id:"r_pori",   land:"finnland",    ort:"Pori",      bau:390000, kapazitaet:1450, plaetze:13,
-   info:"In Pori wird Kupfer mit elektrischem Strom gereinigt. Das hochreine Kupfer eignet sich zum Beispiel für Kabel."},
-  {id:"r_pawlodar",land:"kasachstan", ort:"Pawlodar",  bau:260000, kapazitaet:1600, plaetze:18,
+  {id:"r_de",     land:"deutschland", ort:textVon("kern.freiberg"),  bau:420000, kapazitaet:1400, plaetze:14,
+   info:textVon("kern.europa-baut-raffinerien-auf")},
+  {id:"r_usa",    land:"usa",         ort:textVon("kern.texas"),     bau:440000, kapazitaet:1500, plaetze:14,
+   info:textVon("kern.die-usa-foerdern-eigene")},
+  {id:"r_pori",   land:"finnland",    ort:textVon("kern.pori"),      bau:390000, kapazitaet:1450, plaetze:13,
+   info:textVon("kern.in-pori-wird-kupfer")},
+  {id:"r_pawlodar",land:"kasachstan", ort:textVon("kern.pawlodar"),  bau:260000, kapazitaet:1600, plaetze:18,
    info:"Die Raffinerie in Pawlodar gewinnt aus Bauxit Aluminiumoxid. Daraus entsteht in einem weiteren Schritt Aluminium."}
 ];
 
@@ -773,27 +773,27 @@ const RAFF_ORTE = [
    «kabel» ist das Einsteigerprodukt: nur drei Rohstoffe, günstige Fabrik,
    kurze Bauzeit. Im Tutorial wird ausschliesslich dieses gebaut. */
 const PRODUKT = {
-  kabel: {name:"Ladekabel",      preis: 150, nachfrage:34, proArbeiter:3.2, bauzeit: 8, plaetze:12, kosten: 60000,
+  kabel: {name:textVon("kern.ladekabel"),      preis: 150, nachfrage:34, proArbeiter:3.2, bauzeit: 8, plaetze:12, kosten: 60000,
     rezept:{kupfer:2, alu:1, zinn:1},
-    info:"Ein Ladekabel ist fast nur Kupfer – dazu Aluminium für den Stecker und Zinn zum Löten. Das einfachste Gerät in deinem Katalog."},
+    info:textVon("kern.ein-ladekabel-ist-fast")},
   motor: {name:"E-Bike-Motor",    preis: 520, nachfrage:24, proArbeiter:2.0, bauzeit:14, plaetze:12, kosten: 90000,
     rezept:{kupfer:4, alu:3, seltene:1},
-    info:"Der Motor treibt das E-Bike an. In diesem Motortyp steckt Kupfer in den Spulen, Aluminium im Gehäuse und Neodym aus der Gruppe der Seltenen Erden in den Permanentmagneten."},
-  phone: {name:"Velocity Smartphone", preis:1690, nachfrage:26, proArbeiter:1.1, bauzeit:20, plaetze:14, kosten:120000,
+    info:textVon("kern.der-motor-treibt-das")},
+  phone: {name:textVon("kern.velocity-smartphone"), preis:1690, nachfrage:26, proArbeiter:1.1, bauzeit:20, plaetze:14, kosten:120000,
     rezept:{silizium:4, kupfer:6, kobalt:3, lithium:3, gold:1, zinn:2, tantal:1, seltene:2, indium:1, alu:4},
-    info:"In einem Smartphone stecken über 60 verschiedene Elemente. Fast keines davon wird recycelt."},
+    info:textVon("kern.in-einem-smartphone-stecken")},
   board: {name:"Mainboard V1",   preis:1100, nachfrage:34, proArbeiter:1.6, bauzeit:14, plaetze:10, kosten: 85000,
     rezept:{silizium:6, kupfer:8, gold:1, zinn:4, tantal:1, silber:1},
-    info:"Eine Platine ist im Grunde Kupfer auf Glasfaser – zusammengehalten von Zinn, kontaktiert mit Gold."},
-  konsole:{name:"Konsole Vortex",preis:1570, nachfrage:18, proArbeiter:0.9, bauzeit:26, plaetze:16, kosten:160000,
+    info:textVon("kern.eine-platine-ist-im")},
+  konsole:{name:textVon("kern.konsole-vortex"),preis:1570, nachfrage:18, proArbeiter:0.9, bauzeit:26, plaetze:16, kosten:160000,
     rezept:{silizium:8, kupfer:10, gold:1, zinn:5, seltene:3, alu:6, silber:1},
-    info:"Der Lüftermotor braucht Magnete aus Seltenen Erden – dieselben Elemente wie im Kopfhörer."},
-  tv:    {name:"Smart-TV 55\"",  preis:1710, nachfrage:14, proArbeiter:0.8, bauzeit:24, plaetze:15, kosten:150000,
+    info:textVon("kern.der-lueftermotor-braucht-magnete")},
+  tv:    {name:textVon("kern.smart-tv"),  preis:1710, nachfrage:14, proArbeiter:0.8, bauzeit:24, plaetze:15, kosten:150000,
     rezept:{indium:3, silizium:5, kupfer:9, zinn:4, seltene:2, alu:10, silber:1},
-    info:"Jeder Touchscreen und jedes LCD hat eine hauchdünne, durchsichtige Indium-Zinn-Oxid-Schicht."},
+    info:textVon("kern.jeder-touchscreen-und-jedes")},
   akku:  {name:"E-Bike-Akku",    preis:1260, nachfrage:11, proArbeiter:0.9, bauzeit:18, plaetze:12, kosten:130000,
     rezept:{lithium:8, kobalt:6, nickel:9, kupfer:5, alu:4},
-    info:"Ein E-Bike-Akku enthält ungefähr so viel Kobalt wie 30 Smartphones."}
+    info:textVon("kern.ein-bike-akku-enthaelt")}
 };
 
 const FAB_ORTE = ["china","vietnam","mexiko","deutschland","usa","portugal"];
@@ -838,9 +838,9 @@ const TUTORIAL_MAX_LEUTE = 60;
 
 /* Lohnstufen: Faktor auf den Landeslohn, Zielwert der Zufriedenheit, Risikofaktor. */
 const LOHNSTUFE = [
-  {label:"knapp",  faktor:0.7, ziel:22, name:"unter üblichem Lohn"},
-  {label:"üblich", faktor:1.0, ziel:56, name:"landesüblicher Lohn"},
-  {label:"fair",   faktor:1.45,ziel:86, name:"deutlich über üblich, mit Schutzausrüstung"}
+  {label:"knapp",  faktor:0.7, ziel:22, name:textVon("kern.unter-ueblichem-lohn")},
+  {label:textVon("kern.ueblich"), faktor:1.0, ziel:56, name:textVon("kern.landesueblicher-lohn")},
+  {label:"fair",   faktor:1.45,ziel:86, name:textVon("kern.deutlich-ueber-ueblich-mit")}
 ];
 
 /* ============================================================
@@ -1252,147 +1252,147 @@ function szeneFabrik(f, def){
    ============================================================ */
 const WISSEN = [
   {
-    id:"kette", titel:"Die Lieferkette", farbe:"#3f7fb0", ikon:"schiff",
-    kurz:"Mine → Raffinerie → Fabrik → Markt: warum jedes Glied zählt.",
-    text:["Nichts in deiner Firma entsteht an einem Ort. Aus der Mine kommt <b>Roherz</b> – ein Gemisch aus Gestein und dem, was du eigentlich willst. Erst die <b>Raffinerie</b> trennt beides. Erst die <b>Fabrik</b> baut daraus ein Gerät. Und erst der <b>Markt</b> macht daraus Geld.",
+    id:"kette", titel:textVon("kern.die-lieferkette"), farbe:"#3f7fb0", ikon:"schiff",
+    kurz:textVon("kern.mine-raffinerie-fabrik-markt"),
+    text:[textVon("kern.nichts-in-deiner-firma"),
       "Reisst ein Glied, steht die ganze Kette. Genau das erlebst du im Spiel: eine Mine ohne Raffinerie produziert nur Haufen, eine Fabrik ohne Material nur Kosten."],
-    fakten:["Ein Smartphone legt vor dem Verkauf oft mehr als 100'000 Kilometer zurück.",
-      "Rund 90 % des Welthandels laufen über Schiffe. Ein einziger Containerstau verschiebt Lieferungen um Monate.",
-      "Die teuerste Stelle der Kette ist selten die Mine – meistens ist es die Verarbeitung."],
+    fakten:[textVon("kern.ein-smartphone-legt-vor"),
+      textVon("kern.rund-des-welthandels-laufen"),
+      textVon("kern.die-teuerste-stelle-der")],
     perks:[
-      {id:"kette1", titel:"Ladungsplanung", kosten:70000,
+      {id:"kette1", titel:textVon("kern.ladungsplanung"), kosten:70000,
        text:"Deine Disponentinnen planen Transporte im Voraus. Erz kommt schneller in der Raffinerie an.",
-       wirkung:["Raffinerien +10 % Durchsatz"], mult:{durchsatz:1.10}},
-      {id:"kette2", titel:"Eigene Reederei", kosten:240000,
+       wirkung:[textVon("kern.raffinerien-durchsatz")], mult:{durchsatz:1.10}},
+      {id:"kette2", titel:textVon("kern.eigene-reederei"), kosten:240000,
        text:"Du charterst eigene Schiffe. Weniger Wartezeit im Hafen, tiefere Betriebskosten.",
-       wirkung:["Raffinerien +15 % Durchsatz","Betriebskosten −10 %"], mult:{durchsatz:1.15, betrieb:0.90}}
+       wirkung:[textVon("kern.raffinerien-durchsatz-2"),textVon("kern.betriebskosten")], mult:{durchsatz:1.15, betrieb:0.90}}
     ]
   },
   {
-    id:"geologie", titel:"Geologie & Lagerstätten", farbe:"#b5703c", ikon:"berg",
-    kurz:"Wo Erz liegt, entscheidet die Erdgeschichte – nicht die Politik.",
-    text:["Rohstoffe liegen dort, wo vor Millionen Jahren Vulkane, Meere oder Verwitterung sie angereichert haben. Deshalb sind die Karten so ungleich verteilt: Kobalt im kongolesischen Kupfergürtel, Lithium im Dreieck Chile–Bolivien–Argentinien, Bauxit in Guinea.",
+    id:"geologie", titel:textVon("kern.geologie-lagerstaetten"), farbe:"#b5703c", ikon:"berg",
+    kurz:textVon("kern.wo-erz-liegt-entscheidet"),
+    text:[textVon("kern.rohstoffe-liegen-dort-wo"),
       "Die <b>Ergiebigkeit</b> im Spiel sagt, wie viel Roherz ein Mensch pro Tag aus dem Berg holt. Sie ist in offenen Tagebauen mit Maschinen riesig, in Handarbeit winzig.",
-      "Mit dem <b>Ausbau</b> einer Mine kaufst du genau das: Bagger, Förderbänder, Brecher. Jede Stufe bringt etwas mehr, jede zehnte Stufe verdoppelt die Förderung – und jede Stufe kostet mehr als die vorherige."],
-    fakten:["Für 1 Gramm Gold wird oft über 1 Tonne Gestein bewegt.",
-      "Der Cerro Rico in Potosí wird seit 1545 abgebaut – seit fast 500 Jahren.",
-      "Hochreiner Quarz für Chip-Schmelztiegel kommt fast nur aus einem einzigen Tal in North Carolina."],
+      textVon("kern.mit-dem-ausbau-einer")],
+    fakten:[textVon("kern.fuer-gramm-gold-wird"),
+      textVon("kern.der-cerro-rico-in"),
+      textVon("kern.hochreiner-quarz-fuer-chip-2")],
     perks:[
-      {id:"geo1", titel:"Erzader-Kartierung", kosten:90000,
-       text:"Geologinnen vermessen die Adern, bevor gegraben wird. Weniger Fehlschläge, mehr Erz pro Schicht.",
-       wirkung:["Alle Minen +10 % Förderung"], mult:{foerderung:1.10}},
-      {id:"geo2", titel:"Tiefenbohrung", kosten:280000,
+      {id:"geo1", titel:textVon("kern.erzader-kartierung"), kosten:90000,
+       text:textVon("kern.geologinnen-vermessen-die-adern"),
+       wirkung:[textVon("kern.alle-minen-foerderung")], mult:{foerderung:1.10}},
+      {id:"geo2", titel:textVon("kern.tiefenbohrung"), kosten:280000,
        text:"Neue Bohrtechnik erreicht tiefere, reichere Schichten.",
-       wirkung:["Alle Minen +15 % Förderung"], mult:{foerderung:1.15}}
+       wirkung:[textVon("kern.alle-minen-foerderung-2")], mult:{foerderung:1.15}}
     ]
   },
   {
-    id:"leute", titel:"Menschen & Löhne", farbe:"#e0504a", ikon:"person",
-    kurz:"Der Lohn entscheidet über Zufriedenheit, Streik und deinen Ruf.",
-    text:["Die Länder mit den tiefsten Löhnen sind oft genau jene mit den Rohstoffen, die wir für Smartphones brauchen. Das ist kein Zufall, sondern Geschichte.",
-      "Im Spiel gilt: Tiefe Löhne senken deine Kosten <b>sofort</b>. Sie senken auch die Zufriedenheit. Unter 32 % wird gestreikt, und ein Streik stoppt die Förderung ganz. Sitzt du ihn aus, fällt dein Ruf – und ein schlechter Ruf senkt die Nachfrage nach allem, was du verkaufst."],
-    fakten:["In Kleinstminen («artisanal mining») arbeiten weltweit geschätzt über 40 Millionen Menschen.",
-      "Schutzausrüstung kostet einen Bruchteil eines Monatslohns – und verhindert die meisten schweren Unfälle.",
-      "Zufriedene Belegschaften fördern im Spiel bis zu 60 % mehr als unzufriedene."],
+    id:"leute", titel:textVon("kern.menschen-loehne"), farbe:"#e0504a", ikon:"person",
+    kurz:textVon("kern.der-lohn-entscheidet-ueber"),
+    text:[textVon("kern.die-laender-mit-den"),
+      textVon("kern.im-spiel-gilt-tiefe")],
+    fakten:[textVon("kern.in-kleinstminen-artisanal-mining"),
+      textVon("kern.schutzausruestung-kostet-einen-bruchteil"),
+      textVon("kern.zufriedene-belegschaften-foerdern-im")],
     perks:[
-      {id:"leute1", titel:"Sicherheitsschulung", kosten:80000,
-       text:"Helm, Gurt, Beleuchtung und eine Stunde Schulung pro Woche. Die Leute bleiben – und arbeiten ruhiger.",
-       wirkung:["Zufriedenheit +5 in allen Minen"], plus:{zufrieden:5}},
-      {id:"leute2", titel:"Betriebliche Mitbestimmung", kosten:230000,
-       text:"Die Belegschaft wählt eine Vertretung, die mitredet. Konflikte kommen früher auf den Tisch.",
-       wirkung:["Zufriedenheit +8","Ruf sofort +5"], plus:{zufrieden:8}, sofort:{ruf:5}}
+      {id:"leute1", titel:textVon("kern.sicherheitsschulung"), kosten:80000,
+       text:textVon("kern.helm-gurt-beleuchtung-und"),
+       wirkung:[textVon("kern.zufriedenheit-in-allen-minen")], plus:{zufrieden:5}},
+      {id:"leute2", titel:textVon("kern.betriebliche-mitbestimmung"), kosten:230000,
+       text:textVon("kern.die-belegschaft-waehlt-eine"),
+       wirkung:[textVon("kern.zufriedenheit"),textVon("kern.ruf-sofort")], plus:{zufrieden:8}, sofort:{ruf:5}}
     ]
   },
   {
-    id:"chemie", titel:"Chemie & Raffination", farbe:"#5b8f7a", ikon:"kolben",
-    kurz:"Aus Erz wird Material – und der grösste Teil ist Abraum.",
-    text:["Die <b>Ausbeute</b> sagt, wie viel Material aus einer Einheit Roherz entsteht. Bei Silizium sind es 70 %, bei Gold nur 8 %. Der Rest ist Abraum: Gestein, Schlamm, Chemie.",
-      "Nicht der Abbau ist der weltweite Engpass, sondern die Raffination. China fördert rund 60 % der Seltenen Erden – verarbeitet aber fast 90 %. Wer raffiniert, hat die Macht."],
-    fakten:["Aluminium wird aus Bauxit gewonnen und braucht dafür enorme Mengen Strom.",
-      "Indium fällt fast nur als Nebenprodukt der Zinkgewinnung an.",
-      "Raffinerien in Malaysia stehen wegen radioaktiver Rückstände seit Jahren in der Kritik."],
+    id:"chemie", titel:textVon("kern.chemie-raffination"), farbe:"#5b8f7a", ikon:"kolben",
+    kurz:textVon("kern.aus-erz-wird-material"),
+    text:[textVon("kern.die-ausbeute-sagt-wie"),
+      textVon("kern.nicht-der-abbau-ist")],
+    fakten:[textVon("kern.aluminium-wird-aus-bauxit"),
+      textVon("kern.indium-faellt-fast-nur"),
+      textVon("kern.raffinerien-in-malaysia-stehen")],
     perks:[
-      {id:"chem1", titel:"Prozesschemie", kosten:110000,
-       text:"Bessere Lösungsmittel und Temperaturführung holen mehr aus demselben Erz.",
-       wirkung:["Ausbeute +10 %"], mult:{ausbeute:1.10}},
-      {id:"chem2", titel:"Rückgewinnung aus Abraum", kosten:310000,
-       text:"Was früher auf die Halde ging, wird ein zweites Mal ausgewaschen.",
-       wirkung:["Ausbeute +15 %"], mult:{ausbeute:1.15}}
+      {id:"chem1", titel:textVon("kern.prozesschemie"), kosten:110000,
+       text:textVon("kern.bessere-loesungsmittel-und-temperaturfuehrung"),
+       wirkung:[textVon("kern.ausbeute")], mult:{ausbeute:1.10}},
+      {id:"chem2", titel:textVon("kern.rueckgewinnung-aus-abraum"), kosten:310000,
+       text:textVon("kern.was-frueher-auf-die"),
+       wirkung:[textVon("kern.ausbeute-2")], mult:{ausbeute:1.15}}
     ]
   },
   {
-    id:"fabrik", titel:"Fabrik & Fertigung", farbe:"#8a6ae8", ikon:"fabrik",
-    kurz:"Was in einem Gerät steckt – und warum ein fehlendes Teil alles stoppt.",
-    text:["Eine Fabrik produziert nur so viel, wie das <b>knappste</b> Material zulässt. Fehlt Indium, hilft dir ein Berg Kupfer nichts. Genau das macht Lieferketten so verletzlich.",
-      "In einem Smartphone stecken über 60 verschiedene Elemente. Fast keines davon wird heute vollständig zurückgewonnen."],
-    fakten:["Eine Platine ist im Grunde Kupfer auf Glasfaser – zusammengehalten von Zinn, kontaktiert mit Gold.",
-      "Ein E-Bike-Akku enthält ungefähr so viel Kobalt wie 30 Smartphones.",
-      "Lüftermotoren und Lautsprecher brauchen dieselben Magnete aus Seltenen Erden."],
+    id:"fabrik", titel:textVon("kern.fabrik-fertigung"), farbe:"#8a6ae8", ikon:"fabrik",
+    kurz:textVon("kern.was-in-einem-geraet"),
+    text:[textVon("kern.eine-fabrik-produziert-nur"),
+      textVon("kern.in-einem-smartphone-stecken-2")],
+    fakten:[textVon("kern.eine-platine-ist-im"),
+      textVon("kern.ein-bike-akku-enthaelt"),
+      textVon("kern.lueftermotoren-und-lautsprecher-brauchen")],
     perks:[
-      {id:"fab1", titel:"Fliessband-Feintuning", kosten:100000,
-       text:"Kürzere Wege, weniger Umbauzeit, klarere Taktung an jeder Station.",
-       wirkung:["Fabriken +12 % Ausstoss"], mult:{fabrik:1.12}},
-      {id:"fab2", titel:"Vorfertigung in Modulen", kosten:290000,
+      {id:"fab1", titel:textVon("kern.fliessband-feintuning"), kosten:100000,
+       text:textVon("kern.kuerzere-wege-weniger-umbauzeit"),
+       wirkung:[textVon("kern.fabriken-ausstoss")], mult:{fabrik:1.12}},
+      {id:"fab2", titel:textVon("kern.vorfertigung-in-modulen"), kosten:290000,
        text:"Baugruppen kommen vormontiert an. Neue Werke stehen viel schneller.",
-       wirkung:["Fabriken +12 % Ausstoss","Bauzeit −30 %"], mult:{fabrik:1.12, bauzeit:0.70}}
+       wirkung:[textVon("kern.fabriken-ausstoss"),textVon("kern.bauzeit")], mult:{fabrik:1.12, bauzeit:0.70}}
     ]
   },
   {
-    id:"markt", titel:"Markt & Preise", farbe:"#f08c2e", ikon:"markt",
-    kurz:"Nachfrage, Lager und Dollarkurs – und warum Verkaufen Arbeit ist.",
-    text:["Fertige Produkte müssen verkauft werden. Entweder du verkaufst selber, oder du stellst Verkäuferinnen an, die es jeden Tag für dich erledigen. Jede von ihnen setzt rund " + STUECK_PRO_VERKAEUFER + " Stück pro Tag ab – und kostet Lohn.",
-      "Der Markt nimmt pro Tag nur eine bestimmte Menge auf. Produzierst du mehr, füllt sich das Lager und der Preis fällt um bis zu 35 %. Rohstoffe und Waren werden zudem weltweit in Dollar gehandelt: Ein starker Dollar verändert alle Preise."],
-    fakten:["Der Lithiumpreis fiel zwischen 2022 und 2024 um über 80 % – neue Minen lieferten zu viel.",
-      "Exportbeschränkungen für Seltene Erden können den Preis binnen Wochen verdreifachen.",
-      "Saison zählt: Konsolen und Fernseher verkaufen sich im November und Dezember fast doppelt so gut."],
+    id:"markt", titel:textVon("kern.markt-preise"), farbe:"#f08c2e", ikon:"markt",
+    kurz:textVon("kern.nachfrage-lager-und-dollarkurs"),
+    text:[textVon("kern.fertige-produkte-muessen-verkauft") + STUECK_PRO_VERKAEUFER + textVon("kern.stueck-pro-tag-ab"),
+      textVon("kern.der-markt-nimmt-pro")],
+    fakten:[textVon("kern.der-lithiumpreis-fiel-zwischen"),
+      textVon("kern.exportbeschraenkungen-fuer-seltene-erden"),
+      textVon("kern.saison-zaehlt-konsolen-und")],
     perks:[
-      {id:"markt1", titel:"Verkaufsschulung", kosten:95000,
-       text:"Deine Verkäuferinnen lernen, wie man Grosskunden gewinnt statt Einzelstücke anzubieten.",
-       wirkung:["Verkäufer setzen 30 % mehr ab"], mult:{verkaufskraft:1.30}},
-      {id:"markt2", titel:"Direktvertrieb", kosten:260000,
-       text:"Du lieferst direkt an Grosskunden statt über Zwischenhändler.",
-       wirkung:["Produktpreise +8 %","Verkäufer setzen 20 % mehr ab"], mult:{warenpreis:1.08, verkaufskraft:1.20}}
+      {id:"markt1", titel:textVon("kern.verkaufsschulung"), kosten:95000,
+       text:textVon("kern.deine-verkaeuferinnen-lernen-wie"),
+       wirkung:[textVon("kern.verkaeufer-setzen-mehr-ab")], mult:{verkaufskraft:1.30}},
+      {id:"markt2", titel:textVon("kern.direktvertrieb"), kosten:260000,
+       text:textVon("kern.du-lieferst-direkt-an"),
+       wirkung:[textVon("kern.produktpreise"),textVon("kern.verkaeufer-setzen-mehr-ab-2")], mult:{warenpreis:1.08, verkaufskraft:1.20}}
     ]
   },
   {
-    id:"ruf", titel:"Ruf & Verantwortung", farbe:"#2fbe7e", ikon:"schild",
+    id:"ruf", titel:textVon("kern.ruf-verantwortung"), farbe:"#2fbe7e", ikon:"schild",
     kurz:"Warum sauber gerechnet nicht reicht, wenn niemand mehr kauft.",
     text:["Dein <b>Ruf</b> ist keine Dekoration: Er steuert direkt, wie viele Menschen deine Produkte kaufen. Ein Ruf von 20 kostet dich rund ein Drittel deiner Nachfrage.",
-      "Recherchen, Gesetze und Kundinnen schauen genauer hin als früher. Ein Lieferkettengesetz verlangt Nachweise – wer sie nicht hat, zahlt Bussen. Wer sie hat, gewinnt Grosskunden."],
-    fakten:["Vier Rohstoffe gelten offiziell als «Konfliktmineralien»: Zinn, Tantal, Wolfram und Gold.",
-      "Die EU und die Schweiz verlangen von grossen Firmen Sorgfaltsprüfungen in der Lieferkette.",
-      "Ein einziger Medienbericht kann die Nachfrage nach einem Produkt monatelang drücken."],
+      textVon("kern.recherchen-gesetze-und-kundinnen")],
+    fakten:[textVon("kern.vier-rohstoffe-gelten-offiziell"),
+      textVon("kern.die-eu-und-die"),
+      textVon("kern.ein-einziger-medienbericht-kann")],
     perks:[
-      {id:"ruf1", titel:"Transparenzbericht", kosten:120000,
-       text:"Du legst offen, woher jedes Material kommt – nachprüfbar, mit Zahlen.",
-       wirkung:["Ruf sofort +8","Nachfrage +5 %"], mult:{nachfrage:1.05}, sofort:{ruf:8}},
-      {id:"ruf2", titel:"Zertifizierte Lieferkette", kosten:330000,
-       text:"Unabhängige Stellen prüfen jede Mine. Skandale treffen dich weniger hart.",
-       wirkung:["Nachfrage +10 %","Rufverluste −40 %"], mult:{nachfrage:1.10, rufschutz:0.60}}
+      {id:"ruf1", titel:textVon("kern.transparenzbericht"), kosten:120000,
+       text:textVon("kern.du-legst-offen-woher"),
+       wirkung:[textVon("logikfixes.ruf-sofort"),textVon("logikfixes.nachfrage")], mult:{nachfrage:1.05}, sofort:{ruf:8}},
+      {id:"ruf2", titel:textVon("kern.zertifizierte-lieferkette"), kosten:330000,
+       text:textVon("kern.unabhaengige-stellen-pruefen-jede"),
+       wirkung:[textVon("logikfixes.nachfrage-2"),textVon("logikfixes.rufverluste")], mult:{nachfrage:1.10, rufschutz:0.60}}
     ]
   },
   {
-    id:"modell", titel:"Das Modell im Code", farbe:"#6b5f50", ikon:"code",
+    id:"modell", titel:textVon("kern.das-modell-im-code"), farbe:"#6b5f50", ikon:"code",
     kurz:"Jede Zahl im Spiel kommt aus einer Formel. Hier stehen sie.",
-    text:["Ein Spiel ist immer ein <b>Modell</b> – eine Vereinfachung. Wenn du die Formeln kennst, kannst du das Spiel schlagen und gleichzeitig sehen, wo es die Wirklichkeit verkürzt.",
-      "Such im Quelltext die Funktion <code>tagVor()</code>. Sie ist der Herzschlag des Spiels. In welcher Reihenfolge passiert was – und warum ist die Reihenfolge wichtig?"],
+    text:[textVon("kern.ein-spiel-ist-immer"),
+      textVon("kern.such-im-quelltext-die")],
     formeln:[
-      ["Förderung / Tag","Arbeiter × Ergiebigkeit × (0.55 + Zufriedenheit/100 × 0.6)"],
-      ["Material aus Rohstoff","Rohstoff × Ausbeute"],
-      ["Fabrik-Ausstoss","Arbeiter × Ausstoss, begrenzt vom knappsten Material"],
-      ["Nachfrage","Grundwert × Saison × Ereignis × (0.65 + Ruf/100 × 0.7)"],
-      ["Verkaufspreis","Grundpreis × (1 − 0.35 × Überangebot) × Dollarkurs"]
+      [textVon("didacticmodel.foerderung-tag"),textVon("didacticmodel.arbeiter-ergiebigkeit-zufriedenheit")],
+      [textVon("didacticmodel.material-aus-rohstoff"),textVon("didacticmodel.rohstoff-ausbeute")],
+      [textVon("didacticmodel.fabrik-ausstoss"),textVon("didacticmodel.arbeiter-ausstoss-begrenzt-vom")],
+      [textVon("didacticmodel.nachfrage"),textVon("didacticmodel.grundwert-saison-ereignis-ruf")],
+      [textVon("didacticmodel.verkaufspreis"),textVon("didacticmodel.grundpreis-ueberangebot-dollarkurs")]
     ],
-    fakten:["Alle Zahlen sind gerundet und vereinfacht – echte Minen rechnen mit Dutzenden Faktoren.",
-      "Ein Spieltag folgt dieser Reihenfolge: Erst fördern, dann raffinieren, dann bauen.",
+    fakten:[textVon("kern.alle-zahlen-sind-gerundet"),
+      textVon("kern.ein-spieltag-folgt-dieser"),
       "Zufall gibt es nur bei Marktpreisen und Ereignissen. Alles andere ist berechenbar."],
     perks:[
-      {id:"mod1", titel:"Controlling", kosten:85000,
+      {id:"mod1", titel:textVon("kern.controlling"), kosten:85000,
        text:"Eine Person schaut jeden Monat auf die Zahlen und streicht, was niemand braucht.",
-       wirkung:["Betriebskosten −15 %"], mult:{betrieb:0.85}},
-      {id:"mod2", titel:"Personalplanung", kosten:270000,
+       wirkung:[textVon("kern.betriebskosten-2")], mult:{betrieb:0.85}},
+      {id:"mod2", titel:textVon("kern.personalplanung"), kosten:270000,
        text:"Schichten passen zur Auslastung. Weniger Leerlauf, tiefere Lohnsumme.",
-       wirkung:["Lohnsumme −6 %"], mult:{lohn:0.94}}
+       wirkung:[textVon("kern.lohnsumme")], mult:{lohn:0.94}}
     ]
   }
 ];
@@ -1412,9 +1412,9 @@ const STARTKAPITAL= 1250000;
 const LOHN_PRO_KOPF = 1800;    // einmalige Kosten beim Anstellen
 const LOHN_OHNE_EINSATZ = 200;
 const SCHWIERIGKEIT = {
-  einfach:{name:"Einfach", icon:"🌱", verkauf:1.20, effekt:"Verkaufserlöse +20 %"},
-  mittel: {name:"Mittel",  icon:"⚙️", verkauf:1.00, effekt:"Standard-Balancing"},
-  schwer: {name:"Schwer",  icon:"🔥", verkauf:0.70, effekt:"Verkaufserlöse −30 %"}
+  einfach:{name:textVon("sekbklarheit.einfach"), icon:"🌱", verkauf:1.20, effekt:textVon("kern.verkaufserloese")},
+  mittel: {name:textVon("sekbklarheit.mittel"),  icon:"⚙️", verkauf:1.00, effekt:textVon("kern.standard-balancing")},
+  schwer: {name:textVon("sekbklarheit.schwer"),  icon:"🔥", verkauf:0.70, effekt:textVon("kern.verkaufserloese-2")}
 };
 
 let S;            // der gesamte Spielzustand
@@ -1442,7 +1442,7 @@ function metaLaden(){
 function metaSpeichern(){ try { SPEICHER.schreib(META_SCHLUESSEL,JSON.stringify(META)); } catch(e){} }
 
 /* ---------- Einstellungen (Regler) ---------- */
-const LIEFERANZEIGEN = {punkt:"Punkte", schiff:"Schiffe", flugzeug:"Flugzeuge"};
+const LIEFERANZEIGEN = {punkt:textVon("kern.punkte"), schiff:textVon("kern.schiffe"), flugzeug:textVon("kern.flugzeuge")};
 const OPT_STD = {schrift:106, tempo:100, anim:1, lieferanzeige:"punkt", meldungsdauer:100, lernfeedbackdauer:100, meldungstakt:1};
 let OPT = Object.assign({}, OPT_STD);
 
@@ -1487,14 +1487,17 @@ function neuerZustand(){
 }
 
 /* ---------- kleine Helfer ---------- */
-const chf = n => (n<0?"−":"") + "CHF " + Math.abs(Math.round(n)).toLocaleString("de-CH");
-const kurz = n => Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+" Mio" : Math.abs(n)>=1000 ? Math.round(n/1000)+"k" : Math.round(n);
+const chf = n => (n<0?"−":"") + textVon("abschlusszerti.chf") + Math.abs(Math.round(n)).toLocaleString("de-CH");
+const kurz = n => Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+textVon("kern.mio") : Math.abs(n)>=1000 ? Math.round(n/1000)+"k" : Math.round(n);
 const zufall = (a,b) => a + Math.random()*(b-a);
 const klemm = (v,a,b) => Math.max(a, Math.min(b, v));
 const monat = () => Math.floor((S.tag-1)/30) + 1;
 const schwierigkeitInfo = () => SCHWIERIGKEIT[S.schwierigkeit] || SCHWIERIGKEIT.mittel;
-const verkaufsMultiplikator = () => S.hilfsBonus ? 1.50 : schwierigkeitInfo().verkauf;
-const verkaufsEffektText = () => S.hilfsBonus ? "✨ Bonus aktiv · Verkaufserlöse +50 %" : schwierigkeitInfo().effekt;
+// Bonus: Runde mit +40/+60 % nach verfehltem Ziel auf Einfach (verkaufsBonus);
+// hilfsBonus (+50 %) stammt aus älteren Spielständen.
+const bonusProzent = () => S.verkaufsBonus || (S.hilfsBonus ? 50 : 0);
+const verkaufsMultiplikator = () => bonusProzent() ? 1 + bonusProzent() / 100 : schwierigkeitInfo().verkauf;
+const verkaufsEffektText = () => bonusProzent() ? textVon("kern.bonus-aktiv-verkaufserloese", {p1:(bonusProzent())}) : schwierigkeitInfo().effekt;
 const etappenEnde = () => Math.max(1,S.etappe||1) * ZIEL_TAGE;
 const etappenGewinn = () => (S.eingenommen-(S.etappeStartEingenommen||0)) - (S.ausgegeben-(S.etappeStartAusgegeben||0));
 const gesamtGewinn = () => S.eingenommen - S.ausgegeben;
@@ -1729,9 +1732,9 @@ function tagVor(){
     const lohn = lohnsumme();
     const betrieb = betriebskostenMonat();
     S.kasse -= lohn + betrieb; S.ausgegeben += lohn + betrieb;
-    notiz(`Monatsabschluss: Löhne ${chf(lohn)}, Betrieb ${chf(betrieb)}.`, "geld");
+    notiz(textVon("didacticshould.monatsabschluss-loehne-betrieb", {p1:(chf(lohn)), p2:(chf(betrieb))}), "geld");
     rufAnpassen();
-    if (S.kasse < 0) notiz("Die Kasse ist im Minus. Ohne Gegensteuer ist die Firma bald zahlungsunfähig.", "alarm");
+    if (S.kasse < 0) notiz(textVon("didacticshould.die-kasse-ist-im"), "alarm");
   }
 
   // 7) Marktbewegung: Preise wandern zufällig
@@ -1762,64 +1765,18 @@ function marktBewegen(){
   S.preisMod[k] = {faktor:neu, bis:S.tag + 60};
 }
 
-function etappeWeiter(vorherTempo, mitBonus=false){
-  if (mitBonus){
-    S.hilfsBonus = true;
-    notiz("✨ <b>Bonus aktiviert:</b> Verkaufserlöse +50 % für den restlichen Run.", "gut");
-  }
+function etappeWeiter(vorherTempo){
   S.etappe = Math.max(1,S.etappe||1) + 1;
   S.etappeStartEingenommen = S.eingenommen;
   S.etappeStartAusgegeben = S.ausgegeben;
   S.ende = null;
-  notiz(`<b>Etappe ${S.etappe}</b> gestartet – nächste Abrechnung nach weiteren ${ZIEL_TAGE} Tagen.`, "gut");
+  notiz(textVon("kern.etappe-gestartet-naechste-abrechnung", {p1:(S.etappe), p2:(ZIEL_TAGE)}), "gut");
   tempoSetzen(vorherTempo > 0 ? vorherTempo : 1);
 }
 
-function rundeBeenden(grund){
-  if (S.ende) return;
-  const vorherTempo = tempo > 0 ? tempo : 1;
-  const gewinn = etappenGewinn();
-  const geschafft = grund !== "insolvenz" && gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
-  const mittelUnlock = geschafft && S.schwierigkeit === "mittel" && !META.mittelGeschafft;
-  if (mittelUnlock){ META.mittelGeschafft = true; metaSpeichern(); }
-  S.ende = {grund:grund||"etappe", etappe:S.etappe||1, gewinn, ruf:Math.round(S.ruf), geschafft};
-  tempoSetzen(0);
-
-  if (grund === "insolvenz"){
-    dialogZeigen({
-      art:"Insolvenz", titel:"Die Firma ist zahlungsunfähig",
-      text:`Deine Kasse ist unter −CHF 800’000 gefallen. Die laufende Reise endet an Tag ${S.tag}.`,
-      wahlen:[{text:"Neue Runde starten", klein:"Schwierigkeit neu wählen", tun:()=>{ setTimeout(zuruecksetzen,0); }}]
-    });
-    return;
-  }
-
-  const freischaltText = mittelUnlock
-    ? `<br><br><b>🔥 Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.` : "";
-  const bonusAngebot = !geschafft && S.schwierigkeit === "einfach" && !S.hilfsBonus;
-  const wahlen = [
-    {text:`Weiter · Etappe ${(S.etappe||1)+1}`, klein:`Nochmals ${ZIEL_TAGE} Tage mit derselben Firma`, tun:()=>{ etappeWeiter(vorherTempo); }}
-  ];
-  if (bonusAngebot) wahlen.push({
-    text:"✨ Weiter mit Bonus",
-    klein:"Gleicher Run · Verkaufserlöse ab jetzt +50 %",
-    tun:()=>{ etappeWeiter(vorherTempo, true); }
-  });
-  wahlen.push({text:"Neue Runde starten", klein:"Schwierigkeit neu wählen · alles auf Anfang", tun:()=>{ setTimeout(zuruecksetzen,0); }});
-  dialogZeigen({
-    art:`Etappe ${S.etappe} · ${ZIEL_TAGE} Tage`,
-    titel: geschafft ? "Etappenziel erreicht" : "Etappenziel verfehlt",
-    text: `Etappengewinn: ${chf(gewinn)} (Ziel ${chf(ZIEL_GEWINN)}) · Ruf: ${Math.round(S.ruf)} (Ziel ${ZIEL_RUF}).<br>`
-        + `Schwierigkeit: ${schwierigkeitInfo().icon} <b>${schwierigkeitInfo().name}</b> · ${verkaufsEffektText()}.<br><br>`
-        + (geschafft
-            ? "Du hast Geld verdient <b>und</b> den Ruf gehalten. Du kannst jetzt weiterbauen und dich der nächsten gleich langen Etappe stellen."
-            : (gewinn >= ZIEL_GEWINN
-               ? "Der Gewinn stimmt, aber der Ruf nicht. Du darfst trotzdem weiterspielen und es in der nächsten Etappe erneut versuchen."
-               : "Der Gewinn reicht noch nicht. Du darfst trotzdem weiterspielen und deine Lieferkette in der nächsten Etappe verbessern."))
-        + freischaltText,
-    wahlen
-  });
-}
+/* Etappenende: Fassung in logik-fixes.js (Ziel je Schwierigkeit, Abschlussdialog).
+   Hier nur deklariert, damit logik-fixes.js sie ersetzen kann. */
+function rundeBeenden(grund){}
 
 /* ============================================================
    Ereignisse
@@ -1833,16 +1790,16 @@ const EREIGNISSE = [
       const def = MINEN.find(x=>x.id===id);
       S.minen[id].stillBis = S.tag + 999;   // steht still, bis entschieden ist
       return {
-        art:"Protest", titel:`Streik in ${def.ort}, ${LAND[def.land].name}`, land:def.land,
-        text:`Die Arbeiterinnen und Arbeiter deiner ${MATERIAL[def.mat].name}-Mine legen die Arbeit nieder. Sie sagen: die Löhne reichen nicht zum Leben, und die Ausrüstung ist zu gefährlich. Die Förderung steht still. <b>Du musst entscheiden.</b>`,
+        art:textVon("didacticevents.protest"), titel:textVon("kern.streik-in", {p1:(def.ort), p2:(LAND[def.land].name)}), land:def.land,
+        text:textVon("kern.die-arbeiterinnen-und-arbeiter", {p1:(MATERIAL[def.mat].name)}),
         wahlen:[
-          {text:"Löhne um 20 % erhöhen", klein:"Kostet dauerhaft mehr, Zufriedenheit steigt sofort",
+          {text:textVon("kern.loehne-um-erhoehen"), klein:textVon("kern.kostet-dauerhaft-mehr-zufriedenheit"),
            tun(){ S.minen[id].stufe = Math.min(2, S.minen[id].stufe+1); S.minen[id].zufriedenheit = 62; S.minen[id].stillBis = S.tag+2; rufAendern(6);
-                  notiz(`Löhne in ${def.ort} erhöht. Die Arbeit läuft wieder.`, "gut"); }},
-          {text:"Verhandeln und Sicherheitsausrüstung stellen", klein:"Einmalig CHF 60'000, Ruf steigt",
+                  notiz(textVon("kern.loehne-in-erhoeht-die", {p1:(def.ort)}), "gut"); }},
+          {text:textVon("kern.verhandeln-und-sicherheitsausruestung-stellen"), klein:textVon("kern.einmalig-chf-ruf-steigt"),
            tun(){ S.kasse -= 60000; S.ausgegeben += 60000; S.minen[id].zufriedenheit = 55; S.minen[id].stillBis = S.tag+5; rufAendern(10);
-                  notiz(`Verhandlung in ${def.ort}: Ausrüstung bezahlt, Streik nach 5 Tagen beendet.`, "gut"); }},
-          {text:"Aussitzen und Streikende ersetzen", klein:"Kostet nichts, Mine steht 20 Tage, Ruf fällt stark",
+                  notiz(textVon("kern.verhandlung-in-ausruestung-bezahlt", {p1:(def.ort)}), "gut"); }},
+          {text:textVon("kern.aussitzen-und-streikende-ersetzen"), klein:textVon("kern.kostet-nichts-mine-steht"),
            tun(){ S.minen[id].stillBis = S.tag+20; S.minen[id].zufriedenheit = 12; rufAendern(-18);
                   notiz(`Streik in ${def.ort} ohne Einigung fortgesetzt. 20 Tage kein Erz, Medien berichten.`, "alarm"); }}
         ]
@@ -1856,13 +1813,13 @@ const EREIGNISSE = [
       const id = offeneMinen().find(i => S.minen[i].stufe === 0);
       const def = MINEN.find(x=>x.id===id);
       return {
-        art:"Recherche", titel:"Reportage über deine Lieferkette", land:def.land,
-        text:`Ein Recherche-Team veröffentlicht Bilder aus ${def.ort}: Jugendliche schleppen Säcke, ohne Helm, ohne Vertrag. Dein Name steht im Artikel. Kunden fragen nach.`,
+        art:textVon("didacticevents.recherche"), titel:textVon("kern.reportage-ueber-deine-lieferkette"), land:def.land,
+        text:textVon("kern.ein-recherche-team-veroeffentlicht", {p1:(def.ort)}),
         wahlen:[
-          {text:"Unabhängiges Audit bezahlen und Löhne anheben", klein:"CHF 90'000, Ruf steigt deutlich",
-           tun(){ S.kasse -= 90000; S.ausgegeben += 90000; S.minen[id].stufe = 2; rufAendern(14); notiz("Audit beauftragt, Löhne angehoben.", "gut"); }},
-          {text:"Erklären, das sei ein Zulieferer gewesen", klein:"Kostet nichts, Ruf fällt, Nachfrage sinkt 60 Tage",
-           tun(){ rufAendern(-22); S.nachfrageMod.phone = {faktor:.7, bis:S.tag+60}; notiz("Dementi veröffentlicht. Die Nachfrage nach dem Smartphone bricht ein.", "alarm"); }}
+          {text:textVon("kern.unabhaengiges-audit-bezahlen-und"), klein:textVon("kern.chf-ruf-steigt-deutlich"),
+           tun(){ S.kasse -= 90000; S.ausgegeben += 90000; S.minen[id].stufe = 2; rufAendern(14); notiz(textVon("kern.audit-beauftragt-loehne-angehoben"), "gut"); }},
+          {text:textVon("kern.erklaeren-das-sei-ein"), klein:textVon("kern.kostet-nichts-ruf-faellt"),
+           tun(){ rufAendern(-22); S.nachfrageMod.phone = {faktor:.7, bis:S.tag+60}; notiz(textVon("kern.dementi-veroeffentlicht-die-nachfrage"), "alarm"); }}
         ]
       };
     }
@@ -1875,15 +1832,15 @@ const EREIGNISSE = [
       const def = MINEN.find(x=>x.id===id);
       S.minen[id].stillBis = S.tag + 999;
       return {
-        art:"Unfall", titel:`Stolleneinsturz in ${def.ort}`, land:def.land,
-        text:`In der Nacht ist ein Stollen eingestürzt. Es gibt Verletzte. Die Behörden sperren die Mine, bis geklärt ist, wie es weitergeht.`,
+        art:textVon("didacticevents.unfall"), titel:textVon("kern.stolleneinsturz-in", {p1:(def.ort)}), land:def.land,
+        text:textVon("kern.in-der-nacht-ist"),
         wahlen:[
-          {text:"Entschädigung zahlen und Stollen sichern", klein:"CHF 140'000, Mine läuft in 10 Tagen wieder",
+          {text:textVon("kern.entschaedigung-zahlen-und-stollen"), klein:textVon("kern.chf-mine-laeuft-in"),
            tun(){ S.kasse -= 140000; S.ausgegeben += 140000; S.minen[id].stillBis = S.tag+10; S.minen[id].stufe = Math.max(1, S.minen[id].stufe); rufAendern(4);
-                  notiz(`${def.ort} gesichert, Entschädigung bezahlt.`, "warn"); }},
-          {text:"Nur das Nötigste reparieren", klein:"CHF 30'000, Mine läuft in 25 Tagen, Ruf fällt",
+                  notiz(textVon("kern.gesichert-entschaedigung-bezahlt", {p1:(def.ort)}), "warn"); }},
+          {text:textVon("kern.nur-das-noetigste-reparieren"), klein:textVon("kern.chf-mine-laeuft-in-2"),
            tun(){ S.kasse -= 30000; S.ausgegeben += 30000; S.minen[id].stillBis = S.tag+25; rufAendern(-15); S.minen[id].zufriedenheit = 15;
-                  notiz(`Notreparatur in ${def.ort}. Die Belegschaft ist wütend.`, "alarm"); }}
+                  notiz(textVon("kern.notreparatur-in-die-belegschaft", {p1:(def.ort)}), "alarm"); }}
         ]
       };
     }
@@ -1891,56 +1848,56 @@ const EREIGNISSE = [
   { id:"dollar", gewicht:10, wiederholbar:true, passt:()=>true, bau(){
       const schwach = Math.random() < .5, w = schwach ? .82 : 1.18;
       S.globalMod.push({art:"dollar", wert:w, bis:S.tag+50});
-      return {passiv:true, text:`<b>US-Dollar ${schwach?"schwach":"stark"}</b> – Rohstoffe und Waren werden in Dollar gehandelt. Alle Preise ${schwach?"sinken":"steigen"} 50 Tage lang um ${Math.round(Math.abs(1-w)*100)} %.`, art:"warn"};
+      return {passiv:true, text:textVon("kern.us-dollar-rohstoffe-und", {p1:(schwach?"schwach":"stark"), p2:(schwach?"sinken":"steigen"), p3:(Math.round(Math.abs(1-w)*100))}), art:"warn"};
   }},
   { id:"buschfeuer", gewicht:7, wiederholbar:true,
     passt:()=> offeneMinen().some(i => MINEN.find(x=>x.id===i).land === "australien"),
     bau(){
       offeneMinen().filter(i => MINEN.find(x=>x.id===i).land==="australien").forEach(i => S.minen[i].stillBis = S.tag+18);
-      return {passiv:true, text:"<b>Buschfeuer in Australien</b> – Zufahrtsstrassen gesperrt. Deine australischen Minen stehen 18 Tage still.", art:"alarm"};
+      return {passiv:true, text:textVon("kern.buschfeuer-in-australien-zufahrtsstrassen"), art:"alarm"};
   }},
   { id:"regenzeit", gewicht:8, wiederholbar:true,
     passt:()=> offeneMinen().some(i => MINEN.find(x=>x.id===i).land === "kongo"),
     bau(){
       offeneMinen().filter(i => MINEN.find(x=>x.id===i).land==="kongo").forEach(i => { S.minen[i].malus=.55; S.minen[i].malusBis=S.tag+30; });
-      return {passiv:true, text:"<b>Regenzeit im Kongo</b> – Pisten sind unpassierbar. Förderung dort 30 Tage lang nur bei 55 %.", art:"warn"};
+      return {passiv:true, text:textVon("kern.regenzeit-im-kongo-pisten"), art:"warn"};
   }},
   { id:"exportstopp", gewicht:6, wiederholbar:true, passt:()=>true, bau(){
       S.preisMod.seltene = {faktor:3.2, bis:S.tag+80};
-      return {passiv:true, text:"<b>China beschränkt den Export Seltener Erden</b> – der Preis verdreifacht sich für 80 Tage. Wer eigene Minen und Raffinerien hat, verdient jetzt.", art:"warn"};
+      return {passiv:true, text:textVon("kern.china-beschraenkt-den-export"), art:"warn"};
   }},
   { id:"taiwan", gewicht:5, wiederholbar:true, passt:()=>true, bau(){
       S.preisMod.silizium = {faktor:2.4, bis:S.tag+70};
       S.nachfrageMod.phone = {faktor:1.5, bis:S.tag+70};
       S.nachfrageMod.konsole = {faktor:1.5, bis:S.tag+70};
-      return {passiv:true, text:"<b>Erdbeben bei Taiwan</b> – Chipfabriken stehen still. Silizium wird teuer, fertige Geräte sind gefragt wie nie.", art:"warn"};
+      return {passiv:true, text:textVon("kern.erdbeben-bei-taiwan-chipfabriken"), art:"warn"};
   }},
   { id:"hafen", gewicht:7, wiederholbar:true, passt:()=> Object.keys(S.raff).length>0, bau(){
       S.globalMod.push({art:"hafen", wert:.65, bis:S.tag+28});
-      return {passiv:true, text:"<b>Containerstau in Shanghai</b> – deine Raffinerien schaffen 28 Tage lang nur 65 % des Durchsatzes.", art:"warn"};
+      return {passiv:true, text:textVon("kern.containerstau-in-shanghai-deine"), art:"warn"};
   }},
   { id:"konkurrenz", gewicht:8, wiederholbar:true, passt:()=> (S.ware.phone||0)>0 || S.fabriken.some(f=>f.produkt==="phone"), bau(){
       S.nachfrageMod.phone = {faktor:.6, bis:S.tag+45};
-      return {passiv:true, text:"<b>Konkurrenz zeigt neues Modell</b> – die Nachfrage nach deinem Velocity Smartphone fällt 45 Tage lang um 40 %.", art:"alarm"};
+      return {passiv:true, text:textVon("kern.konkurrenz-zeigt-neues-modell"), art:"alarm"};
   }},
   { id:"lithiumcrash", gewicht:6, wiederholbar:true, passt:()=>true, bau(){
       S.preisMod.lithium = {faktor:.45, bis:S.tag+70};
-      return {passiv:true, text:"<b>Lithium-Preis bricht ein</b> – neue Minen weltweit liefern zu viel. Gut für Akku-Produzenten, schlecht für Lithium-Minen.", art:"warn"};
+      return {passiv:true, text:textVon("kern.lithium-preis-bricht-ein"), art:"warn"};
   }},
   { id:"lieferkettengesetz", gewicht:5, einmalig:true, passt:()=> S.tag>200, bau(){
       if (S.ruf < 50){ S.kasse -= 180000; S.ausgegeben += 180000;
-        return {passiv:true, text:"<b>Neues Lieferkettengesetz</b> – deine Firma kann die Herkunft nicht belegen. Busse: CHF 180'000.", art:"alarm"}; }
+        return {passiv:true, text:textVon("kern.neues-lieferkettengesetz-deine-firma"), art:"alarm"}; }
       S.nachfrageMod.board = {faktor:1.3, bis:S.tag+90};
-      return {passiv:true, text:"<b>Neues Lieferkettengesetz</b> – deine Nachweise sind sauber. Grosskunden bestellen mehr Mainboards.", art:"gut"};
+      return {passiv:true, text:textVon("kern.neues-lieferkettengesetz-deine-nachweise"), art:"gut"};
   }},
   { id:"gewerkschaft", gewicht:5, einmalig:true, passt:()=> offeneMinen().length>2 && S.tag>150, bau(){
       offeneMinen().forEach(i => { if (S.minen[i].stufe===0) S.minen[i].stufe = 1; });
-      return {passiv:true, text:"<b>Gewerkschaft gegründet</b> – in allen deinen Minen gilt neu mindestens der landesübliche Lohn.", art:"gut"};
+      return {passiv:true, text:textVon("kern.gewerkschaft-gegruendet-in-allen"), art:"gut"};
   }},
   { id:"recycling", gewicht:5, wiederholbar:true, passt:()=> S.tag>120, bau(){
       const bonus = {kupfer:120, gold:25, silber:40, alu:150};
       for (const k in bonus) S.mat[k] = (S.mat[k]||0) + bonus[k];
-      return {passiv:true, text:"<b>Altgeräte-Rücknahme</b> – aus alten Geräten gewinnst du Kupfer, Gold, Silber und Aluminium zurück, ganz ohne Mine.", art:"gut"};
+      return {passiv:true, text:textVon("kern.altgeraete-ruecknahme-aus-alten"), art:"gut"};
   }}
 ];
 
@@ -3754,48 +3711,48 @@ function pinAufSchirm(id){
    Geld verloren geht, bevor klar ist, wie das Spiel funktioniert.
    ========================================================== */
 const TUTORIAL = [
-  { id:"mine1", ikon:"hacke", titel:"Eröffne deine erste Mine",
-    text:"Dein erstes Produkt ist ein Ladekabel. Dafür brauchst du Kupfer, Aluminium und Zinn – alles aus eigenen Minen. Tippe einen leuchtenden Pin an.",
+  { id:"mine1", ikon:"hacke", titel:textVon("kern.eroeffne-deine-erste-mine"),
+    text:textVon("kern.dein-erstes-produkt-ist"),
     ziel:()=>"minen-frei",
     fertig:()=> Object.keys(S.minen).length > 0 },
-  { id:"minecrew", ikon:"person", titel:"Schick deine Leute in die Mine",
-    text:"Ohne Arbeiter wird nichts gefördert. Tippe die Mine an und drück auf +10.",
+  { id:"minecrew", ikon:"person", titel:textVon("kern.schick-deine-leute-in"),
+    text:textVon("kern.ohne-arbeiter-wird-nichts"),
     ziel:()=>"meine-minen",
     fertig:()=> Object.values(S.minen).some(m => m.arbeiter >= 8) },
-  { id:"team", ikon:"person", titel:"Stelle mehr Personen ein",
-    text:"Für die weiteren Minen brauchst du mehr Personal. Tippe unten auf den grossen goldenen Knopf und stell auf mindestens 40 Leute auf.",
+  { id:"team", ikon:"person", titel:textVon("kern.stelle-mehr-personen-ein"),
+    text:textVon("kern.fuer-die-weiteren-minen"),
     ziel:()=>"dock:team",
     fertig:()=> S.arbeiterGesamt >= 40 },
-  { id:"minen3", ikon:"berg", titel:"Eröffne alle drei Minen",
-    text:"Kupfer, Aluminium und Zinn. Rohstoffe lassen sich nicht zukaufen – jedes Material kommt aus deiner eigenen Mine.",
+  { id:"minen3", ikon:"berg", titel:textVon("kern.eroeffne-alle-drei-minen"),
+    text:textVon("kern.kupfer-aluminium-und-zinn"),
     ziel:()=>"minen-frei",
     fertig:()=> START_MATERIALIEN.every(k => materialMine(k)) },
-  { id:"crew3", ikon:"person", titel:"Besetze alle drei Minen",
-    text:"Jede Mine braucht Leute, sonst fördert sie nichts. Mindestens 5 pro Mine.",
+  { id:"crew3", ikon:"person", titel:textVon("kern.besetze-alle-drei-minen"),
+    text:textVon("kern.jede-mine-braucht-leute"),
     ziel:()=>"meine-minen",
     fertig:()=> START_MATERIALIEN.every(k => { const id = materialMine(k); return id && S.minen[id].arbeiter >= 5; }) },
-  { id:"raff", ikon:"kolben", titel:"Bau eine Raffinerie",
-    text:"Roherz lässt sich nicht verbauen. Erst die Raffinerie macht Material daraus.",
+  { id:"raff", ikon:"kolben", titel:textVon("kern.bau-eine-raffinerie"),
+    text:textVon("kern.roherz-laesst-sich-nicht"),
     ziel:()=>"raff-frei",
     fertig:()=> Object.keys(S.raff).length > 0 },
-  { id:"raffcrew", ikon:"person", titel:"Besetze die Raffinerie",
+  { id:"raffcrew", ikon:"person", titel:textVon("kern.besetze-die-raffinerie"),
     text:"Ohne Leute steht sie still und dein Erz stapelt sich.",
     ziel:()=>"meine-raff",
     fertig:()=> Object.values(S.raff).some(r => r.arbeiter >= 5) },
-  { id:"fab", ikon:"fabrik", titel:"Bau die Kabelfabrik",
+  { id:"fab", ikon:"fabrik", titel:textVon("kern.bau-die-kabelfabrik"),
     text:"Tippe einen Fabrik-Pin an. Im Tutorial baust du nur das Ladekabel.",
     ziel:()=>"fab-frei",
     fertig:()=> S.fabriken.length > 0 },
-  { id:"fabcrew", ikon:"zahnrad", titel:"Besetze die Fabrik",
+  { id:"fabcrew", ikon:"zahnrad", titel:textVon("kern.besetze-die-fabrik"),
     text:"Sobald sie fertig gebaut ist, kannst du Leute einteilen. Dann entstehen Kabel.",
     ziel:()=>"meine-fab",
     fertig:()=> S.fabriken.some(f => f.restbau === 0 && f.arbeiter > 0) },
-  { id:"verkauf", ikon:"markt", titel:"Verkauf deine Kabel selber",
-    text:"Fertige Produkte müssen verkauft werden. Geh in den Markt und drück auf «Selbst verkaufen».",
+  { id:"verkauf", ikon:"markt", titel:textVon("kern.verkauf-deine-kabel-selber"),
+    text:textVon("kern.fertige-produkte-muessen-verkauft-2"),
     ziel:()=>"dock:markt",
     fertig:()=> S.verkauftSelber },
-  { id:"verkaeufer", ikon:"muenze", titel:"Stell Verkäufer an",
-    text:"Jeden Tag selbst verkaufen ist mühsam. Verkäuferinnen erledigen das für dich – gegen Lohn. Schick mindestens 2 Leute in den Verkauf. Ist niemand frei, stell zuerst im Team neue an.",
+  { id:"verkaeufer", ikon:"muenze", titel:textVon("kern.stell-verkaeufer-an"),
+    text:textVon("kern.jeden-tag-selbst-verkaufen"),
     ziel:()=>"dock:markt",
     fertig:()=> (S.verkaeufer || 0) >= 2 }
 ];
@@ -3826,14 +3783,14 @@ function gesperrt(art, id){
   if (art === "fab")  return S.fabriken.length > 0;
   return false;
 }
-const SPERRTEXT = "Im Tutorial gesperrt";
+const SPERRTEXT = textVon("kern.im-tutorial-gesperrt");
 
 function tutorialPruefen(){
   while (tutorialLaeuft() && TUTORIAL[S.tutorial].fertig()){
     const erledigt = TUTORIAL[S.tutorial];
     S.tutorial++;
-    notiz(tutorialLaeuft() ? "Erledigt: " + erledigt.titel
-                           : "Tutorial geschafft – alle Standorte, alle Produkte und der Ausbau von Minen und Raffinerien sind jetzt offen.", "gut");
+    notiz(tutorialLaeuft() ? textVon("kern.erledigt") + erledigt.titel
+                           : textVon("kern.tutorial-geschafft-alle-standorte"), "gut");
   }
 }
 
@@ -3865,18 +3822,16 @@ function masseMessen(){
 
 /* ---------- Dock mit grossem Orb ---------- */
 const DOCK = [
-  {s:"karte",  t:"Karte",  ik:()=>IK.karte},
-  {s:"markt",  t:"Markt",  ik:()=>IK.markt},
-  {s:"team",   t:"Team",   orb:true},
-  {s:"ziel",   t:"Ziel",   ik:()=>IK.ziel},
-  {s:"wissen", t:"Wissen", ik:()=>IK.wissen}
+  {s:"karte",  t:textVon("kartemitte.karte"),  ik:()=>IK.karte},
+  {s:"markt",  t:textVon("kartemitte.markt"),  ik:()=>IK.markt},
+  {s:"team",   t:textVon("kartemitte.team"),   orb:true},
+  {s:"ziel",   t:textVon("kartemitte.ziel"),   ik:()=>IK.ziel},
+  {s:"wissen", t:textVon("kartemitte.wissen"), ik:()=>IK.wissen}
 ];
 function dockZeichnen(){
   const frei = freieArbeiter();
   $("#dock").innerHTML = DOCK.map(d => d.orb
-    ? `<button class="orb" role="tab" data-seite="team" aria-selected="${aktiveSeite==="team"}" aria-label="Team – Personal einstellen">
-         <span class="orbring">${ikonTeam(3, 34, .40)}
-           <span class="orbzahl ${frei===0?"leer":""}">${frei}</span></span>Team</button>`
+    ? textVon("kern.team", {p1:(aktiveSeite==="team"), p2:(ikonTeam(3, 34, .40)), p3:(frei===0?"leer":""), p4:(frei)})
     : `<button role="tab" data-seite="${d.s}" aria-selected="${aktiveSeite===d.s}">${d.ik()}${d.t}</button>`
   ).join("");
 }
@@ -3986,42 +3941,42 @@ function flieger(text, farbe){
 /* ---------- Hinweis ---------- */
 function naechsterSchritt(){
   const minen = Object.keys(S.minen);
-  if (!minen.length) return ["Eröffne deine erste Mine", "Tippe auf einen hellen Pin. Günstig sind Boké, Katanga und Kolwezi."];
-  if (minen.every(id => S.minen[id].arbeiter === 0)) return ["Schick Leute in die Mine", "Ohne Arbeiter wird nichts gefördert."];
+  if (!minen.length) return [textVon("kern.eroeffne-deine-erste-mine"), textVon("kern.tippe-auf-einen-hellen")];
+  if (minen.every(id => S.minen[id].arbeiter === 0)) return [textVon("kern.schick-leute-in-die"), textVon("kern.ohne-arbeiter-wird-nichts-2")];
   const gefahr = minen.find(id => S.minen[id].zufriedenheit < 35 && S.minen[id].arbeiter > 0);
-  if (gefahr) return ["Streikgefahr in " + MINEN.find(x=>x.id===gefahr).ort, "Zufriedenheit unter 35 %. Erhöh dort den Lohn."];
-  if (!Object.keys(S.raff).length) return ["Bau eine Raffinerie", "Roherz allein nützt nichts. Erst die Raffinerie macht Material daraus."];
+  if (gefahr) return [textVon("kern.streikgefahr-in") + MINEN.find(x=>x.id===gefahr).ort, textVon("kern.zufriedenheit-unter-erhoeh-dort")];
+  if (!Object.keys(S.raff).length) return [textVon("kern.bau-eine-raffinerie"), textVon("kern.roherz-allein-nuetzt-nichts")];
   const kapa = Object.keys(S.raff).reduce((a,id)=>{ const d=RAFF_ORTE.find(x=>x.id===id); return a + d.kapazitaet*(S.raff[id].arbeiter/d.plaetze); }, 0);
-  if (kapa === 0) return ["Die Raffinerie steht still", "Schick Arbeiter hin, sonst stapelt sich dein Erz."];
-  if (Object.values(S.erz).reduce((a,b)=>a+b,0) > kapa*5) return ["Deine Raffinerie kommt nicht nach", "Mehr Arbeiter dort – oder eine zweite bauen."];
-  if (!S.fabriken.length) return ["Bau deine erste Fabrik", "Tippe auf einen Fabrik-Pin. Das Ladekabel braucht am wenigsten Materialien."];
+  if (kapa === 0) return [textVon("kern.die-raffinerie-steht-still"), "Schick Arbeiter hin, sonst stapelt sich dein Erz."];
+  if (Object.values(S.erz).reduce((a,b)=>a+b,0) > kapa*5) return [textVon("kern.deine-raffinerie-kommt-nicht"), textVon("kern.mehr-arbeiter-dort-oder")];
+  if (!S.fabriken.length) return [textVon("kern.bau-deine-erste-fabrik"), "Tippe auf einen Fabrik-Pin. Das Ladekabel braucht am wenigsten Materialien."];
   const leer = S.fabriken.findIndex(f => f.restbau === 0 && f.arbeiter === 0);
-  if (leer >= 0) return ["Deine Fabrik hat keine Leute", "Sie ist fertig, produziert aber nichts."];
+  if (leer >= 0) return [textVon("kern.deine-fabrik-hat-keine"), "Sie ist fertig, produziert aber nichts."];
   for (const f of S.fabriken){
     if (f.restbau > 0) continue;
     const fehlt = Object.keys(PRODUKT[f.produkt].rezept).filter(k => (S.mat[k]||0) < PRODUKT[f.produkt].rezept[k]*3);
-    if (fehlt.length) return ["Es fehlt " + fehlt.map(k=>MATERIAL[k].name).join(", "),
-      "Rohstoffe kannst du nicht zukaufen. Eröffne dafür eine eigene Mine."];
+    if (fehlt.length) return [textVon("kern.es-fehlt") + fehlt.map(k=>MATERIAL[k].name).join(", "),
+      textVon("kern.rohstoffe-kannst-du-nicht")];
   }
   if (warenLager() > 0 && verkaufsKraft() === 0)
-    return ["Deine Ware bleibt liegen", "Stell im Markt Verkäufer an – oder verkauf einmal selber."];
+    return [textVon("kern.deine-ware-bleibt-liegen"), textVon("kern.stell-im-markt-verkaeufer")];
   if (warenLager() > verkaufsKraft() * 12 && verkaufsKraft() > 0)
-    return ["Das Lager füllt sich schneller als du verkaufst", "Mehr Verkäufer anstellen, sonst fällt der Preis."];
-  if (freieArbeiter() > 15) return [freieArbeiter() + " Personen ohne Aufgabe", "Sie kosten trotzdem Lohn. Einteilen oder entlassen."];
-  if (S.ruf < 55) return ["Dein Ruf ist tief", "Das senkt die Nachfrage nach allen Produkten. Prüf die Löhne."];
+    return [textVon("kern.das-lager-fuellt-sich"), textVon("kern.mehr-verkaeufer-anstellen-sonst")];
+  if (freieArbeiter() > 15) return [freieArbeiter() + textVon("didacticshould.personen-ohne-aufgabe"), "Sie kosten trotzdem Lohn. Einteilen oder entlassen."];
+  if (S.ruf < 55) return [textVon("kern.dein-ruf-ist-tief"), textVon("kern.das-senkt-die-nachfrage")];
   const offen = WISSEN.filter(s => naechsterPerk(s) && S.kasse > naechsterPerk(s).kosten*2.5);
-  if (offen.length) return ["Neues Wissen ist bezahlbar", `Im Reiter Wissen: «${naechsterPerk(offen[0]).titel}» im Feld ${offen[0].titel}.`];
+  if (offen.length) return [textVon("kern.neues-wissen-ist-bezahlbar"), textVon("kern.im-reiter-wissen-im", {p1:(naechsterPerk(offen[0]).titel), p2:(offen[0].titel)})];
   // Ausbau lohnt sich vor allem kurz vor einer Verdopplung
   for (const id in S.minen){
     const d = MINEN.find(x=>x.id===id), st = S.minen[id].ausbau || 0;
     if (ausbauVerdoppelt(st) && S.kasse > ausbauKosten(d.erschliessung, st) * 1.5)
-      return ["Verdopplung in " + d.ort + " möglich", "Die nächste Ausbaustufe verdoppelt dort die Förderung."];
+      return [textVon("kern.verdopplung-in") + d.ort + textVon("kern.moeglich"), textVon("kern.die-naechste-ausbaustufe-verdoppelt")];
   }
   const billigsteMine = Object.keys(S.minen).sort((a,b) =>
     ausbauKosten(MINEN.find(x=>x.id===a).erschliessung, S.minen[a].ausbau||0)
     - ausbauKosten(MINEN.find(x=>x.id===b).erschliessung, S.minen[b].ausbau||0))[0];
   if (billigsteMine && S.kasse > ausbauKosten(MINEN.find(x=>x.id===billigsteMine).erschliessung, S.minen[billigsteMine].ausbau||0) * 4)
-    return ["Du hast Geld auf der Seite", "Bau eine Mine oder Raffinerie aus – jede zehnte Stufe verdoppelt."];
+    return [textVon("kern.du-hast-geld-auf"), textVon("kern.bau-eine-mine-oder")];
   return null;
 }
 
@@ -4041,7 +3996,7 @@ function questZeichnen(){
   k.classList.toggle("breit", aktiveSeite !== "karte");
   if (t){
     $("#q-emoji").innerHTML = IK[t.ikon] || IK.ziel;
-    $("#q-art").textContent = `Aufgabe ${S.tutorial+1}/${TUTORIAL.length}`;
+    $("#q-art").textContent = textVon("kern.aufgabe", {p1:(S.tutorial+1), p2:(TUTORIAL.length)});
     $("#q-titel").textContent = t.titel;
     $("#q-text").textContent = t.text;
     $("#q-punkte").innerHTML = TUTORIAL.map((_,i) =>
@@ -4053,7 +4008,7 @@ function questZeichnen(){
   const w = naechsterSchritt();
   if (!w || offenesBlatt){ k.hidden = true; questHoeheMessen(); return; }
   $("#q-emoji").innerHTML = IK.pfeil;
-  $("#q-art").textContent = "Hinweis";
+  $("#q-art").textContent = textVon("notificationhi.hinweis");
   $("#q-titel").textContent = w[0];
   $("#q-text").textContent = w[1];
   $("#q-punkte").innerHTML = "";
@@ -4085,7 +4040,7 @@ function zeichnen(){
   $("#h-tag").textContent = S.tag;
   const tempoGruppe = $("#h-tempo"), abschluss = $("#h-abschluss");
   const beendet = !!S.ende;
-  const abschlussName = S.ende?.grund === "insolvenz" ? "Insolvenz" : "Etappenabschluss";
+  const abschlussName = S.ende?.grund === "insolvenz" ? textVon("abschlusszerti.insolvenz") : textVon("kern.etappenabschluss");
   if (abschluss.textContent !== abschlussName) abschluss.textContent = abschlussName;
   if (tempoGruppe.hidden !== beendet){
     tempoGruppe.hidden = beendet;
@@ -4103,7 +4058,7 @@ function zeichnen(){
   if (S.tag !== letzterTagGezeigt){
     if (offenesBlatt && offenesBlatt.art === "mine"){
       const menge = letzteFoerderung[offenesBlatt.id];
-      if (menge > 0.5) flieger("+" + Math.round(menge) + " Rohstoff", MATERIAL[MINEN.find(x=>x.id===offenesBlatt.id).mat].farbe);
+      if (menge > 0.5) flieger("+" + Math.round(menge) + textVon("kern.rohstoff"), MATERIAL[MINEN.find(x=>x.id===offenesBlatt.id).mat].farbe);
     }
     letzterTagGezeigt = S.tag;
   }
@@ -4129,26 +4084,16 @@ function ausbauKarte(art, id, stufe, grundpreis, was){
       ${voll && frisch && i === inReihe-1 ? "frisch" : ""}">${letzte ? "×2" : voll ? "✓" : ""}</i>`;
   }).join("");
 
-  return `<div class="karte">
-    <div class="ausbaukopf"><h3>Ausbau</h3>
-      ${reihen ? `<span class="ausbaumarke">×${Math.pow(2,reihen)}</span>` : ""}</div>
-    <div class="ort">Stufe ${stufe} · Reihe ${reihen+1} · ${was} ×${ausbauFaktor(stufe).toFixed(2)}</div>
-    <div class="ausbaureihe">${kaesten}</div>
-    <div class="zeile"><span>${doppelt ? "Nächste Stufe verdoppelt!" : "Nächste Stufe"}</span>
-      <b>${stufe >= AUSBAU_MAX ? "voll ausgebaut" : "+" + Math.round((ausbauFaktor(stufe+1)/ausbauFaktor(stufe)-1)*100) + " %"}</b></div>
-    ${stufe >= AUSBAU_MAX ? "" : `<button class="cta ${doppelt?"gruen":""} ${geht&&doppelt?"puls":""}"
+  return textVon("kern.ausbau-stufe-reihe-jede", {p1:(reihen ? `<span class="ausbaumarke">×${Math.pow(2,reihen)}</span>` : ""), p2:(stufe), p3:(reihen+1), p4:(was), p5:(ausbauFaktor(stufe).toFixed(2)), p6:(kaesten), p7:(doppelt ? "Nächste Stufe verdoppelt!" : "Nächste Stufe"), p8:(stufe >= AUSBAU_MAX ? "voll ausgebaut" : "+" + Math.round((ausbauFaktor(stufe+1)/ausbauFaktor(stufe)-1)*100) + " %"), p9:(stufe >= AUSBAU_MAX ? "" : `<button class="cta ${doppelt?"gruen":""} ${geht&&doppelt?"puls":""}"
       data-tun="ausbau" data-art="${art}" data-id="${id}" ${geht?"":"disabled"}>
-      ${geht?IK.berg:""}${geht ? (doppelt ? "VERDOPPELN · " : "Ausbauen · ") + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>`}
-    <div class="notiz">Jede Stufe bringt +5 % und kostet mehr als die vorherige. Jede zehnte Stufe verdoppelt die Ausbringung.</div>
-  </div>`;
+      ${geht?IK.berg:""}${geht ? (doppelt ? "VERDOPPELN · " : "Ausbauen · ") + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>`)});
 }
 
 /* ---------- Blatt: Mine ---------- */
 function blattMine(id){
   const def = MINEN.find(x=>x.id===id), m = S.minen[id];
   const mat = MATERIAL[def.mat], land = LAND[def.land];
-  const kopf = `<div class="titelzeile">${flagge(def.land,"gross")}
-    <div><h2>${def.ort}</h2><div class="ort">${land.name} · Rohstoffquelle</div></div></div>`;
+  const kopf = textVon("kern.rohstoffquelle", {p1:(flagge(def.land,"gross")), p2:(def.ort), p3:(land.name)});
   const band = `<div class="erzband" style="background:${mat.farbe}"><span class="kugel">${mat.sym}</span>${rohstoffDerMine(def)} → ${mat.name}</div>`;
 
   if (!m){
@@ -4158,15 +4103,7 @@ function blattMine(id){
       + (zu ? `<div class="notiz">${START_MATERIALIEN.includes(def.mat)
             ? `Für <b>${mat.name}</b> hast du bereits eine Mine. Im Tutorial genügt eine pro Material.`
             : `Im Tutorial eröffnest du zuerst die Minen für <b>Kupfer, Aluminium und Zinn</b> – die drei Rohstoffe deines Ladekabels. Danach werden alle Standorte frei.`}</div>` : "")
-      + `<div class="werte">
-        <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Ergiebigkeit</small><b>${def.ergiebigkeit} Rohstoff</b></span></div>
-        <div class="wert"><span class="wi">${IK.person}</span><span class="wt"><small>Plätze</small><b>${def.plaetze}</b></span></div>
-        <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Üblicher Lohn</small><b>${chf(land.lohn)}</b></span></div>
-        <div class="wert"><span class="wi">${IK.gluehbirne}</span><span class="wt"><small>Wofür</small><b style="font-size:var(--f0)">${mat.wofuer}</b></span></div>
-      </div>
-      <div class="notiz">${def.info}</div>
-      <button class="cta ${geht?"puls":""}" data-tun="mine-auf" data-id="${id}" ${geht?"":"disabled"}>
-        ${geht?IK.hacke:""}${zu ? SPERRTEXT : geht ? "Rohstoffquelle eröffnen · " + chf(def.erschliessung) : "Zu wenig Geld · " + chf(def.erschliessung)}</button>`;
+      + textVon("kern.ergiebigkeit-rohstoff-plaetze-ueblicher", {p1:(IK.berg), p2:(def.ergiebigkeit), p3:(IK.person), p4:(def.plaetze), p5:(IK.muenze), p6:(chf(land.lohn)), p7:(IK.gluehbirne), p8:(mat.wofuer), p9:(def.info), p10:(geht?"puls":""), p11:(id), p12:(geht?"":"disabled"), p13:(geht?IK.hacke:""), p14:(zu ? SPERRTEXT : geht ? "Rohstoffquelle eröffnen · " + chf(def.erschliessung) : "Zu wenig Geld · " + chf(def.erschliessung))});
   }
 
   const st = LOHNSTUFE[m.stufe], zuf = Math.round(m.zufriedenheit);
@@ -4178,145 +4115,48 @@ function blattMine(id){
   const leuteBild = ikonTeam(Math.max(1, Math.ceil(m.arbeiter / Math.max(1, def.plaetze/5))), 60, .34);
   const sicher = !!m.sicherheit;
   const sicherKosten = Math.max(20000, Math.round(SICHERHEIT_BASIS_KOSTEN * perkMult("sicherheit") / 1000) * 1000);
-  const sicherheitsKarte = tutorialLaeuft() ? "" : `<div class="karte sicherheitskarte ${sicher?"sicher":"offen"}">
-      <h3>Sicherheit</h3>
-      <div class="ort">Sicherheitsmassnahmen senken das Unfallrisiko – unabhängig vom Lohn.</div>
-      <div class="zeile"><span>Status</span><b style="color:${sicher?"var(--gruen)":"var(--warn)"}">${sicher?"verbessert":"nicht verbessert"}</b></div>
-      ${sicher?"":`<button class="cta gruen" data-didaktik="sicherheit" data-id="${id}" ${S.kasse>=sicherKosten?"":"disabled"}>${IK.schild}${S.kasse>=sicherKosten?"Sicherheit verbessern · "+chf(sicherKosten):"Zu wenig Geld · "+chf(sicherKosten)}</button>`}
-    </div>`;
-  const modellHinweis = tutorialLaeuft() ? "" : `<div class="notiz blau"><b>Spielmodell:</b> Mengen und Löhne sind vereinfachte Spielwerte.</div>`;
+  const sicherheitsKarte = tutorialLaeuft() ? "" : textVon("kern.sicherheit-sicherheitsmassnahmen-senken-das", {p1:(sicher?"sicher":"offen"), p2:(sicher?"var(--gruen)":"var(--warn)"), p3:(sicher?"verbessert":"nicht verbessert"), p4:(sicher?"":`<button class="cta gruen" data-didaktik="sicherheit" data-id="${id}" ${S.kasse>=sicherKosten?"":"disabled"}>${IK.schild}${S.kasse>=sicherKosten?"Sicherheit verbessern · "+chf(sicherKosten):"Zu wenig Geld · "+chf(sicherKosten)}</button>`)});
+  const modellHinweis = tutorialLaeuft() ? "" : textVon("sekbklarheit.spielmodell-mengen-und-loehne");
 
   return kopf + band + szeneMine(def, m)
     + (still ? `<div class="notiz rot"><b>Die Rohstoffquelle steht still.</b>${m.stillBis-S.tag<900?" Noch "+(m.stillBis-S.tag)+" Tage.":""}</div>` : "")
-    + `<div class="werte">
-      <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Förderung</small><b>${ertrag.toFixed(1)}/Tag</b></span></div>
-      <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohnkosten</small><b>${chf(m.arbeiter*land.lohn*st.faktor)}</b></span></div>
-    </div>
-
-    <div class="karte">
-      <h3>Belegschaft</h3>
-      <div class="ort">${m.arbeiter} von ${def.plaetze} Plätzen · ${freieArbeiter()} Personen frei im Team</div>
-      <div style="display:flex;justify-content:center">${m.arbeiter?`<div style="width:min(190px,60%)">${leuteBild}</div>`:""}</div>
-      <div class="crewzeile">
-        <button data-tun="crew" data-id="${id}" data-n="-10" ${m.arbeiter<=0?"disabled":""}>−10</button>
-        <button data-tun="crew" data-id="${id}" data-n="-1" ${m.arbeiter<=0?"disabled":""}>−</button>
-        <div class="zahl"><b>${m.arbeiter}</b><small>von ${def.plaetze}</small></div>
-        <button data-tun="crew" data-id="${id}" data-n="1" ${(freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""}>+</button>
-        <button data-tun="crew" data-id="${id}" data-n="10" ${(freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""}>+10</button>
-      </div>
-      <div class="leiste"><i style="width:${(m.arbeiter/def.plaetze*100).toFixed(0)}%;background:#6fb8e0"></i></div>
-    </div>
-
-    ${tutorialLaeuft() ? "" : ausbauKarte("mine", id, m.ausbau, def.erschliessung, "Förderung")}
-
-    <div class="karte">
-      <h3>Lohnstufe</h3>
-      <div class="ort">Der Lohn beeinflusst die Zufriedenheit</div>
-      <div class="segment">${LOHNSTUFE.map((s,i)=>
+    + textVon("kern.foerderung-tag-lohnkosten-belegschaft", {p1:(IK.berg), p2:(ertrag.toFixed(1)), p3:(IK.muenze), p4:(chf(m.arbeiter*land.lohn*st.faktor)), p5:(m.arbeiter), p6:(def.plaetze), p7:(freieArbeiter()), p8:(m.arbeiter?`<div style="width:min(190px,60%)">${leuteBild}</div>`:""), p9:(id), p10:(m.arbeiter<=0?"disabled":""), p11:(id), p12:(m.arbeiter<=0?"disabled":""), p13:(m.arbeiter), p14:(def.plaetze), p15:(id), p16:((freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""), p17:(id), p18:((freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""), p19:((m.arbeiter/def.plaetze*100).toFixed(0)), p20:(tutorialLaeuft() ? "" : ausbauKarte("mine", id, m.ausbau, def.erschliessung, "Förderung")), p21:(LOHNSTUFE.map((s,i)=>
         `<button data-tun="lohn" data-id="${id}" data-stufe="${i}" aria-pressed="${i===m.stufe}">
-           ${ikonLohn(i, i===m.stufe)}${s.label}</button>`).join("")}</div>
-      <div class="zeile"><span>${st.name}</span><b>${chf(land.lohn*st.faktor)}/Mt.</b></div>
-      <div class="zeile"><span>Zielwert Zufriedenheit</span><b>${Math.round(st.ziel - (land.risiko-1)*8 + perkPlus("zufrieden"))} %</b></div>
-    </div>
-
-    ${sicherheitsKarte}
-
-    <div class="karte zufriedenheitskarte">
-      <h3>Zufriedenheit</h3>
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:64px;flex:none">${ikonZufrieden(zuf)}</div>
-        <div style="flex:1;min-width:0">
-          <div class="leiste"><i style="width:${zuf}%;background:${farbe}"></i></div>
-          <div class="zeile" style="padding-top:4px"><span>${zuf<32?"Streik ist wahrscheinlich":zuf<60?"angespannt":"gut"}</span><b>${zuf} %</b></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="notiz">${def.info}</div>
-    ${modellHinweis}`;
+           ${ikonLohn(i, i===m.stufe)}${s.label}</button>`).join("")), p22:(st.name), p23:(chf(land.lohn*st.faktor)), p24:(Math.round(st.ziel - (land.risiko-1)*8 + perkPlus("zufrieden"))), p25:(sicherheitsKarte), p26:(ikonZufrieden(zuf)), p27:(zuf), p28:(farbe), p29:(zuf<32?"Streik ist wahrscheinlich":zuf<60?"angespannt":"gut"), p30:(zuf), p31:(def.info), p32:(modellHinweis)});
 }
 
 /* ---------- Blatt: Raffinerie ---------- */
 function blattRaff(id){
   const def = RAFF_ORTE.find(x=>x.id===id), r = S.raff[id], land = LAND[def.land];
-  const kopf = `<div class="titelzeile">${flagge(def.land,"gross")}
-    <div><h2>${def.ort}</h2><div class="ort">${land.name} · Raffinerie</div></div></div>`;
+  const kopf = textVon("kern.raffinerie", {p1:(flagge(def.land,"gross")), p2:(def.ort), p3:(land.name)});
   const spezial = (def.spezial||[]).map(k=>MATERIAL[k]?.name).filter(Boolean);
-  const spezialKarte = `<div class="karte"><h3>Spezialisierung im Spiel</h3><div class="ort">${spezial.join(" · ")||"keine Spezialisierung"}</div><div class="notiz"><b>+25 % Durchsatz</b> für diese Rohstoffe. Alle anderen Rohstoffe können hier weiterhin normal verarbeitet werden. Die Spezialisierung ist eine Spielregel.</div></div>`;
+  const spezialKarte = textVon("sekbklarheit.spezialisierung-im-spiel-durchsatz", {p1:(spezial.join(" · ")||"keine Spezialisierung")});
   if (!r){
     const zu = gesperrt("raff");
     const geht = S.kasse >= def.bau && !zu;
     return kopf + szeneRaff(def, null)
       + (zu ? `<div class="notiz">Im Tutorial baust du zuerst nur <b>eine</b> Raffinerie.</div>` : "")
-      + `<div class="werte">
-        <div class="wert"><span class="wi">${IK.kolben}</span><span class="wt"><small>Kapazität</small><b>${def.kapazitaet}/Tag</b></span></div>
-        <div class="wert"><span class="wi">${IK.person}</span><span class="wt"><small>Plätze</small><b>${def.plaetze}</b></span></div>
-        <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Lohn</small><b>${chf(land.lohn)}</b></span></div>
-        <div class="wert"><span class="wi">${IK.kalender}</span><span class="wt"><small>Betrieb</small><b>${chf(9000)}/Mt.</b></span></div>
-      </div>
-      ${spezialKarte}
-      <div class="notiz">${def.info}</div>
-      <button class="cta ${geht?"puls":""}" data-tun="raff-bau" data-id="${id}" ${geht?"":"disabled"}>
-        ${geht?IK.kolben:""}${zu ? SPERRTEXT : geht ? "Raffinerie bauen · " + chf(def.bau) : "Zu wenig Geld · " + chf(def.bau)}</button>`;
+      + textVon("kern.kapazitaet-tag-plaetze-lohn", {p1:(IK.kolben), p2:(def.kapazitaet), p3:(IK.person), p4:(def.plaetze), p5:(IK.muenze), p6:(chf(land.lohn)), p7:(IK.kalender), p8:(chf(9000)), p9:(spezialKarte), p10:(def.info), p11:(geht?"puls":""), p12:(id), p13:(geht?"":"disabled"), p14:(geht?IK.kolben:""), p15:(zu ? SPERRTEXT : geht ? "Raffinerie bauen · " + chf(def.bau) : "Zu wenig Geld · " + chf(def.bau))});
   }
   const erzda = Object.values(S.erz).reduce((a,b)=>a+b,0);
-  return kopf + szeneRaff(def, r) + `
-    <div class="werte">
-      <div class="wert"><span class="wi">${IK.kolben}</span><span class="wt"><small>Durchsatz</small><b>${Math.round(def.kapazitaet*ausbauFaktor(r.ausbau)*(r.arbeiter/def.plaetze)*globalWert("hafen")*perkMult("durchsatz"))}/Tag</b></span></div>
-      <div class="wert"><span class="wi">${IK.berg}</span><span class="wt"><small>Rohstoff im Lager</small><b>${Math.round(erzda)}</b></span></div>
-    </div>
-    ${spezialKarte}
-    <div class="karte">
-      <h3>Belegschaft</h3>
-      <div class="ort">${freieArbeiter()} Personen frei im Team</div>
-      <div class="crewzeile">
-        <button data-tun="rcrew" data-id="${id}" data-n="-5" ${r.arbeiter<=0?"disabled":""}>−5</button>
-        <button data-tun="rcrew" data-id="${id}" data-n="-1" ${r.arbeiter<=0?"disabled":""}>−</button>
-        <div class="zahl"><b>${r.arbeiter}</b><small>von ${def.plaetze}</small></div>
-        <button data-tun="rcrew" data-id="${id}" data-n="1" ${(freieArbeiter()<=0||r.arbeiter>=def.plaetze)?"disabled":""}>+</button>
-        <button data-tun="rcrew" data-id="${id}" data-n="5" ${(freieArbeiter()<=0||r.arbeiter>=def.plaetze)?"disabled":""}>+5</button>
-      </div>
-      <div class="leiste"><i style="width:${(r.arbeiter/def.plaetze*100).toFixed(0)}%;background:#5b8f7a"></i></div>
-    </div>
-    ${tutorialLaeuft() ? "" : ausbauKarte("raff", id, r.ausbau, def.bau, "Durchsatz")}
-    <div class="notiz">Aus 1 Einheit Rohstoff wird je nach Material unterschiedlich viel nutzbares Material. Der Rest steht im Spielmodell für Abraum und Verluste.</div>
-    <div class="notiz blau">${def.info}</div>`;
+  return kopf + szeneRaff(def, r) + textVon("kern.durchsatz-tag-rohstoff-im", {p1:(IK.kolben), p2:(Math.round(def.kapazitaet*ausbauFaktor(r.ausbau)*(r.arbeiter/def.plaetze)*globalWert("hafen")*perkMult("durchsatz"))), p3:(IK.berg), p4:(Math.round(erzda)), p5:(spezialKarte), p6:(freieArbeiter()), p7:(id), p8:(r.arbeiter<=0?"disabled":""), p9:(id), p10:(r.arbeiter<=0?"disabled":""), p11:(r.arbeiter), p12:(def.plaetze), p13:(id), p14:((freieArbeiter()<=0||r.arbeiter>=def.plaetze)?"disabled":""), p15:(id), p16:((freieArbeiter()<=0||r.arbeiter>=def.plaetze)?"disabled":""), p17:((r.arbeiter/def.plaetze*100).toFixed(0)), p18:(tutorialLaeuft() ? "" : ausbauKarte("raff", id, r.ausbau, def.bau, "Durchsatz")), p19:(def.info)});
 }
 
 /* ---------- Blatt: Fabrikstandort ---------- */
 function blattFab(land){
   const meine = S.fabriken.map((f,i)=>({f,i})).filter(o => o.f.land === land);
   const { name, lohn, fabrik, fabrikInfo } = LAND[land];
-  const kopf = `<div class="titelzeile">${flagge(land,"gross")}
-    <div><h2>${fabrik || name}</h2><div class="ort">${fabrik ? name + " · " : ""}Fabrikstandort · Lohn ${chf(lohn)}/Monat</div></div></div>
-    ${fabrikInfo ? `<div class="notiz blau">${fabrikInfo}</div>` : ""}`;
+  const kopf = textVon("kern.fabrikstandort-lohn-monat", {p1:(flagge(land,"gross")), p2:(fabrik || name), p3:(fabrik ? name + " · " : ""), p4:(chf(lohn)), p5:(fabrikInfo ? `<div class="notiz blau">${fabrikInfo}</div>` : "")});
 
   const laufend = meine.map(({f,i}) => {
     const def = PRODUKT[f.produkt];
-    if (f.restbau > 0) return `<div class="karte"><h3>${def.name}</h3>
-      <div class="ort">Im Bau – noch ${f.restbau} Tage</div>
-      ${szeneFabrik(f, def)}
-      <div class="leiste"><i style="width:${(100-f.restbau/def.bauzeit*100).toFixed(0)}%;background:var(--gold)"></i></div></div>`;
+    if (f.restbau > 0) return textVon("kern.im-bau-noch-tage", {p1:(def.name), p2:(f.restbau), p3:(szeneFabrik(f, def)), p4:((100-f.restbau/def.bauzeit*100).toFixed(0))});
     let stueck = Math.floor(f.arbeiter * def.proArbeiter * perkMult("fabrik"));
     for (const k in def.rezept) stueck = Math.min(stueck, Math.floor((S.mat[k]||0)/def.rezept[k]));
     const fehlt = Object.keys(def.rezept).filter(k => (S.mat[k]||0) < def.rezept[k]);
-    return `<div class="karte"><h3>${def.name}</h3>
-      <div class="ort">Verkauf ${chf(warenPreis(f.produkt))} · Nachfrage ${Math.round(nachfrage(f.produkt))}/Tag</div>
-      ${szeneFabrik(f, def)}
-      <div class="ort" style="margin-top:7px">Vereinfachtes Rezept · Spielmodell</div>
-      <div class="stueck">${Object.keys(def.rezept).map(k =>
-        `<span class="${fehlt.includes(k)?"fehlt":""}" style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")}</div>
-      <div class="crewzeile">
-        <button data-tun="fcrew" data-i="${i}" data-n="-5" ${f.arbeiter<=0?"disabled":""}>−5</button>
-        <button data-tun="fcrew" data-i="${i}" data-n="-1" ${f.arbeiter<=0?"disabled":""}>−</button>
-        <div class="zahl"><b>${f.arbeiter}</b><small>von ${def.plaetze}</small></div>
-        <button data-tun="fcrew" data-i="${i}" data-n="1" ${(freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""}>+</button>
-        <button data-tun="fcrew" data-i="${i}" data-n="5" ${(freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""}>+5</button>
-      </div>
-      <div class="zeile"><span>Produktion heute</span><b>${stueck} Stück</b></div>
-      <div class="zeile"><span>Lager</span><b>${S.ware[f.produkt]||0} Stück</b></div>
-      ${fehlt.length ? `<div class="notiz rot">Es fehlt: ${fehlt.map(k=>MATERIAL[k].name).join(", ")}.
-        Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.</div>` : ""}</div>`;
+    return textVon("kern.verkauf-nachfrage-tag-vereinfachtes", {p1:(def.name), p2:(chf(warenPreis(f.produkt))), p3:(Math.round(nachfrage(f.produkt))), p4:(szeneFabrik(f, def)), p5:(Object.keys(def.rezept).map(k =>
+        `<span class="${fehlt.includes(k)?"fehlt":""}" style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")), p6:(i), p7:(f.arbeiter<=0?"disabled":""), p8:(i), p9:(f.arbeiter<=0?"disabled":""), p10:(f.arbeiter), p11:(def.plaetze), p12:(i), p13:((freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""), p14:(i), p15:((freieArbeiter()<=0||f.arbeiter>=def.plaetze)?"disabled":""), p16:(stueck), p17:(S.ware[f.produkt]||0), p18:(fehlt.length ? `<div class="notiz rot">Es fehlt: ${fehlt.map(k=>MATERIAL[k].name).join(", ")}.
+        Zukaufen geht nicht – sichere dafür eine eigene Rohstoffquelle.</div>` : "")});
   }).join("");
 
   const zu = gesperrt("fab");
@@ -4326,14 +4166,8 @@ function blattFab(land){
   const neu = auswahl.map(p => {
     const def = PRODUKT[p], geht = S.kasse >= def.kosten && !zu;
     const tage = Math.max(3, Math.round(def.bauzeit * bauzeitF));
-    return `<div class="karte"><h3>${def.name}</h3>
-      <div class="ort">Verkaufspreis ${chf(def.preis)} · Bauzeit ${tage} Tage · ${def.plaetze} Plätze</div>
-      <div class="ort" style="margin-top:7px">Vereinfachtes Rezept · Spielmodell</div>
-      <div class="stueck">${Object.keys(def.rezept).map(k =>
-        `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")}</div>
-      <div class="notiz">${def.info}</div>
-      <button class="cta gruen" data-tun="fab-bau" data-p="${p}" data-l="${land}" ${geht?"":"disabled"}>
-        ${geht?IK.fabrik:""}${zu ? SPERRTEXT : geht ? "Hier bauen · " + chf(def.kosten) : "Zu wenig Geld · " + chf(def.kosten)}</button></div>`;
+    return textVon("kern.verkaufspreis-bauzeit-tage-plaetze", {p1:(def.name), p2:(chf(def.preis)), p3:(tage), p4:(def.plaetze), p5:(Object.keys(def.rezept).map(k =>
+        `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")), p6:(def.info), p7:(p), p8:(land), p9:(geht?"":"disabled"), p10:(geht?IK.fabrik:""), p11:(zu ? SPERRTEXT : geht ? "Hier bauen · " + chf(def.kosten) : "Zu wenig Geld · " + chf(def.kosten))});
   }).join("");
 
   return kopf + laufend + (zu ? `<div class="notiz">Im Tutorial baust du zuerst nur <b>eine</b> Fabrik. Danach stehen alle Produkte offen.</div>` : "")
@@ -4389,164 +4223,45 @@ function seiteWechseln(name){
   zeichnen();
 }
 
-function seiteMarkt(){
-  const kraft = verkaufsKraft(), lager = warenLager();
-  const heuteSchon = S.handverkaufTag === S.tag;
-  const frei = freieArbeiter();
-
-  // Was würde ein Handverkauf jetzt einbringen?
-  let handStueck = 0;
-  for (const p in PRODUKT) handStueck += Math.min(S.ware[p]||0, Math.round(nachfrage(p)));
-
-  const prod = Object.keys(PRODUKT).map(p => {
-    const l = S.ware[p]||0;
-    return `<tr><td>${PRODUKT[p].name}</td>
-      <td class="n" style="${l>0?"color:var(--gruen)":""}">${l}</td>
-      <td class="n">${Math.round(nachfrage(p))}</td>
-      <td class="n">${Math.round(warenPreis(p))}</td></tr>`;
-  }).join("");
-
-  const roh = Object.keys(MATERIAL).map(k => {
-    const p = matPreis(k), d = p/MATERIAL[k].preis - 1;
-    const meins = MINEN.some(m => m.mat === k && S.minen[m.id]);
-    return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}
-        ${meins ? "" : `<br><small style="color:var(--grau);font-weight:600">keine eigene Mine</small>`}</td>
-      <td class="n">${Math.round(S.mat[k]||0)}</td>
-      <td class="n">${Math.round(S.erz[k]||0)}</td>
-      <td class="n" style="color:${d>.03?"var(--gruen)":d<-.03?"var(--alarm)":"inherit"}">${p.toFixed(0)}${d>.03?" ▲":d<-.03?" ▼":""}</td></tr>`;
-  }).join("");
-
-  const eff = S.globalMod.filter(m => m.bis > S.tag);
-
-  return `<h1>Markt &amp; Verkauf</h1><div class="unter">Fertige Produkte müssen verkauft werden</div>
-
-    <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
-      <h3>Verkauf</h3>
-      <div class="ort">Im Lager liegen <b>${lager}</b> Stück</div>
-      <button class="cta riesig ${(!heuteSchon && handStueck>0)?"puls":""}" data-tun="handverkauf"
-        ${(heuteSchon || handStueck<=0) ? "disabled" : ""}>
-        ${IK.muenze}${handStueck<=0 ? "Nichts zu verkaufen"
-          : heuteSchon ? "Heute schon verkauft" : "SELBST VERKAUFEN · " + handStueck + " Stück"}</button>
-      <div class="notiz">Einmal pro Tag kannst du selbst verkaufen. Wer das nicht jeden Tag machen will, stellt Verkäuferinnen an.</div>
-
-      <h3 style="margin-top:14px">Dein Verkaufsteam</h3>
-      <div class="ort">${frei} Personen frei im Team · Lohn ${chf(VERKAUF_LOHN)} pro Person und Monat</div>
-      <div style="display:flex;justify-content:center">${(S.verkaeufer||0)
-        ? `<div style="width:min(190px,60%)">${ikonTeam(Math.max(1, Math.min(5, Math.ceil((S.verkaeufer||0)/4))), 60, .34)}</div>` : ""}</div>
-      <div class="crewzeile">
-        <button data-tun="vcrew" data-n="-5" ${(S.verkaeufer||0)<=0?"disabled":""}>−5</button>
-        <button data-tun="vcrew" data-n="-1" ${(S.verkaeufer||0)<=0?"disabled":""}>−</button>
-        <div class="zahl"><b>${S.verkaeufer||0}</b><small>Verkäufer</small></div>
-        <button data-tun="vcrew" data-n="1" ${(frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""}>+</button>
-        <button data-tun="vcrew" data-n="5" ${(frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""}>+5</button>
-      </div>
-      <div class="zeile"><span>Verkaufskapazität</span><b>${kraft} Stück/Tag</b></div>
-      <div class="zeile"><span>Lohnkosten</span><b>${chf((S.verkaeufer||0)*VERKAUF_LOHN)}/Mt.</b></div>
-      ${frei <= 0 ? `<div class="notiz rot">Niemand ist gerade frei. Stelle zuerst im Team weitere Personen ein – dann kannst du sie hier in den Verkauf schicken.
-        <button class="cta" data-tun="zumteam">${IK.person}Zum Team</button></div>` : ""}
-      ${lager > 0 && kraft === 0 ? `<div class="notiz rot">Deine Ware bleibt liegen. Ohne Verkäufer verkauft nur dein eigener Fingerdruck.</div>` : ""}
-    </div>
-
-    <div class="karte"><h3>Deine Produkte</h3>
-      <table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>${prod}</table>
-      <div class="notiz">Der Markt nimmt pro Tag nur die Nachfrage auf. Produzierst du mehr, füllt sich das Lager und der Preis fällt um bis zu 35 %.</div></div>
-
-    <div class="karte"><h3>Deine Rohstoffe</h3>
-      <table><tr><th>Material</th><th class="n">Bereit</th><th class="n">Erz</th><th class="n">Weltpreis</th></tr>${roh}</table>
-      <div class="notiz">Rohstoffe kannst du nicht zukaufen. Jedes Material, das du brauchst, muss aus einer eigenen Mine kommen und durch eine Raffinerie gehen.</div></div>
-
-    ${eff.length ? `<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m =>
-      `<div class="zeile"><span>${m.art==="dollar"?"US-Dollar-Kurs":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>` : ""}`;
-}
+/* Markt-Reiter: Fassung in didactic-ui.js, zusammengesetzt in module/seiten.js.
+   Hier nur deklariert, damit module/seiten.js sie festlegen kann. */
+function seiteMarkt(){}
 
 function seiteTeam(){
   const rows = [];
   for (const id in S.minen){ const d = MINEN.find(x=>x.id===id);
-    if (S.minen[id].arbeiter) rows.push([d.land, "Rohstoffquelle " + d.ort, S.minen[id].arbeiter, LAND[d.land].lohn*LOHNSTUFE[S.minen[id].stufe].faktor]); }
+    if (S.minen[id].arbeiter) rows.push([d.land, textVon("kern.rohstoffquelle-2") + d.ort, S.minen[id].arbeiter, LAND[d.land].lohn*LOHNSTUFE[S.minen[id].stufe].faktor]); }
   for (const id in S.raff){ const d = RAFF_ORTE.find(x=>x.id===id);
-    if (S.raff[id].arbeiter) rows.push([d.land, "Raffinerie " + d.ort, S.raff[id].arbeiter, LAND[d.land].lohn]); }
-  S.fabriken.forEach(f => { if (f.arbeiter) rows.push([f.land, "Fabrik " + PRODUKT[f.produkt].name, f.arbeiter, LAND[f.land].lohn]); });
-  if (S.verkaeufer) rows.push([null, "Verkauf", S.verkaeufer, VERKAUF_LOHN]);
+    if (S.raff[id].arbeiter) rows.push([d.land, textVon("kern.raffinerie-2") + d.ort, S.raff[id].arbeiter, LAND[d.land].lohn]); }
+  S.fabriken.forEach(f => { if (f.arbeiter) rows.push([f.land, textVon("kern.fabrik") + PRODUKT[f.produkt].name, f.arbeiter, LAND[f.land].lohn]); });
+  if (S.verkaeufer) rows.push([null, textVon("tutorialenhanc.verkauf"), S.verkaeufer, VERKAUF_LOHN]);
   const menge = anstellbar();
   const kosten = menge * LOHN_PRO_KOPF;
   const geht = menge > 0 && S.kasse >= kosten;
   const frei = freieArbeiter();
-  if (frei > 0) rows.push([null, "Ohne Einsatz", frei, LOHN_OHNE_EINSATZ]);
+  if (frei > 0) rows.push([null, textVon("kern.ohne-einsatz"), frei, LOHN_OHNE_EINSATZ]);
   const lohnFaktor = perkMult("lohn");
   const lohn = lohnsumme();
   const betrieb = betriebskostenMonat();
 
-  return `<h1>Dein Team</h1><div class="unter">Lohnkosten im Spielmodell</div>
-
-    <div class="karte" style="text-align:center;background:linear-gradient(#fffdf6,#fdf3dd)">
-      <div style="display:flex;justify-content:center"><div style="width:min(300px,80%)">${ikonTeam(5, 96, .62)}</div></div>
-      <h3 style="font-size:var(--f4);margin-top:6px">Stelle mehr Personen ein</h3>
-      <div class="ort">Ohne Personal fördert keine Rohstoffquelle und läuft keine Fabrik</div>
-      ${regler("anstell", "Wie viele?", "Einmalige Einstellungskosten: CHF " + LOHN_PRO_KOPF.toLocaleString("de-CH") + " pro Person.",
-               5, 50, 5, anstellMenge, anstellMenge + " Personen")}
-      <button class="cta riesig ${geht?"puls":""}" data-tun="anstellen" ${geht?"":"disabled"}>
-        ${IK.person}${menge <= 0 ? "Im Tutorial genügen " + TUTORIAL_MAX_LEUTE + " Leute"
-          : geht ? "STELLE " + menge + " PERSONEN EIN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)}</button>
-      <button class="cta still" data-tun="entlassen" ${frei<5?"disabled":""}>−5 entlassen · nur freie Leute</button>
-    </div>
-
-    <div class="karte">
-      <div class="werte">
-        <div class="wert"><span class="wi">${IK.person}</span><span class="wt"><small>Angestellt</small><b>${S.arbeiterGesamt}</b></span></div>
-        <div class="wert"><span class="wi">${IK.hacke}</span><span class="wt"><small>Ohne Aufgabe</small><b style="color:${frei>10?"var(--warn)":"inherit"}">${frei}</b></span></div>
-        <div class="wert"><span class="wi">${IK.muenze}</span><span class="wt"><small>Löhne pro Monat</small><b>${chf(lohn)}</b></span></div>
-        <div class="wert"><span class="wi">${IK.kalender}</span><span class="wt"><small>Ø je Spieltag</small><b>${chf(lohn/30)}</b></span></div>
-      </div>
-      <div class="notiz">Nicht eingeteilte Leute kosten ${chf(LOHN_OHNE_EINSATZ * lohnFaktor)} pro Person und Monat. Stell nur so viele an, wie du beschäftigen kannst.</div>
-    </div>
-
-    <div class="karte" id="team-einsaetze"><h3>Wer arbeitet wo?</h3>
-      ${rows.length ? `<table><thead><tr><th scope="col">Ort</th><th scope="col" class="n">Leute</th><th scope="col" class="n">Lohn pro Monat</th></tr></thead><tbody>
+  return textVon("kern.dein-team-lohnkosten-im", {p1:(ikonTeam(5, 96, .62)), p2:(regler("anstell", "Wie viele?", "Einmalige Einstellungskosten: CHF " + LOHN_PRO_KOPF.toLocaleString("de-CH") + " pro Person.",
+               5, 50, 5, anstellMenge, anstellMenge + " Personen")), p3:(geht?"puls":""), p4:(geht?"":"disabled"), p5:(IK.person), p6:(menge <= 0 ? "Im Tutorial genügen " + TUTORIAL_MAX_LEUTE + " Leute"
+          : geht ? "STELLE " + menge + " PERSONEN EIN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)), p7:(frei<5?"disabled":""), p8:(IK.person), p9:(S.arbeiterGesamt), p10:(IK.hacke), p11:(frei>10?"var(--warn)":"inherit"), p12:(frei), p13:(IK.muenze), p14:(chf(lohn)), p15:(IK.kalender), p16:(chf(lohn/30)), p17:(chf(LOHN_OHNE_EINSATZ * lohnFaktor)), p18:(rows.length ? `<table><thead><tr><th scope="col">Ort</th><th scope="col" class="n">Leute</th><th scope="col" class="n">Lohn pro Monat</th></tr></thead><tbody>
         ${rows.map(r=>`<tr><td><span class="flz">${r[0]?flagge(r[0]):`<span style="width:1.7em;display:inline-block">${IK.muenze}</span>`}<span>${r[1]}</span></span></td>
           <td class="n">${r[2]}</td><td class="n">${chf(r[2] * r[3] * lohnFaktor)}</td></tr>`).join("")}</tbody></table>`
-      : `<p style="color:var(--grau)">Noch niemand angestellt.</p>`}
-      <div class="zeile"><span>Personalkosten pro Monat</span><b id="team-personalkosten">${chf(lohn)}</b></div>
-      <div class="zeile"><span>Betriebskosten pro Monat</span><b id="team-betriebskosten">${chf(betrieb)}</b></div>
-      <div class="notiz">Laufende Kosten werden alle 30 Spieltage abgerechnet.</div>
-      <div class="zeile team-ausgaben-summe"><strong>Gesamtausgaben pro Monat</strong><b id="team-gesamtausgaben">${chf(lohn + betrieb)}</b></div>
-    </div>
-    ${tutorialLaeuft()?"":`<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`}`;
+      : `<p style="color:var(--grau)">Noch niemand angestellt.</p>`), p19:(chf(lohn)), p20:(chf(betrieb)), p21:(chf(lohn + betrieb)), p22:(tutorialLaeuft()?"":`<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`)});
 }
 
 function seiteZiel(){
   const gewinn = etappenGewinn(), ruf = Math.round(S.ruf), info = schwierigkeitInfo();
   const rest = Math.max(0, etappenEnde() - S.tag + 1);
-  return `<h1>Ziel · Etappe ${S.etappe||1}</h1><div class="unter">Alle ${ZIEL_TAGE} Tage kommt eine Abrechnung – danach kannst du weiterspielen</div>
-    <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
-      <div class="zeile"><span>Schwierigkeit</span><b>${info.icon} ${info.name}</b></div>
-      <div class="ort">${verkaufsEffektText()}${S.schwierigkeit==="schwer"?" · auf Mittel freigeschaltet":""}</div>
-      <div class="zeile" style="margin-top:10px"><span>Nächste Abrechnung</span><b>Tag ${etappenEnde()+1}</b></div>
-      <div class="zeile"><span>Verbleibende Tage</span><b>${rest}</b></div>
-    </div>
-    <div class="karte">
-      <div class="zeile"><span>Etappengewinn</span><b>${chf(gewinn)}</b></div>
-      <div class="leiste"><i style="width:${klemm(gewinn/ZIEL_GEWINN*100,0,100)}%;background:var(--gold)"></i></div>
-      <div class="ort">Ziel ${chf(ZIEL_GEWINN)} · Gesamtgewinn seit Start ${chf(gesamtGewinn())}</div>
-      <div class="zeile" style="margin-top:12px"><span>Ruf</span><b style="color:${ruf<40?"var(--alarm)":ruf<60?"var(--warn)":"var(--gruen)"}">${ruf}</b></div>
-      <div class="leiste"><i style="width:${klemm(ruf/ZIEL_RUF*100,0,100)}%;background:var(--gruen)"></i></div>
-      <div class="ort">Ziel ${ZIEL_RUF} · Ein niedriger Ruf senkt die Nachfrage nach allen deinen Produkten</div>
-    </div>
-    <div class="karte"><h3>Lager</h3>
-      ${Object.keys(MATERIAL).filter(k=>(S.mat[k]||0)>.5||(S.erz[k]||0)>.5).map(k=>
+  return textVon("kern.ziel-etappe-alle-tage", {p1:(S.etappe||1), p2:(ZIEL_TAGE), p3:(info.icon), p4:(info.name), p5:(verkaufsEffektText()), p6:(S.schwierigkeit==="schwer"?" · auf Mittel freigeschaltet":""), p7:(etappenEnde()+1), p8:(rest), p9:(chf(gewinn)), p10:(klemm(gewinn/ZIEL_GEWINN*100,0,100)), p11:(chf(ZIEL_GEWINN)), p12:(chf(gesamtGewinn())), p13:(ruf<40?"var(--alarm)":ruf<60?"var(--warn)":"var(--gruen)"), p14:(ruf), p15:(klemm(ruf/ZIEL_RUF*100,0,100)), p16:(ZIEL_RUF), p17:(Object.keys(MATERIAL).filter(k=>(S.mat[k]||0)>.5||(S.erz[k]||0)>.5).map(k=>
         `<div class="zeile"><span><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}</span>
          <b>${Math.round(S.mat[k]||0)} <small style="color:var(--grau);font-weight:600">+ ${Math.round(S.erz[k]||0)} Rohstoff</small></b></div>`).join("")
-        || `<p style="color:var(--grau)">Noch nichts gefördert.</p>`}</div>
-    <div class="karte"><h3>Finanzierte Verbesserungen</h3>
-      ${Object.keys(S.perks).length ? Object.keys(S.perks).map(id => { const e = PERK_INDEX[id]; return e
+        || `<p style="color:var(--grau)">Noch nichts gefördert.</p>`), p18:(Object.keys(S.perks).length ? Object.keys(S.perks).map(id => { const e = PERK_INDEX[id]; return e
         ? `<div class="zeile"><span>${e.perk.titel}</span><b style="font-size:var(--f0);color:var(--grau)">${e.seg.titel}</b></div>` : ""; }).join("")
-        : `<p style="color:var(--grau)">Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.</p>`}</div>
-    <div class="karte"><h3>Lieferkettennachweise</h3>
-      <div class="zeile"><span>Status</span><b style="color:${nachweisStatus().stufe?"var(--gruen)":"var(--warn)"}">${nachweisStatus().text}</b></div>
-      <div class="notiz">Nachweise entscheiden bei Lieferkettengesetzen. Dein Ruf ist davon getrennt und beeinflusst die Nachfrage.</div></div>
-    <div class="karte"><h3>Meldungen</h3>
-      ${S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:var(--f0)">${e.text}</span><b style="font-size:var(--f0);color:var(--grau)">T${e.tag}</b></div>`).join("")
-        || `<p style="color:var(--grau)">Noch nichts passiert.</p>`}</div>
-    <button class="cta still" data-tun="reset">Neue Runde starten</button>`;
+        : `<p style="color:var(--grau)">Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.</p>`), p19:(nachweisStatus().stufe?"var(--gruen)":"var(--warn)"), p20:(nachweisStatus().text), p21:(S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:var(--f0)">${e.text}</span><b style="font-size:var(--f0);color:var(--grau)">T${e.tag}</b></div>`).join("")
+        || `<p style="color:var(--grau)">Noch nichts passiert.</p>`)});
 }
 
 /* ---------- Wissen: Übersicht der Segmente ---------- */
@@ -4564,16 +4279,7 @@ function seiteWissen(){
       <span class="spfeil">${IK.pfeil}</span></button>`;
   }).join("");
   const gesamt = WISSEN.reduce((a,s)=>a+s.perks.length, 0), hat = Object.keys(S.perks).length;
-  return `<h1>Wissen</h1><div class="unter">⏸ Das Spiel pausiert hier automatisch. Beim Verlassen läuft es im vorherigen Tempo weiter.</div>
-    <div class="karte" style="display:flex;align-items:center;gap:14px">
-      <div style="width:52px;flex:none;color:var(--gold)">${IK.gluehbirne}</div>
-      <div style="flex:1;min-width:0">
-        <b style="font-family:'Baloo 2',sans-serif;font-size:var(--f3)">${hat} von ${gesamt} Verbesserungen finanziert</b>
-        <div class="leiste"><i style="width:${(hat/gesamt*100).toFixed(0)}%;background:var(--gold)"></i></div>
-        <small style="color:var(--grau);font-size:var(--f0)">Wissen ist frei zugänglich. Geld wird nur für Verbesserungen verwendet, deren Voraussetzung im Spiel bereits erfüllt ist.</small>
-      </div>
-    </div>
-    ${karten}`;
+  return textVon("kern.wissen-das-spiel-pausiert", {p1:(IK.gluehbirne), p2:(hat), p3:(gesamt), p4:((hat/gesamt*100).toFixed(0)), p5:(karten)});
 }
 
 /* ---------- Wissen: ein Segment öffnen ---------- */
@@ -4587,56 +4293,31 @@ function lupeFuellen(segId){
   const geht = naechst && !gesperrtDurch && S.kasse >= naechst.kosten;
 
   const erforscht = seg.perks.filter(p => S.perks[p.id]).map(p =>
-    `<div class="perkkarte fertig"><span class="marke">Finanziert</span>
-      <h3>${p.titel}</h3><p>${p.text}</p>
-      <div class="wirkung">${p.wirkung.map(w=>`<span>${w}</span>`).join("")}</div></div>`).join("");
+    textVon("kern.finanziert", {p1:(p.titel), p2:(p.text), p3:(p.wirkung.map(w=>`<span>${w}</span>`).join(""))})).join("");
 
-  const angebot = naechst ? `<div class="perkkarte">
-      <span class="marke">Anwendung</span>
-      <h3>${naechst.titel}</h3><p>${naechst.text}</p>
-      <div class="wirkung">${naechst.wirkung.map(w=>`<span>${w}</span>`).join("")}</div>
-      ${gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» finanzieren.</div>` : ""}
-      <button class="cta ${geht?"puls":""}" data-tun="perk" data-p="${naechst.id}" ${geht?"":"disabled"}>
-        ${geht?IK.gluehbirne:""}${gesperrtDurch ? "Noch gesperrt" : geht ? "Verbesserung finanzieren · " + chf(naechst.kosten) : "Zu wenig Geld · " + chf(naechst.kosten)}</button>
-    </div>`
-    : `<div class="perkkarte fertig"><span class="marke">Vollständig</span>
-        <h3>Alle Verbesserungen finanziert</h3><p>Du hast alle Verbesserungen aus «${seg.titel}» finanziert.</p></div>`;
+  const angebot = naechst ? textVon("kern.anwendung", {p1:(naechst.titel), p2:(naechst.text), p3:(naechst.wirkung.map(w=>`<span>${w}</span>`).join("")), p4:(gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» finanzieren.</div>` : ""), p5:(geht?"puls":""), p6:(naechst.id), p7:(geht?"":"disabled"), p8:(geht?IK.gluehbirne:""), p9:(gesperrtDurch ? "Noch gesperrt" : geht ? "Verbesserung finanzieren · " + chf(naechst.kosten) : "Zu wenig Geld · " + chf(naechst.kosten))})
+    : textVon("kern.vollstaendig-alle-verbesserungen-finanziert", {p1:(seg.titel)});
 
-  const formeln = seg.formeln ? `<div class="karte"><h3>Formeln</h3><table>${
-    seg.formeln.map(f=>`<tr><td>${f[0]}</td><td><code>${f[1]}</code></td></tr>`).join("")}</table></div>` : "";
+  const formeln = seg.formeln ? textVon("kern.formeln", {p1:(seg.formeln.map(f=>`<tr><td>${f[0]}</td><td><code>${f[1]}</code></td></tr>`).join(""))}) : "";
 
-  const materialTabelle = seg.id === "geologie" ? `<div class="karte"><h3>Woher die Rohstoffe kommen</h3>
-    <table><tr><th>Rohstoff → Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>
-    ${Object.keys(MATERIAL).map(k => {
+  const materialTabelle = seg.id === "geologie" ? textVon("kern.woher-die-rohstoffe-kommen", {p1:(Object.keys(MATERIAL).map(k => {
       const laender = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>m.land))];
       const quellen = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>rohstoffDerMine(m)))];
       return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${quellen.join(" / ")} → ${MATERIAL[k].name}</b><br>
         <small style="color:var(--grau);font-weight:600">${MATERIAL[k].wofuer}</small></td>
         <td>${laender.map(l=>`<span class="flz" style="margin-right:6px">${flagge(l,"mini")}<span style="font-size:var(--f0)">${LAND[l].name}</span></span>`).join("")}</td>
         <td class="n">${(MATERIAL[k].ausbeute*100).toFixed(0)} %</td></tr>`;
-    }).join("")}</table>
-    <div class="notiz blau"><b>Spielmodell:</b> Ergiebigkeit und Mengen sind vereinfachte Werte.</div></div>` : "";
+    }).join(""))}) : "";
 
-  const rezepte = seg.id === "fabrik" ? `<div class="karte"><h3>Was in einem Gerät steckt</h3>
-    <div class="notiz blau"><b>Vereinfachte Rezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>${Object.keys(PRODUKT).map(p=>`<div style="margin-bottom:10px"><b>${PRODUKT[p].name}</b>
+  const rezepte = seg.id === "fabrik" ? textVon("kern.was-in-einem-geraet-2", {p1:(Object.keys(PRODUKT).map(p=>`<div style="margin-bottom:10px"><b>${PRODUKT[p].name}</b>
       <div class="stueck">${Object.keys(PRODUKT[p].rezept).map(k=>
-        `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${PRODUKT[p].rezept[k]}</span>`).join("")}</div></div>`).join("")}</div>` : "";
+        `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${PRODUKT[p].rezept[k]}</span>`).join("")}</div></div>`).join(""))}) : "";
 
-  const loehne = seg.id === "leute" ? `<div class="karte"><h3>Monatslöhne im Vergleich</h3>
-    <table>${Object.keys(LAND).sort((a,b)=>LAND[a].lohn-LAND[b].lohn).map(l =>
+  const loehne = seg.id === "leute" ? textVon("kern.monatsloehne-im-vergleich-spielmodell", {p1:(Object.keys(LAND).sort((a,b)=>LAND[a].lohn-LAND[b].lohn).map(l =>
       `<tr><td><span class="flz">${flagge(l)}<span>${LAND[l].name}</span></span></td>
-        <td class="n">${LAND[l].lohn.toLocaleString("de-CH")}</td></tr>`).join("")}</table>
-    <div class="notiz"><b>Spielmodell:</b> Diese Lohnwerte sind vereinfachte Spielwerte und keine aktuelle Statistik.</div></div>` : "";
+        <td class="n">${LAND[l].lohn.toLocaleString("de-CH")}</td></tr>`).join(""))}) : "";
 
-  $("#lupeinhalt").innerHTML = `
-    <div class="titelzeile" style="padding-right:52px">
-      <span class="sicon" style="background:${seg.farbe}22;color:${seg.farbe};width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none">${IK[seg.ikon]||IK.wissen}</span>
-      <div><h2>${seg.titel}</h2><div class="ort">${seg.kurz}</div></div></div>
-    ${seg.text.map(t=>`<p>${t}</p>`).join("")}
-    ${materialTabelle}${loehne}${rezepte}${formeln}
-    <div class="karte"><h3>Zum Merken</h3>
-      ${seg.fakten.map((f,i)=>`<div class="fakt"><span class="nr">${i+1}</span><span>${f}</span></div>`).join("")}</div>
-    ${erforscht}${angebot}`;
+  $("#lupeinhalt").innerHTML = textVon("kern.zum-merken", {p1:(seg.farbe), p2:(seg.farbe), p3:(IK[seg.ikon]||IK.wissen), p4:(seg.titel), p5:(seg.kurz), p6:(seg.text.map(t=>`<p>${t}</p>`).join("")), p7:(materialTabelle), p8:(loehne), p9:(rezepte), p10:(formeln), p11:(seg.fakten.map((f,i)=>`<div class="fakt"><span class="nr">${i+1}</span><span>${f}</span></div>`).join("")), p12:(erforscht), p13:(angebot)});
   einzug($("#lupeinhalt"));
   $("#lupe").hidden = false;
   fensterKlasse();
@@ -4652,45 +4333,22 @@ function regler(id, label, hilfe, min, max, step, wert, anzeige){
     <small>${hilfe}</small></div>`;
 }
 const ANIM_NAME = ["aus","ruhig","verspielt"];
-const MELDUNGSTAKT_NAME = ["Gleich lassen","Bei Folgen","Jeder Meldungstag"];
+const MELDUNGSTAKT_NAME = [textVon("kern.gleich-lassen"),textVon("kern.bei-folgen"),textVon("kern.jeder-meldungstag")];
 function meldungsdauerAnzeige(prozent = OPT.meldungsdauer){
   const sekunden = ms => (ms*prozent/100000).toLocaleString("de-CH",{maximumFractionDigits:1});
   return sekunden(MELDUNG_KURZ_MS) + " / " + sekunden(MELDUNG_LANG_MS) + " s";
 }
 function einstFuellen(){
-  $("#einstinhalt").innerHTML = `
-    <h2>Einstellungen</h2>
-    <div class="unter">Alles wird sofort übernommen und gespeichert.</div>
-    ${regler("schrift", "Schriftgrösse", "Verschiebt die Grösse aller Texte. Die kleinste Schrift im Spiel wächst mit.",
-             90, 175, 5, OPT.schrift, OPT.schrift + " %")}
-    ${regler("tempo", "Spieltempo", "Bei 1× und 100 % dauert ein Spieltag 3 Sekunden, bei 4× eine Dreiviertelsekunde.",
-             50, 250, 10, OPT.tempo, OPT.tempo + " %")}
-    ${regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
-             0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])}
-    <div class="reglerzeile">
-      <div class="kopf lieferanzeige-auswahl">
-        <label for="lieferanzeige"><b>Liefersymbole</b></label>
-        <select id="lieferanzeige">${Object.entries(LIEFERANZEIGEN).map(([art, label]) =>
-          `<option value="${art}"${OPT.lieferanzeige === art ? " selected" : ""}>${label}</option>`).join("")}</select>
-      </div>
-    </div>
-    ${regler("meldungsdauer", "Meldungsdauer", "Lesezeit für kurze und lange Meldungen.",
-             50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())}
-    ${regler("lernfeedbackdauer", "Dauer für Schrittfeedback", "Lesezeit für «Schritt abgeschlossen» und «Tutorial abgeschlossen».",
-             50, 200, 25, OPT.lernfeedbackdauer, meldungsdauerAnzeige(OPT.lernfeedbackdauer))}
-    ${regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen dauert ab dem zweiten Meldungstag in Serie jeder Meldungstag doppelt so lange.",
-             0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])}
-    <button type="button" class="cta still" data-tun="intro-wiederholung">Intro erneut ansehen</button>
-    <div class="karte" style="margin-top:18px">
-      <h3>Fortschritt</h3>
-      <div class="zeile"><span>Spielstand</span><b id="aktiver-spielstand"></b></div>
-      <div class="notiz">${SPEICHER.echt
+  $("#einstinhalt").innerHTML = textVon("kern.einstellungen-alles-wird-sofort", {p1:(regler("schrift", "Schriftgrösse", "Verschiebt die Grösse aller Texte. Die kleinste Schrift im Spiel wächst mit.",
+             90, 175, 5, OPT.schrift, OPT.schrift + " %")), p2:(regler("tempo", "Spieltempo", "Bei 1× und 100 % dauert ein Spieltag 3 Sekunden, bei 4× eine Dreiviertelsekunde.",
+             50, 250, 10, OPT.tempo, OPT.tempo + " %")), p3:(regler("anim", "Animationen", "Aus = alles steht still. Verspielt = mehr Funken und Bewegung.",
+             0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])), p4:(Object.entries(LIEFERANZEIGEN).map(([art, label]) =>
+          `<option value="${art}"${OPT.lieferanzeige === art ? " selected" : ""}>${label}</option>`).join("")), p5:(regler("meldungsdauer", "Meldungsdauer", "Lesezeit für kurze und lange Meldungen.",
+             50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())), p6:(regler("lernfeedbackdauer", "Dauer für Schrittfeedback", "Lesezeit für «Schritt abgeschlossen» und «Tutorial abgeschlossen».",
+             50, 200, 25, OPT.lernfeedbackdauer, meldungsdauerAnzeige(OPT.lernfeedbackdauer))), p7:(regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen dauert ab dem zweiten Meldungstag in Serie jeder Meldungstag doppelt so lange.",
+             0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])), p8:(SPEICHER.echt
         ? "Dein Fortschritt wird automatisch in diesem Speicherplatz gesichert."
-        : "Der Browserspeicher ist nicht verfügbar. Sichere deinen Spielstand als Datei."}</div>
-      <p id="spielstand-fehler" class="notiz" role="alert" hidden></p>
-      <button class="cta" data-spielstand="menue">Speichern &amp; zum Hauptmenü</button>
-      <button class="cta still" data-spielstand="export">Spielstand exportieren</button>
-    </div>`;
+        : "Der Browserspeicher ist nicht verfügbar. Sichere deinen Spielstand als Datei.")});
   $("#einst").hidden = false;
   fensterKlasse();
 }
@@ -4698,13 +4356,13 @@ function einstFuellen(){
 /* ---------- Schwierigkeit einer neuen Runde ---------- */
 function schwierigkeitZeigen(){
   modalOffen = true; tempoSetzen(0);
-  $("#d-art").textContent = "Neue Runde";
-  $("#d-titel").textContent = "Wähle die Schwierigkeit";
-  $("#d-text").innerHTML = `Die Schwierigkeit verändert nur deine Verkaufserlöse. <b>Mittel</b> ist das bisherige Erzwelt-Balancing. Schwer wird nach einer erfolgreich abgeschlossenen Mittel-Etappe freigeschaltet.`;
+  $("#d-art").textContent = textVon("sekbklarheit.neue-runde");
+  $("#d-titel").textContent = textVon("sekbklarheit.waehle-die-schwierigkeit");
+  $("#d-text").innerHTML = textVon("kern.die-schwierigkeit-veraendert-nur");
   const optionen = [
-    ["einfach","🌱","Einfach","Verkaufserlöse +20 %",false],
-    ["mittel","⚙️","Mittel","Standard-Balancing",false],
-    ["schwer","🔥","Schwer","Verkaufserlöse −30 %",!META.mittelGeschafft]
+    ["einfach","🌱",textVon("sekbklarheit.einfach"),textVon("kern.verkaufserloese"),false],
+    ["mittel","⚙️",textVon("sekbklarheit.mittel"),textVon("kern.standard-balancing"),false],
+    ["schwer","🔥",textVon("sekbklarheit.schwer"),textVon("kern.verkaufserloese-2"),!META.mittelGeschafft]
   ];
   $("#d-wahlen").innerHTML = "";
   optionen.forEach(([id,icon,name,klein,gesperrt],i)=>{
@@ -4714,7 +4372,7 @@ function schwierigkeitZeigen(){
     if (!gesperrt) b.onclick=()=>{
       S.schwierigkeit=id; S.etappe=1; S.etappeStartEingenommen=S.eingenommen; S.etappeStartAusgegeben=S.ausgegeben; S.ende=null;
       modalOffen=false; $("#schleier").hidden=true;
-      notiz(`${icon} Schwierigkeit <b>${name}</b> gewählt · ${klein}.`,"gut");
+      notiz(textVon("sekbklarheit.schwierigkeit-gewaehlt", {p1:(icon), p2:(name), p3:(klein)}),"gut");
       speichern(); tempoSetzen(1); zeichnen();
     };
     $("#d-wahlen").appendChild(b);
@@ -4727,7 +4385,7 @@ function schwierigkeitZeigen(){
 function dialogZeigen(e){
   modalOffen = true;
   if (e.offenesEreignis) S.offenesEreignis = e.offenesEreignis;
-  $("#d-art").textContent = e.art || "Ereignis";
+  $("#d-art").textContent = e.art || textVon("kern.ereignis");
   $("#d-titel").innerHTML = (e.land ? `<span class="flz">${flagge(e.land,"gross")}<span>${e.titel||""}</span></span>` : (e.titel || ""));
   $("#d-text").innerHTML = e.text || "";
   $("#d-wahlen").innerHTML = "";
@@ -4803,7 +4461,7 @@ document.addEventListener("click", e => {
       if (S.kasse < def.erschliessung || gesperrt("mine", id)) return;
       S.kasse -= def.erschliessung; S.ausgegeben += def.erschliessung;
       S.minen[id] = {arbeiter:0, stufe:1, zufriedenheit:55, stillBis:0, malus:1, malusBis:0, ausbau:0};
-      notiz(`Rohstoffquelle <b>${def.ort}</b> eröffnet. Jetzt Personal zuweisen.`, "gut");
+      notiz(textVon("kern.rohstoffquelle-eroeffnet-jetzt-personal", {p1:(def.ort)}), "gut");
       zeigeAuf(id); pinFeiern(id);
       const [fx,fy] = pinAufSchirm(id);
       funken(fx, fy, [MATERIAL[def.mat].farbe, "#f5b73d", "#fff", "#ffe9a8"], 24);
@@ -4821,7 +4479,7 @@ document.addEventListener("click", e => {
       if (neu > m.stufe){
         funkenAn(t, ["#f5b73d","#ffe9a8","#2fbe7e"], 18);
         m.zufriedenheit = Math.min(100, m.zufriedenheit + 6);
-        notiz(`Lohnstufe in <b>${MINEN.find(x=>x.id===id).ort}</b> auf «${LOHNSTUFE[neu].label}» erhöht.`, "gut");
+        notiz(textVon("kern.lohnstufe-in-auf-erhoeht", {p1:(MINEN.find(x=>x.id===id).ort), p2:(LOHNSTUFE[neu].label)}), "gut");
       }
       m.stufe = neu; break; }
     case "raff-bau": {
@@ -4844,7 +4502,7 @@ document.addEventListener("click", e => {
       S.kasse -= def.kosten; S.ausgegeben += def.kosten;
       const tage = Math.max(3, Math.round(def.bauzeit * perkMult("bauzeit")));
       S.fabriken.push({produkt:p, land:l, arbeiter:0, restbau:tage});
-      notiz(`Fabrik für <b>${def.name}</b> in ${LAND[l].name} – fertig in ${tage} Tagen.`, "geld");
+      notiz(textVon("kern.fabrik-fuer-in-fertig", {p1:(def.name), p2:(LAND[l].name), p3:(tage)}), "geld");
       pinFeiern("f_"+l);
       const [fx,fy] = pinAufSchirm("f_"+l); funken(fx, fy, ["#b5703c","#f5b73d","#fff"], 22);
       break; }
@@ -4858,7 +4516,7 @@ document.addEventListener("click", e => {
       const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF;
       if (menge <= 0 || S.kasse < kosten) return;
       S.kasse -= kosten; S.ausgegeben += kosten; S.arbeiterGesamt += menge;
-      notiz(`<b>${menge} Leute</b> angestellt für ${chf(kosten)}.`, "geld");
+      notiz(textVon("kern.leute-angestellt-fuer", {p1:(menge), p2:(chf(kosten))}), "geld");
       funkenAn(t, ["#6fb8e0","#f5b73d","#fff","#2fbe7e"], 26);
       break; }
     case "entlassen":
@@ -4868,7 +4526,7 @@ document.addEventListener("click", e => {
       const erg = wareVerkaufen(1e9);
       if (erg.stueck <= 0) return;
       S.handverkaufTag = S.tag; S.verkauftSelber = true;
-      notiz(`Selber verkauft: <b>${erg.stueck} Stück</b> für ${chf(erg.erloes)}.`, "geld");
+      notiz(textVon("kern.selber-verkauft-stueck-fuer", {p1:(erg.stueck), p2:(chf(erg.erloes))}), "geld");
       funkenAn(t, ["#f5b73d","#ffe9a8","#2fbe7e","#fff"], 26);
       break; }
     case "vcrew": {
@@ -4893,7 +4551,7 @@ document.addEventListener("click", e => {
       frischeStufe[id] = Date.now();
       const ort = art === "mine" ? MINEN.find(x=>x.id===id).ort : RAFF_ORTE.find(x=>x.id===id).ort;
       notiz(verdoppelt
-        ? `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut – die Ausbringung ist jetzt <b>doppelt</b> so hoch.`
+        ? textVon("kern.auf-stufe-ausgebaut-die", {p1:(ort), p2:(ziel.ausbau)})
         : `<b>${ort}</b> auf Stufe ${ziel.ausbau} ausgebaut.`, verdoppelt ? "gut" : "geld");
       funkenAn(t, verdoppelt ? ["#2fbe7e","#82e2b4","#f5b73d","#fff"] : ["#f5b73d","#ffe9a8","#fff"],
         verdoppelt ? 40 : 16);
@@ -4909,7 +4567,7 @@ document.addEventListener("click", e => {
       S.kasse -= e2.perk.kosten; S.ausgegeben += e2.perk.kosten;
       S.perks[e2.perk.id] = true;
       if (e2.perk.sofort && e2.perk.sofort.ruf) rufAendern(e2.perk.sofort.ruf);
-      notiz(`Verbesserung finanziert: <b>${e2.perk.titel}</b> · ${e2.perk.wirkung.join(" · ")}`, "gut");
+      notiz(textVon("kern.verbesserung-finanziert", {p1:(e2.perk.titel), p2:(e2.perk.wirkung.join(" · "))}), "gut");
       funkenAn(t, ["#f5b73d","#2fbe7e","#ffe9a8","#fff"], 28);
       speichern(); seitenStand = ""; lupeFuellen(e2.seg.id); zeichnen();
       return; }
@@ -4952,12 +4610,12 @@ document.addEventListener("input", e => {
       if (anzeige) anzeige.textContent = MELDUNGSTAKT_NAME[wert];
       if (tempo > 0) tempoSetzen(tempo);
       optSpeichern(); break;
-    case "anstell": anstellMenge = wert; if (anzeige) anzeige.textContent = wert + " Leute";
+    case "anstell": anstellMenge = wert; if (anzeige) anzeige.textContent = wert + textVon("kern.leute");
       { const knopf = document.querySelector('[data-tun="anstellen"]');
         const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF, geht = menge > 0 && S.kasse >= kosten;
         if (knopf){ knopf.disabled = !geht;
-          knopf.innerHTML = (geht?IK.person:"") + (menge <= 0 ? "Im Tutorial genügen " + TUTORIAL_MAX_LEUTE + " Leute"
-            : geht ? "STELLE " + menge + " PERSONEN EIN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)); } }
+          knopf.innerHTML = (geht?IK.person:"") + (menge <= 0 ? textVon("kern.im-tutorial-genuegen") + TUTORIAL_MAX_LEUTE + textVon("kern.leute")
+            : geht ? textVon("kern.stelle") + menge + textVon("kern.personen-ein") + chf(kosten) : textVon("didacticshould.zu-wenig-geld") + chf(kosten)); } }
       break;
   }
 });
@@ -5024,7 +4682,7 @@ function spielzustandAufbauen(g){
   if (g.verkaeufer === undefined){
     zustand.verkaeufer = zustand.fabriken.length ? 3 : 0;
     if (zustand.verkaeufer){
-      const text = "Neu: Ware verkauft sich nicht mehr von allein. Du hast ein kleines Verkaufsteam bekommen – im Markt kannst du es vergrössern.";
+      const text = textVon("kern.neu-ware-verkauft-sich");
       zustand.log = [{tag:zustand.tag, text, art:"warn"}, ...zustand.log].slice(0, 60);
     }
   }

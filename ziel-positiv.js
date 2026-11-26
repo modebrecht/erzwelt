@@ -15,7 +15,7 @@
 (function(){
   const VERSION = 1;
 
-  const plusMinus = v => (v >= 0 ? "+" : "−") + chf(Math.abs(Math.round(v))).replace(/^CHF\s*/, "CHF ");
+  const plusMinus = v => (v >= 0 ? "+" : "−") + chf(Math.abs(Math.round(v))).replace(/^CHF\s*/, textVon("zielpositiv.chf"));
 
   function balken(v){
     if (!v || v.length < 2) return "";
@@ -32,11 +32,11 @@
     const gewinn = etappenGewinn();
     const fehlt = ziel - gewinn;
     const restMonate = Math.max(0, Math.floor((etappenEnde() - S.tag + 1) / 30));
-    if (fehlt <= 0) return `<div class="ziel-prognose gut"><b>Gewinnziel erreicht.</b> Für die Etappe brauchst du ausserdem einen Ruf von mindestens ${ZIEL_RUF}.</div>`;
+    if (fehlt <= 0) return textVon("zielpositiv.gewinnziel-erreicht-fuer-die", {p1:(ZIEL_RUF)});
     if (laufend === null) return `<div class="ziel-prognose">Bis zum Ziel fehlen noch <b>${chf(fehlt)}</b>. Nach dem ersten Monat siehst du hier, ob dein Tempo reicht.</div>`;
-    if (laufend <= 0) return `<div class="ziel-prognose warn">Bis zum Ziel fehlen noch <b>${chf(fehlt)}</b>. Im Moment kostet der Betrieb mehr, als er bringt – prüfe Engpässe und den Verkauf.</div>`;
+    if (laufend <= 0) return textVon("zielpositiv.bis-zum-ziel-fehlen", {p1:(chf(fehlt))});
     const monate = Math.ceil(fehlt / laufend);
-    if (monate <= restMonate) return `<div class="ziel-prognose gut">Bei diesem Tempo erreichst du das Ziel in etwa <b>${monate} ${monate === 1 ? "Monat" : "Monaten"}</b> – du hast noch ${restMonate}.</div>`;
+    if (monate <= restMonate) return textVon("zielpositiv.bei-diesem-tempo-erreichst", {p1:(monate), p2:(monate === 1 ? "Monat" : "Monaten"), p3:(restMonate)});
     const ende = Math.round(fehlt - laufend * restMonate);
     return `<div class="ziel-prognose">Bei diesem Tempo fehlen am Ende rund <b>${chf(ende)}</b>. Mehr Gewinn bringt ein Ausbau der Kette oder ein zweites Produkt.</div>`;
   }
@@ -50,14 +50,9 @@
     const imMonat = (S.tag - 1) % 30;                 // Abrechnung an Tag 31, 61, …
     const naechster = S.tag + (imMonat === 0 ? 30 : 30 - imMonat);
     const zahl = laufend === null
-      ? `<b class="ziel-held-zahl leer">Noch offen</b><span>Erste Monatsabrechnung an Tag ${naechster}</span>`
-      : `<b class="ziel-held-zahl ${laufend >= 0 ? "plus" : "minus"}">${plusMinus(laufend)}${trend ? ` <i class="ziel-trend">${trend}</i>` : ""}</b><span>Einnahmen minus Löhne und Betrieb</span>`;
-    return `<div class="karte ziel-held">
-      <small>Laufendes Geschäft · pro Monat</small>
-      ${zahl}
-      ${balken(v)}
-      ${prognose(laufend)}
-    </div>`;
+      ? textVon("zielpositiv.noch-offen-erste-monatsabrechnung", {p1:(naechster)})
+      : textVon("zielpositiv.einnahmen-minus-loehne-und", {p1:(laufend >= 0 ? "plus" : "minus"), p2:(plusMinus(laufend)), p3:(trend ? ` <i class="ziel-trend">${trend}</i>` : "")});
+    return textVon("zielpositiv.laufendes-geschaeft-pro-monat", {p1:(zahl), p2:(balken(v)), p3:(prognose(laufend))});
   }
 
   /* (Reihenfolge: module/seiten.js) */
@@ -65,9 +60,9 @@
     // Held direkt unter Titel und Untertitel
     html = html.replace(/(<div class="unter">[\s\S]*?<\/div>)/, `$1${heldKarte()}`);
     // Investitionen als Aufbau erklären
-    html = html.replace(/<span>Etappengewinn<\/span>/, "<span>Etappengewinn <small class=\"ziel-klein\">mit Investitionen</small></span>");
-    html = html.replace("Investitionen: Standorte, Ausbau, Leute, Verbesserungen. Sie lohnen sich erst über Verkäufe.",
-      "Investitionen sind dein Aufbau: Standorte, Ausbau, Leute, Verbesserungen. Sie zahlen sich über das laufende Geschäft zurück.");
+    html = html.replace(/<span>Etappengewinn<\/span>/, textVon("zielpositiv.etappengewinn-mit-investitionen"));
+    html = html.replace(textVon("zielpositiv.investitionen-standorte-ausbau-leute"),
+      textVon("zielpositiv.investitionen-sind-dein-aufbau"));
     return html;
   };
 
