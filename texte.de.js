@@ -117,6 +117,9 @@ const TEXTE_DE = Object.freeze({
   "wellen.an": "an",
   "wellen.aus": "aus",
 
+  /* ---------- Einführung ---------- */
+  "tutorial.freigeschaltet": "Jetzt frei: alle Standorte, alle Produkte und der Ausbau von Rohstoffquellen und Raffinerien.",
+
   /* ---------- Tiere auf der Karte ---------- */
   "tiere.antippen": "{tier} ({ort}) antippen: Bonus",
   "tiere.gefunden": "{zeichen} <b>{tier}</b> entdeckt ({ort}) · Bonus +{betrag}."

@@ -147,9 +147,11 @@
   };
 
   if(typeof notiz==="function"){
-    /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+    /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js).
+       «Tutorial abgeschlossen» zeigt schon die grüne Rückmeldung; die Meldung nennt
+       darum nur, was neu frei ist, statt die Überschrift zu wiederholen. */
     (window.__erzweltMeldungenTeile ||= {}).tutorialText=function(text){
-      if(typeof text==="string"&&text.startsWith("Tutorial geschafft –"))text="Tutorial abgeschlossen – du hast die Lieferkette einmal vollständig aufgebaut. Weitere Standorte, Produkte und Ausbauten sind jetzt verfügbar.";
+      if(typeof text==="string"&&text.startsWith("Tutorial geschafft –"))text=textVon("tutorial.freigeschaltet");
       return text;
     };
   }
