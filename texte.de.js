@@ -94,7 +94,18 @@ const TEXTE_DE = Object.freeze({
   "intro.ueberspringen": "Überspringen",
   "intro.weiter": "Weiter",
   "intro.gruenden": "Firma gründen",
-  "intro.schliessen": "Schliessen"
+  "intro.schliessen": "Schliessen",
+
+  /* ---------- Landschaft auf der Karte ---------- */
+  "landschaft.titel": "Landschaft auf der Karte",
+  "landschaft.hilfe": "Wälder, Schnee, Wüsten, Dschungel und Gebirge. Aus = schlichte Karte.",
+  "landschaft.aus": "aus",
+  "landschaft.leicht": "leicht",
+  "landschaft.voll": "voll",
+  "wellen.titel": "Meereswellen",
+  "wellen.hilfe": "Leichte Wellen auf dem Ozean. Mit Animationen «Aus» stehen sie still.",
+  "wellen.an": "an",
+  "wellen.aus": "aus"
 });
 
 function textVon(schluessel, werte){

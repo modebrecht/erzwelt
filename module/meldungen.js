@@ -17,6 +17,7 @@
      dialogSpielstand, einstSpielstand   spielstaende.js
      tempoVor              sek-b-klarheit.js        Kaufpause endet
      toene                 erfolg-feier.js          Regler «Töne», «Vibration»
+     landschaft            karten-landschaft.js     Regler «Landschaft», «Meereswellen»
    Dazu das Ort-Ziel der Aufgabenkarte (__erzweltQuestTeile.ortZiel) und der
    Lieferfluss der Karte (__erzweltKarteTeile.lieferfluss).
    ============================================================ */
@@ -62,6 +63,7 @@
   einstFuellen = function(){
     kern.einst.apply(this, arguments);
     T.toene();
+    T.landschaft?.();
     T.einstSpielstand();
   };
 
