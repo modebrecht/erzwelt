@@ -38,10 +38,10 @@ Mit dem Modul am Ende fehlten vor dem Spielstart Rohstoff-Marken an den Pins.
   Stands schwankt (kurze Effekte), zählt nicht.
 - `tests/unit/certificate.mjs` grün. Die Formular-Sperre wird jetzt über
   `__erzweltSeitenTeile.formularOffen` geprüft.
-- E2E lokal: `probe`, `spielstaende`, `lernfeedback`, `transport-spieltempo`,
-  `wissen-team`, `intro-entdeckungen` grün. `gameplay` scheitert lokal wie auf main an
-  der Titel-Umbruchprüfung (Google Fonts ist hier gesperrt); ohne diese eine Prüfung
-  läuft es vor und nach dem Umbau durch. Massgeblich ist CI auf GitHub.
+- E2E lokal mit den echten Schriften (Baloo 2, Nunito über `@fontsource`): alle Tests
+  der Pipeline grün. `gameplay` schlug vorher auf main wie im Umbau fehl, weil der Titel
+  der ersten Aufgabe bei 320 px umbrach; behoben mit dem kürzeren Titel
+  «Kupfer abbauen» (einzige sichtbare Änderung, eigener Commit).
 
 ## Offen
 
