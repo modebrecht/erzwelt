@@ -1765,11 +1765,7 @@ function marktBewegen(){
   S.preisMod[k] = {faktor:neu, bis:S.tag + 60};
 }
 
-function etappeWeiter(vorherTempo, mitBonus=false){
-  if (mitBonus){
-    S.hilfsBonus = true;
-    notiz(textVon("kern.bonus-aktiviert-verkaufserloese-fuer"), "gut");
-  }
+function etappeWeiter(vorherTempo){
   S.etappe = Math.max(1,S.etappe||1) + 1;
   S.etappeStartEingenommen = S.eingenommen;
   S.etappeStartAusgegeben = S.ausgegeben;
@@ -1778,51 +1774,9 @@ function etappeWeiter(vorherTempo, mitBonus=false){
   tempoSetzen(vorherTempo > 0 ? vorherTempo : 1);
 }
 
-function rundeBeenden(grund){
-  if (S.ende) return;
-  const vorherTempo = tempo > 0 ? tempo : 1;
-  const gewinn = etappenGewinn();
-  const geschafft = grund !== "insolvenz" && gewinn >= ZIEL_GEWINN && S.ruf >= ZIEL_RUF;
-  const mittelUnlock = geschafft && S.schwierigkeit === "mittel" && !META.mittelGeschafft;
-  if (mittelUnlock){ META.mittelGeschafft = true; metaSpeichern(); }
-  S.ende = {grund:grund||"etappe", etappe:S.etappe||1, gewinn, ruf:Math.round(S.ruf), geschafft};
-  tempoSetzen(0);
-
-  if (grund === "insolvenz"){
-    dialogZeigen({
-      art:textVon("abschlusszerti.insolvenz"), titel:textVon("logikfixes.die-firma-ist-zahlungsunfaehig"),
-      text:textVon("logikfixes.deine-kasse-ist-unter", {p1:(S.tag)}),
-      wahlen:[{text:textVon("logikfixes.neue-runde-starten"), klein:textVon("logikfixes.schwierigkeit-neu-waehlen"), tun:()=>{ setTimeout(zuruecksetzen,0); }}]
-    });
-    return;
-  }
-
-  const freischaltText = mittelUnlock
-    ? textVon("kern.schwer-freigeschaltet-du-kannst") : "";
-  const bonusAngebot = !geschafft && S.schwierigkeit === "einfach" && !S.hilfsBonus;
-  const wahlen = [
-    {text:textVon("logikfixes.weiter-etappe", {p1:((S.etappe||1)+1)}), klein:textVon("logikfixes.nochmals-tage-mit-derselben", {p1:(ZIEL_TAGE)}), tun:()=>{ etappeWeiter(vorherTempo); }}
-  ];
-  if (bonusAngebot) wahlen.push({
-    text:textVon("kern.weiter-mit-bonus"),
-    klein:textVon("kern.gleicher-run-verkaufserloese-ab"),
-    tun:()=>{ etappeWeiter(vorherTempo, true); }
-  });
-  wahlen.push({text:textVon("logikfixes.neue-runde-starten"), klein:textVon("kern.schwierigkeit-neu-waehlen-alles"), tun:()=>{ setTimeout(zuruecksetzen,0); }});
-  dialogZeigen({
-    art:textVon("logikfixes.etappe-tage", {p1:(S.etappe), p2:(ZIEL_TAGE)}),
-    titel: geschafft ? textVon("slot.zielErreicht") : textVon("abschlusszerti.etappenziel-verfehlt"),
-    text: textVon("logikfixes.etappengewinn-ziel-ruf-ziel", {p1:(chf(gewinn)), p2:(chf(ZIEL_GEWINN)), p3:(Math.round(S.ruf)), p4:(ZIEL_RUF)})
-        + textVon("logikfixes.schwierigkeit", {p1:(schwierigkeitInfo().icon), p2:(schwierigkeitInfo().name), p3:(verkaufsEffektText())})
-        + (geschafft
-            ? textVon("logikfixes.du-hast-geld-verdient")
-            : (gewinn >= ZIEL_GEWINN
-               ? textVon("logikfixes.der-gewinn-stimmt-aber")
-               : textVon("logikfixes.der-gewinn-reicht-noch")))
-        + freischaltText,
-    wahlen
-  });
-}
+/* Etappenende: Fassung in logik-fixes.js (Ziel je Schwierigkeit, Abschlussdialog).
+   Hier nur deklariert, damit logik-fixes.js sie ersetzen kann. */
+function rundeBeenden(grund){}
 
 /* ============================================================
    Ereignisse
@@ -4269,41 +4223,9 @@ function seiteWechseln(name){
   zeichnen();
 }
 
-function seiteMarkt(){
-  const kraft = verkaufsKraft(), lager = warenLager();
-  const heuteSchon = S.handverkaufTag === S.tag;
-  const frei = freieArbeiter();
-
-  // Was würde ein Handverkauf jetzt einbringen?
-  let handStueck = 0;
-  for (const p in PRODUKT) handStueck += Math.min(S.ware[p]||0, Math.round(nachfrage(p)));
-
-  const prod = Object.keys(PRODUKT).map(p => {
-    const l = S.ware[p]||0;
-    return `<tr><td>${PRODUKT[p].name}</td>
-      <td class="n" style="${l>0?"color:var(--gruen)":""}">${l}</td>
-      <td class="n">${Math.round(nachfrage(p))}</td>
-      <td class="n">${Math.round(warenPreis(p))}</td></tr>`;
-  }).join("");
-
-  const roh = Object.keys(MATERIAL).map(k => {
-    const p = matPreis(k), d = p/MATERIAL[k].preis - 1;
-    const meins = MINEN.some(m => m.mat === k && S.minen[m.id]);
-    return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}
-        ${meins ? "" : `<br><small style="color:var(--grau);font-weight:600">keine eigene Mine</small>`}</td>
-      <td class="n">${Math.round(S.mat[k]||0)}</td>
-      <td class="n">${Math.round(S.erz[k]||0)}</td>
-      <td class="n" style="color:${d>.03?"var(--gruen)":d<-.03?"var(--alarm)":"inherit"}">${p.toFixed(0)}${d>.03?" ▲":d<-.03?" ▼":""}</td></tr>`;
-  }).join("");
-
-  const eff = S.globalMod.filter(m => m.bis > S.tag);
-
-  return textVon("kern.markt-verkauf-fertige-produkte", {p1:(lager), p2:((!heuteSchon && handStueck>0)?"puls":""), p3:((heuteSchon || handStueck<=0) ? "disabled" : ""), p4:(IK.muenze), p5:(handStueck<=0 ? "Nichts zu verkaufen"
-          : heuteSchon ? "Heute schon verkauft" : "SELBST VERKAUFEN · " + handStueck + " Stück"), p6:(frei), p7:(chf(VERKAUF_LOHN)), p8:((S.verkaeufer||0)
-        ? `<div style="width:min(190px,60%)">${ikonTeam(Math.max(1, Math.min(5, Math.ceil((S.verkaeufer||0)/4))), 60, .34)}</div>` : ""), p9:((S.verkaeufer||0)<=0?"disabled":""), p10:((S.verkaeufer||0)<=0?"disabled":""), p11:(S.verkaeufer||0), p12:((frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""), p13:((frei<=0||(S.verkaeufer||0)>=VERKAUF_PLAETZE)?"disabled":""), p14:(kraft), p15:(chf((S.verkaeufer||0)*VERKAUF_LOHN)), p16:(frei <= 0 ? `<div class="notiz rot">Niemand ist gerade frei. Stelle zuerst im Team weitere Personen ein – dann kannst du sie hier in den Verkauf schicken.
-        <button class="cta" data-tun="zumteam">${IK.person}Zum Team</button></div>` : ""), p17:(lager > 0 && kraft === 0 ? `<div class="notiz rot">Deine Ware bleibt liegen. Ohne Verkäufer verkauft nur dein eigener Fingerdruck.</div>` : ""), p18:(prod), p19:(roh), p20:(eff.length ? `<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m =>
-      `<div class="zeile"><span>${m.art==="dollar"?"US-Dollar-Kurs":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>` : "")});
-}
+/* Markt-Reiter: Fassung in didactic-ui.js, zusammengesetzt in module/seiten.js.
+   Hier nur deklariert, damit module/seiten.js sie festlegen kann. */
+function seiteMarkt(){}
 
 function seiteTeam(){
   const rows = [];

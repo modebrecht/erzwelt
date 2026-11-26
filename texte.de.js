@@ -227,12 +227,6 @@ const TEXTE_DE = Object.freeze({
   "didacticshould.die-ausbeute-ist-ein": "Die <b>Ausbeute</b> ist ein vereinfachter Spielwert dafür, wie viel nutzbares Material aus einer Einheit Rohstoff entsteht.",
   "didacticshould.jede-raffinerie-kann-im": "Jede Raffinerie kann im Spiel alle Rohstoffe verarbeiten. Sie hat zusätzlich einen sichtbaren <b>Spezialisierung im Spiel</b>: passende Rohstoffe werden dort 25 % schneller verarbeitet. Diese Spezialisierung ist eine Spielregel und beschreibt keine reale Anlage.",
   "didacticshould.der-kern-des-modells": "Der Kern des Modells steht in <code>erzwelt-core.html</code>. Die didaktischen Korrekturen sind bewusst in <code>didactic-model.js</code>, <code>didactic-events.js</code>, <code>didactic-ui.js</code> und <code>didactic-should.js</code> getrennt. Vergleiche: Welche Regeln wurden vereinfacht, damit Ursache und Wirkung klar bleiben?",
-  "didacticshould.erschliesse-fuenf-verschiedene-rohstoffe": "Erschliesse fünf verschiedene Rohstoffe auf der Weltkarte.",
-  "didacticshould.beobachte-mindestens-zwei-besetzte": "Beobachte mindestens zwei besetzte Minen über zwei Spielmonate.",
-  "didacticshould.baue-zwei-verschiedene-produkte": "Baue zwei verschiedene Produkte und vergleiche ihre Materialengpässe.",
-  "didacticshould.fuehre-eine-lieferkette-mit": "Führe eine Lieferkette mit mindestens zwei Rohstoffquellen über vier Monate.",
-  "didacticshould.schliesse-das-gefuehrte-tutorial": "Schliesse das geführte Tutorial ab und beobachte die ganze Kette einmal.",
-  "didacticshould.voraussetzung-erfuellt": "Voraussetzung erfüllt.",
   "didacticshould.voraussetzung": `<b>Voraussetzung:</b> {p1}<br>{p2}`,
   "didacticshould.vorherige-verbesserung-fehlt": "Vorherige Verbesserung fehlt",
   "didacticshould.voraussetzung-noch-nicht-erfuellt": "Voraussetzung noch nicht erfüllt",
@@ -773,8 +767,6 @@ const TEXTE_DE = Object.freeze({
   "produktentdeck.deine-fabrik-hat-das": "Deine Fabrik hat das erste Stück hergestellt.",
   "produktentdeck.produkt-entdeckt": "Produkt entdeckt",
 
-  /* ---------- spielstaende.js ---------- */
-
   /* ---------- karte-mitte.js ---------- */
   "kartemitte.markt": "Markt",
   "kartemitte.team": "Team",
@@ -1013,12 +1005,7 @@ const TEXTE_DE = Object.freeze({
   "kern.flugzeuge": "Flugzeuge",
   "kern.mio": " Mio",
   "kern.bonus-aktiv-verkaufserloese": `✨ Bonus aktiv · Verkaufserlöse +{p1} %`,
-  "kern.bonus-aktiviert-verkaufserloese-fuer": "✨ <b>Bonus aktiviert:</b> Verkaufserlöse +50 % für den restlichen Run.",
   "kern.etappe-gestartet-naechste-abrechnung": `<b>Etappe {p1}</b> gestartet – nächste Abrechnung nach weiteren {p2} Tagen.`,
-  "kern.schwer-freigeschaltet-du-kannst": `<br><br><b>🔥 Schwer freigeschaltet!</b> Du kannst Schwer ab der nächsten neuen Runde wählen.`,
-  "kern.weiter-mit-bonus": "✨ Weiter mit Bonus",
-  "kern.gleicher-run-verkaufserloese-ab": "Gleicher Run · Verkaufserlöse ab jetzt +50 %",
-  "kern.schwierigkeit-neu-waehlen-alles": "Schwierigkeit neu wählen · alles auf Anfang",
   "kern.streik-in": `Streik in {p1}, {p2}`,
   "kern.die-arbeiterinnen-und-arbeiter": `Die Arbeiterinnen und Arbeiter deiner {p1}-Mine legen die Arbeit nieder. Sie sagen: die Löhne reichen nicht zum Leben, und die Ausrüstung ist zu gefährlich. Die Förderung steht still. <b>Du musst entscheiden.</b>`,
   "kern.loehne-um-erhoehen": "Löhne um 20 % erhöhen",
@@ -1244,41 +1231,6 @@ const TEXTE_DE = Object.freeze({
       <div class="notiz">{p6}</div>
       <button class="cta gruen" data-tun="fab-bau" data-p="{p7}" data-l="{p8}" {p9}>
         {p10}{p11}</button></div>`,
-  "kern.markt-verkauf-fertige-produkte": `<h1>Markt &amp; Verkauf</h1><div class="unter">Fertige Produkte müssen verkauft werden</div>
-
-    <div class="karte" style="background:linear-gradient(#fffdf6,#fdf3dd)">
-      <h3>Verkauf</h3>
-      <div class="ort">Im Lager liegen <b>{p1}</b> Stück</div>
-      <button class="cta riesig {p2}" data-tun="handverkauf"
-        {p3}>
-        {p4}{p5}</button>
-      <div class="notiz">Einmal pro Tag kannst du selbst verkaufen. Wer das nicht jeden Tag machen will, stellt Verkäuferinnen an.</div>
-
-      <h3 style="margin-top:14px">Dein Verkaufsteam</h3>
-      <div class="ort">{p6} Personen frei im Team · Lohn {p7} pro Person und Monat</div>
-      <div style="display:flex;justify-content:center">{p8}</div>
-      <div class="crewzeile">
-        <button data-tun="vcrew" data-n="-5" {p9}>−5</button>
-        <button data-tun="vcrew" data-n="-1" {p10}>−</button>
-        <div class="zahl"><b>{p11}</b><small>Verkäufer</small></div>
-        <button data-tun="vcrew" data-n="1" {p12}>+</button>
-        <button data-tun="vcrew" data-n="5" {p13}>+5</button>
-      </div>
-      <div class="zeile"><span>Verkaufskapazität</span><b>{p14} Stück/Tag</b></div>
-      <div class="zeile"><span>Lohnkosten</span><b>{p15}/Mt.</b></div>
-      {p16}
-      {p17}
-    </div>
-
-    <div class="karte"><h3>Deine Produkte</h3>
-      <table><tr><th>Produkt</th><th class="n">Lager</th><th class="n">Nachfr.</th><th class="n">CHF</th></tr>{p18}</table>
-      <div class="notiz">Der Markt nimmt pro Tag nur die Nachfrage auf. Produzierst du mehr, füllt sich das Lager und der Preis fällt um bis zu 35 %.</div></div>
-
-    <div class="karte"><h3>Deine Rohstoffe</h3>
-      <table><tr><th>Material</th><th class="n">Bereit</th><th class="n">Erz</th><th class="n">Weltpreis</th></tr>{p19}</table>
-      <div class="notiz">Rohstoffe kannst du nicht zukaufen. Jedes Material, das du brauchst, muss aus einer eigenen Mine kommen und durch eine Raffinerie gehen.</div></div>
-
-    {p20}`,
   "kern.rohstoffquelle-2": "Rohstoffquelle ",
   "kern.raffinerie-2": "Raffinerie ",
   "kern.fabrik": "Fabrik ",

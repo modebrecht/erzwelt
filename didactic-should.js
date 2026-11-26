@@ -36,53 +36,9 @@ function shouldMigration(){
   if(!S.wissenGesehen||typeof S.wissenGesehen!=="object")S.wissenGesehen={};
   S.shouldDidaktikVersion=SHOULD_DIDAKTIK_VERSION;
 }
-function wissenPraxis(segId,stufe){
-  const minen=offeneMinen();
-  const aktiveMinen=minen.filter(id=>S.minen[id]&&S.minen[id].arbeiter>0);
-  const materialien=new Set(minen.map(id=>MINEN.find(x=>x.id===id)?.mat).filter(Boolean));
-  const aktiveRaff=Object.keys(S.raff).filter(id=>S.raff[id]&&S.raff[id].arbeiter>0);
-  const fertigeFab=S.fabriken.filter(f=>f.restbau===0);
-  const produktArten=new Set(S.fabriken.map(f=>f.produkt));
-  const matGesamt=Object.values(S.mat).reduce((a,b)=>a+(+b||0),0);
-  const ausbauRaff=Object.values(S.raff).some(r=>(r.ausbau||0)>=5);
-  const ausbauIrgendwo=Object.values(S.minen).some(m=>(m.ausbau||0)>0)||Object.values(S.raff).some(r=>(r.ausbau||0)>0);
-  const regeln={
-    kette:[
-      [!tutorialLaeuft()&&S.eingenommen>0,"Schliesse die erste Lieferkette bis zu einem Verkauf ab."],
-      [minen.length>=4&&aktiveRaff.length>=1&&fertigeFab.length>=1,"Betreibe mindestens vier Rohstoffquellen zusammen mit Raffinerie und Fabrik."]
-    ],
-    geologie:[
-      [materialien.size>=2,"Erschliesse zwei verschiedene Rohstoffe und vergleiche ihre Standorte."],
-      [materialien.size>=5,textVon("didacticshould.erschliesse-fuenf-verschiedene-rohstoffe")]
-    ],
-    leute:[
-      [aktiveMinen.some(id=>S.minen[id].arbeiter>=10),"Betreibe eine Mine mit mindestens 10 Personen."],
-      [aktiveMinen.length>=2&&S.tag>=60,textVon("didacticshould.beobachte-mindestens-zwei-besetzte")]
-    ],
-    chemie:[
-      [aktiveRaff.length>=1&&matGesamt>0,"Raffiniere erstmals Rohstoff zu nutzbarem Material."],
-      [aktiveRaff.length>=2||ausbauRaff,"Betreibe zwei Raffinerien oder baue eine Raffinerie auf Stufe 5 aus."]
-    ],
-    fabrik:[
-      [fertigeFab.length>=1&&(warenLager()>0||S.eingenommen>0),"Produziere dein erstes fertiges Produkt."],
-      [produktArten.size>=2,textVon("didacticshould.baue-zwei-verschiedene-produkte")]
-    ],
-    markt:[
-      [!!S.verkauftSelber||(S.verkaeufer||0)>0,"Verkaufe selbst oder setze erstmals ein Verkaufsteam ein."],
-      [S.eingenommen>=250000&&(S.verkaeufer||0)>=2,"Erziele mindestens CHF 250'000 Umsatz mit einem Verkaufsteam."]
-    ],
-    ruf:[
-      [!tutorialLaeuft()&&S.tag>=60,"Spiele nach dem Tutorial mindestens zwei Monate und beobachte Ruf und Nachfrage."],
-      [S.tag>=120&&minen.length>=2,textVon("didacticshould.fuehre-eine-lieferkette-mit")]
-    ],
-    modell:[
-      [!tutorialLaeuft(),textVon("didacticshould.schliesse-das-gefuehrte-tutorial")],
-      [ausbauIrgendwo&&Object.keys(S.perks).length>=2,"Nutze mindestens einen Ausbau und zwei bereits umgesetzte Verbesserungen."]
-    ]
-  };
-  const r=regeln[segId]?.[stufe]||[true,textVon("didacticshould.voraussetzung-erfuellt")];
-  return {ok:!!r[0],text:r[1]};
-}
+/* Praxisaufgabe einer Wissensstufe: Fassung in knowledge-quest-flow.js.
+   Hier nur deklariert, damit knowledge-quest-flow.js sie ersetzen kann. */
+function wissenPraxis(segId,stufe){}
 /* Lupe: vor und nach dem Füllen (Reihenfolge: module/wissen.js) */
 (window.__erzweltWissenTeile ||= {}).lupeVor=function(segId){
   shouldMigration();
