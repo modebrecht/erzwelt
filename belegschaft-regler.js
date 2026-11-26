@@ -105,10 +105,9 @@
     ? html.replace(ALT, (_, tun, attrs, wert, klein) => bauen(tun, attrs, +wert, klein))
     : html;
 
-  const mitRegler = vorher => function(){ return umbauen(vorher.apply(this, arguments)); };
   /* Blätter: Regler statt Knöpfe (Reihenfolge: module/blatt.js) */
   (window.__erzweltBlattTeile ||= {}).regler = umbauen;
-  seiteMarkt = mitRegler(seiteMarkt);
+  (window.__erzweltSeitenTeile ||= {}).regler = umbauen;
 
   /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
   const lohnSpanne = () => {
@@ -116,9 +115,7 @@
     return `${chf(Math.min(...l))}–${chf(Math.max(...l)).replace(/^CHF\s*/, "")}`;
   };
   const EINMALIG = /(STELLE \d+ PERSONEN EIN · CHF[^<]*?)(?=\s*<\/button>)/;
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    let html = vorherTeam.apply(this, arguments);
+  (window.__erzweltSeitenTeile ||= {}).teamKosten = function(html){
     html = html.replace(EINMALIG, "$1 einmalig");
     const monat = `<div class="notiz monatskosten"><b>Danach jeden Monat Lohn:</b> je nach Land ${lohnSpanne()} pro Person,
       im Verkauf ${chf(VERKAUF_LOHN)}. Wer keine Aufgabe hat, kostet ${chf(200)}.</div>`;

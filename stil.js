@@ -71,17 +71,16 @@
   };
   if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 
-  const vorherWissen = seiteWissen;
-  seiteWissen = function(){ return vorherWissen.apply(this, arguments).replace("⏸", IKON.pause); };
+  /* Wissen-Reiter: Pause-Zeichen als Symbol (module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).wissenPause = html => html.replace("⏸", IKON.pause);
 
   /* ---------- Knopftexte als Verb, normale Schreibweise ---------- */
   const knopfText = html => html
     .replace(/STELLE (\d+) PERSONEN EIN/g, "$1 Personen einstellen")
     .replace(/SELBST VERKAUFEN/g, "Selbst verkaufen")
     .replace(/VERDOPPELN · /g, "Verdoppeln · ");
-  const mitText = vorher => function(){ return knopfText(vorher.apply(this, arguments)); };
-  seiteTeam = mitText(seiteTeam);
-  seiteMarkt = mitText(seiteMarkt);
+  /* Knopftexte im Team- und Markt-Reiter: module/seiten.js */
+  (window.__erzweltSeitenTeile ||= {}).knopfText = knopfText;
   /* Knopftexte in Rohstoffquelle und Raffinerie: module/blatt.js */
   (window.__erzweltBlattTeile ||= {}).knopfText = knopfText;
   document.addEventListener("input", e => {

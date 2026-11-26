@@ -180,17 +180,13 @@
       ${r.abschluss ? '<button type="button" class="cta still" data-tun="abschluss" aria-haspopup="dialog">Zurück zum Abschluss</button>' : ""}
     </section>`;
   }
-  const originalZiel=seiteZiel;
-  seiteZiel=function(){
-    const html=originalZiel();
+  /* Ziel-Reiter: Zertifikat-Karte vor «Neue Runde» (Reihenfolge: module/seiten.js) */
+  const seitenTeile=(window.__erzweltSeitenTeile ||= {});
+  seitenTeile.zielZertifikat=function(html){
     return html.replace('<button class="cta still" data-tun="reset">',certificateCard()+'<button class="cta still" data-tun="reset">');
   };
-  const originalSeiteFuellen=seiteFuellen;
-  seiteFuellen=function(name){
-    // Ein laufender Spieltag darf das aktive Formular nicht ersetzen.
-    if(name==="ziel" && (exporting || document.activeElement?.closest("#erzwelt-zertifikat-form")))return;
-    return originalSeiteFuellen(name);
-  };
+  // Ein laufender Spieltag darf das aktive Formular nicht ersetzen.
+  seitenTeile.formularOffen=name=>!!(name==="ziel" && (exporting || document.activeElement?.closest("#erzwelt-zertifikat-form")));
   const originalDialog=dialogZeigen;
   dialogZeigen=function(e){
     originalDialog(e);

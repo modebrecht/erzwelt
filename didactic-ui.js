@@ -1,6 +1,7 @@
 "use strict";
 /* ---------- Sichtbare Oberflächen ---------- */
-seiteMarkt = function(){
+/* Markt-Reiter: ersetzt die Fassung des Kerns (Reihenfolge: module/seiten.js) */
+(window.__erzweltSeitenTeile ||= {}).markt = function(){
   const kraft = verkaufsKraft(), lager = warenLager();
   const heuteSchon = S.handverkaufTag === S.tag;
   const frei = freieArbeiter();

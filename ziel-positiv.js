@@ -60,9 +60,8 @@
     </div>`;
   }
 
-  const vorherZiel = seiteZiel;
-  seiteZiel = function(){
-    let html = vorherZiel.apply(this, arguments);
+  /* (Reihenfolge: module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).zielPositiv = function(html){
     // Held direkt unter Titel und Untertitel
     html = html.replace(/(<div class="unter">[\s\S]*?<\/div>)/, `$1${heldKarte()}`);
     // Investitionen als Aufbau erklären

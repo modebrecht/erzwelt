@@ -168,9 +168,8 @@
   }, true);
 
   /* Ziel-Reiter: Ziel pro Schwierigkeit, Investitionen, Nachweis-Zähler. */
-  const originalZiel = seiteZiel;
-  seiteZiel = function(){
-    let html = originalZiel();
+  /* (Reihenfolge: module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).zielEtappe = function(html){
     const gewinn = etappenGewinn(), ziel = zielGewinn();
     const invest = etappenInvestitionen();
     html = html.replace(/(<div class="leiste"><i style="width:)[\d.]+(%;background:var\(--gold\)"><\/i><\/div>)/,

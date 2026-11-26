@@ -342,6 +342,8 @@ ihren Dateien und melden sich in `window.__erzwelt…Teile` an; der Kopf jedes M
 listet, welcher Teil woher kommt.
 
 - `module/quest.js` — **Aufgabenkarte**: `questZeichnen` (früher 11 Hüllen).
+- `module/seiten.js` — **Reiter** Markt, Team, Ziel, Wissen: `seiteMarkt`, `seiteTeam`,
+  `seiteZiel`, `seiteWissen`, `seiteFuellen`.
 - `module/blatt.js` — **Blätter** Rohstoffquelle, Raffinerie, Fabrik: `blattMine`,
   `blattRaff`, `blattFab`, `blattFuellen`, `blattZu`, `szeneRaff`.
 

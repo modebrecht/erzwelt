@@ -307,14 +307,14 @@
 
   const REGLER_ANSTELL = /<div class="reglerzeile">\s*<div class="kopf"><b>Wie viele\?<\/b>[\s\S]*?<\/small><\/div>/;
   const KNOPF_ANSTELL = /<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>(\s*<div class="notiz monatskosten">[\s\S]*?<\/div>)?/;
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    if (!tutorialLaeuft()){
-      if (anstellMenge % 5 || anstellMenge < 5) anstellMenge = 10;
-      return vorherTeam.apply(this, arguments);
-    }
+  /* Team-Reiter vor und nach dem Zeichnen (Reihenfolge: module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).teamVor = function(){
+    if (!tutorialLaeuft() && (anstellMenge % 5 || anstellMenge < 5)) anstellMenge = 10;
+  };
+  (window.__erzweltSeitenTeile ||= {}).teamEinfuehrung = function(html){
+    if (!tutorialLaeuft()) return html;
     const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.ist}/${b.soll}</b></span>`).join("");
-    return vorherTeam.apply(this, arguments).replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
+    return html.replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
         <b>Eingestellt wird an der Station</b>
         <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was einmalig und was jeden Monat kostet.</small>
         <div class="bedarf-liste">${liste}</div>

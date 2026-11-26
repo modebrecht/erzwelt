@@ -106,17 +106,15 @@
     return html;
   };
 
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    let html = vorherTeam();
+  /* Texte im Team- und Markt-Reiter (Reihenfolge: module/seiten.js) */
+  const seitenTeile = (window.__erzweltSeitenTeile ||= {});
+  seitenTeile.teamTexte = function(html){
     html = ersetze(html, `<div class="unter">Lohnkosten im Spielmodell</div>`, `<div class="unter">Personal einstellen und auf die Stationen verteilen</div>`);
     html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`, "");
     return html;
   };
 
-  const vorherMarkt = seiteMarkt;
-  seiteMarkt = function(){
-    let html = vorherMarkt();
+  seitenTeile.marktTexte = function(html){
     html = ersetze(html, "Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.",
       "Die Quelle liefert Rohstoff, die Raffinerie macht Material daraus.");
     return html;

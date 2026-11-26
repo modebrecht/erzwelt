@@ -182,10 +182,8 @@
 
   /* Blätter: Drossel in module/blatt.js */
   (window.__erzweltBlattTeile ||= {}).drossel=throttleTickRender;
-  if(typeof seiteFuellen==="function"){
-    const original=seiteFuellen;
-    seiteFuellen=throttleTickRender(original,name=>String(name));
-  }
+  /* Reiter: Drossel in module/seiten.js */
+  (window.__erzweltSeitenTeile ||= {}).drossel=throttleTickRender;
 
   window.__erzweltPerf={
     version:5,
