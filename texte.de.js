@@ -105,7 +105,11 @@ const TEXTE_DE = Object.freeze({
   "wellen.titel": "Meereswellen",
   "wellen.hilfe": "Leichte Wellen auf dem Ozean. Mit Animationen «Aus» stehen sie still.",
   "wellen.an": "an",
-  "wellen.aus": "aus"
+  "wellen.aus": "aus",
+
+  /* ---------- Tiere auf der Karte ---------- */
+  "tiere.antippen": "{tier} ({ort}) antippen: Bonus",
+  "tiere.gefunden": "{zeichen} <b>{tier}</b> entdeckt ({ort}) · Bonus +{betrag}."
 });
 
 function textVon(schluessel, werte){

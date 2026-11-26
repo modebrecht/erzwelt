@@ -75,7 +75,7 @@
     },
     {
       "name": "map-labels",
-      "files": ["karteninfo-daten.js", "karteninfo.js", "karten-landschaft.js"]
+      "files": ["karteninfo-daten.js", "karteninfo.js", "karten-landschaft.js", "karten-tiere.js"]
     },
     {
       "name": "intro-discoveries",
