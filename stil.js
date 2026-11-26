@@ -51,11 +51,8 @@
 
   /* ---------- Emojis ersetzen ---------- */
   const EMOJI_STUFE = /^\s*(?:🌱|⚙️|⚙|🔥)\s*/;
-  const vorherNotiz = notiz;
-  notiz = function(text, art){
-    if (typeof text === "string") text = text.replace(EMOJI_STUFE, "");
-    return vorherNotiz.call(this, text, art);
-  };
+  /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).ohneEmoji = text => typeof text === "string" ? text.replace(EMOJI_STUFE, "") : text;
 
   /* Stufen-Symbole in der Schwierigkeitswahl (Reihenfolge: module/einfuehrung.js) */
   (window.__erzweltEinfuehrungTeile ||= {}).stufenIkonen = function(){

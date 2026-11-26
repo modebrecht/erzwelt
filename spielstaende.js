@@ -417,10 +417,9 @@
     bereich.append(div);
   }
 
-  const dialogVorher = dialogZeigen;
-  dialogZeigen = function(e){
-    const spielstand = S;
-    dialogVorher(e);
+  /* Nach dialogZeigen: Wahl nur im eigenen Spiel, danach Ereignis/Entdeckung (module/meldungen.js) */
+  const meldungenTeile = (window.__erzweltMeldungenTeile ||= {});
+  meldungenTeile.dialogSpielstand = function(e, spielstand){
     for (const b of $("#d-wahlen").querySelectorAll(".wahl:not([data-certificate-open])")){
       const waehlen = b.onclick;
       b.onclick = () => {
@@ -438,9 +437,8 @@
   /* Speichern/Export unter der Schwierigkeitswahl (Reihenfolge: module/einfuehrung.js) */
   (window.__erzweltEinfuehrungTeile ||= {}).spielstandAktionen = () => dialogAktionen($("#d-wahlen"));
 
-  const einstVorher = einstFuellen;
-  einstFuellen = function(){
-    einstVorher();
+  /* Nach einstFuellen: aktiver Spielstand, Speicherfehler (module/meldungen.js) */
+  meldungenTeile.einstSpielstand = function(){
     $("#aktiver-spielstand").textContent = aktiv ? `${aktiv.name} · Tag ${S.tag}` : "";
     const fehler = $("#spielstand-fehler");
     fehler.textContent = speicherFehler;

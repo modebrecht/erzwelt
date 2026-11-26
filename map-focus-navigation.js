@@ -244,10 +244,8 @@
     }
   }
 
-  if(typeof toastsErneuern==="function"){
-    const priorToasts=toastsErneuern;
-    toastsErneuern=function(){const out=priorToasts();decorateToasts();decorateQuest();return out;};
-  }
+  /* Nach toastsErneuern: Meldungen mit Ort antippbar, Ort-Ziel (module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).meldungOrte=decorateToasts;
   /* Aufgabenkarte: Ort-Ziel nach jedem Zeichnen (module/quest.js) */
   (window.__erzweltQuestTeile ||= {}).ortZiel=decorateQuest;
   /* Nach hinweiseSetzen ebenfalls (module/karte.js) */

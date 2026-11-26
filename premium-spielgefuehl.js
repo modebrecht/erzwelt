@@ -162,10 +162,7 @@
   }
   /* Nach jedem Zeichnen (module/karte.js) */
   karteTeile.lieferfluss = lieferflussZeichnen;
-  if (typeof tempoSetzen === "function"){
-    const vorherTempo = tempoSetzen;
-    tempoSetzen = function(){ const out = vorherTempo.apply(this, arguments); lieferflussZeichnen(); return out; };
-  }
+  /* Nach jedem tempoSetzen: lieferfluss (module/meldungen.js) */
 
   /* ---------- 4. Monatsabschluss als kleine Bilanz ---------- */
   const zahlAus = t => +String(t || "0").replace(/[^\d]/g, "") || 0;
@@ -192,15 +189,14 @@
       + ` <span class="mb-zeile">Einnahmen <span class="mb-plus">${betrag(ein)}</span> · Löhne und Betrieb <span class="mb-minus">${betrag(-(lohn + betrieb))}</span></span>`
       + (investiert >= 1 ? ` <span class="mb-klein">Dazu investiert: <span class="mb-zahl">${chf(Math.round(investiert))}</span></span>` : "");
   }
-  if (typeof notiz === "function"){
-    const vorherNotiz = notiz;
-    notiz = function(text, art){
-      if (typeof text === "string" && text.startsWith("Monatsabschluss:")){
-        try { text = monatsBilanz(text); } catch (e){ /* Originaltext behalten */ }
-      }
-      return vorherNotiz.call(this, text, art);
-    };
-  }
+  /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+  const meldungenTeile = (window.__erzweltMeldungenTeile ||= {});
+  meldungenTeile.monatsBilanz = function(text){
+    if (typeof text === "string" && text.startsWith("Monatsabschluss:")){
+      try { text = monatsBilanz(text); } catch (e){ /* Originaltext behalten */ }
+    }
+    return text;
+  };
 
   /* ---------- 5. Verkaufsbetrag im Kassen-Feld ---------- */
   const kassenBox = document.querySelector(".pille.kasse > div");

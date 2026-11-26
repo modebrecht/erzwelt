@@ -118,22 +118,18 @@
   (window.__erzweltQuestTeile ||= {}).wissenFeiern = () => feiern(false);
 
   /* ---------- Einstellung «Töne» ---------- */
-  if (typeof einstFuellen === "function"){
-    const vorherEinst = einstFuellen;
-    einstFuellen = function(){
-      const out = vorherEinst.apply(this, arguments);
-      const anim = document.getElementById("r-anim")?.closest(".reglerzeile");
-      if (anim && !document.getElementById("r-ton") && typeof regler === "function"){
-        anim.insertAdjacentHTML("afterend", regler("ton", "Töne",
-          "Kurze Töne bei Kauf, eigenem Verkauf und erledigter Aufgabe. Im Schulzimmer: Kopfhörer oder aus.",
-          0, 1, 1, tonAn() ? 1 : 0, tonAn() ? "an" : "aus")
-          + (kannVibrieren ? regler("vib", "Vibration",
-          "Kurzes Vibrieren bei Kauf, eigenem Verkauf und erledigter Aufgabe.",
-          0, 1, 1, vibAn() ? 1 : 0, vibAn() ? "an" : "aus") : ""));
-      }
-      return out;
-    };
-  }
+  /* Nach einstFuellen: Regler «Töne» und «Vibration» (module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).toene = function(){
+    const anim = document.getElementById("r-anim")?.closest(".reglerzeile");
+    if (anim && !document.getElementById("r-ton") && typeof regler === "function"){
+      anim.insertAdjacentHTML("afterend", regler("ton", "Töne",
+        "Kurze Töne bei Kauf, eigenem Verkauf und erledigter Aufgabe. Im Schulzimmer: Kopfhörer oder aus.",
+        0, 1, 1, tonAn() ? 1 : 0, tonAn() ? "an" : "aus")
+        + (kannVibrieren ? regler("vib", "Vibration",
+        "Kurzes Vibrieren bei Kauf, eigenem Verkauf und erledigter Aufgabe.",
+        0, 1, 1, vibAn() ? 1 : 0, vibAn() ? "an" : "aus") : ""));
+    }
+  };
   document.addEventListener("input", e => {
     const r = e.target.closest?.('[data-regler="ton"], [data-regler="vib"]');
     if (!r) return;

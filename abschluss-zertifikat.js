@@ -187,9 +187,8 @@
   };
   // Ein laufender Spieltag darf das aktive Formular nicht ersetzen.
   seitenTeile.formularOffen=name=>!!(name==="ziel" && (exporting || document.activeElement?.closest("#erzwelt-zertifikat-form")));
-  const originalDialog=dialogZeigen;
-  dialogZeigen=function(e){
-    originalDialog(e);
+  /* Nach dialogZeigen: PDF-Abschluss am Rundenende (module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).dialogZertifikat=function(){
     if(!S.ende)return;
     const button=document.createElement("button");
     button.type="button";button.className="wahl";button.dataset.certificateOpen="1";

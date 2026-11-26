@@ -147,10 +147,10 @@
   };
 
   if(typeof notiz==="function"){
-    const originalNotiz=notiz;
-    notiz=function(text,art){
+    /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+    (window.__erzweltMeldungenTeile ||= {}).tutorialText=function(text){
       if(typeof text==="string"&&text.startsWith("Tutorial geschafft –"))text="Tutorial abgeschlossen – du hast die Lieferkette einmal vollständig aufgebaut. Weitere Standorte, Produkte und Ausbauten sind jetzt verfügbar.";
-      return originalNotiz(text,art);
+      return text;
     };
   }
 

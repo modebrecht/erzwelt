@@ -188,23 +188,13 @@
 
   // Pflicht-Ereignisse dürfen nie hinter dem Verlauf liegen. Die Simulation läuft
   // beim Lesen weiter; sobald ein Ereignisdialog erscheint, wird der Verlauf geschlossen.
-  if(typeof dialogZeigen==="function"){
-    const priorDialogZeigen=dialogZeigen;
-    dialogZeigen=function(...args){
-      closeHistory();
-      return priorDialogZeigen.apply(this,args);
-    };
-  }
+  const meldungenTeile=(window.__erzweltMeldungenTeile ||= {});
+  meldungenTeile.verlaufZu=closeHistory;
 
   // Die Anzeige steht im Spielkern. Der Verlauf liest weiterhin direkt aus S.log.
-  if(typeof toastsErneuern==="function"){
-    const vorherToasts=toastsErneuern;
-    toastsErneuern=function(){
-      ensureUi();
-      vorherToasts();
-      if(document.body.classList.contains("toast-history-open"))renderHistory();
-    };
-  }
+  /* Vor und nach toastsErneuern (module/meldungen.js) */
+  meldungenTeile.verlaufBereit=ensureUi;
+  meldungenTeile.verlaufNeu=()=>{if(document.body.classList.contains("toast-history-open"))renderHistory();};
 
   ensureUi();
   window.__erzweltNotificationHistory={version:2,maxEntries:60,source:"S.log"};

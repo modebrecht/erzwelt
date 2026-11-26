@@ -353,6 +353,8 @@ listet, welcher Teil woher kommt.
 - `module/einfuehrung.js` — **Einführung**: `schwierigkeitZeigen`, `tutorialPruefen`.
   Schritte, Sperren und Zielort bleiben in `einfuehrung.js`.
 - `module/wissen.js` — **Wissen**: `lupeFuellen`, `naechsterSchritt`.
+- `module/meldungen.js` — **Meldungen, Dialoge, Tempo, Töne**: `notiz`,
+  `toastsErneuern`, `dialogZeigen`, `tempoSetzen`, `einstFuellen`.
 
 Prüfung bei jedem Schritt: `tests/vergleich/` nimmt rund 490 Zustände auf (Text,
 Spielstand, Screenshot) und vergleicht sie mit Aufnahmen des Stands vor dem Umbau

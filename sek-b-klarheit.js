@@ -347,10 +347,9 @@
   const kaufBlatt = (art, id) => art === "mine" ? !S.minen[id]
     : art === "raff" ? !S.raff[id]
     : art === "fab" ? !(S.fabriken || []).some(f => f.land === id) : false;
-  const vorherTempoSetzen = tempoSetzen;
-  tempoSetzen = function(v){
+  /* Vor jedem tempoSetzen (module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).tempoVor = function(){
     if (!eigenerAufruf) kaufPauseVon = null;   // jemand anderes bestimmt das Tempo
-    return vorherTempoSetzen(v);
   };
   const tempoIntern = v => { eigenerAufruf = true; try { tempoSetzen(v); } finally { eigenerAufruf = false; } };
   const fortsetzen = () => {
