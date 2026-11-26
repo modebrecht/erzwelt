@@ -27,9 +27,16 @@ def lade(ordner):
     return daten
 
 KLASSEN = re.compile(r'class="([^"]*)"')
+FLUECHTIG = re.compile(r'<span class="(?:change premium-pin-fx|mine-stop-fx rein|mine-resume-fx|(?:[a-z-]+ )?premium-v2-fx(?: [a-z-]+)?)"></span>')
+FLUECHTIGE_KLASSE = re.compile(r'(class="[^"]*?)\s*\bpremium-v2-final\b')
 def norm(t):
     # Reihenfolge der Klassen in class="…" ist kein sichtbares Verhalten
-    return KLASSEN.sub(lambda m: 'class="' + " ".join(sorted(m.group(1).split())) + '"', t)
+    t = KLASSEN.sub(lambda m: 'class="' + " ".join(sorted(m.group(1).split())) + '"', t)
+    # Kurze Wechsel-Effekte am Pin (leere spans und die Klasse premium-v2-final,
+    # entfernen sich nach 0,7–1,05 s selbst):
+    # ob er in einer Aufnahme noch steckt, hängt nur von der Laufzeit ab
+    t = FLUECHTIGE_KLASSE.sub(r"\1", t).replace('class=" ', 'class="')
+    return FLUECHTIG.sub("", t)
 
 def unterschiede(a, b, pfad=""):
     if type(a) != type(b):
