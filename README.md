@@ -336,11 +336,14 @@ Text oder Aussehen zu ändern. `docs/neuzuweisungen.md` (erzeugt mit
 `node scripts/neuzuweisungen.mjs`) zeigt, welche globalen Funktionen noch von
 mehreren Dateien überschrieben werden.
 
-- `module/quest.js` — **Aufgabenkarte**. Einzige Fassung von `questZeichnen`;
-  die früher elf Hüllen stehen als Schritte in derselben Reihenfolge hintereinander.
-  Teile, die auch anderswo gebraucht werden («Ziel zeigen», Engpass-Kasten,
-  Wissens-Quest, Ort-Ziel …), bleiben in ihrer Datei und melden sich in
-  `window.__erzweltQuestTeile` an.
+Jedes Modul legt seine Funktionen genau einmal fest und ruft die Schritte der
+früheren Hüllen in derselben Reihenfolge auf. Die Teile bleiben mit ihren Stilen in
+ihren Dateien und melden sich in `window.__erzwelt…Teile` an; der Kopf jedes Moduls
+listet, welcher Teil woher kommt.
+
+- `module/quest.js` — **Aufgabenkarte**: `questZeichnen` (früher 11 Hüllen).
+- `module/blatt.js` — **Blätter** Rohstoffquelle, Raffinerie, Fabrik: `blattMine`,
+  `blattRaff`, `blattFab`, `blattFuellen`, `blattZu`, `szeneRaff`.
 
 Prüfung bei jedem Schritt: `tests/vergleich/` nimmt rund 490 Zustände auf (Text,
 Spielstand, Screenshot) und vergleicht sie mit Aufnahmen des Stands vor dem Umbau

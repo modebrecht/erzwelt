@@ -78,13 +78,7 @@
       return out;
     };
   }
-  if (typeof blattFuellen === "function"){
-    const vorher = blattFuellen;
-    blattFuellen = function(){
-      const out = vorher.apply(this, arguments);
-      kuerzen(document.getElementById("blattinhalt"));
-      return out;
-    };
-  }
+  /* Blätter nach jedem Füllen kürzen (module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).kuerzen = kuerzen;
   window.__erzweltKurztexte = {version:VERSION, anzahl:KUERZER.length};
 })();

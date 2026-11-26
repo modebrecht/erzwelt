@@ -101,7 +101,8 @@
     </svg>`;
   }
 
-  szeneRaff=function(def,r){
+  /* Raffinerie-Szene: ersetzt die Fassung des Kerns (Reihenfolge: module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).szeneRaff=function(def,r){
     const first=(def.spezial||[])[0]||Object.keys(MATERIAL)[0];
     const mat=MATERIAL[first]||{};
     return `<div class="szene prozessszene raff-prozess" data-szene="prozess-raff-${esc(def.id)}" data-prozess="raff" data-id="${esc(def.id)}">

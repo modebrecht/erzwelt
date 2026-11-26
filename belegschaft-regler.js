@@ -106,9 +106,8 @@
     : html;
 
   const mitRegler = vorher => function(){ return umbauen(vorher.apply(this, arguments)); };
-  blattMine = mitRegler(blattMine);
-  blattRaff = mitRegler(blattRaff);
-  blattFab = mitRegler(blattFab);
+  /* Blätter: Regler statt Knöpfe (Reihenfolge: module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).regler = umbauen;
   seiteMarkt = mitRegler(seiteMarkt);
 
   /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
@@ -221,13 +220,8 @@
 
   /* Solange ein Regler im Blatt gezogen wird, das Blatt nicht neu zeichnen –
      sonst springt der Griff unter dem Finger weg. */
-  if (typeof blattFuellen === "function"){
-    const vorher = blattFuellen;
-    blattFuellen = function(art, id){
-      if (gezogen && gezogen.isConnected && offenesBlatt && offenesBlatt.art === art && String(offenesBlatt.id) === String(id)) return;
-      return vorher.apply(this, arguments);
-    };
-  }
+  (window.__erzweltBlattTeile ||= {}).reglerGezogen = (art, id) =>
+    !!(gezogen && gezogen.isConnected && offenesBlatt && offenesBlatt.art === art && String(offenesBlatt.id) === String(id));
 
   const style = document.createElement("style");
   style.id = "erzwelt-belegschaft-regler-style";

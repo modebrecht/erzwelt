@@ -213,14 +213,8 @@
     }
   }
 
-  if(typeof blattFuellen==="function"){
-    const originalBlattFuellen=blattFuellen;
-    blattFuellen=function(...args){
-      const out=originalBlattFuellen.apply(this,args);
-      decorateMineDetail();
-      return out;
-    };
-  }
+  /* Stillstand im Blatt nach jedem Füllen (module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).stillstand=decorateMineDetail;
 
   if(typeof zeichnen==="function"){
     const original=zeichnen;

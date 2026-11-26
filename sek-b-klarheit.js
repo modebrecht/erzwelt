@@ -58,9 +58,9 @@
   /* ---------- 5. Einheiten und 8. weniger Vorbehalte ---------- */
   const proTag = v => v >= 10 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toLocaleString("de-CH");
 
-  const vorherBlattMine = blattMine;
-  blattMine = function(id){
-    let html = vorherBlattMine(id);
+  /* Texte der Blätter: Einheiten statt Fachwörter (Reihenfolge: module/blatt.js) */
+  const blattTeile = (window.__erzweltBlattTeile ||= {});
+  blattTeile.mineTexte = function(html, id){
     const def = MINEN.find(x => x.id === id);
     if (!def) return html;
     const land = LAND[def.land];
@@ -75,9 +75,7 @@
     return html;
   };
 
-  const vorherBlattRaff = blattRaff;
-  blattRaff = function(id){
-    let html = vorherBlattRaff(id);
+  blattTeile.raffTexte = function(html, id){
     const def = RAFF_ORTE.find(x => x.id === id);
     if (!def) return html;
     const land = LAND[def.land];
@@ -97,17 +95,9 @@
     return html;
   };
 
-  if (typeof szeneRaff === "function"){
-    const vorherSzeneRaff = szeneRaff;
-    szeneRaff = function(def, r){
-      if (tutorialLaeuft() && def) return vorherSzeneRaff({...def, spezial:[START_MATERIALIEN[0]]}, r);
-      return vorherSzeneRaff(def, r);
-    };
-  }
+  /* Raffinerie-Szene in der Einführung mit dem Start-Rohstoff: module/blatt.js */
 
-  const vorherBlattFab = blattFab;
-  blattFab = function(land){
-    let html = vorherBlattFab(land);
+  blattTeile.fabTexte = function(html, land){
     html = ersetze(html, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat`, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)} pro Person und Monat`);
     html = ersetze(html, "Vereinfachtes Rezept · Spielmodell", "Rezept: Material pro Stück");
     const e = engpass();
@@ -406,21 +396,14 @@
       if (titel) titel.after(n); else inhalt.prepend(n);
     }
   }
-  const vorherBlattFuellen = blattFuellen;
-  blattFuellen = function(art, id){
-    const out = vorherBlattFuellen(art, id);
+  /* Nach dem Füllen eines Blatts und beim Schliessen (module/blatt.js) */
+  blattTeile.kaufPause = function(art, id){
     const kauf = kaufBlatt(art, id) && !S.ende && !modalOffen && S.schwierigkeit;
     if (kauf && kaufPauseVon === null && tempo > 0){ kaufPauseVon = tempo; tempoIntern(0); }
     else if (!kauf) fortsetzen();
     kaufLayout(kauf, !!kauf && kaufPauseVon !== null);
-    return out;
   };
-  const vorherBlattZu = blattZu;
-  blattZu = function(){
-    const out = vorherBlattZu();
-    fortsetzen();
-    return out;
-  };
+  blattTeile.kaufPauseEnde = fortsetzen;
 
   /* ---------- 2./4. Stil ---------- */
   const style = document.createElement("style");

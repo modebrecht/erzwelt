@@ -82,8 +82,8 @@
   const mitText = vorher => function(){ return knopfText(vorher.apply(this, arguments)); };
   seiteTeam = mitText(seiteTeam);
   seiteMarkt = mitText(seiteMarkt);
-  blattMine = mitText(blattMine);
-  blattRaff = mitText(blattRaff);
+  /* Knopftexte in Rohstoffquelle und Raffinerie: module/blatt.js */
+  (window.__erzweltBlattTeile ||= {}).knopfText = knopfText;
   document.addEventListener("input", e => {
     if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
     const k = document.querySelector('[data-tun="anstellen"]');

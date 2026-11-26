@@ -266,12 +266,8 @@
     return html;
   }
 
-  const vorherMine = blattMine;
-  blattMine = function(id){ const h = vorherMine(id); return S.minen[id] ? h : kaufSperren(h, "mine", id); };
-  const vorherRaff = blattRaff;
-  blattRaff = function(id){ const h = vorherRaff(id); return S.raff[id] ? h : kaufSperren(h, "raff", id); };
-  const vorherFab = blattFab;
-  blattFab = function(land){ const h = vorherFab(land); return S.fabriken.some(f => f.land === land) ? h : kaufSperren(h, "fab", land); };
+  /* Kauf in der Einführung sperren (Reihenfolge: module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).kaufSperren = kaufSperren;
 
   /* Sicherheitsnetz, falls ein Knopf trotzdem erreicht wird */
   document.addEventListener("click", e => {

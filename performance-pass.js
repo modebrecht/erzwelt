@@ -180,10 +180,8 @@
     };
   }
 
-  if(typeof blattFuellen==="function"){
-    const original=blattFuellen;
-    blattFuellen=throttleTickRender(original,(art,id)=>`${art}|${id}`,()=>blatt.classList.contains("auf"));
-  }
+  /* Blätter: Drossel in module/blatt.js */
+  (window.__erzweltBlattTeile ||= {}).drossel=throttleTickRender;
   if(typeof seiteFuellen==="function"){
     const original=seiteFuellen;
     seiteFuellen=throttleTickRender(original,name=>String(name));
