@@ -191,15 +191,16 @@
     blattFuellen(e.ziel.art, e.ziel.id);
   }
 
-  const vorherNaechster = naechsterSchritt;
-  naechsterSchritt = function(){
+  /* Engpass als nächster Schritt, solange keine Wissens-Quest läuft; sonst null (module/wissen.js) */
+  const wissenTeile = (window.__erzweltWissenTeile ||= {});
+  wissenTeile.engpassSchritt = function(){
     const api = window.__erzweltKnowledgeQuestFlow;
     const quest = api && typeof api.active === "function" ? api.active() : null;
     if (!quest){
       const e = engpass();
       if (e) return [e.titel, e.text];
     }
-    return vorherNaechster();
+    return null;
   };
 
   /* Während einer Wissens-Quest erscheint der Engpass als kleiner Kasten in der Karte. */
@@ -325,9 +326,8 @@
       ["Nachfrage", "Saison, Ereignisse und dein Ruf verändern, wie viel gekauft wird."],
       ["Preis", "Ein volles Lager senkt den Preis. Der Dollarkurs kann ihn heben oder senken."]
     ];
-    const vorherLupe = lupeFuellen;
-    lupeFuellen = function(segId){
-      const out = vorherLupe(segId);
+    /* Lupe «Modell»: Regeln als Tabelle (Reihenfolge: module/wissen.js) */
+    wissenTeile.modellRegeln = function(segId){
       if (segId === "modell"){
         const merken = [...document.querySelectorAll("#lupeinhalt .karte > h3")].find(h => h.textContent.trim() === "Zum Merken");
         const karte = document.createElement("div");
@@ -336,7 +336,6 @@
         if (merken) merken.closest(".karte").before(karte);
         else document.getElementById("lupeinhalt")?.appendChild(karte);
       }
-      return out;
     };
   }
 

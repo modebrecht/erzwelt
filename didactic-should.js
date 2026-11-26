@@ -83,11 +83,12 @@ function wissenPraxis(segId,stufe){
   const r=regeln[segId]?.[stufe]||[true,"Voraussetzung erfüllt."];
   return {ok:!!r[0],text:r[1]};
 }
-const originalLupeFuellenShould=lupeFuellen;
-lupeFuellen=function(segId){
+/* Lupe: vor und nach dem Füllen (Reihenfolge: module/wissen.js) */
+(window.__erzweltWissenTeile ||= {}).lupeVor=function(segId){
   shouldMigration();
   S.wissenGesehen[segId]=true;
-  originalLupeFuellenShould(segId);
+};
+(window.__erzweltWissenTeile ||= {}).lupeVoraussetzung=function(segId){
   const seg=WISSEN.find(s=>s.id===segId),next=seg&&naechsterPerk(seg);
   if(!seg||!next){speichern();return;}
   const idx=seg.perks.indexOf(next),praxis=wissenPraxis(segId,idx);
@@ -110,7 +111,9 @@ lupeFuellen=function(segId){
   }
   speichern();
 };
-naechsterSchritt=function(){
+/* Hinweis für die Aufgabenkarte ausserhalb von Tutorial und Wissens-Quest:
+   ersetzt die Fassung des Kerns (Reihenfolge: module/wissen.js) */
+(window.__erzweltWissenTeile ||= {}).hinweis=function(){
   const minen=offeneMinen();
   if(!minen.length)return["Noch keine Rohstoffquelle","Welches Material brauchst du für dein nächstes Produkt? Suche dafür eine passende Quelle auf der Karte."];
   const ohne=minen.find(id=>S.minen[id].arbeiter===0);

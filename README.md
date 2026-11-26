@@ -352,6 +352,7 @@ listet, welcher Teil woher kommt.
   `blattRaff`, `blattFab`, `blattFuellen`, `blattZu`, `szeneRaff`.
 - `module/einfuehrung.js` — **Einführung**: `schwierigkeitZeigen`, `tutorialPruefen`.
   Schritte, Sperren und Zielort bleiben in `einfuehrung.js`.
+- `module/wissen.js` — **Wissen**: `lupeFuellen`, `naechsterSchritt`.
 
 Prüfung bei jedem Schritt: `tests/vergleich/` nimmt rund 490 Zustände auf (Text,
 Spielstand, Screenshot) und vergleicht sie mit Aufnahmen des Stands vor dem Umbau

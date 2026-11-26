@@ -322,17 +322,13 @@
   };
 
   /* ---------- Wissen: Verbesserungen erst nach der Einführung ---------- */
-  if (typeof lupeFuellen === "function"){
-    const vorherLupe = lupeFuellen;
-    lupeFuellen = function(){
-      const out = vorherLupe.apply(this, arguments);
-      if (tutorialLaeuft()) document.querySelectorAll('#lupe [data-tun="perk"]').forEach(b => {
-        b.disabled = true; b.classList.remove("puls");
-        b.textContent = "Erst nach der Einführung";
-      });
-      return out;
-    };
-  }
+  /* Nach jedem Füllen der Lupe (module/wissen.js) */
+  (window.__erzweltWissenTeile ||= {}).lupeEinfuehrung = function(){
+    if (tutorialLaeuft()) document.querySelectorAll('#lupe [data-tun="perk"]').forEach(b => {
+      b.disabled = true; b.classList.remove("puls");
+      b.textContent = "Erst nach der Einführung";
+    });
+  };
 
   /* ---------- Karte: genau ein Ziel leuchtet ---------- */
   function zielPinMarkieren(){
