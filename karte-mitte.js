@@ -43,7 +43,9 @@
     {s:"ziel", t:"Ziel", ik:() => IK.ziel},
     {s:"wissen", t:"Wissen", ik:() => IK.wissen}
   ];
-  dockZeichnen = function(){
+  /* Leiste unten: ersetzt die Fassung des Kerns (module/karte.js) */
+  const karteTeile = (window.__erzweltKarteTeile ||= {});
+  karteTeile.dock = function(){
     const frei = freieArbeiter();
     const html = REIHE.map(d => d.orb
       ? `<button class="orb" role="tab" data-seite="karte" aria-selected="${aktiveSeite === "karte"}" aria-label="Weltkarte"><span class="orbring globus">${globus}</span>Karte</button>`
@@ -76,14 +78,8 @@
       el.classList.toggle("steht", steht);
     }
   }
-  if (typeof pinsZeichnen === "function"){
-    const vorher = pinsZeichnen;
-    pinsZeichnen = function(){ const out = vorher.apply(this, arguments); arbeiterZeigen(); return out; };
-  }
-  if (typeof zeichnen === "function"){
-    const vorherZ = zeichnen;
-    zeichnen = function(){ const out = vorherZ.apply(this, arguments); arbeiterZeigen(); return out; };
-  }
+  /* Nach jedem pinsZeichnen und Zeichnen (module/karte.js) */
+  karteTeile.arbeiter = arbeiterZeigen;
   dockZeichnen();
   window.__erzweltKarteMitte = {version:VERSION};
 })();

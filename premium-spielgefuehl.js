@@ -81,10 +81,9 @@
       if (!label.includes(mat.name)) pin.setAttribute("aria-label", `${label}, ${mat.name}`);
     }
   }
-  if (typeof pinsZeichnen === "function"){
-    const vorherPins = pinsZeichnen;
-    pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); pinsMitRohstoff(); return out; };
-  }
+  /* Nach jedem pinsZeichnen (module/karte.js) */
+  const karteTeile = (window.__erzweltKarteTeile ||= {});
+  karteTeile.pinsMitRohstoff = pinsMitRohstoff;
 
   // «Kupfer» → «Kupfer (Cu)» im Aufgabentext (je Rohstoff einmal)
   const buchstabe = "A-Za-zÄÖÜäöüß";
@@ -161,10 +160,8 @@
     const transport = svg.querySelector("#didaktik-transport");
     if (transport) svg.insertBefore(g, transport); else svg.appendChild(g);
   }
-  if (typeof zeichnen === "function"){
-    const vorherZeichnen = zeichnen;
-    zeichnen = function(){ const out = vorherZeichnen.apply(this, arguments); lieferflussZeichnen(); return out; };
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  karteTeile.lieferfluss = lieferflussZeichnen;
   if (typeof tempoSetzen === "function"){
     const vorherTempo = tempoSetzen;
     tempoSetzen = function(){ const out = vorherTempo.apply(this, arguments); lieferflussZeichnen(); return out; };
@@ -256,10 +253,8 @@
       + `Nur zur Orientierung: Transportkosten und Lieferzeiten rechnet das Spiel nicht.</span></span>`;
     if (lwKnopf.dataset.inhalt !== inhalt){ lwKnopf.innerHTML = inhalt; lwKnopf.dataset.inhalt = inhalt; }
   }
-  if (typeof zeichnen === "function"){
-    const vorherZ = zeichnen;
-    zeichnen = function(){ const out = vorherZ.apply(this, arguments); lieferwegKnopf(); return out; };
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  karteTeile.lieferwegKnopf = lieferwegKnopf;
 
   if (typeof pinsZeichnen === "function"){ try { pinsMitRohstoff(); } catch (e){} }
   lieferflussZeichnen();

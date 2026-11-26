@@ -216,8 +216,8 @@
 
   const vorherPruefen = tutorialPruefen;
   tutorialPruefen = function(){ migrieren(); return vorherPruefen.apply(this, arguments); };
-  const vorherZeichnen = zeichnen;
-  zeichnen = function(){ migrieren(); return vorherZeichnen.apply(this, arguments); };
+  /* Vor jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).einfuehrungMigrieren = migrieren;
 
   /* ---------- Nur der Zielort ist kaufbar ---------- */
   const erlaubtKauf = (art, id) => {
@@ -344,8 +344,8 @@
       p.classList.toggle("blass", !treffer);
     });
   }
-  const vorherPins = pinsZeichnen;
-  pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); zielPinMarkieren(); return out; };
+  /* Nach jedem pinsZeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).zielPin = zielPinMarkieren;
 
   /* Ziel des Reglers im Blatt (Marke «Ziel 10») */
   function besetzungsZiel(tun, ref){

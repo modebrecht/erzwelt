@@ -35,11 +35,8 @@
     ${eff.length?`<div class="karte"><h3>Aktuelle Einflüsse</h3>${eff.map(m=>`<div class="zeile"><span>${m.art==="dollar"?"US-Dollar / Fertigwaren":"Durchsatz im Hafen"}</span><b>${Math.round(m.wert*100)} % · ${m.bis-S.tag} T.</b></div>`).join("")}</div>`:""}`;
 };
 
-const originalZeichnen = zeichnen;
-zeichnen = function(){
-  didaktikMigration();
-  return originalZeichnen();
-};
+/* Vor jedem Zeichnen (Reihenfolge: module/karte.js) */
+(window.__erzweltKarteTeile ||= {}).didaktikVor = () => didaktikMigration();
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-didaktik='sicherheit']");
   if (!b) return;

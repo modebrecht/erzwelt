@@ -341,6 +341,10 @@ früheren Hüllen in derselben Reihenfolge auf. Die Teile bleiben mit ihren Stil
 ihren Dateien und melden sich in `window.__erzwelt…Teile` an; der Kopf jedes Moduls
 listet, welcher Teil woher kommt.
 
+- `module/karte.js` — **Karte und Pins**: `zeichnen`, `pinsZeichnen`, `dockZeichnen`,
+  `ansichtAnwenden`, `hinweiseSetzen`, `pinFeiern` (früher bis zu 15 Hüllen). Lädt als
+  erstes nach dem Kern; ein Schritt läuft, sobald seine Datei ihn angemeldet hat. So
+  verhält sich auch das Zeichnen während des Ladens wie vorher.
 - `module/quest.js` — **Aufgabenkarte**: `questZeichnen` (früher 11 Hüllen).
 - `module/seiten.js` — **Reiter** Markt, Team, Ziel, Wissen: `seiteMarkt`, `seiteTeam`,
   `seiteZiel`, `seiteWissen`, `seiteFuellen`.

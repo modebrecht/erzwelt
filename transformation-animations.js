@@ -175,14 +175,8 @@
     });
   }
 
-  if(typeof zeichnen==="function"){
-    const originalZeichnen=zeichnen;
-    zeichnen=function(){
-      const out=originalZeichnen();
-      updateTransformationScenes();
-      return out;
-    };
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).prozessSzenen=updateTransformationScenes;
 
   updateTransformationScenes();
   window.__erzweltProcessAnimations={version:1,features:["raffination","fertigung"]};

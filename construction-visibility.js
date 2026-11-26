@@ -167,24 +167,19 @@
     for(const land of FAB_ORTE)if(S.fabriken.some(f=>f.land===land))updateFactoryLand(land);
   }
 
-  if(typeof pinFeiern==="function"){
-    const originalPinFeiern=pinFeiern;
-    pinFeiern=function(id){
-      const out=originalPinFeiern(id);
-      if(String(id).startsWith("f_")){
-        const land=String(id).slice(2);
-        S.fabriken.filter(f=>f.land===land&&f.restbau>0).forEach(f=>{if(!buildTotals.has(f))buildTotals.set(f,f.restbau);});
-      }
-      setTimeout(updateWorldStates,40);
-      setTimeout(updateWorldStates,RECENT_MS+80);
-      return out;
-    };
-  }
+  /* Nach pinFeiern (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).pinFeiernBau=function(id){
+    if(String(id).startsWith("f_")){
+      const land=String(id).slice(2);
+      S.fabriken.filter(f=>f.land===land&&f.restbau>0).forEach(f=>{if(!buildTotals.has(f))buildTotals.set(f,f.restbau);});
+    }
+    setTimeout(updateWorldStates,40);
+    setTimeout(updateWorldStates,RECENT_MS+80);
+  };
 
-  if(typeof zeichnen==="function"){
-    const originalZeichnen=zeichnen;
-    zeichnen=function(){const out=originalZeichnen();updateWorldStates();return out;};
-  }
+
+  /* Nach jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).bauStatus=updateWorldStates;
 
   updateWorldStates();
   window.__erzweltWorldStatus={version:1,realConstruction:["fabrik"],instantSetup:["mine","raffinerie"]};

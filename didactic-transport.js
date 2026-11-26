@@ -101,9 +101,6 @@ function lieferwegTransportZeichnen(){
   svg.append(gruppe);
 }
 
-const originalZeichnenTransport = zeichnen;
-zeichnen = function(){
-  originalZeichnenTransport();
-  lieferwegTransportZeichnen();
-};
+/* Nach jedem Zeichnen (Reihenfolge: module/karte.js) */
+(window.__erzweltKarteTeile ||= {}).transport = () => lieferwegTransportZeichnen();
 lieferwegTransportZeichnen();

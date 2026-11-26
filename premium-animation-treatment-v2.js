@@ -62,10 +62,8 @@
       last.set(id,state);
     });
   }
-  if(typeof zeichnen==="function"){
-    const original=zeichnen;
-    zeichnen=function(){const out=original();inspect();return out;};
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).animationen2=inspect;
   inspect();
   window.__erzweltPremiumAnimationTreatmentV2={version:1,features:["build-day-tick","construction-finale","machine-beat","output-glint","sale-materiality","transport-depth","tutorial-completion-line","quiet-mode","reduced-motion"]};
 })();

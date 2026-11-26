@@ -250,10 +250,8 @@
   }
   /* Aufgabenkarte: Ort-Ziel nach jedem Zeichnen (module/quest.js) */
   (window.__erzweltQuestTeile ||= {}).ortZiel=decorateQuest;
-  if(typeof hinweiseSetzen==="function"){
-    const priorHints=hinweiseSetzen;
-    hinweiseSetzen=function(){const out=priorHints();decorateQuest();return out;};
-  }
+  /* Nach hinweiseSetzen ebenfalls (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).hinweiseOrtZiel=decorateQuest;
 
   decorateToasts();decorateQuest();
   window.__erzweltMapFocusNavigation={version:1,features:["clickable-location-notifications","quest-context-focus","suggested-purchase-location","smooth-camera-focus"]};

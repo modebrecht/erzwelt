@@ -251,23 +251,23 @@
     aufgeklapptAuf = aktiveSeite;
     questKompakt();
   }, true);
-  const vorherZeichnen = zeichnen;
   /* Zeigt das Tutorial auf einen Knopf der Leiste unten (z. B. Team),
      endet das Blatt über der Leiste, damit der Knopf antippbar bleibt. */
   const dockHinweis = () => document.body.classList.toggle("dock-hinweis",
     tutorialLaeuft() && !!document.querySelector("#dock button.wink"));
   const dockEl = document.getElementById("dock");
   if (dockEl) new MutationObserver(dockHinweis).observe(dockEl, {subtree:true, attributes:true, attributeFilter:["class"]});
-  zeichnen = function(){ const out = vorherZeichnen(); materiallisteKlaeren(); dockHinweis(); return out; };
+  /* Nach jedem Zeichnen (module/karte.js) */
+  Object.assign((window.__erzweltKarteTeile ||= {}), {materialliste:materiallisteKlaeren, dockHinweis});
 
   /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte ----------
      map-focus-navigation rechnet mit der Ecke des Pins statt mit seinem
      sichtbaren Kopf. Hier wird der Ziel-Pin berechnet und so platziert,
      dass er mittig und unterhalb der Aufgabenkarte erscheint. */
-  if (typeof ansichtAnwenden === "function"){
-    const vorherAnsicht = ansichtAnwenden;
+  /* Kamera zum Ziel-Pin: umfasst die Ansicht aus performance-pass.js (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).ansichtFokus = function(vorherAnsicht){
     let zuletzt = 0;
-    ansichtAnwenden = function(){
+    return function(){
       const fokus = welt.classList.contains("map-focus-moving");
       if (!fokus || Date.now() - zuletzt < 700 || aktiveSeite !== "karte") return vorherAnsicht();
       zuletzt = Date.now();
@@ -308,7 +308,7 @@
       window.__zielFokusTimer = setTimeout(() => document.body.classList.remove("ziel-fokus"), 2600);
       return vorherAnsicht();
     };
-  }
+  };
 
   /* ---------- Gelb: kleine Unstimmigkeiten ---------- */
   /* «Das Modell im Code» → «Das Spielmodell», Zusammenhänge in Worten statt Formeln. */

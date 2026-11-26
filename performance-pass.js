@@ -105,12 +105,15 @@
     };
   }
 
+  /* Karte: Stände, an denen module/karte.js erkennt, ob neu gezeichnet werden muss */
+  const karteTeile=(window.__erzweltKarteTeile ||= {});
+
   // Pan/zoom used to rescale every pin on every pointer event, even when only panning.
   // Clamp state synchronously, but batch the DOM transform to one paint per frame and
   // recalculate individual pin sizes only when zoom actually changes.
-  if(typeof ansichtAnwenden==="function"){
+  {
     let raf=0,lastPinZoom=NaN;
-    ansichtAnwenden=function(){
+    karteTeile.ansicht=function(){
       ansichtBegrenzen();
       if(raf)return;
       raf=requestAnimationFrame(()=>{
@@ -124,43 +127,15 @@
     };
   }
 
-  if(typeof pinsZeichnen==="function"){
-    const original=pinsZeichnen;
-    let key="";
-    pinsZeichnen=function(){
-      const next=JSON.stringify([
-        S.tutorial,minePinState(),raffPinState(),fabPinState(),
-        ebenen.mine?1:0,ebenen.raff?1:0,ebenen.fab?1:0
-      ]);
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
-
-  if(typeof dockZeichnen==="function"){
-    const original=dockZeichnen;
-    let key="";
-    dockZeichnen=function(){
-      const next=aktiveSeite+"|"+freieArbeiter();
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
+  karteTeile.pinsStand=()=>JSON.stringify([
+    S.tutorial,minePinState(),raffPinState(),fabPinState(),
+    ebenen.mine?1:0,ebenen.raff?1:0,ebenen.fab?1:0
+  ]);
+  karteTeile.dockStand=()=>aktiveSeite+"|"+freieArbeiter();
 
   /* Aufgabenkarte: Kern nur bei geändertem Inhalt neu zeichnen – in module/quest.js. */
 
-  if(typeof hinweiseSetzen==="function"){
-    const original=hinweiseSetzen;
-    let key="";
-    hinweiseSetzen=function(){
-      const next=(tutorialSchritt()?.ziel?.()||"-")+"|"+aktiveSeite;
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
+  karteTeile.hinweiseStand=()=>(tutorialSchritt()?.ziel?.()||"-")+"|"+aktiveSeite;
 
   function throttleTickRender(original,identity,canSkipTick=()=>true){
     let lastIdentity="",lastTag=-1,lastPaint=0;
