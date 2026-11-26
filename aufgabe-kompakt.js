@@ -51,16 +51,6 @@
   `;
   document.head.appendChild(style);
 
-  /* Kopfzeile kurz halten: «Wissen freigeschaltet» passt nicht auf eine Zeile */
-  if (typeof questZeichnen === "function"){
-    const vorher = questZeichnen;
-    questZeichnen = function(){
-      const out = vorher.apply(this, arguments);
-      const art = document.getElementById("q-art");
-      if (art && art.textContent === "Wissen freigeschaltet") art.textContent = "Neues Wissen";
-      return out;
-    };
-  }
-  if (typeof questZeichnen === "function") questZeichnen();
+  /* Kopfzeile «Neues Wissen» statt «Wissen freigeschaltet»: module/quest.js */
   window.__erzweltAufgabeKompakt = {version: VERSION};
 })();

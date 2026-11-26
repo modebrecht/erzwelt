@@ -9,6 +9,8 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
+- `module/` — zusammengeführte Bereiche: Hier wird eine Funktion genau einmal
+  festgelegt statt in vielen Hüllen übereinander (siehe «Module» unten).
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
 - `index.html` — generierter Einstieg mit eingebettetem Spielcode. Nicht von Hand bearbeiten.
 - `IDEA.md` — Ideensammlung; Einträge dort gelten nicht automatisch als implementiert.
@@ -326,6 +328,34 @@ weiterhin über eine erfolgreich abgeschlossene Mittel-Etappe freigeschaltet.
 Frühere Browser-Spielstände werden einmalig übernommen und als Sicherung
 behalten. Bei blockiertem Browserspeicher bleiben Spielstände in der laufenden
 Sitzung verfügbar. Für die nächste Sitzung die JSON-Datei exportieren.
+
+## Module
+
+Die Patches werden Schritt für Schritt zu Modulen zusammengeführt, ohne Verhalten,
+Text oder Aussehen zu ändern. `docs/neuzuweisungen.md` (erzeugt mit
+`node scripts/neuzuweisungen.mjs`) zeigt, welche globalen Funktionen noch von
+mehreren Dateien überschrieben werden.
+
+- `module/quest.js` — **Aufgabenkarte**. Einzige Fassung von `questZeichnen`;
+  die früher elf Hüllen stehen als Schritte in derselben Reihenfolge hintereinander.
+  Teile, die auch anderswo gebraucht werden («Ziel zeigen», Engpass-Kasten,
+  Wissens-Quest, Ort-Ziel …), bleiben in ihrer Datei und melden sich in
+  `window.__erzweltQuestTeile` an.
+
+Prüfung bei jedem Schritt: `tests/vergleich/` nimmt rund 490 Zustände auf (Text,
+Spielstand, Screenshot) und vergleicht sie mit Aufnahmen des Stands vor dem Umbau
+(Branch `vor-umbau`). Die Referenz zweimal aufnehmen: Was schon zwischen den beiden
+schwankt (Zeitabläufe), zählt nicht als Unterschied. Das Skript startet einen eigenen
+kleinen Webserver; Playwright muss per `NODE_PATH` auffindbar sein.
+
+```bash
+git worktree add /tmp/vorher vor-umbau
+cp -r tests/vergleich /tmp/vorher/tests/
+(cd /tmp/vorher && node scripts/build-standalone.mjs && \
+  node tests/vergleich/aufnahme.cjs /tmp/ref1 && node tests/vergleich/aufnahme.cjs /tmp/ref2)
+node scripts/build-standalone.mjs && node tests/vergleich/aufnahme.cjs /tmp/neu
+python3 tests/vergleich/vergleich.py /tmp/ref1 /tmp/neu --zweite-referenz /tmp/ref2
+```
 
 ## Release-Gates
 

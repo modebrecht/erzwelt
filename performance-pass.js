@@ -149,21 +149,7 @@
     };
   }
 
-  if(typeof questZeichnen==="function"){
-    const original=questZeichnen;
-    let key="";
-    questZeichnen=function(){
-      const t=tutorialSchritt();
-      const w=t?null:naechsterSchritt();
-      const next=JSON.stringify([
-        aktiveSeite,!!offenesBlatt,
-        t?[S.tutorial,t.id,t.titel,t.text]:w
-      ]);
-      if(next===key)return;
-      key=next;
-      return original();
-    };
-  }
+  /* Aufgabenkarte: Kern nur bei geändertem Inhalt neu zeichnen – in module/quest.js. */
 
   if(typeof hinweiseSetzen==="function"){
     const original=hinweiseSetzen;

@@ -98,14 +98,8 @@
     if (t !== el.textContent) el.textContent = t;
     el.dataset.kuerzel = el.textContent;
   }
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      kuerzelImText(document.getElementById("q-text"));
-      return out;
-    };
-  }
+  /* Rohstoff-Kürzel im Aufgabentext nach jedem Zeichnen (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).kuerzel = kuerzelImText;
 
   /* ---------- 2. Lieferkette lebt ---------- */
   const abstand = (a, b) => { const p = px(a), q = px(b); return Math.hypot(p[0]-q[0], p[1]-q[1]); };

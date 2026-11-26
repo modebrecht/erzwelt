@@ -248,10 +248,8 @@
     const priorToasts=toastsErneuern;
     toastsErneuern=function(){const out=priorToasts();decorateToasts();decorateQuest();return out;};
   }
-  if(typeof questZeichnen==="function"){
-    const priorQuest=questZeichnen;
-    questZeichnen=function(){const out=priorQuest();decorateQuest();return out;};
-  }
+  /* Aufgabenkarte: Ort-Ziel nach jedem Zeichnen (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).ortZiel=decorateQuest;
   if(typeof hinweiseSetzen==="function"){
     const priorHints=hinweiseSetzen;
     hinweiseSetzen=function(){const out=priorHints();decorateQuest();return out;};

@@ -121,18 +121,8 @@
   });
 
   /* ---------- Auslöser: Wissens-Quest abgeschlossen ---------- */
-  const anzahlWissen = () => Object.keys(S?.wissenQuestFlow?.collected || {}).length;
-  let wissenBisher = anzahlWissen();
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      const jetzt = anzahlWissen();
-      if (jetzt > wissenBisher) feiern(false);
-      wissenBisher = jetzt;
-      return out;
-    };
-  }
+  /* Neues Wissen feiern: Zählung nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).wissenFeiern = () => feiern(false);
 
   /* ---------- Einstellung «Töne» ---------- */
   if (typeof einstFuellen === "function"){

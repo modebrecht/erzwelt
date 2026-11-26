@@ -231,10 +231,8 @@
     if (typeof questHoeheMessen === "function") questHoeheMessen();
   }
 
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); questKompakt(); return out; };
-  }
+  /* Nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
+  Object.assign((window.__erzweltQuestTeile ||= {}), {engpassKasten, questKompakt});
 
   /* Aufgabe auf anderen Seiten als der Karte nur als schmale Zeile – ausser
      die Aufgabe wird genau auf dieser Seite erledigt (Tutorial: Team, Markt;

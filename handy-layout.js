@@ -218,16 +218,8 @@
     }
     zeile.hidden = !!kette.hidden;
   }
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      phaseZeile();
-      if (typeof questHoeheMessen === "function") questHoeheMessen();
-      return out;
-    };
-    questZeichnen();
-  }
+  /* Nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).phaseZeile = phaseZeile;
 
   window.__erzweltHandyLayout = {version:VERSION};
 })();

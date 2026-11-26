@@ -186,13 +186,8 @@
     if(typeof questHoeheMessen==="function") questHoeheMessen();
   }
 
-  const originalQuestZeichnen=questZeichnen;
-  questZeichnen=function(){
-    flowState();
-    const out=originalQuestZeichnen();
-    syncWissenHinweis();
-    return out;
-  };
+  /* Aufgabenkarte: Zustand vor, Wissens-Quest nach dem Zeichnen (module/quest.js) */
+  Object.assign((window.__erzweltQuestTeile ||= {}), {wissenZustand:flowState, wissenHinweis:syncWissenHinweis});
 
   function markieren(flag){
     if(tutorialLaeuft()) return;
