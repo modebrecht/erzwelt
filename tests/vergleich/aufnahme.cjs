@@ -179,7 +179,8 @@ const ZUSTAND = () => {
     // Fokusring und Zielfokus verschwinden sonst nach Zeitablauf (1–2,6 s): für feste
     // Folgezustände nach der Aufnahme sofort entfernen.
     await p.evaluate(() => {
-      document.querySelectorAll(".map-focus-ring,.map-focus-suggestion").forEach(e => e.remove());
+      // Ebenso die Änderungs-Chips am Blatt («Förderung +12 %», 6,1 s sichtbar)
+      document.querySelectorAll(".map-focus-ring,.map-focus-suggestion,#delta-ebene .delta-chip").forEach(e => e.remove());
       document.body.classList.remove("ziel-fokus");
       if (typeof welt !== "undefined") welt.classList.remove("map-focus-moving");
     });
@@ -1139,6 +1140,7 @@ const ZUSTAND = () => {
   ergebnis["zz-nicht-da"] = { nichtDa };
   fs.writeFileSync(path.join(AUS, "zustaende.json"), JSON.stringify({ fehler, ergebnis }, null, 1));
   await browser.close();
+  server.close(); server.closeAllConnections();
   console.log(`${Object.keys(ergebnis).length} Zustände aufgenommen nach ${AUS}` + (fehler.length ? ` · ${fehler.length} Seitenfehler` : ""));
   if (fehler.length) { console.log(fehler.join("\n")); process.exitCode = 1; }
 })().catch(e => { console.error("FEHLER", e); process.exit(1); });

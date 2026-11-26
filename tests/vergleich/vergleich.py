@@ -10,12 +10,17 @@ zwischen den beiden Referenzen schwanken (Zeitabläufe: Rückmeldungen, kurze
 Effekte), als instabil: sie werden gemeldet, zählen aber nicht als Unterschied.
 Exit-Code 0 = gleich, 1 = Unterschiede.
 """
-import json, sys, os
+import json, sys, os, re
 from PIL import Image, ImageChops
 
 def lade(ordner):
     with open(os.path.join(ordner, "zustaende.json"), encoding="utf-8") as f:
         return json.load(f)
+
+KLASSEN = re.compile(r'class="([^"]*)"')
+def norm(t):
+    # Reihenfolge der Klassen in class="…" ist kein sichtbares Verhalten
+    return KLASSEN.sub(lambda m: 'class="' + " ".join(sorted(m.group(1).split())) + '"', t)
 
 def unterschiede(a, b, pfad=""):
     if type(a) != type(b):
@@ -33,6 +38,9 @@ def unterschiede(a, b, pfad=""):
             yield from unterschiede(x, y, f"{pfad}[{i}]")
     elif isinstance(a, float) and isinstance(b, float):
         if abs(a - b) > 1e-6:
+            yield pfad, a, b
+    elif isinstance(a, str) and isinstance(b, str):
+        if a != b and norm(a) != norm(b):
             yield pfad, a, b
     elif a != b:
         yield pfad, a, b
