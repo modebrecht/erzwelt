@@ -8,6 +8,8 @@
 //   Ersetzung     `name = function` / `name = (…) =>` ohne den Vorgänger zu merken
 //   Hülle         wie Ersetzung, aber der Patch merkt sich vorher den Vorgänger
 //                 (`const alt = name;`, `const alt = window.name`) und ruft ihn auf
+//   Modul         Zuweisung in module/*.js: die eine Fassung, die die Schritte
+//                 aller früheren Hüllen in fester Reihenfolge aufruft
 // Kommentare und Zeichenketten werden vor der Suche entfernt. Das ist eine Übersicht
 // für den Umbau, keine exakte Analyse.
 import { readFile } from "node:fs/promises";
@@ -77,7 +79,8 @@ for (const [datei, code] of quellen) {
       new RegExp(`\\(\\s*(?:window\\.)?${n}\\s*\\)\\s*;?\\s*$|\\}\\)\\(\\s*(?:window\\.)?${n}\\s*\\)`, "mu").test(code);
     for (const m of code.matchAll(zuweisung)) {
       if (datei === "erzwelt-core.html") continue; // im Kern: Initialisierung, keine Umhüllung
-      merke(name, { datei, zeile: zeileVon(code, m.index), art: gemerkt ? "Hülle" : "Ersetzung" });
+      const art = datei.startsWith("module/") ? "Modul" : gemerkt ? "Hülle" : "Ersetzung";
+      merke(name, { datei, zeile: zeileVon(code, m.index), art });
     }
   }
 }
@@ -92,8 +95,10 @@ const aus = [];
 aus.push("# Neuzuweisungen globaler Funktionen", "",
   "Erzeugt mit `node scripts/neuzuweisungen.mjs` (Ladereihenfolge aus `patches.json`).",
   "Textbasiert: «Hülle» = der Patch merkt sich den Vorgänger und ruft ihn auf,",
-  "«Ersetzung» = neue Fassung ohne Vorgänger. Nur Funktionen mit mindestens einer Neuzuweisung.", "",
-  `${liste.length} Funktionen werden nach ihrer Definition neu zugewiesen.`, "",
+  "«Ersetzung» = neue Fassung ohne Vorgänger, «Modul» = die eine Fassung in `module/`.",
+  "Nur Funktionen mit mindestens einer Neuzuweisung.", "",
+  `${liste.length} Funktionen werden nach ihrer Definition neu zugewiesen, davon ` +
+    `${liste.filter(([, e]) => e.some(x => x.art === "Modul") && e.filter(x => x.art !== "Definition").length === 1).length} nur noch durch ein Modul.`, "",
   "| Funktion | Schichten | Reihenfolge |", "|---|---:|---|");
 for (const [name, e] of liste) {
   aus.push(`| \`${name}\` | ${e.length} | ${e.map(x => `${x.datei}:${x.zeile} (${x.art})`).join(" → ")} |`);
