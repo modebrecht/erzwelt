@@ -51,15 +51,11 @@
 
   /* ---------- Emojis ersetzen ---------- */
   const EMOJI_STUFE = /^\s*(?:🌱|⚙️|⚙|🔥)\s*/;
-  const vorherNotiz = notiz;
-  notiz = function(text, art){
-    if (typeof text === "string") text = text.replace(EMOJI_STUFE, "");
-    return vorherNotiz.call(this, text, art);
-  };
+  /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).ohneEmoji = text => typeof text === "string" ? text.replace(EMOJI_STUFE, "") : text;
 
-  const vorherSchwierigkeit = schwierigkeitZeigen;
-  schwierigkeitZeigen = function(){
-    const out = vorherSchwierigkeit.apply(this, arguments);
+  /* Stufen-Symbole in der Schwierigkeitswahl (Reihenfolge: module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).stufenIkonen = function(){
     const ids = ["einfach", "mittel", "schwer"];
     document.querySelectorAll("#d-wahlen .wahl.schwierigkeit").forEach((b, i) => {
       const ic = b.querySelector(".schwierigkeitsicon");
@@ -67,23 +63,21 @@
       const sp = b.querySelector(".sperre");
       if (sp) sp.innerHTML = sp.innerHTML.replace("🔒", IKON.schloss);
     });
-    return out;
   };
   if (!$("#schleier").hidden && $("#d-titel").textContent === "Wähle die Schwierigkeit") schwierigkeitZeigen();
 
-  const vorherWissen = seiteWissen;
-  seiteWissen = function(){ return vorherWissen.apply(this, arguments).replace("⏸", IKON.pause); };
+  /* Wissen-Reiter: Pause-Zeichen als Symbol (module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).wissenPause = html => html.replace("⏸", IKON.pause);
 
   /* ---------- Knopftexte als Verb, normale Schreibweise ---------- */
   const knopfText = html => html
     .replace(/STELLE (\d+) PERSONEN EIN/g, "$1 Personen einstellen")
     .replace(/SELBST VERKAUFEN/g, "Selbst verkaufen")
     .replace(/VERDOPPELN · /g, "Verdoppeln · ");
-  const mitText = vorher => function(){ return knopfText(vorher.apply(this, arguments)); };
-  seiteTeam = mitText(seiteTeam);
-  seiteMarkt = mitText(seiteMarkt);
-  blattMine = mitText(blattMine);
-  blattRaff = mitText(blattRaff);
+  /* Knopftexte im Team- und Markt-Reiter: module/seiten.js */
+  (window.__erzweltSeitenTeile ||= {}).knopfText = knopfText;
+  /* Knopftexte in Rohstoffquelle und Raffinerie: module/blatt.js */
+  (window.__erzweltBlattTeile ||= {}).knopfText = knopfText;
   document.addEventListener("input", e => {
     if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
     const k = document.querySelector('[data-tun="anstellen"]');

@@ -26,7 +26,8 @@
   SCHWIERIGKEIT.mittel.effekt  = "normale Verkaufspreise";
   SCHWIERIGKEIT.schwer.effekt  = "Verkauf bringt 30 % weniger";
 
-  schwierigkeitZeigen = function(){
+  /* Schwierigkeitswahl: ersetzt die Fassung des Kerns (Reihenfolge: module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).schwierigkeitWahl = function(){
     modalOffen = true; tempoSetzen(0);
     $("#d-art").textContent = "Neue Runde";
     $("#d-titel").textContent = "Wähle die Schwierigkeit";
@@ -58,9 +59,9 @@
   /* ---------- 5. Einheiten und 8. weniger Vorbehalte ---------- */
   const proTag = v => v >= 10 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toLocaleString("de-CH");
 
-  const vorherBlattMine = blattMine;
-  blattMine = function(id){
-    let html = vorherBlattMine(id);
+  /* Texte der Blätter: Einheiten statt Fachwörter (Reihenfolge: module/blatt.js) */
+  const blattTeile = (window.__erzweltBlattTeile ||= {});
+  blattTeile.mineTexte = function(html, id){
     const def = MINEN.find(x => x.id === id);
     if (!def) return html;
     const land = LAND[def.land];
@@ -75,9 +76,7 @@
     return html;
   };
 
-  const vorherBlattRaff = blattRaff;
-  blattRaff = function(id){
-    let html = vorherBlattRaff(id);
+  blattTeile.raffTexte = function(html, id){
     const def = RAFF_ORTE.find(x => x.id === id);
     if (!def) return html;
     const land = LAND[def.land];
@@ -97,17 +96,9 @@
     return html;
   };
 
-  if (typeof szeneRaff === "function"){
-    const vorherSzeneRaff = szeneRaff;
-    szeneRaff = function(def, r){
-      if (tutorialLaeuft() && def) return vorherSzeneRaff({...def, spezial:[START_MATERIALIEN[0]]}, r);
-      return vorherSzeneRaff(def, r);
-    };
-  }
+  /* Raffinerie-Szene in der Einführung mit dem Start-Rohstoff: module/blatt.js */
 
-  const vorherBlattFab = blattFab;
-  blattFab = function(land){
-    let html = vorherBlattFab(land);
+  blattTeile.fabTexte = function(html, land){
     html = ersetze(html, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)}/Monat`, `Fabrikstandort · Lohn ${chf(LAND[land].lohn)} pro Person und Monat`);
     html = ersetze(html, "Vereinfachtes Rezept · Spielmodell", "Rezept: Material pro Stück");
     const e = engpass();
@@ -116,17 +107,15 @@
     return html;
   };
 
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    let html = vorherTeam();
+  /* Texte im Team- und Markt-Reiter (Reihenfolge: module/seiten.js) */
+  const seitenTeile = (window.__erzweltSeitenTeile ||= {});
+  seitenTeile.teamTexte = function(html){
     html = ersetze(html, `<div class="unter">Lohnkosten im Spielmodell</div>`, `<div class="unter">Personal einstellen und auf die Stationen verteilen</div>`);
     html = ersetze(html, `<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`, "");
     return html;
   };
 
-  const vorherMarkt = seiteMarkt;
-  seiteMarkt = function(){
-    let html = vorherMarkt();
+  seitenTeile.marktTexte = function(html){
     html = ersetze(html, "Rohstoffpreise am Weltmarkt werden nicht berechnet. Die Rohstoffe stammen im Spiel aus eigenen Quellen und werden anschliessend raffiniert.",
       "Die Quelle liefert Rohstoff, die Raffinerie macht Material daraus.");
     return html;
@@ -202,15 +191,16 @@
     blattFuellen(e.ziel.art, e.ziel.id);
   }
 
-  const vorherNaechster = naechsterSchritt;
-  naechsterSchritt = function(){
+  /* Engpass als nächster Schritt, solange keine Wissens-Quest läuft; sonst null (module/wissen.js) */
+  const wissenTeile = (window.__erzweltWissenTeile ||= {});
+  wissenTeile.engpassSchritt = function(){
     const api = window.__erzweltKnowledgeQuestFlow;
     const quest = api && typeof api.active === "function" ? api.active() : null;
     if (!quest){
       const e = engpass();
       if (e) return [e.titel, e.text];
     }
-    return vorherNaechster();
+    return null;
   };
 
   /* Während einer Wissens-Quest erscheint der Engpass als kleiner Kasten in der Karte. */
@@ -231,10 +221,8 @@
     if (typeof questHoeheMessen === "function") questHoeheMessen();
   }
 
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){ const out = vorherQuest(); engpassKasten(); questKompakt(); return out; };
-  }
+  /* Nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
+  Object.assign((window.__erzweltQuestTeile ||= {}), {engpassKasten, questKompakt});
 
   /* Aufgabe auf anderen Seiten als der Karte nur als schmale Zeile – ausser
      die Aufgabe wird genau auf dieser Seite erledigt (Tutorial: Team, Markt;
@@ -265,23 +253,23 @@
     aufgeklapptAuf = aktiveSeite;
     questKompakt();
   }, true);
-  const vorherZeichnen = zeichnen;
   /* Zeigt das Tutorial auf einen Knopf der Leiste unten (z. B. Team),
      endet das Blatt über der Leiste, damit der Knopf antippbar bleibt. */
   const dockHinweis = () => document.body.classList.toggle("dock-hinweis",
     tutorialLaeuft() && !!document.querySelector("#dock button.wink"));
   const dockEl = document.getElementById("dock");
   if (dockEl) new MutationObserver(dockHinweis).observe(dockEl, {subtree:true, attributes:true, attributeFilter:["class"]});
-  zeichnen = function(){ const out = vorherZeichnen(); materiallisteKlaeren(); dockHinweis(); return out; };
+  /* Nach jedem Zeichnen (module/karte.js) */
+  Object.assign((window.__erzweltKarteTeile ||= {}), {materialliste:materiallisteKlaeren, dockHinweis});
 
   /* ---------- 3. «Ziel zeigen» nicht hinter der Aufgabenkarte ----------
      map-focus-navigation rechnet mit der Ecke des Pins statt mit seinem
      sichtbaren Kopf. Hier wird der Ziel-Pin berechnet und so platziert,
      dass er mittig und unterhalb der Aufgabenkarte erscheint. */
-  if (typeof ansichtAnwenden === "function"){
-    const vorherAnsicht = ansichtAnwenden;
+  /* Kamera zum Ziel-Pin: umfasst die Ansicht aus performance-pass.js (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).ansichtFokus = function(vorherAnsicht){
     let zuletzt = 0;
-    ansichtAnwenden = function(){
+    return function(){
       const fokus = welt.classList.contains("map-focus-moving");
       if (!fokus || Date.now() - zuletzt < 700 || aktiveSeite !== "karte") return vorherAnsicht();
       zuletzt = Date.now();
@@ -322,7 +310,7 @@
       window.__zielFokusTimer = setTimeout(() => document.body.classList.remove("ziel-fokus"), 2600);
       return vorherAnsicht();
     };
-  }
+  };
 
   /* ---------- Gelb: kleine Unstimmigkeiten ---------- */
   /* «Das Modell im Code» → «Das Spielmodell», Zusammenhänge in Worten statt Formeln. */
@@ -338,9 +326,8 @@
       ["Nachfrage", "Saison, Ereignisse und dein Ruf verändern, wie viel gekauft wird."],
       ["Preis", "Ein volles Lager senkt den Preis. Der Dollarkurs kann ihn heben oder senken."]
     ];
-    const vorherLupe = lupeFuellen;
-    lupeFuellen = function(segId){
-      const out = vorherLupe(segId);
+    /* Lupe «Modell»: Regeln als Tabelle (Reihenfolge: module/wissen.js) */
+    wissenTeile.modellRegeln = function(segId){
       if (segId === "modell"){
         const merken = [...document.querySelectorAll("#lupeinhalt .karte > h3")].find(h => h.textContent.trim() === "Zum Merken");
         const karte = document.createElement("div");
@@ -349,7 +336,6 @@
         if (merken) merken.closest(".karte").before(karte);
         else document.getElementById("lupeinhalt")?.appendChild(karte);
       }
-      return out;
     };
   }
 
@@ -361,10 +347,9 @@
   const kaufBlatt = (art, id) => art === "mine" ? !S.minen[id]
     : art === "raff" ? !S.raff[id]
     : art === "fab" ? !(S.fabriken || []).some(f => f.land === id) : false;
-  const vorherTempoSetzen = tempoSetzen;
-  tempoSetzen = function(v){
+  /* Vor jedem tempoSetzen (module/meldungen.js) */
+  (window.__erzweltMeldungenTeile ||= {}).tempoVor = function(){
     if (!eigenerAufruf) kaufPauseVon = null;   // jemand anderes bestimmt das Tempo
-    return vorherTempoSetzen(v);
   };
   const tempoIntern = v => { eigenerAufruf = true; try { tempoSetzen(v); } finally { eigenerAufruf = false; } };
   const fortsetzen = () => {
@@ -408,21 +393,14 @@
       if (titel) titel.after(n); else inhalt.prepend(n);
     }
   }
-  const vorherBlattFuellen = blattFuellen;
-  blattFuellen = function(art, id){
-    const out = vorherBlattFuellen(art, id);
+  /* Nach dem Füllen eines Blatts und beim Schliessen (module/blatt.js) */
+  blattTeile.kaufPause = function(art, id){
     const kauf = kaufBlatt(art, id) && !S.ende && !modalOffen && S.schwierigkeit;
     if (kauf && kaufPauseVon === null && tempo > 0){ kaufPauseVon = tempo; tempoIntern(0); }
     else if (!kauf) fortsetzen();
     kaufLayout(kauf, !!kauf && kaufPauseVon !== null);
-    return out;
   };
-  const vorherBlattZu = blattZu;
-  blattZu = function(){
-    const out = vorherBlattZu();
-    fortsetzen();
-    return out;
-  };
+  blattTeile.kaufPauseEnde = fortsetzen;
 
   /* ---------- 2./4. Stil ---------- */
   const style = document.createElement("style");

@@ -225,10 +225,8 @@
     });
   }
 
-  if(typeof zeichnen==="function"){
-    const originalZeichnen=zeichnen;
-    zeichnen=function(){const out=originalZeichnen();inspectTransitions();return out;};
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).animationen=inspectTransitions;
   inspectTransitions();
 
   window.__erzweltPremiumAnimationTreatment={

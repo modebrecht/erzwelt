@@ -195,10 +195,8 @@
       if (ev.target.closest("#ebenen, #filterknopf")) return;
       filterZu();
     });
-    if (typeof pinsZeichnen === "function"){
-      const vorherPins = pinsZeichnen;
-      pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); filterPunkt(); return out; };
-    }
+    /* Nach jedem pinsZeichnen (module/karte.js) */
+    (window.__erzweltKarteTeile ||= {}).filterPunkt = filterPunkt;
     filterPunkt();
   }
 
@@ -218,16 +216,8 @@
     }
     zeile.hidden = !!kette.hidden;
   }
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      phaseZeile();
-      if (typeof questHoeheMessen === "function") questHoeheMessen();
-      return out;
-    };
-    questZeichnen();
-  }
+  /* Nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).phaseZeile = phaseZeile;
 
   window.__erzweltHandyLayout = {version:VERSION};
 })();

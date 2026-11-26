@@ -83,11 +83,12 @@ function wissenPraxis(segId,stufe){
   const r=regeln[segId]?.[stufe]||[true,"Voraussetzung erfüllt."];
   return {ok:!!r[0],text:r[1]};
 }
-const originalLupeFuellenShould=lupeFuellen;
-lupeFuellen=function(segId){
+/* Lupe: vor und nach dem Füllen (Reihenfolge: module/wissen.js) */
+(window.__erzweltWissenTeile ||= {}).lupeVor=function(segId){
   shouldMigration();
   S.wissenGesehen[segId]=true;
-  originalLupeFuellenShould(segId);
+};
+(window.__erzweltWissenTeile ||= {}).lupeVoraussetzung=function(segId){
   const seg=WISSEN.find(s=>s.id===segId),next=seg&&naechsterPerk(seg);
   if(!seg||!next){speichern();return;}
   const idx=seg.perks.indexOf(next),praxis=wissenPraxis(segId,idx);
@@ -110,7 +111,9 @@ lupeFuellen=function(segId){
   }
   speichern();
 };
-naechsterSchritt=function(){
+/* Hinweis für die Aufgabenkarte ausserhalb von Tutorial und Wissens-Quest:
+   ersetzt die Fassung des Kerns (Reihenfolge: module/wissen.js) */
+(window.__erzweltWissenTeile ||= {}).hinweis=function(){
   const minen=offeneMinen();
   if(!minen.length)return["Noch keine Rohstoffquelle","Welches Material brauchst du für dein nächstes Produkt? Suche dafür eine passende Quelle auf der Karte."];
   const ohne=minen.find(id=>S.minen[id].arbeiter===0);
@@ -140,14 +143,7 @@ naechsterSchritt=function(){
   if(nahe)return["Nächste Ausbaustufe mit grösserer Wirkung","Vergleiche Kosten und Wirkung deiner Ausbauten. Nicht jeder Engpass braucht dieselbe Lösung."];
   return null;
 };
-const originalQuestZeichnenShould=questZeichnen;
-questZeichnen=function(){
-  originalQuestZeichnenShould();
-  if(!tutorialLaeuft()){
-    const q=document.getElementById("quest");
-    if(q&&!q.hidden){const art=document.getElementById("q-art");if(art)art.textContent="Hinweis";}
-  }
-};
+/* Aufgabenkarte: Kopf «Hinweis» ausserhalb des Tutorials setzt module/quest.js. */
 tagVor=function(){
   if(S.ende||modalOffen)return;
   S.tag++;letzteFoerderung={};
@@ -221,6 +217,6 @@ function lieferwegZeichnen(){
   const mine=MINEN.find(x=>x.id===r.mineId),raff=RAFF_ORTE.find(x=>x.id===r.raffId),km=(Math.round((r.d1+r.d2)/100)*100).toLocaleString("de-CH");
   note.innerHTML=`<b>Beispielweg auf der Karte</b><br>${mine.ort} → ${raff.ort} → ${LAND[r.fabrik.land].name} · ca. ${km} km<br><span style="font-weight:600;color:#6b5f50">Die Entfernung dient der geografischen Orientierung. Transportkosten und Lieferzeiten werden nicht berechnet.</span>`;
 }
-const originalZeichnenShould=zeichnen;
-zeichnen=function(){shouldMigration();originalZeichnenShould();lieferwegZeichnen();};
+/* Vor jedem Zeichnen shouldMigration, danach Lieferweg (Reihenfolge: module/karte.js) */
+Object.assign((window.__erzweltKarteTeile ||= {}), {shouldVor:() => shouldMigration(), lieferweg:() => lieferwegZeichnen()});
 shouldMigration();seitenStand="";blattStand="";zeichnen();

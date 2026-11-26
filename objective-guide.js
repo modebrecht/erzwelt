@@ -63,14 +63,8 @@
     if(typeof questHoeheMessen==="function") questHoeheMessen();
   }
 
-  if(typeof questZeichnen==="function"){
-    const priorQuestZeichnen=questZeichnen;
-    questZeichnen=function(){
-      const out=priorQuestZeichnen();
-      syncGuide();
-      return out;
-    };
-  }
+  /* Nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).zielZeigen=syncGuide;
 
   /* Falls ein Klick ausserhalb des Hinweiss den Kontext aendert, ist der
      Button nach dem naechsten Render ebenfalls korrekt. */

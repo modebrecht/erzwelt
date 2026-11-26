@@ -147,9 +147,8 @@
     </div>`;
   }
 
-  const originalBlattMine = blattMine;
-  blattMine = function(id){
-    const html = originalBlattMine(id);
+  /* Rohstoffquelle: Nachweis-Karte vor der Zufriedenheit (Reihenfolge: module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).nachweis = function(html, id){
     const karte = nachweisKarte(id);
     if (!karte) return html;
     const marke = '<div class="karte zufriedenheitskarte">';
@@ -169,9 +168,8 @@
   }, true);
 
   /* Ziel-Reiter: Ziel pro Schwierigkeit, Investitionen, Nachweis-Zähler. */
-  const originalZiel = seiteZiel;
-  seiteZiel = function(){
-    let html = originalZiel();
+  /* (Reihenfolge: module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).zielEtappe = function(html){
     const gewinn = etappenGewinn(), ziel = zielGewinn();
     const invest = etappenInvestitionen();
     html = html.replace(/(<div class="leiste"><i style="width:)[\d.]+(%;background:var\(--gold\)"><\/i><\/div>)/,

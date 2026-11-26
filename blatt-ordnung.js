@@ -106,14 +106,10 @@
     if (dk) chip(`Lohnkosten ${dk}`, jetzt.kosten <= vor.kosten, x, y);
   }
 
-  if (typeof blattFuellen === "function"){
-    const vorher = blattFuellen;
-    blattFuellen = function(art, id){
-      const out = vorher.apply(this, arguments);
-      if (art === "mine" && S.minen[id]){ ordnen(id); deltaPruefen(id); }
-      else letzter = null;
-      return out;
-    };
-  }
+  /* Nach jedem Füllen (module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).ordnen = function(art, id){
+    if (art === "mine" && S.minen[id]){ ordnen(id); deltaPruefen(id); }
+    else letzter = null;
+  };
   window.__erzweltBlattOrdnung = {version:VERSION};
 })();

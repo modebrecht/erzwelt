@@ -213,24 +213,12 @@
     }
   }
 
-  if(typeof blattFuellen==="function"){
-    const originalBlattFuellen=blattFuellen;
-    blattFuellen=function(...args){
-      const out=originalBlattFuellen.apply(this,args);
-      decorateMineDetail();
-      return out;
-    };
-  }
+  /* Stillstand im Blatt nach jedem Füllen (module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).stillstand=decorateMineDetail;
 
-  if(typeof zeichnen==="function"){
-    const original=zeichnen;
-    zeichnen=function(){
-      const out=original();
-      decorateWorld();
-      decorateMineDetail();
-      return out;
-    };
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).stillstandWelt=decorateWorld;
+  (window.__erzweltKarteTeile ||= {}).stillstandBlatt=decorateMineDetail;
   decorateWorld();
 
   window.__erzweltStopSafetyVisual={version:1,features:["strike-vs-safety","real-stop-visual","mine-detail-causal-separation","resume-feedback"]};

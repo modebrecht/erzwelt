@@ -114,7 +114,7 @@
   function quellenSchritte(k, ikon, zusammenhangAuf, warum){
     const name = MAT_NAME(k), n = BEDARF.quelle(k);
     return [
-      { id: k + "-auf", ikon, titel: `${name}-Quelle eröffnen`,
+      { id: k + "-auf", ikon, titel: `${name} abbauen`,
         get text(){ return `Tippe auf der Karte auf ${fett(ortName("mine", quelle(k)))} und eröffne die Rohstoffquelle.`; },
         zusammenhang: zusammenhangAuf,
         ziel: () => pinZiel("mine", quelle(k)),
@@ -214,10 +214,10 @@
   }
   migrieren();
 
-  const vorherPruefen = tutorialPruefen;
-  tutorialPruefen = function(){ migrieren(); return vorherPruefen.apply(this, arguments); };
-  const vorherZeichnen = zeichnen;
-  zeichnen = function(){ migrieren(); return vorherZeichnen.apply(this, arguments); };
+  /* Vor tutorialPruefen (module/einfuehrung.js) */
+  (window.__erzweltEinfuehrungTeile ||= {}).migrieren = migrieren;
+  /* Vor jedem Zeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).einfuehrungMigrieren = migrieren;
 
   /* ---------- Nur der Zielort ist kaufbar ---------- */
   const erlaubtKauf = (art, id) => {
@@ -266,12 +266,8 @@
     return html;
   }
 
-  const vorherMine = blattMine;
-  blattMine = function(id){ const h = vorherMine(id); return S.minen[id] ? h : kaufSperren(h, "mine", id); };
-  const vorherRaff = blattRaff;
-  blattRaff = function(id){ const h = vorherRaff(id); return S.raff[id] ? h : kaufSperren(h, "raff", id); };
-  const vorherFab = blattFab;
-  blattFab = function(land){ const h = vorherFab(land); return S.fabriken.some(f => f.land === land) ? h : kaufSperren(h, "fab", land); };
+  /* Kauf in der Einführung sperren (Reihenfolge: module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).kaufSperren = kaufSperren;
 
   /* Sicherheitsnetz, falls ein Knopf trotzdem erreicht wird */
   document.addEventListener("click", e => {
@@ -311,14 +307,14 @@
 
   const REGLER_ANSTELL = /<div class="reglerzeile">\s*<div class="kopf"><b>Wie viele\?<\/b>[\s\S]*?<\/small><\/div>/;
   const KNOPF_ANSTELL = /<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>(\s*<div class="notiz monatskosten">[\s\S]*?<\/div>)?/;
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    if (!tutorialLaeuft()){
-      if (anstellMenge % 5 || anstellMenge < 5) anstellMenge = 10;
-      return vorherTeam.apply(this, arguments);
-    }
+  /* Team-Reiter vor und nach dem Zeichnen (Reihenfolge: module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).teamVor = function(){
+    if (!tutorialLaeuft() && (anstellMenge % 5 || anstellMenge < 5)) anstellMenge = 10;
+  };
+  (window.__erzweltSeitenTeile ||= {}).teamEinfuehrung = function(html){
+    if (!tutorialLaeuft()) return html;
     const liste = bedarfListe().map(b => `<span>${b.name} <b>${b.ist}/${b.soll}</b></span>`).join("");
-    return vorherTeam.apply(this, arguments).replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
+    return html.replace(">Stelle mehr Personen ein</h3>", ">Dein Personal in der Einführung</h3>").replace(REGLER_ANSTELL, "").replace(KNOPF_ANSTELL, `<div class="einfuehrung-bedarf">
         <b>Eingestellt wird an der Station</b>
         <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was einmalig und was jeden Monat kostet.</small>
         <div class="bedarf-liste">${liste}</div>
@@ -326,17 +322,13 @@
   };
 
   /* ---------- Wissen: Verbesserungen erst nach der Einführung ---------- */
-  if (typeof lupeFuellen === "function"){
-    const vorherLupe = lupeFuellen;
-    lupeFuellen = function(){
-      const out = vorherLupe.apply(this, arguments);
-      if (tutorialLaeuft()) document.querySelectorAll('#lupe [data-tun="perk"]').forEach(b => {
-        b.disabled = true; b.classList.remove("puls");
-        b.textContent = "Erst nach der Einführung";
-      });
-      return out;
-    };
-  }
+  /* Nach jedem Füllen der Lupe (module/wissen.js) */
+  (window.__erzweltWissenTeile ||= {}).lupeEinfuehrung = function(){
+    if (tutorialLaeuft()) document.querySelectorAll('#lupe [data-tun="perk"]').forEach(b => {
+      b.disabled = true; b.classList.remove("puls");
+      b.textContent = "Erst nach der Einführung";
+    });
+  };
 
   /* ---------- Karte: genau ein Ziel leuchtet ---------- */
   function zielPinMarkieren(){
@@ -348,8 +340,8 @@
       p.classList.toggle("blass", !treffer);
     });
   }
-  const vorherPins = pinsZeichnen;
-  pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); zielPinMarkieren(); return out; };
+  /* Nach jedem pinsZeichnen (module/karte.js) */
+  (window.__erzweltKarteTeile ||= {}).zielPin = zielPinMarkieren;
 
   /* Ziel des Reglers im Blatt (Marke «Ziel 10») */
   function besetzungsZiel(tun, ref){

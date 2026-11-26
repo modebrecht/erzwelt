@@ -145,14 +145,12 @@
     return {ok:true,text:praxisText(segId)};
   };
 
-  const originalNaechsterSchritt=naechsterSchritt;
-  naechsterSchritt=function(){
+  /* Aufgabe der laufenden Wissens-Quest, sonst null (module/wissen.js) */
+  (window.__erzweltWissenTeile ||= {}).questSchritt=function(){
     const def=aktiveQuest();
-    if(def){
-      if(questFertig(def)) return [def.titel,def.erfolg];
-      return [def.titel,aufgabeText(def)];
-    }
-    return originalNaechsterSchritt();
+    if(!def) return null;
+    if(questFertig(def)) return [def.titel,def.erfolg];
+    return [def.titel,aufgabeText(def)];
   };
 
   function syncWissenHinweis(){
@@ -186,13 +184,8 @@
     if(typeof questHoeheMessen==="function") questHoeheMessen();
   }
 
-  const originalQuestZeichnen=questZeichnen;
-  questZeichnen=function(){
-    flowState();
-    const out=originalQuestZeichnen();
-    syncWissenHinweis();
-    return out;
-  };
+  /* Aufgabenkarte: Zustand vor, Wissens-Quest nach dem Zeichnen (module/quest.js) */
+  Object.assign((window.__erzweltQuestTeile ||= {}), {wissenZustand:flowState, wissenHinweis:syncWissenHinweis});
 
   function markieren(flag){
     if(tutorialLaeuft()) return;

@@ -105,11 +105,9 @@
     ? html.replace(ALT, (_, tun, attrs, wert, klein) => bauen(tun, attrs, +wert, klein))
     : html;
 
-  const mitRegler = vorher => function(){ return umbauen(vorher.apply(this, arguments)); };
-  blattMine = mitRegler(blattMine);
-  blattRaff = mitRegler(blattRaff);
-  blattFab = mitRegler(blattFab);
-  seiteMarkt = mitRegler(seiteMarkt);
+  /* Blätter: Regler statt Knöpfe (Reihenfolge: module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).regler = umbauen;
+  (window.__erzweltSeitenTeile ||= {}).regler = umbauen;
 
   /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
   const lohnSpanne = () => {
@@ -117,9 +115,7 @@
     return `${chf(Math.min(...l))}–${chf(Math.max(...l)).replace(/^CHF\s*/, "")}`;
   };
   const EINMALIG = /(STELLE \d+ PERSONEN EIN · CHF[^<]*?)(?=\s*<\/button>)/;
-  const vorherTeam = seiteTeam;
-  seiteTeam = function(){
-    let html = vorherTeam.apply(this, arguments);
+  (window.__erzweltSeitenTeile ||= {}).teamKosten = function(html){
     html = html.replace(EINMALIG, "$1 einmalig");
     const monat = `<div class="notiz monatskosten"><b>Danach jeden Monat Lohn:</b> je nach Land ${lohnSpanne()} pro Person,
       im Verkauf ${chf(VERKAUF_LOHN)}. Wer keine Aufgabe hat, kostet ${chf(200)}.</div>`;
@@ -221,13 +217,8 @@
 
   /* Solange ein Regler im Blatt gezogen wird, das Blatt nicht neu zeichnen –
      sonst springt der Griff unter dem Finger weg. */
-  if (typeof blattFuellen === "function"){
-    const vorher = blattFuellen;
-    blattFuellen = function(art, id){
-      if (gezogen && gezogen.isConnected && offenesBlatt && offenesBlatt.art === art && String(offenesBlatt.id) === String(id)) return;
-      return vorher.apply(this, arguments);
-    };
-  }
+  (window.__erzweltBlattTeile ||= {}).reglerGezogen = (art, id) =>
+    !!(gezogen && gezogen.isConnected && offenesBlatt && offenesBlatt.art === art && String(offenesBlatt.id) === String(id));
 
   const style = document.createElement("style");
   style.id = "erzwelt-belegschaft-regler-style";

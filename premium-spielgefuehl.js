@@ -81,10 +81,9 @@
       if (!label.includes(mat.name)) pin.setAttribute("aria-label", `${label}, ${mat.name}`);
     }
   }
-  if (typeof pinsZeichnen === "function"){
-    const vorherPins = pinsZeichnen;
-    pinsZeichnen = function(){ const out = vorherPins.apply(this, arguments); pinsMitRohstoff(); return out; };
-  }
+  /* Nach jedem pinsZeichnen (module/karte.js) */
+  const karteTeile = (window.__erzweltKarteTeile ||= {});
+  karteTeile.pinsMitRohstoff = pinsMitRohstoff;
 
   // «Kupfer» → «Kupfer (Cu)» im Aufgabentext (je Rohstoff einmal)
   const buchstabe = "A-Za-zÄÖÜäöüß";
@@ -98,14 +97,8 @@
     if (t !== el.textContent) el.textContent = t;
     el.dataset.kuerzel = el.textContent;
   }
-  if (typeof questZeichnen === "function"){
-    const vorherQuest = questZeichnen;
-    questZeichnen = function(){
-      const out = vorherQuest.apply(this, arguments);
-      kuerzelImText(document.getElementById("q-text"));
-      return out;
-    };
-  }
+  /* Rohstoff-Kürzel im Aufgabentext nach jedem Zeichnen (module/quest.js) */
+  (window.__erzweltQuestTeile ||= {}).kuerzel = kuerzelImText;
 
   /* ---------- 2. Lieferkette lebt ---------- */
   const abstand = (a, b) => { const p = px(a), q = px(b); return Math.hypot(p[0]-q[0], p[1]-q[1]); };
@@ -167,14 +160,9 @@
     const transport = svg.querySelector("#didaktik-transport");
     if (transport) svg.insertBefore(g, transport); else svg.appendChild(g);
   }
-  if (typeof zeichnen === "function"){
-    const vorherZeichnen = zeichnen;
-    zeichnen = function(){ const out = vorherZeichnen.apply(this, arguments); lieferflussZeichnen(); return out; };
-  }
-  if (typeof tempoSetzen === "function"){
-    const vorherTempo = tempoSetzen;
-    tempoSetzen = function(){ const out = vorherTempo.apply(this, arguments); lieferflussZeichnen(); return out; };
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  karteTeile.lieferfluss = lieferflussZeichnen;
+  /* Nach jedem tempoSetzen: lieferfluss (module/meldungen.js) */
 
   /* ---------- 4. Monatsabschluss als kleine Bilanz ---------- */
   const zahlAus = t => +String(t || "0").replace(/[^\d]/g, "") || 0;
@@ -201,15 +189,14 @@
       + ` <span class="mb-zeile">Einnahmen <span class="mb-plus">${betrag(ein)}</span> · Löhne und Betrieb <span class="mb-minus">${betrag(-(lohn + betrieb))}</span></span>`
       + (investiert >= 1 ? ` <span class="mb-klein">Dazu investiert: <span class="mb-zahl">${chf(Math.round(investiert))}</span></span>` : "");
   }
-  if (typeof notiz === "function"){
-    const vorherNotiz = notiz;
-    notiz = function(text, art){
-      if (typeof text === "string" && text.startsWith("Monatsabschluss:")){
-        try { text = monatsBilanz(text); } catch (e){ /* Originaltext behalten */ }
-      }
-      return vorherNotiz.call(this, text, art);
-    };
-  }
+  /* Meldungstext vor dem Anzeigen (Reihenfolge: module/meldungen.js) */
+  const meldungenTeile = (window.__erzweltMeldungenTeile ||= {});
+  meldungenTeile.monatsBilanz = function(text){
+    if (typeof text === "string" && text.startsWith("Monatsabschluss:")){
+      try { text = monatsBilanz(text); } catch (e){ /* Originaltext behalten */ }
+    }
+    return text;
+  };
 
   /* ---------- 5. Verkaufsbetrag im Kassen-Feld ---------- */
   const kassenBox = document.querySelector(".pille.kasse > div");
@@ -262,10 +249,8 @@
       + `Nur zur Orientierung: Transportkosten und Lieferzeiten rechnet das Spiel nicht.</span></span>`;
     if (lwKnopf.dataset.inhalt !== inhalt){ lwKnopf.innerHTML = inhalt; lwKnopf.dataset.inhalt = inhalt; }
   }
-  if (typeof zeichnen === "function"){
-    const vorherZ = zeichnen;
-    zeichnen = function(){ const out = vorherZ.apply(this, arguments); lieferwegKnopf(); return out; };
-  }
+  /* Nach jedem Zeichnen (module/karte.js) */
+  karteTeile.lieferwegKnopf = lieferwegKnopf;
 
   if (typeof pinsZeichnen === "function"){ try { pinsMitRohstoff(); } catch (e){} }
   lieferflussZeichnen();

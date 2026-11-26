@@ -96,10 +96,12 @@ assert.equal((effectiveDay.match(/produktBuchen\(f.produkt,stueck\)/g)||[]).leng
 assert.equal((model.match(/produktBuchen\(f.produkt, stueck\)/g)||[]).length,1);
 
 // Guard against UI rerender destroying the input cursor or export.
+// module/seiten.js skips seiteFuellen("ziel") while this reports true.
 document.activeElement={closest:()=>true};
-assert.equal(run('seiteFuellen("ziel")'),undefined);
+assert.equal(run('window.__erzweltSeitenTeile.formularOffen("ziel")'),true);
 document.activeElement=null;
-assert.equal(run('seiteFuellen("ziel")'),'redrawn');
+assert.equal(run('window.__erzweltSeitenTeile.formularOffen("ziel")'),false);
+assert.equal(run('window.__erzweltSeitenTeile.formularOffen("markt")'),false);
 
 // Generate actual PDFs with the same offline library used in the standalone.
 await mkdir('artifacts/certificate',{recursive:true});

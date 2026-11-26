@@ -9,7 +9,7 @@
   "groups": [
     {
       "name": "didactic",
-      "files": ["bewegung-immer.js",
+      "files": ["texte.de.js", "module/karte.js", "bewegung-immer.js",
         "didactic-model.js",
         "didactic-events.js",
         "didactic-ui.js",
@@ -71,7 +71,7 @@
     },
     {
       "name": "logic-fixes",
-      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "ziel-positiv.js", "feinschliff.js", "stil.js"]
+      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "module/quest.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "module/seiten.js"]
     },
     {
       "name": "map-labels",
@@ -83,7 +83,7 @@
     },
     {
       "name": "save-slots",
-      "files": ["spielstaende-daten.js", "spielstaende.js", "karte-mitte.js", "blatt-ordnung.js"]
+      "files": ["spielstaende-daten.js", "spielstaende.js", "karte-mitte.js", "blatt-ordnung.js", "module/blatt.js", "module/einfuehrung.js", "module/wissen.js", "module/meldungen.js"]
     }
   ]
 }

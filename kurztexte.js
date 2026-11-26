@@ -69,22 +69,12 @@
     karte?.remove();
   }
 
-  if (typeof seiteFuellen === "function"){
-    const vorher = seiteFuellen;
-    seiteFuellen = function(){
-      const out = vorher.apply(this, arguments);
-      const seite = document.getElementById("seite");
-      kuerzen(seite); rohstoffTabelle(seite); meldungenWeg(seite);
-      return out;
-    };
-  }
-  if (typeof blattFuellen === "function"){
-    const vorher = blattFuellen;
-    blattFuellen = function(){
-      const out = vorher.apply(this, arguments);
-      kuerzen(document.getElementById("blattinhalt"));
-      return out;
-    };
-  }
+  /* Reiter nach jedem Füllen kürzen (module/seiten.js) */
+  (window.__erzweltSeitenTeile ||= {}).kuerzen = function(){
+    const seite = document.getElementById("seite");
+    kuerzen(seite); rohstoffTabelle(seite); meldungenWeg(seite);
+  };
+  /* Blätter nach jedem Füllen kürzen (module/blatt.js) */
+  (window.__erzweltBlattTeile ||= {}).kuerzen = kuerzen;
   window.__erzweltKurztexte = {version:VERSION, anzahl:KUERZER.length};
 })();
