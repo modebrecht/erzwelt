@@ -9,6 +9,8 @@ Die Entwicklungsquellen bleiben bewusst getrennt:
 - `erzwelt-core.html` — ursprünglicher Spielkern. Nicht durch generierte Dateien ersetzen.
 - `patches.json` — einzige verbindliche Reihenfolge aller Patch-Dateien.
 - `*.js` im Repo — Didaktik-, UI-, Performance- und Präsentations-Patches.
+- `texte.de.js` — sichtbare Texte als Schlüssel → Text, abgerufen mit
+  `textVon(schluessel, werte)`. Noch nicht alle Texte umgestellt (`docs/texte-offen.md`).
 - `module/` — zusammengeführte Bereiche: Hier wird eine Funktion genau einmal
   festgelegt statt in vielen Hüllen übereinander (siehe «Module» unten).
 - `scripts/build-standalone.mjs` — erzeugt die eigenständige Enddatei.
@@ -331,8 +333,8 @@ Sitzung verfügbar. Für die nächste Sitzung die JSON-Datei exportieren.
 
 ## Module
 
-Die Patches werden Schritt für Schritt zu Modulen zusammengeführt, ohne Verhalten,
-Text oder Aussehen zu ändern. `docs/neuzuweisungen.md` (erzeugt mit
+Die Patches sind zu Modulen zusammengeführt, ohne Verhalten, Text oder Aussehen zu
+ändern (Bericht: `docs/UMBAU-BERICHT.md`). `docs/neuzuweisungen.md` (erzeugt mit
 `node scripts/neuzuweisungen.mjs`) zeigt, welche globalen Funktionen noch von
 mehreren Dateien überschrieben werden.
 
