@@ -14,10 +14,10 @@ const materialIds = Object.keys(MATERIAL);
 const produktIds = Object.keys(PRODUKT);
 const wissenIds = WISSEN.map(feld => feld.id);
 const slotSchluessel = id => "erzwelt_slot_v1_" + id;
-const slotStandardname = id => "Spielstand " + id;
+const slotStandardname = id => textVon("slot.standardname", {id});
 
 function spielstandFordern(ok, feld){
-  if (!ok) throw new Error("Ungültige Spielstanddaten (" + feld + ").");
+  if (!ok) throw new Error(textVon("daten.ungueltig", {feld}));
 }
 const spielstandObjekt = wert => wert !== null && typeof wert === "object" && !Array.isArray(wert);
 const spielstandZahl = (wert, min = 0, max = 1e15) =>
@@ -184,15 +184,15 @@ function spielstandZustand(daten, alt = false){
 }
 
 function spielstandLesen(roh){
-  if (roh.length > SPIELSTAND_DATEIGRENZE) throw new Error("Die Datei ist grösser als 1 MB.");
+  if (roh.length > SPIELSTAND_DATEIGRENZE) throw new Error(textVon("datei.zuGross"));
   try { return JSON.parse(roh); }
-  catch (e){ throw new Error("Die Datei enthält kein gültiges JSON."); }
+  catch (e){ throw new Error(textVon("datei.keinJson")); }
 }
 
 function spielstandDatei(roh){
   const paket = spielstandLesen(roh);
   spielstandFordern(spielstandObjekt(paket) && paket.saveFormat === SPIELSTAND_FORMAT, "Dateiformat");
-  if (paket.schemaVersion !== SPIELSTAND_VERSION) throw new Error("Diese Version der Spielstanddatei wird nicht unterstützt.");
+  if (paket.schemaVersion !== SPIELSTAND_VERSION) throw new Error(textVon("datei.version"));
   spielstandFordern(spielstandObjekt(paket.slot) && spielstandDatum(paket.slot.savedAt), "Speicherzeit");
   return {name:spielstandName(paket.slot.name), savedAt:paket.slot.savedAt,
     state:spielstandZustand(paket.gameState)};
@@ -213,12 +213,12 @@ function slotLesen(id){
 function slotSchreiben(slot, daten){
   const key = slotSchluessel(slot.id);
   const roh = JSON.stringify({...daten, version:SPIELSTAND_VERSION});
-  if (roh.length > SPIELSTAND_DATEIGRENZE) throw new Error("Der Spielstand ist zu gross für den Speicherplatz.");
+  if (roh.length > SPIELSTAND_DATEIGRENZE) throw new Error(textVon("speichern.zuGross"));
   try {
-    if (SPEICHER.lies(key) !== slot.roh) throw new Error("Der Speicherplatz wurde inzwischen geändert.");
+    if (SPEICHER.lies(key) !== slot.roh) throw new Error(textVon("slot.geaendert"));
     SPEICHER.schreib(key, roh);
-    if (SPEICHER.lies(key) !== roh) throw new Error("Die Speicherung konnte nicht überprüft werden.");
-  } catch (e){ throw new Error("Speicherplatz konnte nicht gesichert werden. " + (e.name === "Error" ? e.message : "")); }
+    if (SPEICHER.lies(key) !== roh) throw new Error(textVon("speichern.nichtGeprueft"));
+  } catch (e){ throw new Error(textVon("speichern.nichtGesichertPlatz") + (e.name === "Error" ? e.message : "")); }
   return roh;
 }
 
@@ -238,13 +238,12 @@ function alteSpielstaendeUebernehmen(){
         catch (e){ unlesbar = true; }
       }
       const state = kandidaten.sort((a, b) => b.tag - a.tag)[0];
-      if (!state) return unlesbar ? "Ein alter Spielstand ist beschädigt. Das Original wurde behalten." : "";
-      if (!leer) return "Ein alter Spielstand ist noch vorhanden. Für die Übernahme braucht es einen freien Speicherplatz.";
+      if (!state) return unlesbar ? textVon("alt.beschaedigt") : "";
+      if (!leer) return textVon("alt.keinPlatz");
       slotSchreiben(leer, {name:slotStandardname(leer.id), savedAt:new Date().toISOString(), state, legacy:true});
       if (!slotLesen(leer.id).state) throw new Error();
     }
     SPEICHER.schreib(SPIELSTAND_LEGACY, "1");
-    return unlesbar ? "Der lesbare alte Spielstand wurde übernommen. Die alten Daten wurden behalten."
-      : "Dein bisheriger Spielstand wurde übernommen. Das Original bleibt als Sicherung im Browser.";
-  } catch (e){ return "Der alte Spielstand konnte nicht übernommen werden. Die bisherigen Daten wurden behalten."; }
+    return textVon(unlesbar ? "alt.teilweise" : "alt.uebernommen");
+  } catch (e){ return textVon("alt.fehler"); }
 }

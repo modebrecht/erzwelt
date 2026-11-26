@@ -16,7 +16,7 @@
     <div class="spielmenue-innen">
       <div class="spielmenue-marke">
         <span class="sm-markenicon" aria-hidden="true">${IK.hacke}</span>
-        <h1 id="spielmenue-titel" tabindex="-1">Erzwelt</h1>
+        <h1 id="spielmenue-titel" tabindex="-1">${textVon("menue.titel")}</h1>
       </div>
       <section id="spielmenue-inhalt" aria-labelledby="spielmenue-titel"></section>
       <p id="spielmenue-meldung" class="sm-meldung" role="status" hidden></p>
@@ -76,14 +76,14 @@
   spiel.append(warnung);
 
   const lokalzeit = zeit => new Date(zeit).toLocaleString("de-CH", {dateStyle:"medium", timeStyle:"short"});
-  const schwierigkeit = state => SCHWIERIGKEIT[state.schwierigkeit]?.name || "Schwierigkeit offen";
+  const schwierigkeit = state => SCHWIERIGKEIT[state.schwierigkeit]?.name || textVon("slot.schwierigkeitOffen");
   function status(state){
-    if (state.ende?.grund === "insolvenz") return "Insolvent";
-    if (state.ende) return state.ende.geschafft ? "Etappenziel erreicht" : "Etappe beendet";
-    return state.schwierigkeit ? "Läuft" : "Spielstart";
+    if (state.ende?.grund === "insolvenz") return textVon("slot.insolvent");
+    if (state.ende) return textVon(state.ende.geschafft ? "slot.zielErreicht" : "slot.etappeBeendet");
+    return textVon(state.schwierigkeit ? "slot.laeuft" : "slot.spielstart");
   }
   function beschreibung(state){
-    return `${schwierigkeit(state)} · Tag ${state.tag} · Etappe ${state.etappe || 1} · ${chf(state.kasse)} · ${status(state)}`;
+    return textVon("slot.beschreibung", {schwierigkeit:schwierigkeit(state), tag:state.tag, etappe:state.etappe || 1, kasse:chf(state.kasse), status:status(state)});
   }
 
   function knopf(text, aktion, {still = false, id, slot} = {}){
@@ -104,8 +104,8 @@
   function speicherMeldung(text){
     speicherFehler = text;
     warnung.textContent = SPEICHER.echt
-      ? "Autosave fehlgeschlagen. Exportiere den Spielstand in den Einstellungen."
-      : "Nur für diese Sitzung gespeichert.";
+      ? textVon("speichern.autosaveFehler")
+      : textVon("speichern.nurSitzung");
     warnung.hidden = !text;
     const fehler = $("#spielstand-fehler");
     if (fehler){
@@ -157,16 +157,16 @@
     karte.className = "sm-karte";
     if (!vorschau) karte.dataset.slotId = slot.id;
     const kopf = document.createElement("h2");
-    kopf.textContent = vorschau ? slot.name : `${slot.id} · ${slot.name || "Freier Speicherplatz"}`;
+    kopf.textContent = vorschau ? slot.name : textVon("slot.kopf", {id:slot.id, name:slot.name || textVon("slot.frei")});
     karte.append(kopf);
     const details = document.createElement("p");
     details.className = "sm-details";
-    details.textContent = slot.state ? beschreibung(slot.state) : slot.fehler ? "Beschädigter Spielstand" : "Leer";
+    details.textContent = slot.state ? beschreibung(slot.state) : textVon(slot.fehler ? "slot.beschaedigt" : "slot.leer");
     karte.append(details);
     if (slot.state){
       const zeit = document.createElement("p");
       zeit.className = "sm-details";
-      zeit.textContent = `Zuletzt gespeichert ${lokalzeit(slot.savedAt)} (Ortszeit)`;
+      zeit.textContent = textVon("slot.zuletztGespeichert", {zeit:lokalzeit(slot.savedAt)});
       karte.append(zeit);
     }
     return karte;
@@ -175,17 +175,17 @@
   function verwalten(slot, aktionen){
     if (slot.state){
       aktionen.append(
-        knopf("Fortsetzen", () => fortsetzen(slot.id), {slot}),
-        knopf("Umbenennen", () => umbenennen(slot.id), {still:true, slot}),
-        knopf("Exportieren", () => {
+        knopf(textVon("slot.fortsetzen"), () => fortsetzen(slot.id), {slot}),
+        knopf(textVon("slot.umbenennen"), () => umbenennen(slot.id), {still:true, slot}),
+        knopf(textVon("slot.exportieren"), () => {
           const aktuell = slotLesen(slot.id);
           if (aktuell.state) exportieren(aktuell);
-          else menueZeigen("verwalten", "Der Spielstand ist inzwischen nicht mehr verfügbar.");
+          else menueZeigen("verwalten", textVon("slot.nichtMehrVerfuegbar"));
         }, {still:true, slot})
       );
     }
-    if (slot.roh === null) aktionen.append(knopf("Neues Spiel", () => neu(slot), {slot}));
-    else if (typeof slot.roh === "string") aktionen.append(knopf("Löschen", () => loeschen(slot), {still:true, slot}));
+    if (slot.roh === null) aktionen.append(knopf(textVon("slot.neu"), () => neu(slot), {slot}));
+    else if (typeof slot.roh === "string") aktionen.append(knopf(textVon("slot.loeschen"), () => loeschen(slot), {still:true, slot}));
   }
 
   function menueZeigen(modus = "start", hinweis = ""){
@@ -198,24 +198,24 @@
     inhalt.replaceChildren();
     const slots = alleSlots();
     if (modus === "start"){
-      titel.textContent = "Erzwelt";
+      titel.textContent = textVon("menue.titel");
       const aktionen = document.createElement("div");
       aktionen.className = "sm-menuaktionen";
       const zuletzt = letzterSlot(slots);
       if (zuletzt){
         const detail = document.createElement("p");
         detail.className = "sm-hinweis";
-        detail.textContent = `${zuletzt.name} · ${schwierigkeit(zuletzt.state)} · Tag ${zuletzt.state.tag}`;
-        aktionen.append(knopf("Spiel fortsetzen", () => fortsetzen(zuletzt.id), {id:"spielmenue-weiter"}), detail);
+        detail.textContent = textVon("menue.zuletzt", {name:zuletzt.name, schwierigkeit:schwierigkeit(zuletzt.state), tag:zuletzt.state.tag});
+        aktionen.append(knopf(textVon("menue.fortsetzen"), () => fortsetzen(zuletzt.id), {id:"spielmenue-weiter"}), detail);
       }
       aktionen.append(
-        knopf("Neues Spiel", () => menueZeigen("neu"), {still:!!zuletzt, id:"spielmenue-neu"}),
-        knopf("Spielstände", () => menueZeigen("verwalten"), {still:true, id:"spielmenue-slots"}),
-        knopf("JSON importieren", () => datei.click(), {still:true, id:"spielmenue-import"})
+        knopf(textVon("menue.neu"), () => menueZeigen("neu"), {still:!!zuletzt, id:"spielmenue-neu"}),
+        knopf(textVon("menue.spielstaende"), () => menueZeigen("verwalten"), {still:true, id:"spielmenue-slots"}),
+        knopf(textVon("menue.import"), () => datei.click(), {still:true, id:"spielmenue-import"})
       );
       inhalt.append(aktionen);
     } else {
-      titel.textContent = {neu:"Speicherplatz wählen", verwalten:"Spielstände", import:"Spielstand importieren"}[modus];
+      titel.textContent = textVon({neu:"menue.titelNeu", verwalten:"menue.titelVerwalten", import:"menue.titelImport"}[modus]);
       const karten = document.createElement("div");
       karten.className = "sm-karten";
       if (modus === "import") karten.append(karteErstellen(importVorschau, true));
@@ -223,7 +223,7 @@
       if (ersterFreier && modus !== "verwalten"){
         const tipp = document.createElement("p");
         tipp.className = "sm-hinweis";
-        tipp.textContent = "Empfohlen · freier Speicherplatz " + ersterFreier.id;
+        tipp.textContent = textVon("menue.empfohlen", {id:ersterFreier.id});
         karten.append(tipp);
       }
       for (const slot of slots){
@@ -234,8 +234,8 @@
         else {
           const frei = slot.roh === null;
           const beschriftung = modus === "import"
-            ? (frei ? "Hier importieren" : "Mit Import überschreiben")
-            : (frei ? "Hier starten" : "Mit neuem Spiel überschreiben");
+            ? textVon(frei ? "menue.hierImportieren" : "menue.importUeberschreiben")
+            : textVon(frei ? "menue.hierStarten" : "menue.neuUeberschreiben");
           const b = knopf(beschriftung, () => modus === "import" ? importieren(slot) : neu(slot), {slot, still:!frei});
           b.disabled = slot.fehler && typeof slot.roh !== "string";
           aktionen.append(b);
@@ -243,18 +243,18 @@
         karte.append(aktionen);
         karten.append(karte);
       }
-      const zurueck = knopf("Zum Hauptmenü", () => menueZeigen(), {still:true});
+      const zurueck = knopf(textVon("menue.zurueck"), () => menueZeigen(), {still:true});
       zurueck.classList.add("sm-zurueck");
       inhalt.append(karten, zurueck);
     }
-    menueMeldung([hinweis, SPEICHER.echt ? "" : "Nur für diese Sitzung gespeichert. Sichere deine Spielstände als JSON-Datei."]
+    menueMeldung([hinweis, SPEICHER.echt ? "" : textVon("menue.nurSitzung")]
       .filter(Boolean).join(" "));
     titel.focus();
     menue.scrollTop = 0;
   }
 
   function slotErsetzen(slot, daten){
-    if (slot.roh !== null && !confirm(`«${slot.name}» auf Speicherplatz ${slot.id} überschreiben?`)) return false;
+    if (slot.roh !== null && !confirm(textVon("slot.ueberschreibenFrage", {name:slot.name, id:slot.id}))) return false;
     try { slotSchreiben(slot, daten); return true; }
     catch (e){ menueMeldung(e.message); return false; }
   }
@@ -267,26 +267,26 @@
 
   function umbenennen(id){
     const slot = slotLesen(id);
-    if (!slot.state) return menueZeigen("verwalten", "Der Spielstand ist nicht verfügbar.");
-    const eingabe = prompt("Neuer Name für «" + slot.name + "»", slot.name);
+    if (!slot.state) return menueZeigen("verwalten", textVon("slot.nichtVerfuegbar"));
+    const eingabe = prompt(textVon("slot.neuerName", {name:slot.name}), slot.name);
     if (eingabe === null || eingabe === slot.name) return;
     try {
       const name = spielstandName(eingabe);
       const daten = JSON.parse(slot.roh);
       slotSchreiben(slot, {...daten, name});
-      menueZeigen("verwalten", "Spielstand umbenannt.");
+      menueZeigen("verwalten", textVon("slot.umbenannt"));
     } catch (e){ menueMeldung(e.message); }
   }
 
   function loeschen(slot){
-    if (!confirm(`«${slot.name}» auf Speicherplatz ${slot.id} unwiderruflich löschen?`)) return;
+    if (!confirm(textVon("slot.loeschenFrage", {name:slot.name, id:slot.id}))) return;
     try {
       const key = slotSchluessel(slot.id);
-      if (SPEICHER.lies(key) !== slot.roh) return menueZeigen("verwalten", "Der Speicherplatz wurde inzwischen geändert.");
+      if (SPEICHER.lies(key) !== slot.roh) return menueZeigen("verwalten", textVon("slot.geaendert"));
       SPEICHER.loesch(key);
       if (SPEICHER.lies(key) !== null) throw new Error();
-      menueZeigen("verwalten", "Spielstand gelöscht.");
-    } catch (e){ menueMeldung("Der Spielstand konnte nicht gelöscht werden."); }
+      menueZeigen("verwalten", textVon("slot.geloescht"));
+    } catch (e){ menueMeldung(textVon("slot.nichtGeloescht")); }
   }
 
   datei.addEventListener("change", async () => {
@@ -295,10 +295,10 @@
     if (!quelle) return;
     const anfrage = ++importAnfrage;
     try {
-      if (quelle.size > SPIELSTAND_DATEIGRENZE) throw new Error("Die Datei ist grösser als 1 MB.");
+      if (quelle.size > SPIELSTAND_DATEIGRENZE) throw new Error(textVon("datei.zuGross"));
       let roh;
       try { roh = new TextDecoder("utf-8", {fatal:true}).decode(await quelle.arrayBuffer()); }
-      catch (e){ throw new Error("Die Datei muss als UTF-8-JSON gespeichert sein."); }
+      catch (e){ throw new Error(textVon("datei.keinUtf8")); }
       if (anfrage !== importAnfrage) return;
       importVorschau = spielstandDatei(roh);
       menueZeigen("import");
@@ -307,8 +307,8 @@
 
   function importieren(slot){
     if (!importVorschau || !slotErsetzen(slot, {...importVorschau, savedAt:new Date().toISOString()})) return;
-    menueZeigen("verwalten", "Spielstand importiert.");
-    const weiter = knopf("Jetzt fortsetzen", () => fortsetzen(slot.id), {id:"spielmenue-import-weiter"});
+    menueZeigen("verwalten", textVon("slot.importiert"));
+    const weiter = knopf(textVon("slot.jetztFortsetzen"), () => fortsetzen(slot.id), {id:"spielmenue-import-weiter"});
     inhalt.prepend(weiter);
     weiter.focus();
   }
@@ -340,9 +340,9 @@
 
   function fortsetzen(id, neuBegonnen = false){
     const slot = slotLesen(id);
-    if (!slot.state) return menueZeigen("verwalten", "Der Spielstand ist nicht verfügbar.");
+    if (!slot.state) return menueZeigen("verwalten", textVon("slot.nichtVerfuegbar"));
     spieloberflaecheSchliessen();
-    if (!laden(slot.state)) return menueZeigen("verwalten", "Der Spielstand konnte nicht geladen werden.");
+    if (!laden(slot.state)) return menueZeigen("verwalten", textVon("slot.nichtGeladen"));
     aktiv = slot;
     spielAktiv = true;
     produktentdeckungenInitialisieren();
@@ -388,8 +388,8 @@
     const gesichert = speichern(true);
     if (gesichert && SPEICHER.echt) return spielVerlassen(neuWaehlen);
     verlassenAngeboten = true;
-    const text = gesichert ? "Nur für diese Sitzung gespeichert. Exportiere eine JSON-Sicherung für später."
-      : "Der aktuelle Fortschritt konnte nicht im Browser gespeichert werden. Exportiere ihn vor dem Verlassen. " + speicherFehler;
+    const text = gesichert ? textVon("speichern.nurSitzungExport")
+      : textVon("speichern.nichtGesichert") + speicherFehler;
     speicherMeldung(text);
     for (const el of document.querySelectorAll(".sm-fehler")){
       el.textContent = text;
@@ -411,9 +411,9 @@
     const div = document.createElement("div");
     div.className = "sm-dialogaktionen";
     div.innerHTML = `<p class="sm-fehler notiz" role="alert" hidden></p>
-      <button type="button" class="cta still" data-spielstand="menue">Speichern &amp; zum Hauptmenü</button>
-      <button type="button" class="cta still" data-spielstand="export">Spielstand exportieren</button>
-      <button type="button" class="cta still" data-spielstand="verlassen" hidden>Zum Hauptmenü</button>`;
+      <button type="button" class="cta still" data-spielstand="menue">${textVon("speichern.menue").replace("&", "&amp;")}</button>
+      <button type="button" class="cta still" data-spielstand="export">${textVon("speichern.export")}</button>
+      <button type="button" class="cta still" data-spielstand="verlassen" hidden>${textVon("menue.zurueck")}</button>`;
     bereich.append(div);
   }
 
@@ -439,11 +439,11 @@
 
   /* Nach einstFuellen: aktiver Spielstand, Speicherfehler (module/meldungen.js) */
   meldungenTeile.einstSpielstand = function(){
-    $("#aktiver-spielstand").textContent = aktiv ? `${aktiv.name} · Tag ${S.tag}` : "";
+    $("#aktiver-spielstand").textContent = aktiv ? textVon("slot.aktiv", {name:aktiv.name, tag:S.tag}) : "";
     const fehler = $("#spielstand-fehler");
     fehler.textContent = speicherFehler;
     fehler.hidden = !speicherFehler;
-    const verlassen = knopf("Zum Hauptmenü", undefined, {still:true});
+    const verlassen = knopf(textVon("menue.zurueck"), undefined, {still:true});
     verlassen.dataset.spielstand = "verlassen";
     verlassen.hidden = true;
     $("#einstinhalt .karte").append(verlassen);

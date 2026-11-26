@@ -40,14 +40,14 @@ function bilderIntroZeigen(gruendung = false){
   tempoSetzen(0);
   dialog.innerHTML = `
     <div class="intro-innen">
-      <header><h2 id="bilder-intro-titel">Erzwelt · Intro</h2><span class="intro-zaehler" aria-live="polite"></span></header>
+      <header><h2 id="bilder-intro-titel">${textVon("intro.titel")}</h2><span class="intro-zaehler" aria-live="polite"></span></header>
       <img class="intro-bild" width="1672" height="941" decoding="async">
-      <p class="intro-text" aria-live="polite">Intro wird geladen …</p>
+      <p class="intro-text" aria-live="polite">${textVon("intro.laedt")}</p>
       <div class="intro-punkte" aria-hidden="true">${folien.map(() => "<span></span>").join("")}</div>
-      <nav aria-label="Einführung">
-        <button type="button" class="cta still intro-zurueck" disabled>Zurück</button>
-        <button type="button" class="cta still intro-sprung">Überspringen</button>
-        <button type="button" class="cta intro-weiter" disabled>Weiter</button>
+      <nav aria-label="${textVon("intro.navigation")}">
+        <button type="button" class="cta still intro-zurueck" disabled>${textVon("intro.zurueck")}</button>
+        <button type="button" class="cta still intro-sprung">${textVon("intro.ueberspringen")}</button>
+        <button type="button" class="cta intro-weiter" disabled>${textVon("intro.weiter")}</button>
       </nav>
     </div>`;
   const innen = dialog.querySelector(".intro-innen");
@@ -87,7 +87,7 @@ function bilderIntroZeigen(gruendung = false){
     zurueck.disabled = index === 0;
     weiter.disabled = false;
     if (ersteFolie || (hatteFokus && zurueck.disabled)) weiter.focus();
-    weiter.textContent = index < folien.length - 1 ? "Weiter" : gruendung ? "Firma gründen" : "Schliessen";
+    weiter.textContent = textVon(index < folien.length - 1 ? "intro.weiter" : gruendung ? "intro.gruenden" : "intro.schliessen");
     if (!ersteFolie && geladen && OPT.anim > 0 && !matchMedia("(prefers-reduced-motion: reduce)").matches){
       animation = bild.animate([{opacity:.65}, {opacity:1}], 150);
     }
