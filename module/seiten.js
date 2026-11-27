@@ -47,6 +47,7 @@
   };
   seiteWissen = function(){
     let html = T.wissenPause(kern.wissen.apply(this, arguments));
+    if (T.geschichte) html = T.geschichte(html);
     if (T.tierAlbum) html = T.tierAlbum(html);
     return T.produktentwicklung ? T.produktentwicklung(html) : html;
   };

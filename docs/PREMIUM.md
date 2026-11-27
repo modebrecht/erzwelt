@@ -36,6 +36,7 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 - [ ] Didaktik: `marktBewegen()` verändert Rohstoffpreise, die nirgends wirken (kein Rohstoffmarkt) – entfernen oder sichtbar machen
 - [x] Balance Einfach: Ziel CHF 1 Mio laufendes Geschäft
 - [ ] Texte: Ortsinfos in `karteninfo-daten.js` auf Fakten und Verständlichkeit prüfen
+- [ ] Geschichte: weitere Kapitel (z. B. Gold an der Goldküste/Ghana, Lithium-Dreieck, Kupfer in Chile 1971)
 - [ ] Didaktik: Wissen «Die Lieferkette» – Beispielweg km vs. «Transportkosten nicht berechnet» klarer
 - [ ] GFX: Handy-Screenshots der vollsten Momente (Etappenabschluss, viele Meldungen)
 - [ ] Performance: Messung Karte mit allen Pins, Landschaft «voll»
@@ -44,3 +45,4 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 - Pass 1 (27.11.2026, Didaktik): Raffinerie-Kapazität halbiert, damit «Nicht der Abbau ist der Engpass, sondern die Raffination» im Spiel stimmt (Containerstau, Raffinerie-Ausbau und Ladungsplanung wirken jetzt); Formeln in Wissen um Ausbau und Schwierigkeit ergänzt; Containerstau-Text erklärt die Ursache. Vorher am selben Tag: Ziel Einfach = laufendes Geschäft, Ladekabel 10er-Pack, Anstellen ohne Einmalkosten, Zeit steht bei offenen Fenstern, Texte ohne KI-Floskeln, Monatsübersicht.
 - Pass 1b (27.11.2026): Packs statt Fantasiepreise (Mainboard 5er, Konsole 3er, Smart-TV/E-Bike-Akku 2er); Ziel Einfach CHF 1 Mio laufendes Geschäft.
 - Wissens-Quiz (27.11.2026): pro Wissensfeld eine Frage mit 4 Antworten; Verbesserungen erst nach richtiger Antwort, 20 % Rabatt bei richtig im ersten Versuch; falsch = alle vier wackeln rot.
+- Geschichte (27.11.2026): 5 Kapitel im Reiter Wissen (Potosí, Kongo, Seltene Erden, Konfliktmineralien, Konzernverantwortung CH) mit Frage; richtig im 1. Versuch CHF 15'000. Fakten per Websuche geprüft.
