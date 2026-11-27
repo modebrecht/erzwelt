@@ -158,6 +158,7 @@ function spielstandZustand(daten, alt = false){
       status:id => ["offen", "gesehen"].includes(id)
     }, {ersterTag:n => spielstandTag(n) && n <= daten.tag}) && (e.status === "gesehen" || Object.hasOwn(e, "ersterTag"))),
     wissenGesehen:tab => spielstandTabelle(tab, wissenIds, spielstandBoolean),
+    wissenQuiz:tab => spielstandTabelle(tab, wissenIds, n => spielstandGanzzahl(n, 0, 2)),
     wissenQuestFlow:q => spielstandFelder(q, {}, {
       version:spielstandGanzzahl, startTag:spielstandTag, flags:tab => spielstandTabelle(tab, null, spielstandBoolean),
       collected:tab => spielstandTabelle(tab, null, spielstandBoolean),

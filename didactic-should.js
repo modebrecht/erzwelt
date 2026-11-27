@@ -59,11 +59,11 @@ function wissenPraxis(segId,stufe){}
   }
   if(button){
     const vorherGesperrt=idx>0&&!S.perks[seg.perks[idx-1].id];
-    const genug=S.kasse>=next.kosten;
-    const geht=praxis.ok&&!vorherGesperrt&&genug;
+    const preis=perkKosten(next),genug=S.kasse>=preis,quizOk=perkFrei(segId);
+    const geht=praxis.ok&&!vorherGesperrt&&genug&&quizOk;
     button.disabled=!geht;
     button.classList.toggle("puls",geht);
-    button.innerHTML=vorherGesperrt?textVon("didacticshould.vorherige-verbesserung-fehlt"):!praxis.ok?textVon("didacticshould.voraussetzung-noch-nicht-erfuellt"):!genug?textVon("didacticshould.zu-wenig-geld")+chf(next.kosten):IK.gluehbirne+textVon("didacticshould.verbesserung-finanzieren")+chf(next.kosten);
+    button.innerHTML=vorherGesperrt?textVon("didacticshould.vorherige-verbesserung-fehlt"):!praxis.ok?textVon("didacticshould.voraussetzung-noch-nicht-erfuellt"):!quizOk?textVon("quiz.zuerst"):!genug?textVon("didacticshould.zu-wenig-geld")+chf(preis):IK.gluehbirne+textVon("didacticshould.verbesserung-finanzieren")+chf(preis);
   }
   speichern();
 };

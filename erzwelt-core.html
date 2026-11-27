@@ -1534,6 +1534,10 @@ function notiz(text, art){
 /* ---------- Wissen / Perks ----------
    mult = multiplikativ (1.10 = +10 %), plus = additiv.
    Beide stapeln sich über alle gekauften Perks.                */
+/* Preis und Freigabe einer Verbesserung. Fassung mit Wissens-Quiz
+   (Freigabe nach richtiger Antwort, 20 % Rabatt beim ersten Versuch): wissen-quiz.js */
+function perkKosten(perk){ return perk.kosten; }
+function perkFrei(segId){ return true; }
 function perkMult(art){
   let f = 1;
   for (const id in S.perks){ const e = PERK_INDEX[id];
@@ -4312,7 +4316,7 @@ function lupeFuellen(segId){
   const erforscht = seg.perks.filter(p => S.perks[p.id]).map(p =>
     textVon("kern.finanziert", {p1:(p.titel), p2:(p.text), p3:(p.wirkung.map(w=>`<span>${w}</span>`).join(""))})).join("");
 
-  const angebot = naechst ? textVon("kern.anwendung", {p1:(naechst.titel), p2:(naechst.text), p3:(naechst.wirkung.map(w=>`<span>${w}</span>`).join("")), p4:(gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» finanzieren.</div>` : ""), p5:(geht?"puls":""), p6:(naechst.id), p7:(geht?"":"disabled"), p8:(geht?IK.gluehbirne:""), p9:(gesperrtDurch ? "Noch gesperrt" : geht ? "Verbesserung finanzieren · " + chf(naechst.kosten) : "Zu wenig Geld · " + chf(naechst.kosten))})
+  const angebot = naechst ? textVon("kern.anwendung", {p1:(naechst.titel), p2:(naechst.text), p3:(naechst.wirkung.map(w=>`<span>${w}</span>`).join("")), p4:(gesperrtDurch ? `<div class="notiz">Zuerst «${gesperrtDurch.titel}» finanzieren.</div>` : ""), p5:(geht?"puls":""), p6:(naechst.id), p7:(geht?"":"disabled"), p8:(geht?IK.gluehbirne:""), p9:(gesperrtDurch ? "Noch gesperrt" : geht ? "Verbesserung finanzieren · " + chf(perkKosten(naechst)) : "Zu wenig Geld · " + chf(perkKosten(naechst)))})
     : textVon("kern.vollstaendig-alle-verbesserungen-finanziert", {p1:(seg.titel)});
 
   const formeln = seg.formeln ? textVon("kern.formeln", {p1:(seg.formeln.map(f=>`<tr><td>${f[0]}</td><td><code>${f[1]}</code></td></tr>`).join(""))}) : "";
@@ -4580,8 +4584,10 @@ document.addEventListener("click", e => {
       if (!e2 || S.perks[e2.perk.id]) return;
       const i = e2.seg.perks.indexOf(e2.perk);
       if (i > 0 && !S.perks[e2.seg.perks[i-1].id]) return;
-      if (S.kasse < e2.perk.kosten) return;
-      S.kasse -= e2.perk.kosten; S.ausgegeben += e2.perk.kosten;
+      if (!perkFrei(e2.seg.id)) return;
+      const preis = perkKosten(e2.perk);
+      if (S.kasse < preis) return;
+      S.kasse -= preis; S.ausgegeben += preis;
       S.perks[e2.perk.id] = true;
       if (e2.perk.sofort && e2.perk.sofort.ruf) rufAendern(e2.perk.sofort.ruf);
       notiz(textVon("kern.verbesserung-finanziert", {p1:(e2.perk.titel), p2:(e2.perk.wirkung.join(" · "))}), "gut");

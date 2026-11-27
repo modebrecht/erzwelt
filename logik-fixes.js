@@ -44,7 +44,7 @@
       if (d) summe += d.bau + ausbauSumme(d.bau, S.raff[id].ausbau);
     }
     for (const f of S.fabriken || []) summe += (PRODUKT[f.produkt] || {}).kosten || 0;
-    for (const id in S.perks || {}) summe += (PERK_INDEX[id] && PERK_INDEX[id].perk.kosten) || 0;
+    for (const id in S.perks || {}) summe += (PERK_INDEX[id] && perkKosten(PERK_INDEX[id].perk)) || 0;
     summe += Math.max(0, (S.arbeiterGesamt || 0) - (S.startTeam ?? START_TEAM)) * LOHN_PRO_KOPF;
     return summe;
   }

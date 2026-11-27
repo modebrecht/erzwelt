@@ -43,3 +43,4 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 ## Done
 - Pass 1 (27.11.2026, Didaktik): Raffinerie-Kapazität halbiert, damit «Nicht der Abbau ist der Engpass, sondern die Raffination» im Spiel stimmt (Containerstau, Raffinerie-Ausbau und Ladungsplanung wirken jetzt); Formeln in Wissen um Ausbau und Schwierigkeit ergänzt; Containerstau-Text erklärt die Ursache. Vorher am selben Tag: Ziel Einfach = laufendes Geschäft, Ladekabel 10er-Pack, Anstellen ohne Einmalkosten, Zeit steht bei offenen Fenstern, Texte ohne KI-Floskeln, Monatsübersicht.
 - Pass 1b (27.11.2026): Packs statt Fantasiepreise (Mainboard 5er, Konsole 3er, Smart-TV/E-Bike-Akku 2er); Ziel Einfach CHF 1 Mio laufendes Geschäft.
+- Wissens-Quiz (27.11.2026): pro Wissensfeld eine Frage mit 4 Antworten; Verbesserungen erst nach richtiger Antwort, 20 % Rabatt bei richtig im ersten Versuch; falsch = alle vier wackeln rot.
