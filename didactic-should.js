@@ -87,10 +87,10 @@ function wissenPraxis(segId,stufe){}
   for(const f of S.fabriken){
     if(f.restbau>0)continue;
     const fehlt=Object.keys(PRODUKT[f.produkt].rezept).filter(k=>(S.mat[k]||0)<PRODUKT[f.produkt].rezept[k]*3);
-    if(fehlt.length)return[textVon("didacticshould.produktion-stockt")+fehlt.map(k=>MATERIAL[k].name).join(", "),"Fehlt Rohstoff, Personal in der Raffinerie oder eine Quelle? Folge der Kette rückwärts bis zur Rohstoffquelle."];
+    if(fehlt.length)return[textVon("didacticshould.produktion-stockt")+fehlt.map(k=>MATERIAL[k].name).join(", "),textVon("didacticshould.kette-rueckwaerts")];
   }
   if(warenLager()>0&&verkaufsKraft()===0)return[textVon("didacticshould.fertige-ware-liegt-im"),textVon("didacticshould.vergleiche-lager-nachfrage-und")];
-  if(warenLager()>verkaufsKraft()*12&&verkaufsKraft()>0)return[textVon("didacticshould.warenbestand-ist-hoch"),"Du stellst mehr her, als du verkaufst. Setze mehr Leute in den Verkauf, sonst sinkt der Preis."];
+  if(warenLager()>verkaufsKraft()*12&&verkaufsKraft()>0)return[textVon("didacticshould.warenbestand-ist-hoch"),textVon("didacticshould.mehr-verkauf")];
   if(freieArbeiter()>15)return[freieArbeiter()+textVon("didacticshould.personen-ohne-aufgabe"),textVon("didacticshould.pruefe-ob-du-dieses")];
   if(S.ruf<55)return[textVon("didacticshould.ein-niedriger-ruf-senkt"),textVon("didacticshould.pruefe-meldungen-und-fruehere")];
   const praxisOffen=WISSEN.filter(seg=>{const p=naechsterPerk(seg);return p&&wissenPraxis(seg.id,seg.perks.indexOf(p)).ok;});

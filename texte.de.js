@@ -439,6 +439,8 @@ const TEXTE_DE = Object.freeze({
   "didacticshould.eine-fabrik-steht-still": "Eine Fabrik steht still",
   "didacticshould.die-anlage-ist-fertig": "Die Fabrik ist fertig, aber niemand arbeitet dort. Öffne sie und setze Leute ein.",
   "didacticshould.produktion-stockt": "Produktion stockt: ",
+  "didacticshould.kette-rueckwaerts": "Fehlt Rohstoff, Personal in der Raffinerie oder eine Quelle? Folge der Kette rückwärts bis zur Rohstoffquelle.",
+  "didacticshould.mehr-verkauf": "Du stellst mehr her, als du verkaufst. Setze mehr Leute in den Verkauf, sonst sinkt der Preis.",
   "didacticshould.fertige-ware-liegt-im": "Fertige Ware liegt im Lager",
   "didacticshould.vergleiche-lager-nachfrage-und": "Niemand verkauft. Setze im Markt Leute ins Verkaufsteam oder verkaufe selbst.",
   "didacticshould.warenbestand-ist-hoch": "Warenbestand ist hoch",
@@ -1549,6 +1551,7 @@ const TEXTE_DE = Object.freeze({
     <div class="karte"><h3>Zum Merken</h3>
       {p11}</div>
     {p12}{p13}`,
+  "kern.meldungstakt-hilfe": "Bei Meldungen läuft die Zeit halb so schnell, damit du sie lesen kannst. «Bei vielen Meldungen»: erst ab dem zweiten Tag mit Meldung in Folge.",
   "kern.gleich-lassen": "Normal",
   "kern.bei-folgen": "Bei vielen Meldungen",
   "kern.jeder-meldungstag": "Bei jeder Meldung",
