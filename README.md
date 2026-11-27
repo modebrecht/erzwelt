@@ -138,7 +138,7 @@ Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
 
 Freiwillige Forschung im Wissen-Reiter (Reiter «Produktentwicklung»), nur auf Mittel und Schwer
 nach der Einführung. Pro Produkt Stufe 1–3 (Verkaufspreis ×1.00 / ×1.05 / ×1.10), je Projekt ein
-Forscher (Junior, Spezialist, Experte) mit Monatslohn und Dauer, Projektgebühr beim Start. Lohn nur
+Forscher (Junior, Spezialistin, Experte) mit Monatslohn und Dauer, Projektgebühr beim Start. Lohn nur
 an Forschungstagen; ein Projekt zugleich. Zustand in `S.produktForschung`, beim Laden/Import geprüft.
 Bericht, Messungen und Vorschlag zu den Werten: [`docs/produktentwicklung.md`](docs/produktentwicklung.md).
 Tests: `tests/e2e/produktentwicklung.mjs`, Simulation `tests/sim/produktentwicklung.mjs`.
