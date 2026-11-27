@@ -46,3 +46,4 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 - Pass 1b (27.11.2026): Packs statt Fantasiepreise (Mainboard 5er, Konsole 3er, Smart-TV/E-Bike-Akku 2er); Ziel Einfach CHF 1 Mio laufendes Geschäft.
 - Wissens-Quiz (27.11.2026): pro Wissensfeld eine Frage mit 4 Antworten; Verbesserungen erst nach richtiger Antwort, 20 % Rabatt bei richtig im ersten Versuch; falsch = alle vier wackeln rot.
 - Geschichte (27.11.2026): 5 Kapitel im Reiter Wissen (Potosí, Kongo, Seltene Erden, Konfliktmineralien, Konzernverantwortung CH) mit Frage; richtig im 1. Versuch CHF 15'000. Fakten per Websuche geprüft.
+- Geschichte erweitert (27.11.2026): Kapitel 1–4 vor 1500 (Ötzi, Bronze, Eisen, Gold/Silber), alle 9 nummeriert; eigenes SVG-Bild pro Kapitel (gross im Kapitel, klein in der Liste), Beschriftungen in texte.de.js.
