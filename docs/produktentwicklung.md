@@ -9,7 +9,7 @@ Stand: 27.11.2026, Branch `produktentwicklung`. Grundlage: `AP01_Forschung_Wisse
   Verbesserungen bleiben unverändert.
 - **Freischaltung:** nur Mittel und Schwer, erst nach der Einführung. Auf Einfach steht nur
   «Produktentwicklung gibt es auf Mittel und Schwer.»
-- **Forscher (genau einer pro Projekt):** Junior CHF 2'850/Monat, 30 Tage · Spezialist
+- **Forscher (genau einer pro Projekt):** Junior CHF 2'850/Monat, 30 Tage · Spezialistin
   CHF 4'500, 25 Tage · Experte CHF 6'500, 20 Tage.
 - **Stufen:** Preisfaktor 1.00 / 1.05 / 1.10 gegenüber dem Original (nicht zusammengesetzt), nur
   auf den Verkaufspreis des gewählten Produkts. Stapelt mit Lager, Dollar, Verbesserungen und
@@ -18,8 +18,8 @@ Stand: 27.11.2026, Branch `produktentwicklung`. Grundlage: `AP01_Forschung_Wisse
   (Preis × Stück pro Tag, höchstens die Grundnachfrage): Stufe 2 = 6 Tagesumsätze, Stufe 3 = 12,
   auf CHF 1'000 gerundet (Entscheid vom 27.11.2026, siehe unten; der Auftrag sah 15 % / 25 % der
   Fabrik-Baukosten vor). Ein Projekt zugleich, Stufe 3 erst nach Stufe 2, kein Abbruch.
-- **Forscherwahl mit Silhouetten:** Junior, Spezialist (Brille, Kragen), Experte (Laborkittel,
-  graue Haare) als schlichte eigene Zeichnungen.
+- **Forscherwahl mit Silhouetten** (eigene Zeichnungen, Kopf, Hals, Schultern): Junior im
+  Kapuzenpulli, Spezialistin mit Bob und Blazer, Experte mit Laborkittel, grauem Bart und Brille.
 - **Lohn:** Monatslohn / 30 pro Forschungstag direkt aus Kasse und Ausgaben; endet am letzten
   Forschungstag. Nicht in der monatlichen Lohnsumme, nicht in der Einführungs-Personalgrenze.
 - **Tagesablauf** (`didactic-should.js`, `tagVor`): … Verkauf → Monatsende → **Forschungstag** →

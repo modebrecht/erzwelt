@@ -10,7 +10,7 @@
      Produkts, zusätzlich zu Lager, Dollar, Verbesserungen und Schwierigkeit.
    - Drei Forscher zur Wahl, je Projekt genau einer:
        Junior      CHF 2'850 pro Monat, 30 Spieltage
-       Spezialist  CHF 4'500 pro Monat, 25 Spieltage
+       Spezialistin CHF 4'500 pro Monat, 25 Spieltage
        Experte     CHF 6'500 pro Monat, 20 Spieltage
    - Projektgebühr einmal beim Start, gemessen am Umsatz einer vollen Fabrik
      dieses Produkts (Preis × Stück pro Tag, höchstens die Grundnachfrage):
@@ -148,19 +148,15 @@
   /* ---------- Ansicht im Wissen-Reiter ---------- */
   const wahl = {reiter:"wissen", produkt:null, forscher:"junior"};
 
-  /* Schlichte Personen-Silhouetten für die Forscherwahl (eigene Zeichnung) */
-  const KOPF = '<circle cx="20" cy="15" r="7"/>';
-  const KOERPER = '<path d="M6 38c0-8.5 6.2-13.5 14-13.5S34 29.5 34 38z"/>';
-  const BRILLE = '<g fill="none" stroke="#fffaf0" stroke-width="1.4"><circle cx="17" cy="15.5" r="2.3"/><circle cx="23" cy="15.5" r="2.3"/><path d="M19.3 15.5h1.4"/></g>';
+  /* Personen-Silhouetten für die Forscherwahl (eigene Zeichnung, 48 × 48):
+     Junior mit Kapuzenpulli, Spezialistin mit Bob und Blazer,
+     Experte mit Laborkittel, grauem Bart und Brille. */
   const SILHOUETTE = {
-    // Junior: kurze Haare mit Stirnlocke
-    junior:`${KOERPER}${KOPF}<path fill="#3b2c1d" d="M12.8 13.5c-.4-5 3-8.5 7.4-8.5 4.6 0 7.6 3.4 7 8.2-1.6-2-3.3-2.9-5.4-3.1-.9 1.3-2.6 2-4.6 2-1.7 0-3.3.4-4.4 1.4z"/>`,
-    // Spezialist: Brille und Hemdkragen
-    spezialist:`${KOERPER}<path fill="#fffaf0" d="M16 25.4l4 4.2 4-4.2-1.6-.8L20 27l-2.4-2.4z"/>${KOPF}<path fill="#3b2c1d" d="M13 12.6c.2-4.4 3.3-7.4 7.2-7.4s7 3 7 7.4c-2.2-1.5-4.6-2.3-7.1-2.3s-5 .8-7.1 2.3z"/>${BRILLE}`,
-    // Experte: Laborkittel, graue Haare, Brille
-    experte:`<path fill="#fffaf0" stroke="currentColor" stroke-width="1.6" d="M6.8 38c0-8.2 5.9-13 13.2-13s13.2 4.8 13.2 13z"/><path d="M17 25.5l3 8.5 3-8.5c-1-.3-2-.4-3-.4s-2 .1-3 .4z"/>${KOPF}<path fill="#a9a39a" d="M12.6 15.5c-.9-5.4 2.6-9.6 7.4-9.6 4.9 0 8.4 4.2 7.4 9.6-.6-1.6-1.4-2.8-2.4-3.6-1.4 1-3.3 1.5-5 1.5s-3.6-.5-5-1.5c-1 .8-1.8 2-2.4 3.6z"/>${BRILLE}`
+      "junior": "<path d=\"M3.2 48.5C3.5 40.4 6.8 34.4 12.4 32.5l7.4-3.4 4.2 2.6 4.2-2.6 7.4 3.4c5.6 1.9 8.9 7.9 9.2 16z\"/><path d=\"M15.6 32.4c2.2-1.9 5-2.9 8.4-2.9s6.2 1 8.4 2.9\" fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"1.3\" stroke-linecap=\"round\"/><path d=\"M21.4 34.6v5.6M26.6 34.6v5.6\" stroke=\"#fffaf0\" stroke-width=\"1.1\" stroke-linecap=\"round\"/><path d=\"M20 20.5h8v10.3L24 33l-4-2.2z\"/><ellipse cx=\"16.8\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"31.2\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"24\" cy=\"16\" rx=\"7.1\" ry=\"7.9\"/><path d=\"M16.4 15.8c-1-5.8 2.2-10.4 7.6-10.4 5.6 0 8.6 4.4 7.6 10.4-.6-1.9-1.5-3.2-2.7-4-1.2 1.1-2.9 1.6-4.6 1.2-1.4.9-3.2 1.2-5 .7-1.3.4-2.3 1-2.9 2.1z\"/><path d=\"M18.6 7.4c1.2-1.4 2.8-2.2 4.6-2.4-.6.8-.9 1.6-.8 2.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/>",
+      "spezialist": "<path d=\"M14.9 17.6c-.4-7.4 3.6-11.8 9.1-11.8s9.5 4.4 9.1 11.8l.9 8.8c-1.8 1.3-3.9 2-6.1 2.1v-7.1h-7.8v7.1c-2.2-.1-4.3-.8-6.1-2.1z\"/><path d=\"M3.2 48.5C3.5 40.4 6.8 34.4 12.4 32.5l7.4-3.4 4.2 2.6 4.2-2.6 7.4 3.4c5.6 1.9 8.9 7.9 9.2 16z\"/><path d=\"M18.4 31.4l5.6 7.4 5.6-7.4\" fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/><circle cx=\"24\" cy=\"42.6\" r=\"1.1\" fill=\"#fffaf0\"/><path d=\"M20 20.5h8v10.3L24 33l-4-2.2z\"/><ellipse cx=\"24\" cy=\"16\" rx=\"7.1\" ry=\"7.9\"/><path d=\"M16.9 15.6c.4-5.2 3.2-8.4 7.4-8.4 3.2 0 5.7 1.8 6.8 4.8-2.7-.3-5.8-1.4-8-3.2-1.5 3.5-3.6 5.5-6.2 6.8z\"/>",
+      "experte": "<path fill=\"#fffaf0\" stroke=\"currentColor\" stroke-width=\"1.4\" d=\"M4.1 48.8C4.4 40.9 7.6 35.1 13 33.2l7-3.2 4 2.6 4-2.6 7 3.2c5.4 1.9 8.6 7.7 8.9 15.6z\"/><path d=\"M20.2 31.4L24 41.4l3.8-10-3.8 2.2z\"/><path d=\"M17.6 31.6l4.8 11M30.4 31.6l-4.8 11\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><path d=\"M32.6 40.2h5.2\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><path d=\"M34.8 36.8v3.2\" stroke=\"#c2562a\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M20 20.5h8v10.3L24 33l-4-2.2z\"/><ellipse cx=\"16.8\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"31.2\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"24\" cy=\"16\" rx=\"7.1\" ry=\"7.9\"/><path fill=\"#b3ada4\" d=\"M16.6 16.8c-.9-4.4.3-7.4 2.6-8.6-.1 2 .4 3.6 1.4 4.8-1.8.8-3.2 2-4 3.8zM31.4 16.8c.9-4.4-.3-7.4-2.6-8.6.1 2-.4 3.6-1.4 4.8 1.8.8 3.2 2 4 3.8z\"/><path fill=\"#b3ada4\" d=\"M18.4 19.8c.5 4.8 2.8 7.4 5.6 7.4s5.1-2.6 5.6-7.4c-1.5 1.3-3.4 1.9-5.6 1.9s-4.1-.6-5.6-1.9z\"/><g fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"1.3\"><rect x=\"18.2\" y=\"14.4\" width=\"4.7\" height=\"3.5\" rx=\"1.5\"/><rect x=\"25.1\" y=\"14.4\" width=\"4.7\" height=\"3.5\" rx=\"1.5\"/><path d=\"M22.9 15.7h2.2\"/></g>"
   };
-  const silhouette = id => `<svg class="pe-person" viewBox="0 0 40 40" aria-hidden="true" focusable="false">${SILHOUETTE[id]}</svg>`;
+  const silhouette = id => `<svg class="pe-person" viewBox="0 0 48 48" aria-hidden="true" focusable="false">${SILHOUETTE[id]}</svg>`;
   const t = (k, w) => textVon("forschung." + k, w);
   const prozent = s => Math.round((PREISFAKTOR[s] - 1) * 100);
 
@@ -298,7 +294,7 @@
     .pe-forscher{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 10px;text-align:left;border:2px solid var(--linie);
       background:#fff;border-radius:12px;padding:8px;min-height:44px;color:var(--tinte);cursor:pointer}
     .pe-forscher-text{display:grid;gap:2px;min-width:0}
-    .pe-person{width:46px;height:46px;flex:none;border-radius:50%;background:#efe5d0;color:#5b4a36;fill:currentColor;overflow:hidden}
+    .pe-person{width:52px;height:52px;flex:none;border-radius:50%;background:#efe5d0;color:#5b4a36;fill:currentColor;overflow:hidden}
     .pe-forscher.gewaehlt .pe-person{background:#f8dfa0}
     @media (min-width:421px){.pe-forscher{grid-template-columns:1fr;justify-items:start}}
     .pe-forscher small{font-size:var(--f0);color:var(--grau);font-weight:700}
