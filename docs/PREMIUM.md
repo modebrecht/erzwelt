@@ -17,10 +17,10 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 ## Current rating (1–10)
 | Area | Rating | Notes |
 |---|---|---|
-| Didaktik (Erklärung = Rechnung) | 7 | Pass 1: Raffinerie-Engpass jetzt echt; Formeln vollständig. Offen: Produktpreise teils unrealistisch |
+| Didaktik (Erklärung = Rechnung) | 8 | Raffinerie-Engpass echt; Formeln vollständig; Preise pro Gerät realistisch (Packs) |
 | UI | 7 | Zeit steht bei offenen Fenstern; Kopfleiste einzeilig bei Platz; Aufgabe minimiert |
 | Texte (DE) | 7 | Durchgang 27.11.: KI-Floskeln, Jargon, «Tier» → «Stufe». Ortsinfos noch nicht geprüft |
-| Balance Einfach | 6 | Ziel = laufendes Geschäft; evtl. zu leicht (500k in ~10 Monaten ohne Ausbau) |
+| Balance Einfach | 7 | Ziel CHF 1 Mio laufendes Geschäft: Tutorial-Kette allein ≈ 16 von 24 Monaten |
 | GFX readability | 7 | nicht systematisch geprüft |
 | Performance | ? | noch nicht gemessen |
 | Sound / Musik | 6 | 3 Titel, SFX; Musik startet erst nach Wahl |
@@ -32,9 +32,9 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 | (noch nicht erhoben) | | | |
 
 ## Backlog (highest impact per hour first)
-- [ ] Didaktik: Produktpreise prüfen (Konsole CHF 1'570, E-Bike-Akku CHF 1'260, Mainboard CHF 1'100 wirken hoch) – nur mit Mattys Okay, beeinflusst Balance
+- [x] Didaktik: Produktpreise – als Packs verkauft (Mainboard 5er, Konsole 3er, TV/Akku 2er), Preis pro Gerät realistisch, Balance gleich
 - [ ] Didaktik: `marktBewegen()` verändert Rohstoffpreise, die nirgends wirken (kein Rohstoffmarkt) – entfernen oder sichtbar machen
-- [ ] Balance Einfach: Ziel auf ~CHF 1 Mio laufendes Geschäft? (Entscheid Matty)
+- [x] Balance Einfach: Ziel CHF 1 Mio laufendes Geschäft
 - [ ] Texte: Ortsinfos in `karteninfo-daten.js` auf Fakten und Verständlichkeit prüfen
 - [ ] Didaktik: Wissen «Die Lieferkette» – Beispielweg km vs. «Transportkosten nicht berechnet» klarer
 - [ ] GFX: Handy-Screenshots der vollsten Momente (Etappenabschluss, viele Meldungen)
@@ -42,3 +42,4 @@ Für Erzwelt zusätzlich als eigener Track: **Didaktik** – stimmt, was das Spi
 
 ## Done
 - Pass 1 (27.11.2026, Didaktik): Raffinerie-Kapazität halbiert, damit «Nicht der Abbau ist der Engpass, sondern die Raffination» im Spiel stimmt (Containerstau, Raffinerie-Ausbau und Ladungsplanung wirken jetzt); Formeln in Wissen um Ausbau und Schwierigkeit ergänzt; Containerstau-Text erklärt die Ursache. Vorher am selben Tag: Ziel Einfach = laufendes Geschäft, Ladekabel 10er-Pack, Anstellen ohne Einmalkosten, Zeit steht bei offenen Fenstern, Texte ohne KI-Floskeln, Monatsübersicht.
+- Pass 1b (27.11.2026): Packs statt Fantasiepreise (Mainboard 5er, Konsole 3er, Smart-TV/E-Bike-Akku 2er); Ziel Einfach CHF 1 Mio laufendes Geschäft.

@@ -64,7 +64,7 @@ Der Builder prüft dabei automatisch:
 
 ## Etappenziel und Nachweise (`logik-fixes.js`)
 
-- **Etappenziel nach Schwierigkeit:** Einfach CHF 500'000, Mittel und Schwer
+- **Etappenziel nach Schwierigkeit:** Einfach CHF 1 Mio (nur laufendes Geschäft, ohne Investitionen), Mittel und Schwer
   CHF 3'000'000 (Ruf jeweils mindestens 60). Durchgerechnet mit dem Spielcode
   (zufällige Ereignisse, mehrere Durchläufe): Einfach schafft, wer die
   Ladekabel-Kette ausbaut. Mit Ladekabeln allein sind höchstens rund 1.6 Mio

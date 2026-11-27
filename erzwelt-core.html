@@ -775,6 +775,9 @@ const RAFF_ORTE = [
 ];
 
 /* Produkte: rezept = Materialeinheiten pro Stück.
+   Verkauft wird wie im Grosshandel in Packs: Ladekabel zu 10, Mainboards zu 5,
+   Konsolen zu 3, Smart-TVs und E-Bike-Akkus zu 2 Stück. So stimmt der Preis pro
+   Gerät ungefähr mit dem Ladenpreis überein, ohne die Balance zu verändern.
    «kabel» ist das Einsteigerprodukt: nur drei Rohstoffe, günstige Fabrik,
    kurze Bauzeit. Im Tutorial wird ausschliesslich dieses gebaut. */
 const PRODUKT = {
@@ -787,7 +790,7 @@ const PRODUKT = {
   phone: {name:textVon("kern.velocity-smartphone"), preis:1690, nachfrage:26, proArbeiter:1.1, bauzeit:20, plaetze:14, kosten:120000,
     rezept:{silizium:4, kupfer:6, kobalt:3, lithium:3, gold:1, zinn:2, tantal:1, seltene:2, indium:1, alu:4},
     info:textVon("kern.in-einem-smartphone-stecken")},
-  board: {name:"Mainboard V1",   preis:1100, nachfrage:34, proArbeiter:1.6, bauzeit:14, plaetze:10, kosten: 85000,
+  board: {name:"Mainboard V1 5er-Pack", preis:1100, nachfrage:34, proArbeiter:1.6, bauzeit:14, plaetze:10, kosten: 85000,
     rezept:{silizium:6, kupfer:8, gold:1, zinn:4, tantal:1, silber:1},
     info:textVon("kern.eine-platine-ist-im")},
   konsole:{name:textVon("kern.konsole-vortex"),preis:1570, nachfrage:18, proArbeiter:0.9, bauzeit:26, plaetze:16, kosten:160000,
@@ -796,7 +799,7 @@ const PRODUKT = {
   tv:    {name:textVon("kern.smart-tv"),  preis:1710, nachfrage:14, proArbeiter:0.8, bauzeit:24, plaetze:15, kosten:150000,
     rezept:{indium:3, silizium:5, kupfer:9, zinn:4, seltene:2, alu:10, silber:1},
     info:textVon("kern.jeder-touchscreen-und-jedes")},
-  akku:  {name:"E-Bike-Akku",    preis:1260, nachfrage:11, proArbeiter:0.9, bauzeit:18, plaetze:12, kosten:130000,
+  akku:  {name:"E-Bike-Akku 2er-Pack", preis:1260, nachfrage:11, proArbeiter:0.9, bauzeit:18, plaetze:12, kosten:130000,
     rezept:{lithium:8, kobalt:6, nickel:9, kupfer:5, alu:4},
     info:textVon("kern.ein-bike-akku-enthaelt")}
 };

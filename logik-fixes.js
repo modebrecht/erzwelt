@@ -2,7 +2,7 @@
 /* ============================================================
    LOGIK-FIXES (Sek B)
 
-   1. Etappenziel passend zur Schwierigkeit: Einfach CHF 500'000,
+   1. Etappenziel passend zur Schwierigkeit: Einfach CHF 1 Mio (nur laufendes Geschäft),
       Mittel und Schwer CHF 3 Mio. Investitionen werden im
       Ziel-Reiter getrennt ausgewiesen, damit das Minus nach dem Bau
       nachvollziehbar ist.
@@ -20,7 +20,9 @@
      sind höchstens rund 1.6 Mio (Etappe 1) bzw. 2.5 Mio (Etappe 2) möglich.
      Mittel/Schwer verlangen deshalb ein zweites Produkt, aber kein
      perfektes Timing mit hohen Schulden. */
-  const ZIEL_NACH_STUFE = {einfach:500000, mittel:3000000, schwer:3000000};
+  // Einfach zählt nur das laufende Geschäft; die Tutorial-Kette allein bringt
+  // rund CHF 50'000 pro Monat – 1 Mio verlangt 2 Jahre Durchhalten und etwas Ausbau.
+  const ZIEL_NACH_STUFE = {einfach:1000000, mittel:3000000, schwer:3000000};
   const zielGewinn = () => ZIEL_NACH_STUFE[S && S.schwierigkeit] ?? ZIEL_GEWINN;
   const START_TEAM = 10;   // ältere Spielstände; neue Runden: S.startTeam = 0 (einfuehrung.js)
 
