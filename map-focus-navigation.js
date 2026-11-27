@@ -160,6 +160,9 @@
   function questAction(){
     const wissen = window.__erzweltKnowledgeQuestFlow;
     if (wissen?.active()) return wissen.ziel();
+    // Nennt der Hinweis einen Reiter («Im Reiter Wissen …»), führt «Ziel zeigen» dorthin
+    const reiter=norm(document.getElementById("quest")?.textContent).match(/reiter (wissen|team|markt|ziel)\b/);
+    if(reiter&&!tutorialLaeuft())return {type:"dock",seite:reiter[1]};
     const direct=highlightedTarget();if(direct)return {type:"map",target:direct};
     const dock=dockAction();if(dock)return dock;
     const q=document.getElementById("quest");
