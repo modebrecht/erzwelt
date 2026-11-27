@@ -2,7 +2,7 @@
 /* Leistungsnachweis: gespeicherte Buchungen, PDF vollständig offline. */
 (function(){
   const money = (n, signed=false) => (n < 0 ? "-" : signed && n > 0 ? "+" : "") +
-    textVon("abschlusszerti.chf") + Math.abs(n).toLocaleString("de-CH", {minimumFractionDigits:2, maximumFractionDigits:2});
+    textVon("abschlusszerti.chf") + Math.abs(n).toLocaleString("de-CH", {maximumFractionDigits:0});
   const number = n => n.toLocaleString("de-CH", {maximumFractionDigits:0});
   const escape = text => String(text ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 

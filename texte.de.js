@@ -1250,7 +1250,7 @@ const TEXTE_DE = Object.freeze({
       <h3>Lohnstufe</h3>
       <div class="ort">Der Lohn beeinflusst die Zufriedenheit</div>
       <div class="segment">{p21}</div>
-      <div class="zeile"><span>{p22}</span><b>{p23}/Mt.</b></div>
+      <div class="zeile"><span>{p22}</span><b>{p23} pro Person und Monat</b></div>
       <div class="zeile"><span>Zielwert Zufriedenheit</span><b>{p24} %</b></div>
     </div>
 

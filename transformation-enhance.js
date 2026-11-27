@@ -95,6 +95,9 @@
     return String(text??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   }
 
+  // Eigene Rohstoffquelle mit Personal liefert dieses Material laufend nach
+  const liefertNach=k=>Object.keys(S.minen).some(id=>{const m=S.minen[id],d=MINEN.find(x=>x.id===id);return d&&d.mat===k&&m.arbeiter>0&&(m.stillBis||0)<=S.tag;});
+  const geliefert=()=>Object.keys(MATERIAL).filter(liefertNach);
   function raffMaterial(def){
     const keys=Object.keys(MATERIAL).filter(k=>(S.erz[k]||0)>.5);
     if(keys.length){
@@ -104,7 +107,7 @@
       });
       return keys[0];
     }
-    return (def.spezial||[])[0]||Object.keys(MATERIAL)[0];
+    return geliefert()[0]||(def.spezial||[])[0]||Object.keys(MATERIAL)[0];
   }
 
   function ensureMeta(scene){
@@ -149,7 +152,7 @@
     const rawLager=Math.max(0,Math.round(S.erz[k]||0)),matLager=Math.max(0,Math.round(S.mat[k]||0));
     setHtml(ein,textVon("transformation.im-rohstofflager", {p1:(esc(raw)), p2:(rawLager)}),`${raw}|${rawLager}`);
     setHtml(aus,textVon("transformation.im-materiallager", {p1:(esc(mat.name)), p2:(matLager)}),`${mat.name}|${matLager}`);
-    const active=!!r&&r.arbeiter>0&&(S.erz[k]||0)>.5;
+    const active=!!r&&r.arbeiter>0&&((S.erz[k]||0)>.5||liefertNach(k));
     scene.classList.toggle("wartet",!!r&&!active);
     scene.setAttribute("aria-label",active?textVon("transformation.wird-zu-raffiniert", {p1:(raw), p2:(mat.name)}):textVon("transformation.raffination-pausiert-zu", {p1:(raw), p2:(mat.name)}));
     markTick(scene);

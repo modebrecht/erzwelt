@@ -4122,7 +4122,7 @@ function blattMine(id){
 
   return kopf + band + szeneMine(def, m)
     + (still ? `<div class="notiz rot"><b>Die Rohstoffquelle steht still.</b>${m.stillBis-S.tag<900?" Noch "+(m.stillBis-S.tag)+" Tage.":""}</div>` : "")
-    + textVon("kern.foerderung-tag-lohnkosten-belegschaft", {p1:(IK.berg), p2:(ertrag.toFixed(1)), p3:(IK.muenze), p4:(chf(m.arbeiter*land.lohn*st.faktor)), p5:(m.arbeiter), p6:(def.plaetze), p7:(freieArbeiter()), p8:(m.arbeiter?`<div style="width:min(190px,60%)">${leuteBild}</div>`:""), p9:(id), p10:(m.arbeiter<=0?"disabled":""), p11:(id), p12:(m.arbeiter<=0?"disabled":""), p13:(m.arbeiter), p14:(def.plaetze), p15:(id), p16:((freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""), p17:(id), p18:((freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""), p19:((m.arbeiter/def.plaetze*100).toFixed(0)), p20:(tutorialLaeuft() ? "" : ausbauKarte("mine", id, m.ausbau, def.erschliessung, "Förderung")), p21:(LOHNSTUFE.map((s,i)=>
+    + textVon("kern.foerderung-tag-lohnkosten-belegschaft", {p1:(IK.berg), p2:(Math.round(ertrag)), p3:(IK.muenze), p4:(chf(m.arbeiter*land.lohn*st.faktor)), p5:(m.arbeiter), p6:(def.plaetze), p7:(freieArbeiter()), p8:(m.arbeiter?`<div style="width:min(190px,60%)">${leuteBild}</div>`:""), p9:(id), p10:(m.arbeiter<=0?"disabled":""), p11:(id), p12:(m.arbeiter<=0?"disabled":""), p13:(m.arbeiter), p14:(def.plaetze), p15:(id), p16:((freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""), p17:(id), p18:((freieArbeiter()<=0||m.arbeiter>=def.plaetze)?"disabled":""), p19:((m.arbeiter/def.plaetze*100).toFixed(0)), p20:(tutorialLaeuft() ? "" : ausbauKarte("mine", id, m.ausbau, def.erschliessung, "Förderung")), p21:(LOHNSTUFE.map((s,i)=>
         `<button data-tun="lohn" data-id="${id}" data-stufe="${i}" aria-pressed="${i===m.stufe}">
            ${ikonLohn(i, i===m.stufe)}${s.label}</button>`).join("")), p22:(st.name), p23:(chf(land.lohn*st.faktor)), p24:(Math.round(st.ziel - (land.risiko-1)*8 + perkPlus("zufrieden"))), p25:(sicherheitsKarte), p26:(ikonZufrieden(zuf)), p27:(zuf), p28:(farbe), p29:(zuf<32?"Streik ist wahrscheinlich":zuf<60?"angespannt":"gut"), p30:(zuf), p31:(def.info), p32:(modellHinweis)});
 }
@@ -4168,7 +4168,7 @@ function blattFab(land){
   const neu = auswahl.map(p => {
     const def = PRODUKT[p], geht = S.kasse >= def.kosten && !zu;
     const tage = Math.max(3, Math.round(def.bauzeit * bauzeitF));
-    return textVon("kern.verkaufspreis-bauzeit-tage-plaetze", {p1:(def.name), p2:(chf(def.preis)), p3:(tage), p4:(def.plaetze), p5:(Object.keys(def.rezept).map(k =>
+    return textVon("kern.verkaufspreis-bauzeit-tage-plaetze", {p1:(def.name), p2:(chf(Math.round(def.preis * verkaufsMultiplikator()))), p3:(tage), p4:(def.plaetze), p5:(Object.keys(def.rezept).map(k =>
         `<span style="background:${MATERIAL[k].farbe}">${MATERIAL[k].sym} ${def.rezept[k]}</span>`).join("")), p6:(def.info), p7:(p), p8:(land), p9:(geht?"":"disabled"), p10:(geht?IK.fabrik:""), p11:(zu ? SPERRTEXT : geht ? "Hier bauen · " + chf(def.kosten) : "Zu wenig Geld · " + chf(def.kosten))});
   }).join("");
 
@@ -4259,7 +4259,7 @@ function seiteZiel(){
   const rest = Math.max(0, etappenEnde() - S.tag + 1);
   return textVon("kern.ziel-etappe-alle-tage", {p1:(S.etappe||1), p2:(ZIEL_TAGE), p3:(info.icon), p4:(info.name), p5:(verkaufsEffektText()), p6:(S.schwierigkeit==="schwer"?" · auf Mittel freigeschaltet":""), p7:(etappenEnde()+1), p8:(rest), p9:(chf(gewinn)), p10:(klemm(gewinn/ZIEL_GEWINN*100,0,100)), p11:(chf(ZIEL_GEWINN)), p12:(chf(gesamtGewinn())), p13:(ruf<40?"var(--alarm)":ruf<60?"var(--warn)":"var(--gruen)"), p14:(ruf), p15:(klemm(ruf/ZIEL_RUF*100,0,100)), p16:(ZIEL_RUF), p17:(Object.keys(MATERIAL).filter(k=>(S.mat[k]||0)>.5||(S.erz[k]||0)>.5).map(k=>
         `<div class="zeile"><span><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> ${MATERIAL[k].name}</span>
-         <b>${Math.round(S.mat[k]||0)} <small style="color:var(--grau);font-weight:600">+ ${Math.round(S.erz[k]||0)} Rohstoff</small></b></div>`).join("")
+         <b>${Math.round(S.mat[k]||0)}${(S.erz[k]||0)>.5?` <small style="color:var(--grau);font-weight:600">+ ${Math.round(S.erz[k])} Rohstoff</small>`:""}</b></div>`).join("")
         || `<p style="color:var(--grau)">Noch nichts gefördert.</p>`), p18:(Object.keys(S.perks).length ? Object.keys(S.perks).map(id => { const e = PERK_INDEX[id]; return e
         ? `<div class="zeile"><span>${e.perk.titel}</span><b style="font-size:var(--f0);color:var(--grau)">${e.seg.titel}</b></div>` : ""; }).join("")
         : `<p style="color:var(--grau)">Noch keine Verbesserung finanziert. Im Reiter Wissen siehst du, welche Voraussetzungen noch fehlen.</p>`), p19:(nachweisStatus().stufe?"var(--gruen)":"var(--warn)"), p20:(nachweisStatus().text), p21:(S.log.slice(0,14).map(e=>`<div class="zeile"><span style="font-size:var(--f0)">${e.text}</span><b style="font-size:var(--f0);color:var(--grau)">T${e.tag}</b></div>`).join("")

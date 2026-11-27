@@ -115,6 +115,9 @@
     return textVon("transformation.materialien-fertigung-produkt-materialien", {p1:(f.restbau>0?"im-bau":""), p2:(idx), p3:(idx), p4:(esc(f.produkt)), p5:(chips), p6:(fabrikSvg()), p7:(esc(def.name)), p8:(esc(def.name))});
   };
 
+  // Eigene Rohstoffquelle mit Personal liefert dieses Material laufend nach
+  const liefertNach=k=>Object.keys(S.minen).some(id=>{const m=S.minen[id],d=MINEN.find(x=>x.id===id);return d&&d.mat===k&&m.arbeiter>0&&(m.stillBis||0)<=S.tag;});
+  const geliefert=()=>Object.keys(MATERIAL).filter(liefertNach);
   function bestesRaffMaterial(def){
     const keys=Object.keys(MATERIAL).filter(k=>(S.erz[k]||0)>.5);
     if(keys.length){
@@ -124,7 +127,7 @@
       });
       return keys[0];
     }
-    return (def.spezial||[])[0]||Object.keys(MATERIAL)[0];
+    return geliefert()[0]||(def.spezial||[])[0]||Object.keys(MATERIAL)[0];
   }
 
   function factoryCanRun(f){
@@ -139,11 +142,11 @@
       if(!def)return;
       const r=S.raff[def.id];
       const k=bestesRaffMaterial(def),mat=MATERIAL[k];
-      const active=!!r&&r.arbeiter>0&&(S.erz[k]||0)>.5;
+      const active=!!r&&r.arbeiter>0&&((S.erz[k]||0)>.5||liefertNach(k));
       scene.classList.toggle("aktiv",active);
       scene.style.setProperty("--prozess-farbe",mat?.farbe||"#5b8f7a");
       const sym=scene.querySelector(".prozess-mat-sym");if(sym&&sym.textContent!==String(mat?.sym||""))sym.textContent=mat?.sym||"";
-      const status=!r?textVon("transformation.vorschau-rohstoff-material"):r.arbeiter<=0?textVon("transformation.kein-personal-zugewiesen"):(S.erz[k]||0)<=.5?textVon("transformation.kein-rohstoff-im-lager"):`${mat?.rohstoff||"Rohstoff"} → ${mat?.name||"Material"}`;
+      const status=!r?textVon("transformation.vorschau-rohstoff-material"):r.arbeiter<=0?textVon("transformation.kein-personal-zugewiesen"):(S.erz[k]||0)<=.5&&!liefertNach(k)?textVon("transformation.kein-rohstoff-im-lager"):`${mat?.rohstoff||"Rohstoff"} → ${mat?.name||"Material"}`;
       const st=scene.querySelector(".prozess-status-text");if(st&&st.textContent!==status)st.textContent=status;
     });
     document.querySelectorAll(".fabrik-prozess[data-index]").forEach(scene=>{
