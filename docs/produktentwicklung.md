@@ -14,8 +14,12 @@ Stand: 27.11.2026, Branch `produktentwicklung`. Grundlage: `AP01_Forschung_Wisse
 - **Stufen:** Preisfaktor 1.00 / 1.05 / 1.10 gegenüber dem Original (nicht zusammengesetzt), nur
   auf den Verkaufspreis des gewählten Produkts. Stapelt mit Lager, Dollar, Verbesserungen und
   Schwierigkeit (gemessen: Mainboard × markt2 × Stufe 3 = Grundpreis × 1.08 × 1.10).
-- **Projektgebühr:** einmal beim Start, 15 % (Stufe 2) bzw. 25 % (Stufe 3) der Fabrik-Baukosten,
-  auf CHF 100 gerundet. Ein Projekt zugleich, Stufe 3 erst nach Stufe 2, kein Abbruch.
+- **Projektgebühr:** einmal beim Start, gemessen am Tagesumsatz einer vollen Fabrik des Produkts
+  (Preis × Stück pro Tag, höchstens die Grundnachfrage): Stufe 2 = 6 Tagesumsätze, Stufe 3 = 12,
+  auf CHF 1'000 gerundet (Entscheid vom 27.11.2026, siehe unten; der Auftrag sah 15 % / 25 % der
+  Fabrik-Baukosten vor). Ein Projekt zugleich, Stufe 3 erst nach Stufe 2, kein Abbruch.
+- **Forscherwahl mit Silhouetten:** Junior, Spezialist (Brille, Kragen), Experte (Laborkittel,
+  graue Haare) als schlichte eigene Zeichnungen.
 - **Lohn:** Monatslohn / 30 pro Forschungstag direkt aus Kasse und Ausgaben; endet am letzten
   Forschungstag. Nicht in der monatlichen Lohnsumme, nicht in der Einführungs-Personalgrenze.
 - **Tagesablauf** (`didactic-should.js`, `tagVor`): … Verkauf → Monatsende → **Forschungstag** →
@@ -39,53 +43,56 @@ Tests `tests/e2e/produktentwicklung.mjs`, Simulation `tests/sim/produktentwicklu
 
 ## Gemessen (Simulation mit der echten Spiel-Logik)
 
-Volle Tabellen: [`produktentwicklung-simulation.md`](produktentwicklung-simulation.md).
+Volle Tabellen: [`produktentwicklung-simulation.md`](produktentwicklung-simulation.md)
+(`node tests/sim/produktentwicklung.mjs --md docs/produktentwicklung-simulation.md`).
 Ein Betrieb mit einer voll besetzten Fabrik, Etappe bis Tag 720, Läufe mit und ohne Forschung
 bei gleichem Zufall.
 
-1. **Forschung lohnt sich mit den vereinbarten Werten fast immer und deutlich.** Stufe 2 ab Tag 60
-   bringt netto CHF 160'000 (Ladekabel) bis CHF 780'000 (Smartphone) bis Tag 720; die Kosten sind
-   nach 37–91 Tagen wieder eingespielt. Selbst ein Start an Tag 600 bleibt auf Schwer im Plus
-   (CHF 5'600–65'000). Stufe 2 + 3 bringen bis CHF 1,5 Mio. (Smartphone, Mittel).
-2. **Grund:** Die Gebühr hängt an den Fabrik-Baukosten (CHF 60'000–160'000), der Mehrerlös aber am
-   Umsatz. Eine volle Smartphone-Fabrik setzt rund CHF 26'000 pro Tag um; +5 % sind CHF 1'300 pro
-   Tag gegenüber einer Gebühr von CHF 18'000.
-3. **Der Experte ist fast immer am besten.** Zehn Tage früher fertig bringen mehr als die
-   CHF 1'500 Mehrlohn. Nur bei Ladekabel mit Engpässen (Rohstoffe 50 %, Verkaufsteam 40 %,
-   Ruf 30) ist der Junior knapp vorn.
-4. **Engpässe senken den Nutzen wie erwartet:** halbe Rohstoffe oder 40 % Verkaufsteam senken
-   ihn auf etwa ein Drittel bis die Hälfte; ein voller Lager senkt ihn wenig.
-5. **Verglichen mit den Verbesserungen:** markt2 (CHF 260'000) bringt im selben Betrieb
-   CHF 58'000–980'000 netto; Stufe 2 zusätzlich zu markt2 bringt nochmals CHF 177'000–707'000
-   für CHF 12'000–27'000. Pro investiertem Franken ist Forschung damit weit stärker als jede
-   Verbesserung. fab1 schadet in der Simulation beim Ladekabel (mehr Ausstoss als Nachfrage →
-   volles Lager → tieferer Preis), weil die Simulation die Belegschaft nicht anpasst.
+### Erste Messung mit den Werten aus dem Auftrag (15 % / 25 % der Baukosten)
+
+- Forschung lohnte sich fast immer und deutlich: Stufe 2 ab Tag 60 brachte netto CHF 160'000
+  (Ladekabel) bis CHF 780'000 (Smartphone), die Kosten waren nach 37–91 Tagen wieder drin.
+  Selbst ein Start an Tag 600 blieb auf Schwer im Plus.
+- Pro Franken weit stärker als jede bestehende Verbesserung (Gebühren CHF 9'000–24'000 gegenüber
+  z. B. markt2 für CHF 260'000).
+- Grund: Die Gebühr hing an den Fabrik-Baukosten, der Mehrerlös am Umsatz. Eine volle
+  Smartphone-Fabrik setzt rund CHF 26'000 pro Tag um; +5 % sind CHF 1'300 pro Tag gegenüber
+  einer Gebühr von CHF 18'000.
+
+### Entscheid: Gebühr am Umsatz (umgesetzt)
+
+| Produkt | Auftrag Stufe 2 / 3 | jetzt Stufe 2 / 3 |
+|---|---:|---:|
+| Ladekabel | 9'000 / 15'000 | 31'000 / 61'000 |
+| E-Bike-Motor | 13'500 / 22'500 | 75'000 / 150'000 |
+| Smartphone | 18'000 / 30'000 | 156'000 / 312'000 |
+| Mainboard | 12'800 / 21'300 | 106'000 / 211'000 |
+| Konsole | 24'000 / 40'000 | 136'000 / 271'000 |
+| Smart-TV | 22'500 / 37'500 | 123'000 / 246'000 |
+| E-Bike-Akku | 19'500 / 32'500 | 82'000 / 163'000 |
+
+Messung mit diesen Gebühren:
+
+1. **Früh lohnt es sich, spät nicht mehr.** Stufe 2 ab Tag 60: netto CHF 141'000 (Ladekabel,
+   Mittel) bis CHF 639'000 (Smartphone, Mittel); auf Schwer CHF 88'000–400'000. Die Kosten sind
+   nach 150–170 Tagen (Mittel) bzw. 200–225 Tagen (Schwer) wieder drin. Start an Tag 300: weiterhin
+   im Plus. Start an Tag 600: **bei allen Produkten im Minus** (−CHF 8'000 bis −CHF 80'000).
+2. **Stufe 2 und 3 nacheinander** ab Tag 60 bleiben lohnend (z. B. Smartphone Mittel
+   CHF 1,06–1,10 Mio. netto bei Kosten von CHF 474'000–477'000), brauchen aber viel Kapital.
+3. **Engpässe** (halbe Rohstoffe, Verkaufsteam 40 %) senken den Nutzen auf etwa 20–40 %;
+   Ladekabel mit schwachem Verkaufsteam bringt nur noch CHF 27'000. Ein tiefer Ruf (30) wirkt
+   nur dort, wo die Nachfrage der Engpass ist (Ladekabel: −60 %).
+4. **Gegenüber den Verbesserungen** ist Forschung jetzt in derselben Grössenordnung: markt2
+   (CHF 260'000) bringt im selben Betrieb CHF 58'000–980'000 netto, Stufe 2 zusätzlich
+   (CHF 34'000–139'000) CHF 155'000–595'000.
+5. **Der Experte ist meist knapp vorn** (zehn Tage früher fertig, CHF 1'500 mehr Lohn); bei
+   Ladekabel mit Engpässen ist der Junior knapp vorn. Der Unterschied ist klein gegenüber der
+   Frage, *wann* und *für welches Produkt* man forscht.
 6. **Ohne Forschung ändert sich nichts:** Ohne Projekt bleibt jeder Preis und jede Ausgabe gleich
    (Faktor 1.00, kein Lohn). Ziele, Schwierigkeit und bisherige Strategien sind unberührt.
+7. **Stapeln:** Mainboard × markt2 × Stufe 3 = Grundpreis × 1.08 × 1.10 (gemessen 1306.80).
 
-## Vorschlag (braucht deine Freigabe, noch nicht umgesetzt)
-
-Der Auftrag verlangt, die Werte nicht ohne Zustimmung zu ändern. Damit Forschung eine echte
-Abwägung wird (früh lohnend, spät eher nicht; nicht stärker als die Verbesserungen):
-
-- **Gebühr am Umsatz statt an den Baukosten:** Stufe 2 = 6 Tagesumsätze einer vollen Fabrik
-  (≈ 4 Monate Mehrerlös bei vollem Absatz), Stufe 3 = 12 Tagesumsätze, auf CHF 1'000 gerundet.
-
-  | Produkt | heute Stufe 2 / 3 | Vorschlag Stufe 2 / 3 |
-  |---|---:|---:|
-  | Ladekabel | 9'000 / 15'000 | 31'000 / 61'000 |
-  | E-Bike-Motor | 13'500 / 22'500 | 75'000 / 150'000 |
-  | Smartphone | 18'000 / 30'000 | 156'000 / 312'000 |
-  | Mainboard | 12'800 / 21'300 | 106'000 / 211'000 |
-  | Konsole | 24'000 / 40'000 | 136'000 / 271'000 |
-  | Smart-TV | 22'500 / 37'500 | 123'000 / 246'000 |
-  | E-Bike-Akku | 19'500 / 32'500 | 82'000 / 163'000 |
-
-- **Forscher:** so lassen. Dass der Experte meist gewinnt, ist bei diesen Löhnen gegenüber den
-  Umsätzen fast unvermeidlich; mit höheren Gebühren wird die Wahl aber wieder wichtiger, weil
-  ein später Start sich dann nicht mehr lohnt.
-
-Die Werte stehen an einer Stelle (`GEBUEHR_ANTEIL`, `FORSCHER`, `PREISFAKTOR` in
+Die Werte stehen an einer Stelle (`GEBUEHR_TAGE`, `FORSCHER`, `PREISFAKTOR` in
 `produktentwicklung.js`); die Simulation lässt sich nach einer Änderung neu laufen lassen.
 
 ## Offen

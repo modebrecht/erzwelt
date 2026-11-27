@@ -62,9 +62,9 @@ const vor = await page.evaluate(() => ({kasse:S.kasse, aus:S.ausgegeben, preis:w
 await page.locator('[data-pe-start="board"]').click();
 await page.locator('[data-pe-start="board"]').click({timeout:300}).catch(() => {});   // Doppelklick: kein zweites Projekt
 const gestartet = await page.evaluate(() => ({kasse:S.kasse, aus:S.ausgegeben, f:structuredClone(S.produktForschung)}));
-assert.equal(gestartet.f.aktiv.gebuehr, 12800, '15 % von CHF 85\'000, auf CHF 100 gerundet');
-assert.ok(Math.abs((vor.kasse - gestartet.kasse) - 12800) < 1e-6, 'Gebühr genau einmal');
-assert.ok(Math.abs((gestartet.aus - vor.aus) - 12800) < 1e-6);
+assert.equal(gestartet.f.aktiv.gebuehr, 106000, '6 Tagesumsätze einer vollen Mainboard-Fabrik (1100 × 16 × 6), auf CHF 1000 gerundet');
+assert.ok(Math.abs((vor.kasse - gestartet.kasse) - 106000) < 1e-6, 'Gebühr genau einmal');
+assert.ok(Math.abs((gestartet.aus - vor.aus) - 106000) < 1e-6);
 assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.startenMoeglich('board', 'junior')), 'laeuft');
 
 // Lohn pro Forschungstag, auch über das Monatsende

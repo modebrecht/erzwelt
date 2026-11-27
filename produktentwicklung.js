@@ -12,8 +12,11 @@
        Junior      CHF 2'850 pro Monat, 30 Spieltage
        Spezialist  CHF 4'500 pro Monat, 25 Spieltage
        Experte     CHF 6'500 pro Monat, 20 Spieltage
-   - Projektgebühr einmal beim Start: 15 % (Stufe 2) bzw. 25 % (Stufe 3) der
-     Baukosten der Fabrik dieses Produkts, auf CHF 100 gerundet.
+   - Projektgebühr einmal beim Start, gemessen am Umsatz einer vollen Fabrik
+     dieses Produkts (Preis × Stück pro Tag, höchstens die Grundnachfrage):
+     Stufe 2 = 6 Tagesumsätze (≈ 4 Monate Mehrerlös bei vollem Absatz),
+     Stufe 3 = 12 Tagesumsätze, auf CHF 1'000 gerundet. So lohnt sich
+     Forschung früh, spät eher nicht (Messung: docs/produktentwicklung.md).
    - Lohn nur an Forschungstagen: Monatslohn / 30 pro Spieltag, direkt aus
      der Kasse (S.kasse, S.ausgegeben). Nach dem letzten Tag kein Lohn mehr.
    - Ein Projekt zugleich. Kein Abbruch, keine Rückerstattung.
@@ -38,10 +41,11 @@
     experte:    {lohn:6500, tage:20}
   };
   const PREISFAKTOR = {1:1, 2:1.05, 3:1.10};
-  const GEBUEHR_ANTEIL = {2:.15, 3:.25};
+  const GEBUEHR_TAGE = {2:6, 3:12};
   const MAX_STUFE = 3;
 
-  const gebuehr = (p, ziel) => Math.round(PRODUKT[p].kosten * GEBUEHR_ANTEIL[ziel] / 100) * 100;
+  const tagesUmsatz = p => PRODUKT[p].preis * Math.min(PRODUKT[p].plaetze * PRODUKT[p].proArbeiter, PRODUKT[p].nachfrage);
+  const gebuehr = (p, ziel) => Math.round(tagesUmsatz(p) * GEBUEHR_TAGE[ziel] / 1000) * 1000;
   const projektLohn = forscher => FORSCHER[forscher].lohn * FORSCHER[forscher].tage / 30;
   const stufe = p => {
     const s = S.produktForschung?.stufen?.[p];
@@ -143,6 +147,20 @@
 
   /* ---------- Ansicht im Wissen-Reiter ---------- */
   const wahl = {reiter:"wissen", produkt:null, forscher:"junior"};
+
+  /* Schlichte Personen-Silhouetten für die Forscherwahl (eigene Zeichnung) */
+  const KOPF = '<circle cx="20" cy="15" r="7"/>';
+  const KOERPER = '<path d="M6 38c0-8.5 6.2-13.5 14-13.5S34 29.5 34 38z"/>';
+  const BRILLE = '<g fill="none" stroke="#fffaf0" stroke-width="1.4"><circle cx="17" cy="15.5" r="2.3"/><circle cx="23" cy="15.5" r="2.3"/><path d="M19.3 15.5h1.4"/></g>';
+  const SILHOUETTE = {
+    // Junior: kurze Haare mit Stirnlocke
+    junior:`${KOERPER}${KOPF}<path fill="#3b2c1d" d="M12.8 13.5c-.4-5 3-8.5 7.4-8.5 4.6 0 7.6 3.4 7 8.2-1.6-2-3.3-2.9-5.4-3.1-.9 1.3-2.6 2-4.6 2-1.7 0-3.3.4-4.4 1.4z"/>`,
+    // Spezialist: Brille und Hemdkragen
+    spezialist:`${KOERPER}<path fill="#fffaf0" d="M16 25.4l4 4.2 4-4.2-1.6-.8L20 27l-2.4-2.4z"/>${KOPF}<path fill="#3b2c1d" d="M13 12.6c.2-4.4 3.3-7.4 7.2-7.4s7 3 7 7.4c-2.2-1.5-4.6-2.3-7.1-2.3s-5 .8-7.1 2.3z"/>${BRILLE}`,
+    // Experte: Laborkittel, graue Haare, Brille
+    experte:`<path fill="#fffaf0" stroke="currentColor" stroke-width="1.6" d="M6.8 38c0-8.2 5.9-13 13.2-13s13.2 4.8 13.2 13z"/><path d="M17 25.5l3 8.5 3-8.5c-1-.3-2-.4-3-.4s-2 .1-3 .4z"/>${KOPF}<path fill="#a9a39a" d="M12.6 15.5c-.9-5.4 2.6-9.6 7.4-9.6 4.9 0 8.4 4.2 7.4 9.6-.6-1.6-1.4-2.8-2.4-3.6-1.4 1-3.3 1.5-5 1.5s-3.6-.5-5-1.5c-1 .8-1.8 2-2.4 3.6z"/>${BRILLE}`
+  };
+  const silhouette = id => `<svg class="pe-person" viewBox="0 0 40 40" aria-hidden="true" focusable="false">${SILHOUETTE[id]}</svg>`;
   const t = (k, w) => textVon("forschung." + k, w);
   const prozent = s => Math.round((PREISFAKTOR[s] - 1) * 100);
 
@@ -189,9 +207,10 @@
     const forscherKarten = Object.entries(FORSCHER).map(([id, f]) => {
       const gewaehlt = wahl.forscher === id;
       return `<button type="button" role="radio" class="pe-forscher${gewaehlt ? " gewaehlt" : ""}" aria-checked="${gewaehlt}" data-pe-forscher="${id}">
+        ${silhouette(id)}<span class="pe-forscher-text">
         <b>${t("forscher." + id)}</b>
         <small>${t("forscherZeile", {lohn:chf(f.lohn), tage:f.tage})}</small>
-        <small>${t("forscherProjekt", {lohn:chf(projektLohn(id))})}</small></button>`;
+        <small>${t("forscherProjekt", {lohn:chf(projektLohn(id))})}</small></span></button>`;
     }).join("");
     const lohn = projektLohn(wahl.forscher), gesamt = g + lohn;
     const grund = startenMoeglich(p, wahl.forscher);
@@ -276,8 +295,12 @@
     .pe-plan h3{margin:0 0 4px}
     .pe-plan h4{margin:12px 0 6px;font-size:var(--f2)}
     .pe-forscherwahl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-    .pe-forscher{display:grid;gap:2px;text-align:left;border:2px solid var(--linie);background:#fff;border-radius:12px;padding:8px;
-      min-height:44px;color:var(--tinte);cursor:pointer}
+    .pe-forscher{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 10px;text-align:left;border:2px solid var(--linie);
+      background:#fff;border-radius:12px;padding:8px;min-height:44px;color:var(--tinte);cursor:pointer}
+    .pe-forscher-text{display:grid;gap:2px;min-width:0}
+    .pe-person{width:46px;height:46px;flex:none;border-radius:50%;background:#efe5d0;color:#5b4a36;fill:currentColor;overflow:hidden}
+    .pe-forscher.gewaehlt .pe-person{background:#f8dfa0}
+    @media (min-width:421px){.pe-forscher{grid-template-columns:1fr;justify-items:start}}
     .pe-forscher small{font-size:var(--f0);color:var(--grau);font-weight:700}
     .pe-forscher.gewaehlt{border-color:var(--gold);background:#fff8e6}
     .pe-kosten{margin:10px 0 6px;padding:8px 10px;background:var(--papier2);border-radius:12px}
@@ -287,6 +310,6 @@
     @media (max-width:420px){.pe-forscherwahl{grid-template-columns:1fr}}`;
   document.head.append(stil);
 
-  window.__erzweltProduktentwicklung = {version:VERSION, FORSCHER, PREISFAKTOR, GEBUEHR_ANTEIL,
+  window.__erzweltProduktentwicklung = {version:VERSION, FORSCHER, PREISFAKTOR, GEBUEHR_TAGE,
     stufe, faktor, gebuehr, projektLohn, starten, startenMoeglich, pruefen, absatzProTag, offen};
 })();
