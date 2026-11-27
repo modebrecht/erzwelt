@@ -28,6 +28,19 @@
     #hud #toast-history-control:not(.mit-text) .toast-history-count{position:absolute;top:-4px;right:-3px;min-width:14px;height:14px;padding:0 3px;
       background:#f5b73d;color:#4a3000;font-size:9px}
     #hud #toast-history-control:disabled .toast-history-count{display:none}
+    /* Genug Platz: Kasse und Tag einzeilig im Stil von «Verlauf» */
+    #hud.hud-zeile .hudwerte,#hud.hud-zeile .pille,#hud.hud-zeile .pille > div{flex:none;min-width:auto}
+    #hud.hud-zeile .pille{height:40px;min-height:40px;padding:0 6px 0 7px;gap:7px;border-radius:13px}
+    #hud.hud-zeile .pille > div{display:flex;align-items:center;gap:8px}
+    #hud.hud-zeile .pille i{width:24px;height:24px}
+    #hud.hud-zeile .pille i svg{width:15px;height:15px}
+    #hud.hud-zeile .pille.tag i{display:grid;background:none}
+    #hud.hud-zeile .pille small{font:800 var(--f1)/1 "Baloo 2",sans-serif;opacity:1;margin:0;letter-spacing:0}
+    #hud.hud-zeile .pille b,#hud.hud-zeile #toast-history-control .toast-history-count{
+      min-width:24px;height:26px;padding:0 9px;border-radius:999px;display:grid;place-items:center;
+      background:#ffffff20;font:800 var(--f1)/1 "Baloo 2",sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
+    #hud.hud-zeile #h-kasse{white-space:nowrap}
+    #hud.hud-zeile .pille.kasse .kasse-plus{top:calc(50% - .5em)!important;font-size:var(--f1)}
     @media (max-width:540px){
       #hud{gap:4px;padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right))}
       #hud .hudwerte{gap:4px}
@@ -113,20 +126,29 @@
   const hudwerte = hud.querySelector(".hudwerte");
   const hudrechts = hud.querySelector(".hudrechts");
   const verlauf = document.getElementById("toast-history-control");
-  function verlaufAnpassen(){
-    if (!verlauf || !hudwerte || !hudrechts) return;
-    // First measure the compact layout; only add text when it fits.
-    verlauf.classList.remove("mit-text");
-    const werteBreite = hudwerte.getBoundingClientRect().width;
-    const rechtsBreite = hudrechts.getBoundingClientRect().width;
+  // Drei Stufen, die erste, die passt, gilt:
+  // 1. Kasse und Tag einzeilig wie «Verlauf» (Symbol, Wort, Wert im Abzeichen)
+  // 2. Kasse und Tag zweizeilig, «Verlauf» mit Text
+  // 3. alles kompakt, «Verlauf» nur als Symbol
+  function passt(){
     const css = getComputedStyle(hud);
     const platz = hud.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
     const abstand = 2 * (parseFloat(css.columnGap) || 0);
+    const breite = el => el.getBoundingClientRect().width;
+    // Kasse und Tag ohne Verlaufstext messen (sonst schrumpft die Kasse mit)
+    verlauf.classList.remove("mit-text");
+    const werte = breite(hudwerte), rechts = breite(hudrechts);
     verlauf.classList.add("mit-text");
-    const voll = verlauf.getBoundingClientRect().width;
-    if (Math.ceil(werteBreite + rechtsBreite + voll + abstand) > Math.floor(platz)){
-      verlauf.classList.remove("mit-text");
-    }
+    return Math.ceil(werte + rechts + breite(verlauf) + abstand) <= Math.floor(platz);
+  }
+  function verlaufAnpassen(){
+    if (!verlauf || !hudwerte || !hudrechts) return;
+    hud.classList.add("hud-zeile");
+    verlauf.classList.add("mit-text");
+    if (passt()) return;
+    hud.classList.remove("hud-zeile");
+    if (passt()) return;
+    verlauf.classList.remove("mit-text");
   }
   function aufgabeAusrichten(){
     verlaufAnpassen();

@@ -224,12 +224,14 @@
   /* Nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
   Object.assign((window.__erzweltQuestTeile ||= {}), {engpassKasten, questKompakt});
 
-  /* Aufgabe auf anderen Seiten als der Karte nur als schmale Zeile – ausser
+  /* Aufgabe auf anderen Seiten als der Karte nur als schmale Zeile (Handy: immer) – am Desktop ausser
      die Aufgabe wird genau auf dieser Seite erledigt (Tutorial: Team, Markt;
      Wissensauftrag: Wissen) oder ein Wissen ist zum Ansehen bereit. Antippen führt wie bisher zum Ziel; ohne Ziel
      klappt die Zeile auf. */
   let aufgeklapptAuf = null;
   function questGehoertZuSeite(q){
+    // Handy: auf allen Seiten minimiert oben rechts, Antippen klappt auf
+    if (window.matchMedia("(max-width:819px)").matches) return false;
     const t = tutorialSchritt();
     if (t) return t.ziel() === "dock:" + aktiveSeite;
     // «Ansehen» geht überall; ausserhalb von Wissen als schmale Zeile mit Knopf (aufgabe-kompakt.js)

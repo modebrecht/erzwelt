@@ -83,7 +83,7 @@
     },
     {
       "name": "save-slots",
-      "files": ["spielstaende-daten.js", "spielstaende.js", "karte-mitte.js", "blatt-ordnung.js", "module/blatt.js", "module/einfuehrung.js", "module/wissen.js", "module/meldungen.js"]
+      "files": ["spielstaende-daten.js", "spielstaende.js", "karte-mitte.js", "blatt-ordnung.js", "module/blatt.js", "module/einfuehrung.js", "module/wissen.js", "module/meldungen.js", "monatsuebersicht.js"]
     }
   ]
 }

@@ -182,6 +182,12 @@
     if (verlauf.at(-1)?.tag === S.tag) verlauf[verlauf.length - 1] = eintrag;
     else verlauf.push(eintrag);
     while (verlauf.length > 6) verlauf.shift();
+    // Ganzes Monatsbuch für die Monatsübersicht (Tippen auf «Tag», monatsuebersicht.js)
+    const buch = Array.isArray(S.monatsBuch) ? S.monatsBuch : (S.monatsBuch = []);
+    const zeile = {tag:S.tag, ein:Math.round(ein), betrieb:Math.round(lohn + betrieb), aus:Math.round(aus), kasse:Math.round(S.kasse)};
+    if (buch.at(-1)?.tag === S.tag) buch[buch.length - 1] = zeile;
+    else buch.push(zeile);
+    while (buch.length > 240) buch.shift();
     const monat = Math.max(1, Math.round((S.tag - 1) / 30));
     const betrag = v => `<span class="mb-zahl">${(v >= 0 ? "+" : "−") + chf(Math.abs(Math.round(v)))}</span>`;
     return textVon("premiumspielge.monat-laufendes-geschaeft", {p1:(monat), p2:(laufend >= 0 ? "mb-plus" : "mb-minus"), p3:(betrag(laufend))})

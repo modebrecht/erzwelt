@@ -167,6 +167,8 @@ function spielstandZustand(daten, alt = false){
     monatsBilanz:m => spielstandFelder(m, {ein:spielstandZahl, aus:spielstandZahl, letzt:v => v === null || spielstandFinanz(v)}),
     monatsVerlauf:liste => Array.isArray(liste) && liste.length <= 6 && liste.every(e =>
       spielstandFelder(e, {tag:spielstandTag, wert:spielstandFinanz})),
+    monatsBuch:liste => Array.isArray(liste) && liste.length <= 240 && liste.every(e =>
+      spielstandFelder(e, {tag:spielstandTag, ein:spielstandZahl, betrieb:spielstandZahl, aus:spielstandZahl, kasse:spielstandFinanz})),
     zertifikatProfil:p => spielstandFelder(p, {vorname:t => spielstandText(t, 120)}),
     offenesEreignis:e => spielstandFelder(e, {id:id => ["protest", "unglueck", "kinderarbeit"].includes(id),
       mine:id => typeof id === "string" && spielstandObjekt(daten.minen) && Object.hasOwn(daten.minen, id)})

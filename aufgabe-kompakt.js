@@ -17,6 +17,8 @@
   style.id = "erzwelt-aufgabe-kompakt-style";
   style.textContent = `
     #quest:not(.breit) #q-titel{font-size:var(--f0)}
+    /* Aufgeklappt nie höher als der Platz bis zur Leiste unten: sonst scrollen */
+    #quest:not(.kompakt){max-height:calc(100dvh - var(--hudh) - var(--dockh) - 24px);overflow-y:auto;overscroll-behavior:contain}
 
     @media (max-width:819px){
       #quest{padding:8px 11px 10px}
