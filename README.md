@@ -172,10 +172,19 @@ unabhängige Lautstärken, Schleife, Neuladen).
 Freiwillige Forschung im Wissen-Reiter (Reiter «Produktentwicklung»), nur auf Mittel und Schwer nach
 der Einführung. Eine Forschungsstelle: Junior, Spezialistin oder Experte anstellen, kündigen oder
 offen lassen; Lohn jeden Spieltag, solange jemand angestellt ist. Forschungsziel = ein Produkt; jedes
-fertige Tier (Tier 2 ×1.05, Tier 3 ×1.10 Verkaufspreis) wird gemeldet, danach geht es automatisch mit
+fertige Tier (bis Tier 5, je +5 % Verkaufspreis) wird gemeldet, danach geht es automatisch mit
 dem nächsten Tier weiter. Zustand in `S.produktForschung`, beim Laden/Import geprüft.
 Bericht und Messungen: [`docs/produktentwicklung.md`](docs/produktentwicklung.md).
 Tests: `tests/e2e/produktentwicklung.mjs`, Simulation `tests/sim/produktentwicklung.mjs`.
+
+## Geldhelfer (`geldhelfer.js`)
+
+Nur auf Einfach: Wird die Kasse knapp (unter null, unter zwei Monaten Löhne und Betrieb oder bei
+Verlust unter drei Monaten Verlust), zeigt die Aufgabenkarte unten «Kasse wird knapp»: wie lange
+das Geld noch reicht und den wichtigsten Grund aus dem Spielstand (Personen ohne Aufgabe, Ware ohne
+Verkauf, Fabrik ohne Personal oder Material, noch keine Fabrik …) mit Knopf «Zum Team» bzw. «Zum
+Markt». «Mehr dazu» zeigt Kosten, Einnahmen und weitere Gründe; «Verstanden» blendet aus, bis die
+Kasse um die Hälfte weiter sinkt oder 30 Tage vergehen. Test: `tests/e2e/geldhelfer.mjs`.
 
 ## Premium-Spielgefühl (`premium-spielgefuehl.js`)
 

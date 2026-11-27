@@ -14,11 +14,11 @@
        Experte       CHF 18'000 pro Monat, 60 Spieltage pro Tier
    - Forschungsziel: ein Produkt. Ist ein Tier fertig, kommt eine Meldung,
      und die Forschung geht automatisch am nächsten Tier desselben Produkts
-     weiter (bis Tier 3). Das Ziel lässt sich jederzeit wechseln; der
+     weiter (bis Tier 5). Das Ziel lässt sich jederzeit wechseln; der
      Fortschritt pro Produkt bleibt erhalten (als Anteil, damit ein Wechsel
      der Person ihn nicht verfälscht).
-   - Tier 1 / 2 / 3: Verkaufspreis ×1.00 / ×1.05 / ×1.10 gegenüber dem
-     Original, nur für dieses Produkt; stapelt mit Lager, Dollar,
+   - Tier 1–5: Verkaufspreis ×1.00 / 1.05 / 1.10 / 1.15 / 1.20 gegenüber dem
+     Original (je Tier +5 Prozentpunkte, nicht zusammengesetzt), nur für dieses Produkt; stapelt mit Lager, Dollar,
      Verbesserungen und Schwierigkeit.
    - Keine weiteren Kosten: nur der Lohn.
 
@@ -39,8 +39,8 @@
     spezialist: {lohn:12000, tage:75},
     experte:    {lohn:18000, tage:60}
   };
-  const PREISFAKTOR = {1:1, 2:1.05, 3:1.10};
-  const MAX_STUFE = 3;
+  const PREISFAKTOR = {1:1, 2:1.05, 3:1.10, 4:1.15, 5:1.20};
+  const MAX_STUFE = 5;
   const FAST_FERTIG = 1 - 1e-9;
 
   const daten = () => S.produktForschung || null;

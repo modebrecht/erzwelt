@@ -112,7 +112,7 @@ const paket = await page.evaluate(() => JSON.stringify({saveFormat:SPIELSTAND_FO
   slot:{name:'Test', savedAt:new Date().toISOString()}, gameState:S}));
 assert.deepEqual(await page.evaluate(roh => spielstandDatei(roh).state.produktForschung, paket), vorReload);
 for (const [name, aendern] of [
-  ['Tier 4', s => { s.produktForschung.stufen.board = 4; }],
+  ['Tier 6', s => { s.produktForschung.stufen.board = 6; }],
   ['unbekannte Person', s => { s.produktForschung.forscher = 'genie'; }],
   ['Fortschritt über 100 %', s => { s.produktForschung.fortschritt.board = 2; }],
   ['negativer Lohn', s => { s.produktForschung.lohnBezahlt = -5; }],
@@ -126,7 +126,7 @@ for (const [name, aendern] of [
   assert.ok(abgelehnt, name + ' muss abgelehnt werden');
 }
 
-// Tier 3 fertig: Meldung «höchstes Tier», Lohn läuft weiter, ohne Fortschritt
+// Weiter bis Tier 5: je Tier eine Meldung, dann «höchstes Tier»; Lohn läuft weiter
 const rest = await page.evaluate(() => {
   let n = 0;
   while (S.produktForschung.stufen.board < 3 && n < 120){ tagVor(); n++; }
@@ -134,9 +134,11 @@ const rest = await page.evaluate(() => {
 });
 assert.equal(rest, 73, 'Junior: 90 Tage pro Tier, 5/60 + 10/90 geschafft → noch 72.5, also 73 Tage');
 assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.1);
+await page.evaluate(() => { let n = 0; while (S.produktForschung.stufen.board < 5 && n < 400){ tagVor(); n++; } });
+assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.2);
 log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
-assert.match(log, /Tier 3.*höchste Tier/);
-assert.equal((log.match(/Forschung abgeschlossen!/g) || []).length, 2, 'je Tier genau eine Meldung');
+assert.match(log, /Tier 5.*höchste Tier/);
+assert.equal(await page.evaluate(() => S.log.filter(e => /Forschung abgeschlossen!/.test(e.text)).length), 4, 'je Tier genau eine Meldung');
 const leer = await tagesKosten(3);
 assert.ok(leer.every(x => Math.abs(x - 8000 / 30) < 0.01), 'Lohn läuft weiter, solange angestellt');
 

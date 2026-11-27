@@ -33,7 +33,7 @@ const ergebnis = await page.evaluate(() => {
     return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   }
 
-  // cfg: {p, stufe:"mittel"|"schwer", start, forscher, behalten (nach Tier 3 angestellt lassen), versorgung, verkauf, lager, ruf, perks:[]}
+  // cfg: {p, stufe:"mittel"|"schwer", start, forscher, behalten (nach Tier 5 angestellt lassen), versorgung, verkauf, lager, ruf, perks:[]}
   function lauf(cfg, mitForschung){
     Math.random = zufall(20261127);
     S = neuerZustand();
@@ -59,7 +59,7 @@ const ergebnis = await page.evaluate(() => {
         if (!PE.zielSetzen(cfg.p) || !PE.einstellen(cfg.forscher)) throw new Error("Start abgelehnt");
         gestartet = true;
       }
-      if (gestartet && !cfg.behalten && PE.stufe(cfg.p) === 3 && S.produktForschung.forscher) PE.kuendigen();
+      if (gestartet && !cfg.behalten && PE.stufe(cfg.p) === 5 && S.produktForschung.forscher) PE.kuendigen();
       // Rohstoffe: 25 % Reserve (damit auch +12 % Fabrikausstoss genutzt werden kann), oder knapp
       for (const k in def.rezept) S.mat[k] = (S.mat[k] || 0) + produktion * def.rezept[k] * (cfg.versorgung ?? 1.25);
       const vorStufe = PE.stufe(cfg.p);
@@ -82,11 +82,11 @@ const ergebnis = await page.evaluate(() => {
   const produkte = Object.keys(PRODUKT);
   const out = {grund:[], stufe3:[], engpass:[], perks:[], stapel:null};
 
-  // 1) Jedes Produkt, Mittel/Schwer, früh/mitte/spät, drei Personen; nach Tier 3 gekündigt
+  // 1) Jedes Produkt, Mittel/Schwer, früh/mitte/spät, drei Personen; nach Tier 5 gekündigt
   for (const p of produkte) for (const stufe of ["mittel", "schwer"]) for (const start of [60, 300, 600])
     for (const forscher of ["junior", "spezialist", "experte"])
       out.grund.push(vergleich({p, stufe, start, forscher}));
-  // 2) Nach Tier 3 vergessen zu kündigen: Lohn läuft bis Tag 720 weiter
+  // 2) Nach Tier 5 vergessen zu kündigen: Lohn läuft bis Tag 720 weiter
   for (const p of produkte) for (const stufe of ["mittel", "schwer"]) for (const forscher of ["junior", "experte"])
     out.stufe3.push(vergleich({p, stufe, start:60, forscher, behalten:true}));
   // 3) Engpässe: Rohstoffmangel, schwaches Verkaufsteam, volles Lager, Ruf tief/hoch
@@ -103,7 +103,7 @@ const ergebnis = await page.evaluate(() => {
       const preis = PERK_INDEX[perk].perk.kosten;
       out.perks.push({p, perk, netto:Math.round(mit.gewinn - ohne.gewinn - preis), kosten:preis});
     }
-    out.perks.push({p, perk:"Forschung bis Tier 3 (Junior, ab Tag 60) zusätzlich zu markt2",
+    out.perks.push({p, perk:"Forschung bis Tier 5 (Junior, ab Tag 60) zusätzlich zu markt2",
       ...(({netto, kosten}) => ({netto, kosten}))(vergleich({p, stufe:"mittel", start:60, forscher:"junior", perks:["markt2"]}))});
   }
   // 5) Stapeln: Preis mit markt2 und Stufe 3 = Grundpreis × 1.08 × 1.10 (nicht doppelt)
@@ -124,19 +124,19 @@ const NAME = {kabel:"Ladekabel", motor:"E-Bike-Motor", phone:"Smartphone", board
 const zeilen = [];
 zeilen.push("# Produktentwicklung – Simulation", "",
   "Erzeugt mit `node tests/sim/produktentwicklung.mjs --md docs/produktentwicklung-simulation.md` (echte Spiel-Logik, fester Zufall).",
-  "Forschung: ab Starttag eine Person angestellt, Ziel = das Produkt der Fabrik, automatisch bis Tier 3, danach gekündigt (wo nicht anders angegeben). Kosten = bezahlter Lohn. Netto = Gewinn mit Forschung − Gewinn ohne Forschung am Etappenende (Tag 720). «Wieder vorn» = erster Tag, an dem der Lauf mit Forschung den Lauf ohne eingeholt hat.",
+  "Forschung: ab Starttag eine Person angestellt, Ziel = das Produkt der Fabrik, automatisch bis Tier 5 (oder Etappenende), danach gekündigt (wo nicht anders angegeben). Kosten = bezahlter Lohn. Netto = Gewinn mit Forschung − Gewinn ohne Forschung am Etappenende (Tag 720). «Wieder vorn» = erster Tag, an dem der Lauf mit Forschung den Lauf ohne eingeholt hat.",
   "Szenario: eine voll besetzte Fabrik (China), Rohstoffe mit 25 % Reserve, Verkaufsteam reicht (wo nicht anders angegeben), Ruf 70, keine Ereignisse. Rohstoffe 50 % = halbe Fabrikleistung; Verkaufsteam 40 % = Team schafft 40 % der Produktion.", "");
-zeilen.push("## 1. Bis Tier 3 je Produkt, Schwierigkeit, Startzeitpunkt und Person", "",
+zeilen.push("## 1. Forschung bis Tier 5 je Produkt, Schwierigkeit, Startzeitpunkt und Person", "",
   "| Produkt | Stufe | Start | Absatz/Tag | Junior netto | Spezialist netto | Experte netto | wieder vorn (J/S/E) |", "|---|---|---:|---:|---:|---:|---:|---|");
 for (const p of Object.keys(NAME)) for (const stufe of ["mittel", "schwer"]) for (const start of [60, 300, 600]){
   const r = id => ergebnis.grund.find(e => e.p === p && e.stufe === stufe && e.start === start && e.forscher === id);
   const [j, s, e] = ["junior", "spezialist", "experte"].map(r);
   zeilen.push(`| ${NAME[p]} | ${stufe} | ${start} | ${j.absatz} | ${chf(j.netto)} | ${chf(s.netto)} | ${chf(e.netto)} | ${[j, s, e].map(x => x.wiederVorn ?? "–").join(" / ")} |`);
 }
-zeilen.push("", "## 2. Nach Tier 3 nicht gekündigt (Start Tag 60, Lohn bis Tag 720)", "",
-  "| Produkt | Stufe | Person | Lohn | Tier 2 / Tier 3 an Tag | netto |", "|---|---|---|---:|---|---:|");
+zeilen.push("", "## 2. Nach Tier 5 nicht gekündigt (Start Tag 60, Lohn bis Tag 720)", "",
+  "| Produkt | Stufe | Person | Lohn | Tier 2–5 an Tag | netto |", "|---|---|---|---:|---|---:|");
 for (const e of ergebnis.stufe3) zeilen.push(`| ${NAME[e.p]} | ${e.stufe} | ${e.forscher} | ${chf(e.kosten)} | ${e.fertig.join(", ")} | ${chf(e.netto)} |`);
-zeilen.push("", "## 3. Engpässe (Mittel, Start Tag 60, bis Tier 3)", "",
+zeilen.push("", "## 3. Engpässe (Mittel, Start Tag 60, bis Tier 5)", "",
   "| Produkt | Variante | Absatz/Tag | Junior netto | Experte netto |", "|---|---|---:|---:|---:|");
 for (const p of ["kabel", "board", "konsole"]) for (const [name] of [["Rohstoffe 50 %"], ["Verkaufsteam 40 %"], ["Lager voll (20 Tage Nachfrage)"], ["Ruf 30"], ["Ruf 85"]]){
   const r = id => ergebnis.engpass.find(e => e.p === p && e.variante === name && e.forscher === id);
