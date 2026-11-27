@@ -125,6 +125,8 @@
   const style = document.createElement("style");
   style.id = "erzwelt-stil-style";
   style.textContent = `
+    /* Tabellen in Fenstern: bei grosser Schrift seitlich wischen statt abschneiden */
+    .ueberlage .karte:has(> table),#seite .karte:has(> table){overflow-x:auto}
     :root{--kante-gold:#c48d1c;--kante-papier:#ddd0b4}
     /* Fremde Regeln wie «.stueck span» dürfen die Hülle nicht als Chip gestalten */
     span.al-text.al-text,span.al-l.al-l,span.al-sr.al-sr{all:unset}

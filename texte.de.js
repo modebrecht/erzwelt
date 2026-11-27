@@ -529,7 +529,8 @@ const TEXTE_DE = Object.freeze({
   "knowledgequest.oeffne-ziel-und-vergleiche": "Öffne «Ziel» und vergleiche Ruf mit Lieferkettennachweisen.",
   "knowledgequest.wissen-freigeschaltet": "Wissen freigeschaltet",
   "knowledgequest.wissens-quest": `Wissens-Quest {p1}/{p2}`,
-  "knowledgequest.ansehen": "Ansehen",
+  "knowledgequest.ansehen": "Wissen ansehen",
+  "knowledgequest.erledigt-weiter": "Erledigt! Tippe «Wissen ansehen».",
 
   /* ---------- objective-guide.js ---------- */
   "objectiveguide.ziel-zeigen": `{p1}<span>Ziel zeigen</span>`,
@@ -1414,8 +1415,9 @@ const TEXTE_DE = Object.freeze({
   "kern.vollstaendig-alle-verbesserungen-finanziert": `<div class="perkkarte fertig"><span class="marke">Vollständig</span>
         <h3>Alle Verbesserungen finanziert</h3><p>Du hast alle Verbesserungen aus «{p1}» finanziert.</p></div>`,
   "kern.formeln": `<div class="karte"><h3>Formeln</h3><table>{p1}</table></div>`,
+  "kern.ausbeute-zeile": "Ausbeute {p1} %",
   "kern.woher-die-rohstoffe-kommen": `<div class="karte"><h3>Woher die Rohstoffe kommen</h3>
-    <table><tr><th>Rohstoff → Material</th><th>Wichtige Förderländer</th><th class="n">Ausbeute</th></tr>
+    <table><tr><th>Rohstoff → Material</th><th>Wichtige Förderländer</th></tr>
     {p1}</table>
     <div class="notiz blau"><b>Spielmodell:</b> Ergiebigkeit und Mengen sind vereinfachte Werte.</div></div>`,
   "kern.was-in-einem-geraet-2": `<div class="karte"><h3>Was in einem Gerät steckt</h3>

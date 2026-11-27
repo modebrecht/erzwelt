@@ -149,7 +149,7 @@
   (window.__erzweltWissenTeile ||= {}).questSchritt=function(){
     const def=aktiveQuest();
     if(!def) return null;
-    if(questFertig(def)) return [def.titel,def.erfolg];
+    if(questFertig(def)) return [def.titel,textVon("knowledgequest.erledigt-weiter")+" "+def.erfolg];
     return [def.titel,aufgabeText(def)];
   };
 

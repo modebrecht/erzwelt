@@ -4304,9 +4304,9 @@ function lupeFuellen(segId){
       const laender = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>m.land))];
       const quellen = [...new Set(MINEN.filter(m=>m.mat===k).map(m=>rohstoffDerMine(m)))];
       return `<tr><td><i class="punkt" style="background:${MATERIAL[k].farbe}"></i> <b>${quellen.join(" / ")} → ${MATERIAL[k].name}</b><br>
-        <small style="color:var(--grau);font-weight:600">${MATERIAL[k].wofuer}</small></td>
-        <td>${laender.map(l=>`<span class="flz" style="margin-right:6px">${flagge(l,"mini")}<span style="font-size:var(--f0)">${LAND[l].name}</span></span>`).join("")}</td>
-        <td class="n">${(MATERIAL[k].ausbeute*100).toFixed(0)} %</td></tr>`;
+        <small style="color:var(--grau);font-weight:600">${MATERIAL[k].wofuer}</small><br>
+        <small style="font-weight:800">${textVon("kern.ausbeute-zeile", {p1:(MATERIAL[k].ausbeute*100).toFixed(0)})}</small></td>
+        <td>${laender.map(l=>`<span class="flz" style="margin-right:6px">${flagge(l,"mini")}<span style="font-size:var(--f0)">${LAND[l].name}</span></span>`).join("")}</td></tr>`;
     }).join(""))}) : "";
 
   const rezepte = seg.id === "fabrik" ? textVon("kern.was-in-einem-geraet-2", {p1:(Object.keys(PRODUKT).map(p=>`<div style="margin-bottom:10px"><b>${PRODUKT[p].name}</b>
