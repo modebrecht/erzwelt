@@ -131,8 +131,41 @@ leisen Erfolgston (Web Audio, keine Datei) und Funken; beim Abschluss des
 Tutorials etwas grösser. Kaufen und selbst verkaufen haben je einen eigenen
 kurzen Ton (der tägliche Verkauf durch das Team bleibt still). Auf Android
 vibriert das Handy kurz bei Kauf, eigenem Verkauf und Erfolg. In den
-Einstellungen: «Töne» und «Vibration» abschaltbar, Funken über
-«Animationen: aus».
+Einstellungen unter «Audio»: «Soundeffekte» (mit Lautstärke) und «Vibration»
+abschaltbar, Funken über «Animationen: aus».
+
+## Audio (`audio.js`, Ordner `audio/`)
+
+Bereich «Audio» im Hauptmenü und in den Einstellungen im Spiel (derselbe Bereich):
+
+- **Hintergrundmusik:** an/aus (zu Beginn aus), eigene Lautstärke, Auswahl
+  **Musik 1–3** (Musik 1 vorausgewählt). Jede Fassung enthält Original → Premium →
+  Ruhig mit je 2 Sekunden Pause und wiederholt sich am Ende. Wechsel bei laufender
+  Musik beginnt die neue Fassung von vorne; die Lautstärke wirkt sofort.
+- **Soundeffekte (SFX):** an/aus und Lautstärke für die Töne aus `erfolg-feier.js`,
+  dazu Vibration, wo das Gerät es kann.
+- Alles steht in `erzwelt_opt` im Browser. Ist die Musik gespeichert an, setzt sie
+  beim nächsten Tippen auf einen Knopf ein (Browser erlauben Ton erst danach).
+
+Datenverkehr:
+
+- Beim Laden wird keine Musik angefordert; der Player bekommt die Adresse erst
+  beim Abspielen, und nur die der gewählten Fassung. Im Hintergrund pausiert sie.
+- Die OGG-Dateien sind die unveränderten Originale (byte-gleich). Die Namen tragen
+  einen Prüfwert (`musik-1-aad43401.ogg`); `vercel.json` lässt Browser sie ein Jahr
+  behalten (`immutable`), ein zweiter Besuch lädt nichts neu.
+- Browser ohne OGG/Vorbis (Safari vor 18.4, ältere iPads) bekommen eine
+  MP3-Ersatzdatei (LAME VBR `-V2`, rund 190 kbit/s). Nur diese Geräte laden sie.
+- iPads lassen die Lautstärke eines Audio-Elements nicht setzen; dort läuft die
+  Musik über Web Audio mit eigenem Lautstärkeregler.
+- Neue oder geänderte Musik: Datei unter neuem Prüfwert-Namen ablegen
+  (`sha256sum datei | cut -c1-8`) und in `MUSIK` in `audio.js` eintragen; alte
+  Datei löschen. Nie eine Datei unter gleichem Namen ersetzen (Browser-Cache).
+- Die Offline-Fassung (`--offline`) enthält keine Musik; der Bereich meldet dann,
+  dass Musik eine Internetverbindung braucht.
+
+Test: `tests/e2e/audio.mjs` (keine Musik beim Laden, nur gewählte Fassung, Wechsel,
+unabhängige Lautstärken, Schleife, Neuladen).
 
 ## Produktentwicklung (`produktentwicklung.js`)
 

@@ -213,7 +213,18 @@
         knopf(textVon("menue.spielstaende"), () => menueZeigen("verwalten"), {still:true, id:"spielmenue-slots"}),
         knopf(textVon("menue.import"), () => datei.click(), {still:true, id:"spielmenue-import"})
       );
+      if (window.__erzweltAudio) aktionen.append(knopf(textVon("menue.audio"), () => menueZeigen("audio"), {still:true, id:"spielmenue-audio"}));
       inhalt.append(aktionen);
+    } else if (modus === "audio"){
+      // Derselbe Bereich wie in den Einstellungen im Spiel (audio.js)
+      titel.textContent = textVon("menue.audio");
+      const audio = document.createElement("div");
+      audio.className = "spielmenue-audio";
+      audio.innerHTML = window.__erzweltAudio.bereich();
+      const zurueck = knopf(textVon("menue.zurueck"), () => menueZeigen(), {still:true});
+      zurueck.classList.add("sm-zurueck");
+      inhalt.append(audio, zurueck);
+      window.__erzweltAudio.bereitMachen();
     } else {
       titel.textContent = textVon({neu:"menue.titelNeu", verwalten:"menue.titelVerwalten", import:"menue.titelImport"}[modus]);
       const karten = document.createElement("div");
