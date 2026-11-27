@@ -42,6 +42,7 @@ try {
       betrieb:chf(betrieb), gesamt:chf(personal+betrieb), wert:personal+betrieb
     };
   });
+  if (await page.locator('#quest.kompakt').count()) await page.locator('#quest #q-titel').click();
   await guide.click();
   await page.waitForFunction(() => offenesBlatt?.id === 'katanga' && ebenen.mine &&
     document.activeElement.dataset.tun === 'lohn');

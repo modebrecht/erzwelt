@@ -159,7 +159,7 @@ function spielstandZustand(daten, alt = false){
     }, {ersterTag:n => spielstandTag(n) && n <= daten.tag}) && (e.status === "gesehen" || Object.hasOwn(e, "ersterTag"))),
     wissenGesehen:tab => spielstandTabelle(tab, wissenIds, spielstandBoolean),
     wissenQuestFlow:q => spielstandFelder(q, {}, {
-      version:spielstandGanzzahl, flags:tab => spielstandTabelle(tab, null, spielstandBoolean),
+      version:spielstandGanzzahl, startTag:spielstandTag, flags:tab => spielstandTabelle(tab, null, spielstandBoolean),
       collected:tab => spielstandTabelle(tab, null, spielstandBoolean),
       fields:tab => spielstandTabelle(tab, wissenIds, spielstandBoolean),
       geologieBesucht:liste => Array.isArray(liste) && liste.every(id => mineIds.includes(id))

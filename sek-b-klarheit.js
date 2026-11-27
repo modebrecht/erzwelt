@@ -244,13 +244,18 @@
     const q = document.getElementById("quest");
     if (!q) return;
     if (aufgeklapptAuf !== aktiveSeite) aufgeklapptAuf = null;
-    const kompakt = !q.hidden && aktiveSeite !== "karte" && aufgeklapptAuf === null && !questGehoertZuSeite(q);
+    // Wissens-Quests auch auf der Karte minimiert (Antippen klappt auf)
+    const handy = window.matchMedia("(max-width:819px)").matches;
+    const wissen = q.classList.contains("wissen-quest") && (handy || !q.classList.contains("wissen-bereit"));
+    const kompakt = !q.hidden && aufgeklapptAuf === null &&
+      (aktiveSeite !== "karte" ? !questGehoertZuSeite(q) : wissen);
     q.classList.toggle("kompakt", kompakt);
     if (typeof questHoeheMessen === "function") questHoeheMessen();
   }
   document.getElementById("quest")?.addEventListener("click", ev => {
     const q = ev.currentTarget;
-    if (!q.classList.contains("kompakt") || q.classList.contains("map-link") || ev.target.closest("button")) return;
+    if (!q.classList.contains("kompakt") || ev.target.closest("button")) return;
+    if (q.classList.contains("map-link") && !q.classList.contains("wissen-quest")) return;
     ev.preventDefault(); ev.stopPropagation();
     aufgeklapptAuf = aktiveSeite;
     questKompakt();

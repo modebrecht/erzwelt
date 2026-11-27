@@ -69,6 +69,11 @@ const setTempo = async n => {
   const b = page.locator(`button[data-tempo="${n}"]`);
   await b.first().click();
 };
+// Wissens-Quests stehen minimiert in der Aufgabenkarte: zuerst aufklappen, dann «Ziel zeigen»
+const zielZeigen = async () => {
+  if (await page.locator('#quest.kompakt').count()) await page.locator('#quest #q-titel').click();
+  await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+};
 const collectKnowledge = async expectedId => {
   const button = page.locator(`button[data-wissen-quest="${expectedId}"]`);
   await button.waitFor({ state: 'visible', timeout: 10000 });
@@ -264,7 +269,8 @@ await page.waitForFunction(() => (S.verkaeufer || 0) >= 4 && S.tutorial >= TUTOR
 await checkpoint('tutorial-complete');
 await page.screenshot({ path: 'artifacts/tutorial-complete-mobile.png', fullPage: true });
 
-// Knowledge 1: basis should now be ready and collectible.
+// Knowledge 1: after the free-play pause (40 days) basis is ready and collectible.
+await page.evaluate(() => { S.wissenQuestFlow.flags.pauseVorbei = true; questZeichnen(); });
 await collectKnowledge('basis');
 await checkpoint('knowledge-basis');
 
@@ -274,7 +280,7 @@ await goMap();
 s = await state();
 const firstMine = Object.keys(s.minen)[0];
 await page.evaluate(() => { ebenen.mine = false; zeichnen(); });
-await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+await zielZeigen();
 await page.waitForFunction(id => offenesBlatt?.id === id && ebenen.mine && document.activeElement.dataset.tun === 'lohn', firstMine);
 await clickVisible('button[data-tun="lohn"][aria-pressed="false"]');
 await goMap();
@@ -296,7 +302,7 @@ await checkpoint('reload-ok');
 
 // Knowledge 3: post-tutorial manual market experience. Remove sellers, make stock, sell.
 await closeLupe();
-await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+await zielZeigen();
 await page.waitForFunction(() => aktiveSeite === 'markt');
 while ((await state()).verkaeufer > 0) {
   const minus = page.locator('button[data-tun="vcrew"][data-n="-1"]:not([disabled])').first();
@@ -318,7 +324,7 @@ await closeLupe();
 const geologieBesuche = [];
 for (let i = 0; i < 2; i++) {
   await goMap();
-  await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+  await zielZeigen();
   await page.waitForFunction(() => offenesBlatt?.art === 'mine');
   geologieBesuche.push(await page.evaluate(() => offenesBlatt.id));
 }
@@ -330,7 +336,7 @@ await checkpoint('knowledge-geology');
 // Knowledge 5: open Ziel.
 await closeLupe();
 await goMap();
-await page.getByRole('button', {name:'Aktuelles Ziel anzeigen'}).click();
+await zielZeigen();
 await page.waitForFunction(() => aktiveSeite === 'ziel' && S.wissenQuestFlow.flags.ruf);
 await collectKnowledge('ruf');
 await checkpoint('knowledge-reputation');

@@ -91,9 +91,15 @@
     }
   ];
 
+  /* Nach dem Tutorial erst frei spielen (PAUSE Spieltage ≈ 2 Minuten bei 1×),
+     dann kommen die Wissens-Quests – minimiert, mit Belohnung (BELOHNUNG). */
+  const PAUSE=40, BELOHNUNG=20000;
   function aktiveQuest(){
     if(tutorialLaeuft()) return null;
     const q=flowState();
+    if(typeof q.startTag!=="number") q.startTag=S.tag;
+    // Pause nur vor der ersten Quest (ältere Spielstände mit abgeholten Quests: ohne Pause)
+    if(!Object.keys(q.collected).length&&!q.flags.pauseVorbei&&S.tag<q.startTag+PAUSE) return null;
     return QUESTS.find(x=>!q.collected[x.id])||null;
   }
   function questFertig(def){ return !!(def&&def.fertig(flowState())); }
@@ -149,8 +155,9 @@
   (window.__erzweltWissenTeile ||= {}).questSchritt=function(){
     const def=aktiveQuest();
     if(!def) return null;
-    if(questFertig(def)) return [def.titel,textVon("knowledgequest.erledigt-weiter")+" "+def.erfolg];
-    return [def.titel,aufgabeText(def)];
+    const belohnung=chf(BELOHNUNG);
+    if(questFertig(def)) return [def.titel,textVon("knowledgequest.erledigt-weiter",{betrag:belohnung})+" "+def.erfolg];
+    return [def.titel,aufgabeText(def)+" "+textVon("knowledgequest.belohnung",{betrag:belohnung})];
   };
 
   function syncWissenHinweis(){
@@ -221,6 +228,8 @@
       const q=flowState();
       q.collected[def.id]=true;
       for(const field of def.fields) q.fields[field]=true;
+      S.kasse+=BELOHNUNG;
+      notiz(textVon("knowledgequest.belohnung-erhalten",{betrag:chf(BELOHNUNG),nr:QUESTS.indexOf(def)+1,von:QUESTS.length}),"gut");
       if(typeof speichern==="function") speichern();
       seiteWechseln("wissen");
       setTimeout(()=>{ if(typeof lupeFuellen==="function") lupeFuellen(def.seg); },0);

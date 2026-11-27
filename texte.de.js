@@ -530,7 +530,9 @@ const TEXTE_DE = Object.freeze({
   "knowledgequest.wissen-freigeschaltet": "Wissen freigeschaltet",
   "knowledgequest.wissens-quest": `Wissens-Quest {p1}/{p2}`,
   "knowledgequest.ansehen": "Wissen ansehen",
-  "knowledgequest.erledigt-weiter": "Erledigt! Tippe «Wissen ansehen».",
+  "knowledgequest.erledigt-weiter": "Erledigt! Tippe «Wissen ansehen» und hol dir {betrag}.",
+  "knowledgequest.belohnung": "Belohnung: {betrag}.",
+  "knowledgequest.belohnung-erhalten": "Wissens-Quest {nr}/{von} geschafft · Belohnung <b>+{betrag}</b>.",
 
   /* ---------- objective-guide.js ---------- */
   "objectiveguide.ziel-zeigen": `{p1}<span>Ziel zeigen</span>`,

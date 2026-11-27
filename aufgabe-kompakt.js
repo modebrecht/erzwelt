@@ -5,8 +5,8 @@
    Auf dem Handy bekommt die Karte mehr Platz. Nur Darstellung:
    - Tutorial-Aufgabe: ohne «Zusammenhang» (kommt als Rückmeldung nach
      dem Schritt) und ohne Phasen-Text; «Ziel zeigen» niedriger.
-   - «Wissen freigeschaltet» heisst im Kopf «Neues Wissen»; Text höchstens zwei
-     Zeilen, Engpass als einzeiliger Hinweis (Antippen führt hin).
+   - «Wissen freigeschaltet» heisst im Kopf «Neues Wissen»; Text ganz (die Karte
+     ist minimiert und geht nur auf Wunsch auf), Engpass als einzeiliger Hinweis (Antippen führt hin).
    - Auf Markt, Team und Ziel ist «Wissen freigeschaltet» eine schmale
      Zeile mit «Ansehen» (sek-b-klarheit.js: questGehoertZuSeite).
    - Meldungen werden einzeln am Kartenrand gezeigt.
@@ -34,7 +34,6 @@
       #quest .objective-guide-action{min-height:36px;margin-top:8px;padding-top:4px;padding-bottom:4px;font-size:var(--f0)}
 
       /* Wissen freigeschaltet */
-      #quest.wissen-quest #q-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
       #quest .wissen-quest-action{min-height:36px;margin-top:7px;padding-top:5px;padding-bottom:5px}
       #quest .engpass-kasten{margin-top:7px;padding:6px 26px 6px 9px;position:relative}
       #quest .engpass-kasten b{font-size:var(--f0)!important;margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
