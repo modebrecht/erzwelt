@@ -152,6 +152,7 @@ function spielstandZustand(daten, alt = false){
     startTeam:spielstandGanzzahl, einfuehrung:spielstandGanzzahl, investStartWert:spielstandZahl,
     verkaufsBonus:n => [40, 60].includes(n),
     tierAlbum:tab => spielstandTabelle(tab, null, n => spielstandGanzzahl(n, 1, 9999)) && Object.keys(tab).length <= 100,
+    produktForschung:f => !!window.__erzweltProduktentwicklung && window.__erzweltProduktentwicklung.pruefen(f, daten.tag),
     einstiegGesehen:spielstandBoolean, didaktikVersion:spielstandGanzzahl, shouldDidaktikVersion:spielstandGanzzahl,
     produktEntdeckungen:tab => spielstandTabelle(tab, produktIds, e => spielstandFelder(e, {
       status:id => ["offen", "gesehen"].includes(id)

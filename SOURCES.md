@@ -102,3 +102,10 @@ Folgende Dinge sind **bewusst keine Realwelt-Aussagen**, sondern Spielregeln:
 - Transportwege auf der Karte.
 
 Bei Unterrichtsfragen zu aktuellen Produktionsanteilen oder Marktanteilen sollte immer eine aktuelle Quelle verwendet werden. Für Erzwelt gilt dafür primär der USGS-Quellenstand 2026.
+
+## Bilder von Dritten
+
+- Forscherwahl in der Produktentwicklung (`produktentwicklung.js`): Personenbilder aus
+  [Avataaars](https://avataaars.com/) von Pablo Stanley, Lizenz: frei für private und
+  kommerzielle Nutzung. Erzeugt mit [DiceBear](https://www.dicebear.com/) 9
+  (`@dicebear/avataaars`, Code unter MIT-Lizenz) mit festen Einstellungen.

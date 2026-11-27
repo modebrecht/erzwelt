@@ -14,6 +14,7 @@
      teamVor, teamEinfuehrung   einfuehrung.js     Team in der Einführung
      knopfText, wissenPause  stil.js
      tierAlbum               karten-tiere.js       Tieralbum unter dem Wissen
+     produktentwicklung      produktentwicklung.js Reiter «Produktentwicklung» im Wissen
      zielZertifikat, formularOffen   abschluss-zertifikat.js
      zielEtappe              logik-fixes.js        Ziel pro Schwierigkeit, Nachweise
      zielPositiv             ziel-positiv.js
@@ -45,8 +46,9 @@
     return T.zielPositiv(html);
   };
   seiteWissen = function(){
-    const html = T.wissenPause(kern.wissen.apply(this, arguments));
-    return T.tierAlbum ? T.tierAlbum(html) : html;
+    let html = T.wissenPause(kern.wissen.apply(this, arguments));
+    if (T.tierAlbum) html = T.tierAlbum(html);
+    return T.produktentwicklung ? T.produktentwicklung(html) : html;
   };
 
   const gedrosselt = T.drossel(kern.fuellen, name => String(name));

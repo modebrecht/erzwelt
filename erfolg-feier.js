@@ -2,7 +2,8 @@
 /* Erfolg feiern: Ist eine Aufgabe erledigt (Tutorial-Schritt oder
    Wissens-Quest), gibt es einen kurzen Erfolgston und Funken.
    - Ton: kurz und leise, mit Web Audio erzeugt (keine Datei). In den
-     Einstellungen unter «Töne» abschaltbar.
+     Einstellungen unter «Audio» → «Soundeffekte (SFX)» abschaltbar, mit
+     eigener Lautstärke (audio.js).
    - Kaufen und selbst verkaufen haben je einen eigenen, kurzen Ton.
      (Der tägliche Verkauf durch das Team bleibt still – sonst klingelt es
      ständig.)
@@ -44,7 +45,7 @@
     if (!a) return;
     const t0 = a.currentTime + 0.02;
     const master = a.createGain();
-    master.gain.value = laut;
+    master.gain.value = laut * (window.__erzweltAudio ? window.__erzweltAudio.sfxFaktor() : 1);
     master.connect(a.destination);
     for (const [f, start, dauer] of noten){
       const s = t0 + start;
@@ -117,26 +118,15 @@
   /* Neues Wissen feiern: Zählung nach jedem Zeichnen der Aufgabenkarte (module/quest.js) */
   (window.__erzweltQuestTeile ||= {}).wissenFeiern = () => feiern(false);
 
-  /* ---------- Einstellung «Töne» ---------- */
-  /* Nach einstFuellen: Regler «Töne» und «Vibration» (module/meldungen.js) */
-  (window.__erzweltMeldungenTeile ||= {}).toene = function(){
-    const anim = document.getElementById("r-anim")?.closest(".reglerzeile");
-    if (anim && !document.getElementById("r-ton") && typeof regler === "function"){
-      anim.insertAdjacentHTML("afterend", regler("ton", textVon("erfolgfeier.toene"),
-        textVon("erfolgfeier.kurze-toene-bei-kauf"),
-        0, 1, 1, tonAn() ? 1 : 0, tonAn() ? "an" : "aus")
-        + (kannVibrieren ? regler("vib", textVon("erfolgfeier.vibration"),
-        "Kurzes Vibrieren bei Kauf, eigenem Verkauf und erledigter Aufgabe.",
-        0, 1, 1, vibAn() ? 1 : 0, vibAn() ? "an" : "aus") : ""));
-    }
-  };
+  /* ---------- Regler «Soundeffekte» und «Vibration» ---------- */
+  /* Die Regler stehen im Bereich «Audio» (audio.js); hier nur ihre Wirkung. */
   document.addEventListener("input", e => {
     const r = e.target.closest?.('[data-regler="ton"], [data-regler="vib"]');
     if (!r) return;
     const art = r.dataset.regler;
     OPT[art] = +r.value;
     const anzeige = document.getElementById("w-" + art);
-    if (anzeige) anzeige.textContent = OPT[art] ? "an" : "aus";
+    if (anzeige) anzeige.textContent = textVon(OPT[art] ? "audio.an" : "audio.aus");
     if (typeof optSpeichern === "function") optSpeichern();
     // kurz anspielen, damit man hört bzw. spürt, wie es ist
     if (art === "ton" && OPT.ton) erfolgTon(false);

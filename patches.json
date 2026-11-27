@@ -71,7 +71,7 @@
     },
     {
       "name": "logic-fixes",
-      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "module/quest.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "module/seiten.js"]
+      "files": ["logik-fixes.js", "sek-b-klarheit.js", "handy-layout.js", "erfolg-feier.js", "audio.js", "produktentwicklung.js", "geldhelfer.js", "premium-spielgefuehl.js", "kurztexte.js", "belegschaft-regler.js", "einfuehrung.js", "aufgabe-kompakt.js", "module/quest.js", "ziel-positiv.js", "feinschliff.js", "stil.js", "module/seiten.js"]
     },
     {
       "name": "map-labels",

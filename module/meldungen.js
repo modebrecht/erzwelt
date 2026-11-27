@@ -16,7 +16,7 @@
      dialogZertifikat      abschluss-zertifikat.js
      dialogSpielstand, einstSpielstand   spielstaende.js
      tempoVor              sek-b-klarheit.js        Kaufpause endet
-     toene                 erfolg-feier.js          Regler «Töne», «Vibration»
+     audio                 audio.js                 Bereich «Audio»: Musik, Soundeffekte, Vibration
      landschaft            karten-landschaft.js     Regler «Landschaft», «Meereswellen»
    Dazu das Ort-Ziel der Aufgabenkarte (__erzweltQuestTeile.ortZiel) und der
    Lieferfluss der Karte (__erzweltKarteTeile.lieferfluss).
@@ -59,10 +59,10 @@
     return out;
   };
 
-  /* ---------- Einstellungen: Töne, Spielstand ---------- */
+  /* ---------- Einstellungen: Audio, Spielstand ---------- */
   einstFuellen = function(){
     kern.einst.apply(this, arguments);
-    T.toene();
+    T.audio();
     T.landschaft?.();
     T.einstSpielstand();
   };

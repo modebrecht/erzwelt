@@ -13,6 +13,7 @@
      zielZeigen                     objective-guide.js  («Ziel zeigen»)
      engpassKasten, questKompakt    sek-b-klarheit.js
      phaseZeile                     handy-layout.js
+     geldHelfer                     geldhelfer.js       «Die Kasse wird knapp» (nur Einfach)
      wissenFeiern                   erfolg-feier.js
      kuerzel                        premium-spielgefuehl.js
 
@@ -134,6 +135,7 @@
     T.wissenHinweis();
     T.zielZeigen();
     T.engpassKasten();
+    T.geldHelfer?.();
     T.questKompakt();
     T.phaseZeile();
     if (typeof questHoeheMessen === "function") questHoeheMessen();
