@@ -66,6 +66,11 @@ jobs:
       - name: Verify knowledge objectives and monthly team costs
         run: node tests/e2e/wissen-team.mjs
 
+      - name: Verify product research (Produktentwicklung)
+        run: |
+          node tests/e2e/produktentwicklung.mjs
+          node tests/sim/produktentwicklung.mjs >/dev/null
+
       - name: Verify intro and discoveries, including the offline build
         run: |
           node scripts/build-standalone.mjs --offline

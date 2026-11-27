@@ -141,6 +141,9 @@ tagVor=function(){
     S.kasse-=lohn+betrieb;S.ausgegeben+=lohn+betrieb;notiz(textVon("didacticshould.monatsabschluss-loehne-betrieb", {p1:(chf(lohn)), p2:(chf(betrieb))}),"geld");rufAnpassen();
     if(S.kasse<0)notiz(textVon("didacticshould.die-kasse-ist-im"),"alarm");
   }
+  /* Nach Verkauf und Monatsende, vor Markt, Ereignissen und Etappenende:
+     forschung  produktentwicklung.js  Forschungslohn des Tages, Projekt fertig? */
+  for(const teil of Object.values(window.__erzweltTagTeile||{}))teil();
   if(S.tag%5===0)marktBewegen();ereignisPruefen();if(S.kasse<-800000)rundeBeenden("insolvenz");else if(S.tag>etappenEnde())rundeBeenden("etappe");speichern();
 };
 function kmDistanz(idA,idB){
