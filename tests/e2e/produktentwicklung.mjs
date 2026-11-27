@@ -1,6 +1,7 @@
-// Produktentwicklung (AP1): nur Mittel/Schwer nach der Einführung, ein Projekt,
-// Gebühr einmal, Lohn nur an Forschungstagen, Stufe gilt ab dem nächsten Tag,
-// Speichern/Neuladen, JSON-Export/-Import, manipulierte Daten werden abgelehnt.
+// Produktentwicklung: nur Mittel/Schwer nach der Einführung. Eine Forschungsstelle:
+// anstellen, kündigen, wechseln; Lohn jeden Tag, solange jemand angestellt ist;
+// Forschungsziel mit automatischem Weiterforschen am nächsten Tier; Meldungen;
+// Speichern/Neuladen; JSON-Import prüft die Daten.
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
@@ -30,74 +31,93 @@ const betrieb = () => page.evaluate(() => {
   S.tutorial = TUTORIAL.length;
   S.fabriken.push({produkt:'board', land:'vietnam', arbeiter:10, restbau:0});
   S.produktEntdeckungen = {board:{status:'gesehen'}};   // Entdeckungskarte (AP2) hier nicht testen
-  S.arbeiterGesamt += 10; S.verkaeufer = 6; S.arbeiterGesamt += 6;
+  S.arbeiterGesamt += 16; S.verkaeufer = 6;
   for (const k in MATERIAL) S.mat[k] = 1e6;
   speichern(true);
 });
-const tage = n => page.evaluate(n => { for (let i = 0; i < n; i++) tagVor(); }, n);
+// Forschungskosten eines Tages = Ausgaben ohne Monatslöhne und Betriebskosten
+const tagesKosten = n => page.evaluate(n => {
+  const out = [];
+  for (let i = 0; i < n; i++){
+    const a = S.ausgegeben, monat = S.tag % 30 === 0, l = lohnsumme() + betriebskostenMonat();
+    tagVor(); out.push(+(S.ausgegeben - a - (monat ? l : 0)).toFixed(4));
+  }
+  return out;
+}, n);
+const PE = () => page.evaluate(() => structuredClone(S.produktForschung || null));
 
 // Einfach: keine Bedienelemente
 await neuesSpiel('Einfach');
 await page.evaluate(() => { S.tutorial = TUTORIAL.length; });
 await wissenForschung();
 assert.match(await page.locator('.pe-bereich').textContent(), /gibt es auf Mittel und Schwer/);
-assert.equal(await page.locator('[data-pe-start]').count(), 0);
+assert.equal(await page.locator('[data-pe-einstellen]').count(), 0);
 
-// Mittel, noch in der Einführung: noch zu
+// Mittel, noch in der Einführung: noch zu; Wissen & Verbesserungen unverändert
 await neuesSpiel('Mittel');
 await wissenForschung();
 assert.match(await page.locator('.pe-bereich').textContent(), /nach der Einführung/);
-// Wissen & Verbesserungen bleibt unverändert erreichbar
 await page.locator('[data-pe-reiter="wissen"]').click();
 assert.equal(await page.locator('.segkarte').count(), await page.evaluate(() => WISSEN.length));
 
-// Nach der Einführung: Mainboard mit Experte (20 Tage, CHF 6'500)
+// Nach der Einführung: Stelle offen, drei Personen zur Wahl
 await betrieb();
-await tage(10);
+await page.evaluate(() => { for (let i = 0; i < 10; i++) tagVor(); });
 await wissenForschung();
-assert.equal(await page.locator('[data-pe-produkt="kabel"]').getAttribute('aria-disabled'), 'true', 'ohne Fabrik nicht wählbar');
-await page.locator('[data-pe-produkt="board"]').click();
-await page.locator('[data-pe-forscher="experte"]').click();
-const vor = await page.evaluate(() => ({kasse:S.kasse, aus:S.ausgegeben, preis:warenPreis('board'), tag:S.tag}));
-await page.locator('[data-pe-start="board"]').click();
-await page.locator('[data-pe-start="board"]').click({timeout:300}).catch(() => {});   // Doppelklick: kein zweites Projekt
-const gestartet = await page.evaluate(() => ({kasse:S.kasse, aus:S.ausgegeben, f:structuredClone(S.produktForschung)}));
-assert.equal(gestartet.f.aktiv.gebuehr, 106000, '6 Tagesumsätze einer vollen Mainboard-Fabrik (1100 × 16 × 6), auf CHF 1000 gerundet');
-assert.ok(Math.abs((vor.kasse - gestartet.kasse) - 106000) < 1e-6, 'Gebühr genau einmal');
-assert.ok(Math.abs((gestartet.aus - vor.aus) - 106000) < 1e-6);
-assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.startenMoeglich('board', 'junior')), 'laeuft');
+assert.equal(await page.locator('[data-pe-einstellen]').count(), 3);
+assert.equal(await page.locator('[data-pe-ziel="kabel"]').getAttribute('aria-disabled'), 'true', 'ohne Fabrik kein Ziel');
+assert.deepEqual(await tagesKosten(3), [0, 0, 0], 'ohne Person kein Lohn');
 
-// Lohn pro Forschungstag, auch über das Monatsende
-const lohnTage = await page.evaluate(() => {
-  const out = [];
-  for (let i = 0; i < 12; i++){ const a = S.ausgegeben, l = lohnsumme() + betriebskostenMonat(), monat = (S.tag) % 30 === 0;
-    tagVor(); out.push(+(S.ausgegeben - a - (monat ? l : 0)).toFixed(4)); }
-  return out;
-});
-assert.ok(lohnTage.every(x => Math.abs(x - 6500 / 30) < 0.01), 'Forschungslohn pro Tag: ' + lohnTage.join(', '));
+// Ziel Mainboard, Experte anstellen (CHF 6'500 pro Monat, 20 Tage pro Tier)
+await wissenForschung();
+await page.locator('[data-pe-ziel="board"]').click();
+await page.locator('[data-pe-einstellen="experte"]').click();
+assert.equal((await PE()).forscher, 'experte');
+const lohn = 6500 / 30;
+const kosten20 = await tagesKosten(20);
+assert.ok(kosten20.every(x => Math.abs(x - lohn) < 0.01), 'Lohn jeden Tag: ' + kosten20.join(', '));
+let pe = await PE();
+assert.equal(pe.stufen.board, 2, 'nach 20 Tagen Tier 2');
+assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.05);
+let log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
+assert.match(log, /Forschung abgeschlossen!.*Mainboard V1.*Tier 2.*weiter mit Tier 3/);
+// automatisch weiter am nächsten Tier
+await tagesKosten(5);
+pe = await PE();
+assert.equal(pe.ziel, 'board');
+assert.ok(Math.abs(pe.fortschritt.board - 5 / 20) < 1e-9, 'Tier 3 läuft automatisch: ' + pe.fortschritt.board);
+
+// Kündigen: kein Lohn, kein Fortschritt; Fortschritt bleibt
+await wissenForschung();
+await page.locator('[data-pe-kuendigen]').click();
+assert.deepEqual(await tagesKosten(4), [0, 0, 0, 0]);
+assert.ok(Math.abs((await PE()).fortschritt.board - 0.25) < 1e-9);
+
+// Junior übernimmt: Anteil bleibt, Junior braucht 30 Tage pro Tier
+await wissenForschung();
+await page.locator('[data-pe-einstellen="junior"]').click();
+await tagesKosten(10);
+assert.ok(Math.abs((await PE()).fortschritt.board - (0.25 + 10 / 30)) < 1e-9);
 
 // Speichern, neu laden, weiter
 await page.evaluate(() => speichern(true));
+const vorReload = await PE();
 await page.reload();
 await page.locator('#spielmenue-weiter').click();
 await page.evaluate(() => { tempoSetzen(0); ereignisPruefen = () => {}; });
-const geladen = await page.evaluate(() => structuredClone(S.produktForschung.aktiv));
-assert.equal(geladen.tage, 12);
-assert.ok(Math.abs(geladen.lohnBezahlt - 12 * 6500 / 30) < 0.01);
+assert.deepEqual(await PE(), vorReload);
 
-// Export → Import in einen anderen Speicherplatz behält das Projekt
+// Export → Import behält alles; manipulierte Daten werden abgelehnt
 const paket = await page.evaluate(() => JSON.stringify({saveFormat:SPIELSTAND_FORMAT, schemaVersion:SPIELSTAND_VERSION,
   slot:{name:'Test', savedAt:new Date().toISOString()}, gameState:S}));
-const importiert = await page.evaluate(roh => spielstandDatei(roh).state.produktForschung, paket);
-assert.deepEqual(importiert.aktiv, geladen);
-// Manipulierte Dateien werden abgelehnt
+assert.deepEqual(await page.evaluate(roh => spielstandDatei(roh).state.produktForschung, paket), vorReload);
 for (const [name, aendern] of [
-  ['Stufe 4', s => { s.produktForschung.stufen.board = 4; }],
-  ['falscher Lohn', s => { s.produktForschung.aktiv.lohnMonat = 1; }],
-  ['negative Tage', s => { s.produktForschung.aktiv.tage = -3; }],
-  ['falsche Gebühr', s => { s.produktForschung.aktiv.gebuehr = 0; }],
-  ['unbekannter Forscher', s => { s.produktForschung.aktiv.forscher = 'genie'; }],
-  ['Stufe überspringen', s => { s.produktForschung.aktiv.ziel = 3; }]
+  ['Tier 4', s => { s.produktForschung.stufen.board = 4; }],
+  ['unbekannte Person', s => { s.produktForschung.forscher = 'genie'; }],
+  ['Fortschritt über 100 %', s => { s.produktForschung.fortschritt.board = 2; }],
+  ['negativer Lohn', s => { s.produktForschung.lohnBezahlt = -5; }],
+  ['unbekanntes Feld', s => { s.produktForschung.bonus = 99; }],
+  ['unbekanntes Produkt', s => { s.produktForschung.ziel = 'grafikkarte'; }]
 ]){
   const abgelehnt = await page.evaluate(([roh, code]) => {
     const p = JSON.parse(roh); (0, eval)('(' + code + ')')(p.gameState);
@@ -106,34 +126,26 @@ for (const [name, aendern] of [
   assert.ok(abgelehnt, name + ' muss abgelehnt werden');
 }
 
-// Fertig nach genau 20 Forschungstagen; Preis ab dann +5 %, danach kein Lohn mehr
-const ende = await page.evaluate(() => {
-  const start = S.produktForschung.aktiv.start, preisVor = warenPreis('board') / window.__erzweltProduktentwicklung.faktor('board');
-  for (let i = 0; i < 40 && S.produktForschung.aktiv; i++){ if (modalOffen || S.ende) return {modal:modalOffen, ende:S.ende, titel:document.getElementById('d-titel')?.textContent}; tagVor(); }
-  const tag = S.tag, a = S.ausgegeben;
-  const monat = S.tag % 30 === 0, l = lohnsumme() + betriebskostenMonat();
-  tagVor();
-  return {start, tag, stufe:S.produktForschung.stufen.board, faktor:window.__erzweltProduktentwicklung.faktor('board'),
-    danach:+(S.ausgegeben - a - (monat ? l : 0)).toFixed(4)};
+// Tier 3 fertig: Meldung «höchstes Tier», Lohn läuft weiter, ohne Fortschritt
+const rest = await page.evaluate(() => {
+  let n = 0;
+  while (S.produktForschung.stufen.board < 3 && n < 40){ tagVor(); n++; }
+  return n;
 });
-assert.equal(ende.tag, ende.start + 20);
-assert.equal(ende.stufe, 2);
-assert.equal(ende.faktor, 1.05);
-assert.equal(ende.danach, 0, 'kein Lohn nach Projektende');
-const log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
-assert.match(log, /Produkt verbessert!/);
-assert.equal((log.match(/Produkt verbessert!/g) || []).length, 1, 'genau einmal fertig');
+assert.equal(rest, 13, 'Junior: 30 Tage pro Tier, 0.25 + 10/30 schon geschafft → noch 12.5, also 13 Tage');
+assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.1);
+log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
+assert.match(log, /Tier 3.*höchste Tier/);
+assert.equal((log.match(/Forschung abgeschlossen!/g) || []).length, 2, 'je Tier genau eine Meldung');
+const leer = await tagesKosten(3);
+assert.ok(leer.every(x => Math.abs(x - 2850 / 30) < 0.01), 'Lohn läuft weiter, solange angestellt');
 
-// Ansicht auf 360 px: Knopf sichtbar und nicht verdeckt
-await page.evaluate(() => seiteWechseln('karte'));
+// Ansicht auf 360 px: Kündigen-Knopf und Hinweis sichtbar
 await wissenForschung();
-await page.locator('[data-pe-produkt="board"]').click();
-const knopf = page.locator('[data-pe-start="board"]');
-await knopf.scrollIntoViewIfNeeded();
-const box = await knopf.boundingBox();
+assert.match(await page.locator('.pe-bereich').textContent(), /höchste Tier/);
+const box = await page.locator('[data-pe-kuendigen]').boundingBox();
 assert.ok(box && box.width <= 360 && box.height >= 44);
-assert.match(await knopf.textContent(), /Forschung starten/);
 
 assert.deepEqual(errors, []);
 await browser.close();
-console.log('PASS Produktentwicklung: Freischaltung, Kosten, Lohn, Abschluss, Speichern, Import-Prüfung');
+console.log('PASS Produktentwicklung: Stelle, Lohn, Ziel, automatisch weiter, Meldungen, Speichern, Import-Prüfung');
