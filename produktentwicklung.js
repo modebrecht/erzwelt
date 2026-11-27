@@ -204,7 +204,7 @@
         ${silhouette(id)}<span class="pe-forscher-text">
         <b>${t("forscher." + id)}</b>
         <small>${t("forscherZeile", {lohn:chf(f.lohn), tage:f.tage})}</small>
-        <small>${t("forscherProjekt", {lohn:chf(projektLohn(id))})}</small></span></button>`;
+        <small>${t("forscherProjekt", {lohn:chf(projektLohn(id)), monat:chf(f.lohn)})}</small></span></button>`;
     }).join("");
     const lohn = projektLohn(wahl.forscher), gesamt = g + lohn;
     const grund = startenMoeglich(p, wahl.forscher);
