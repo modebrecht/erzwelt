@@ -36,7 +36,7 @@ try {
     zeichnen();
     const rohstoff = 3 * LAND[MINEN.find(m => m.id === 'katanga').land].lohn * LOHNSTUFE[2].faktor;
     const personal = (rohstoff + 2*LAND.china.lohn + 4*LAND.mexiko.lohn + 2*VERKAUF_LOHN + 3*200) * .94;
-    const betrieb = (9000 + 14000) * .85;
+    const betrieb = (9000 + 14000) * .85 * (S.schwierigkeit === 'einfach' ? .5 : 1);
     return {
       rohstoff:chf(rohstoff * .94), frei:chf(3*200*.94), personal:chf(personal),
       betrieb:chf(betrieb), gesamt:chf(personal+betrieb), wert:personal+betrieb

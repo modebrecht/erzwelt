@@ -11,8 +11,8 @@
    - Vorgeschlagen werden die günstigsten Orte; wer schon eine passende
      Quelle oder Raffinerie hat (alter Spielstand), arbeitet mit dieser.
    - Neue Runde startet mit 0 Personen. Eingestellt wird direkt an der
-     Station über den Regler (belegschaft-regler.js); dort steht, was einmalig
-     und was jeden Monat kostet. Jede Station lässt sich nur bis zum Bedarf
+     Station über den Regler (belegschaft-regler.js); dort steht, was das
+     jeden Monat an Lohn kostet. Jede Station lässt sich nur bis zum Bedarf
      besetzen (Kupfer 15, Aluminium 5, Zinn 10, Raffinerie 5, Fabrik 5,
      Verkauf 4). Durchgerechnet: Damit läuft die Kette danach ohne Engpass
      (16 Kabel pro Tag hergestellt, bis 20 verkauft). Im Team-Reiter wird

@@ -1409,7 +1409,7 @@ const ZIEL_GEWINN = 5000000;   // Rundenziel in CHF
 const ZIEL_RUF    = 60;
 const ZIEL_TAGE   = 720;       // eine Etappe = 2 Spieljahre
 const STARTKAPITAL= 1250000;
-const LOHN_PRO_KOPF = 1800;    // einmalige Kosten beim Anstellen
+const LOHN_PRO_KOPF = 0;       // Anstellen kostet nichts extra, nur den Monatslohn
 const LOHN_OHNE_EINSATZ = 200;
 const SCHWIERIGKEIT = {
   einfach:{name:textVon("sekbklarheit.einfach"), icon:"🌱", verkauf:1.20, effekt:textVon("kern.verkaufserloese")},
@@ -1577,7 +1577,9 @@ function lohnsumme(){
   return summe * perkMult("lohn");
 }
 function betriebskostenMonat(){
-  return (Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000) * perkMult("betrieb");
+  // «Einfach»: Betriebskosten halb so hoch
+  const leicht = S.schwierigkeit === "einfach" ? 0.5 : 1;
+  return (Object.keys(S.raff).length * 9000 + S.fabriken.length * 14000) * perkMult("betrieb") * leicht;
 }
 
 /* Wie viele Leute lassen sich gerade wirklich anstellen? */
@@ -4237,16 +4239,16 @@ function seiteTeam(){
   if (S.verkaeufer) rows.push([null, textVon("tutorialenhanc.verkauf"), S.verkaeufer, VERKAUF_LOHN]);
   const menge = anstellbar();
   const kosten = menge * LOHN_PRO_KOPF;
-  const geht = menge > 0 && S.kasse >= kosten;
+  const geht = menge > 0 && S.kasse >= kosten && S.kasse > 0;
   const frei = freieArbeiter();
   if (frei > 0) rows.push([null, textVon("kern.ohne-einsatz"), frei, LOHN_OHNE_EINSATZ]);
   const lohnFaktor = perkMult("lohn");
   const lohn = lohnsumme();
   const betrieb = betriebskostenMonat();
 
-  return textVon("kern.dein-team-lohnkosten-im", {p1:(ikonTeam(5, 96, .62)), p2:(regler("anstell", "Wie viele?", "Einmalige Einstellungskosten: CHF " + LOHN_PRO_KOPF.toLocaleString("de-CH") + " pro Person.",
+  return textVon("kern.dein-team-lohnkosten-im", {p1:(ikonTeam(5, 96, .62)), p2:(regler("anstell", "Wie viele?", textVon("kern.anstellen-kostet-nur-lohn"),
                5, 50, 5, anstellMenge, anstellMenge + " Personen")), p3:(geht?"puls":""), p4:(geht?"":"disabled"), p5:(IK.person), p6:(menge <= 0 ? "Im Tutorial genügen " + TUTORIAL_MAX_LEUTE + " Leute"
-          : geht ? "STELLE " + menge + " PERSONEN EIN · " + chf(kosten) : "Zu wenig Geld · " + chf(kosten)), p7:(frei<5?"disabled":""), p8:(IK.person), p9:(S.arbeiterGesamt), p10:(IK.hacke), p11:(frei>10?"var(--warn)":"inherit"), p12:(frei), p13:(IK.muenze), p14:(chf(lohn)), p15:(IK.kalender), p16:(chf(lohn/30)), p17:(chf(LOHN_OHNE_EINSATZ * lohnFaktor)), p18:(rows.length ? `<table><thead><tr><th scope="col">Ort</th><th scope="col" class="n">Leute</th><th scope="col" class="n">Lohn pro Monat</th></tr></thead><tbody>
+          : geht ? "STELLE " + menge + " PERSONEN EIN" : textVon("kern.zu-wenig-geld-anstellen")), p7:(frei<5?"disabled":""), p8:(IK.person), p9:(S.arbeiterGesamt), p10:(IK.hacke), p11:(frei>10?"var(--warn)":"inherit"), p12:(frei), p13:(IK.muenze), p14:(chf(lohn)), p15:(IK.kalender), p16:(chf(lohn/30)), p17:(chf(LOHN_OHNE_EINSATZ * lohnFaktor)), p18:(rows.length ? `<table><thead><tr><th scope="col">Ort</th><th scope="col" class="n">Leute</th><th scope="col" class="n">Lohn pro Monat</th></tr></thead><tbody>
         ${rows.map(r=>`<tr><td><span class="flz">${r[0]?flagge(r[0]):`<span style="width:1.7em;display:inline-block">${IK.muenze}</span>`}<span>${r[1]}</span></span></td>
           <td class="n">${r[2]}</td><td class="n">${chf(r[2] * r[3] * lohnFaktor)}</td></tr>`).join("")}</tbody></table>`
       : `<p style="color:var(--grau)">Noch niemand angestellt.</p>`), p19:(chf(lohn)), p20:(chf(betrieb)), p21:(chf(lohn + betrieb)), p22:(tutorialLaeuft()?"":`<div class="notiz blau"><b>Spielmodell:</b> Die Lohnwerte sind vereinfacht und keine aktuelle Lohnstatistik.</div>`)});
@@ -4514,9 +4516,9 @@ document.addEventListener("click", e => {
       break; }
     case "anstellen": {
       const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF;
-      if (menge <= 0 || S.kasse < kosten) return;
+      if (menge <= 0 || S.kasse < kosten || S.kasse <= 0) return;
       S.kasse -= kosten; S.ausgegeben += kosten; S.arbeiterGesamt += menge;
-      notiz(textVon("kern.leute-angestellt-fuer", {p1:(menge), p2:(chf(kosten))}), "geld");
+      notiz(textVon("kern.leute-angestellt-fuer", {p1:(menge)}), "geld");
       funkenAn(t, ["#6fb8e0","#f5b73d","#fff","#2fbe7e"], 26);
       break; }
     case "entlassen":
@@ -4612,10 +4614,10 @@ document.addEventListener("input", e => {
       optSpeichern(); break;
     case "anstell": anstellMenge = wert; if (anzeige) anzeige.textContent = wert + textVon("kern.leute");
       { const knopf = document.querySelector('[data-tun="anstellen"]');
-        const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF, geht = menge > 0 && S.kasse >= kosten;
+        const menge = anstellbar(), kosten = menge * LOHN_PRO_KOPF, geht = menge > 0 && S.kasse >= kosten && S.kasse > 0;
         if (knopf){ knopf.disabled = !geht;
           knopf.innerHTML = (geht?IK.person:"") + (menge <= 0 ? textVon("kern.im-tutorial-genuegen") + TUTORIAL_MAX_LEUTE + textVon("kern.leute")
-            : geht ? textVon("kern.stelle") + menge + textVon("kern.personen-ein") + chf(kosten) : textVon("didacticshould.zu-wenig-geld") + chf(kosten)); } }
+            : geht ? textVon("kern.stelle") + menge + textVon("kern.personen-ein") : textVon("kern.zu-wenig-geld-anstellen")); } }
       break;
   }
 });

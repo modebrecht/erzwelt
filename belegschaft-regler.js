@@ -6,9 +6,9 @@
    einem Regler verteilt statt mit −10 / − / + / +10:
    - Zeile: − · Zahl «von Plätzen» · +   (einzelne Personen, gut antippbar)
    - darunter ein Regler 0 … Plätze. Hell: aus dem freien Team. Gelb: wird
-     beim Loslassen neu eingestellt (einmalig CHF 1'800 pro Person), soweit
-     das Geld reicht. Schraffiert: geht nicht.
-   - Zwei Kacheln zeigen live: «Einmalig» (Einstellen) und «Jeden Monat» (Lohn).
+     beim Loslassen neu eingestellt (ohne Extrakosten, nur Monatslohn), solange
+     die Kasse nicht im Minus ist. Schraffiert: geht nicht.
+   - Eine Kachel zeigt live, was das jeden Monat an Lohn kostet.
    - Im Tutorial zeigt eine Marke, wie viele Personen das Ziel verlangt;
      der Regler reicht nur so weit, wie die Einführung Personal braucht.
    Übernommen wird beim Loslassen, über die bestehende Spiellogik
@@ -44,18 +44,19 @@
     else l = VERKAUF_LOHN;
     return l * (typeof perkMult === "function" ? perkMult("lohn") : 1);
   }
-  const kannEinstellen = () => Math.max(0, Math.floor(S.kasse / LOHN_PRO_KOPF));
+  // Einstellen kostet nichts extra; gesperrt nur, solange die Kasse im Minus ist.
+  const kannEinstellen = () => S.kasse > 0 ? 100000 : 0;
 
-  /* Zwei Kacheln: was einmalig kostet, was jeden Monat */
+  /* Kachel: was es jeden Monat an Lohn kostet */
   function kostenHtml(v, wert, frei, lohn){
     const d = v - wert;
     if (d > 0){
       const neu = Math.max(0, d - frei), ausTeam = d - neu;
       const wer = [ausTeam ? textVon("belegschaftreg.aus-dem-team", {p1:(ausTeam)}) : "", neu ? `${neu} neu eingestellt` : ""].filter(Boolean).join(" · ");
-      return textVon("belegschaftreg.einmalig-jeden-monat-lohn", {p1:(neu ? "" : "leer"), p2:(neu ? chf(neu * LOHN_PRO_KOPF) : "CHF 0"), p3:(neu ? `${neu} × ${chf(LOHN_PRO_KOPF)} Einstellen` : "niemand neu"), p4:(chf(d * lohn)), p5:(wer)});
+      return textVon("belegschaftreg.einmalig-jeden-monat-lohn", {p1:(chf(d * lohn)), p2:(wer)});
     }
     if (d < 0) return textVon("belegschaftreg.einmalig-chf-zurueck-ins", {p1:(-d), p2:(chf(-d * lohn)), p3:(chf(200))});
-    return textVon("belegschaftreg.einmalig-pro-neue-person", {p1:(chf(LOHN_PRO_KOPF)), p2:(chf(wert * lohn)), p3:(chf(lohn))});
+    return textVon("belegschaftreg.einmalig-pro-neue-person", {p1:(chf(wert * lohn)), p2:(chf(lohn))});
   }
 
   function bauen(tun, attrs, wert, klein){
@@ -79,7 +80,7 @@
     const ziel = zielFuer(tun, r);
     const zielMarke = ziel && ziel <= max ? textVon("belegschaftreg.ziel", {p1:(wert >= ziel ? "ok" : ""), p2:((ziel / max).toFixed(4)), p3:(wert >= ziel ? "✓ " : ""), p4:(ziel)}) : "";
     const unten = tun === "vcrew" ? textVon("belegschaftreg.im-verkauf") : `von ${plaetze}`;
-    const hinweis = frei > 0 ? textVon("belegschaftreg.frei-im-team", {p1:(frei)}) : erreichbar > wert ? textVon("belegschaftreg.mehr-neu-einstellen") : textVon("belegschaftreg.zu-wenig-geld-zum");
+    const hinweis = frei > 0 ? textVon("belegschaftreg.frei-im-team", {p1:(frei)}) : erreichbar > wert ? textVon("belegschaftreg.mehr-neu-einstellen") : S.kasse <= 0 && wert < max ? textVon("belegschaftreg.zu-wenig-geld-zum") : "";
     return `<div class="besetzung" data-art="${tun}" ${ref} data-wert="${wert}" data-max="${max}" data-erreichbar="${erreichbar}" data-frei="${frei}" data-lohn="${lohn}">
       <div class="besetzung-zeile">
         <button class="besetzung-schritt" data-tun="${tun}" ${ref} data-n="-1" ${wert <= 0 ? "disabled" : ""} aria-label="Eine Person weniger">−</button>
@@ -106,23 +107,15 @@
   (window.__erzweltBlattTeile ||= {}).regler = umbauen;
   (window.__erzweltSeitenTeile ||= {}).regler = umbauen;
 
-  /* ---------- Team: einmalige und monatliche Kosten getrennt zeigen ---------- */
+  /* ---------- Team: Monatslohn unter dem Anstellen-Knopf ---------- */
   const lohnSpanne = () => {
     const l = Object.values(LAND).map(x => x.lohn);
     return `${chf(Math.min(...l))}–${chf(Math.max(...l)).replace(/^CHF\s*/, "")}`;
   };
-  const EINMALIG = /(STELLE \d+ PERSONEN EIN · CHF[^<]*?)(?=\s*<\/button>)/;
   (window.__erzweltSeitenTeile ||= {}).teamKosten = function(html){
-    html = html.replace(EINMALIG, "$1 einmalig");
     const monat = textVon("belegschaftreg.danach-jeden-monat-lohn", {p1:(lohnSpanne()), p2:(chf(VERKAUF_LOHN)), p3:(chf(200))});
     return html.replace(/(<button class="cta riesig[^"]*" data-tun="anstellen"[\s\S]*?<\/button>)/, `$1${monat}`);
   };
-  /* Der Kern schreibt den Knopf beim Ziehen des Reglers neu – «einmalig» wieder anhängen. */
-  document.addEventListener("input", e => {
-    if (!e.target.closest || !e.target.closest('[data-regler="anstell"]')) return;
-    const k = document.querySelector('[data-tun="anstellen"]');
-    if (k && /PERSONEN EIN · CHF/.test(k.textContent) && !/einmalig/.test(k.textContent)) k.insertAdjacentText("beforeend", " einmalig");
-  });
 
   /* ---------- Bedienung ---------- */
   let gezogen = null;          // Regler, der gerade gezogen wird
@@ -165,7 +158,7 @@
     knopf.click();
   }
 
-  /* Fehlen freie Leute, werden sie zuerst eingestellt (einmalig LOHN_PRO_KOPF),
+  /* Fehlen freie Leute, werden sie zuerst eingestellt (ohne Extrakosten),
      dann teilt die bestehende Spiellogik sie zu. In der Einführung nie über den Bedarf. */
   document.addEventListener("click", e => {
     const b = e.target.closest && e.target.closest(".besetzung [data-tun]");
@@ -180,9 +173,8 @@
     if (n <= 0){ e.preventDefault(); e.stopImmediatePropagation(); blattStand = ""; seitenStand = ""; zeichnen(); return; }
     b.dataset.n = n;
     if (neu > 0){
-      const kosten = neu * LOHN_PRO_KOPF;
-      S.kasse -= kosten; S.ausgegeben += kosten; S.arbeiterGesamt += neu;
-      notiz(textVon("belegschaftreg.eingestellt-einmalig-danach-lohn", {p1:(neu), p2:(neu === 1 ? "Person" : "Personen"), p3:(chf(kosten))}), "geld");
+      S.arbeiterGesamt += neu;
+      notiz(textVon("belegschaftreg.eingestellt-einmalig-danach-lohn", {p1:(neu), p2:(neu === 1 ? "Person" : "Personen")}), "geld");
     }
   }, true);
 
@@ -249,13 +241,11 @@
     .besetzung-skala{display:flex;justify-content:space-between;gap:8px;color:var(--grau);font-size:var(--f0);font-weight:700;margin-top:2px}
     .besetzung-skala span:nth-child(2){text-align:center}
     #seite .monatskosten{margin-top:10px;text-align:left}
-    .besetzung-kosten{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .besetzung-kosten{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
     .besetzung-kosten .kachel{border-radius:12px;padding:7px 10px;line-height:1.2;min-width:0}
     .besetzung-kosten .kachel small{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;opacity:.75}
     .besetzung-kosten .kachel b{display:block;font-family:"Baloo 2",sans-serif;font-size:var(--f2);font-variant-numeric:tabular-nums;white-space:nowrap}
     .besetzung-kosten .kachel span{display:block;font-size:11px;font-weight:700;opacity:.8}
-    .besetzung-kosten .einmalig{background:#fff2c9;color:#6b4a0a}
-    .besetzung-kosten .einmalig.leer{background:#f4efe4;color:#7a6f5c}
     .besetzung-kosten .monatlich{background:#e6f1f8;color:#1f4f6b}
     .besetzung-anwenden{position:absolute;top:70px;left:50%;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none}
   `;

@@ -23,7 +23,7 @@ async function spiel(stufe){
     S.produktEntdeckungen = {kabel:{status:'gesehen'}};
     S.arbeiterGesamt += 40; S.ware.kabel = 300;
     for (let i = 0; i < 12; i++) tagVor();
-    S.kasse = 60000; questZeichnen();
+    S.kasse = 30000; questZeichnen();
     return document.querySelector('#quest .geld-helfer')?.textContent || null;
   });
 }

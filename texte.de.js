@@ -646,7 +646,7 @@ const TEXTE_DE = Object.freeze({
 
   /* ---------- sek-b-klarheit.js ---------- */
   "sekbklarheit.chf-mio": `CHF {p1} Mio`,
-  "sekbklarheit.verkauf-bringt-mehr": "Verkauf bringt 20 % mehr",
+  "sekbklarheit.verkauf-bringt-mehr": "Verkauf bringt 20 % mehr, Betriebskosten halb so hoch",
   "sekbklarheit.normale-verkaufspreise": "normale Verkaufspreise",
   "sekbklarheit.verkauf-bringt-weniger": "Verkauf bringt 30 % weniger",
   "sekbklarheit.neue-runde": "Neue Runde",
@@ -767,22 +767,19 @@ const TEXTE_DE = Object.freeze({
 
   /* ---------- belegschaft-regler.js ---------- */
   "belegschaftreg.aus-dem-team": `{p1} aus dem Team`,
-  "belegschaftreg.einmalig-jeden-monat-lohn": `<div class="kachel einmalig {p1}"><small>Einmalig</small><b>{p2}</b><span>{p3}</span></div>
-        <div class="kachel monatlich"><small>Jeden Monat</small><b>+ {p4}</b><span>Lohn · {p5}</span></div>`,
-  "belegschaftreg.einmalig-chf-zurueck-ins": `<div class="kachel einmalig leer"><small>Einmalig</small><b>CHF 0</b><span>{p1} zurück ins Team</span></div>
-        <div class="kachel monatlich"><small>Jeden Monat</small><b>− {p2}</b><span>Lohn · im Team ohne Aufgabe je {p3}</span></div>`,
-  "belegschaftreg.einmalig-pro-neue-person": `<div class="kachel einmalig"><small>Einmalig</small><b>{p1}</b><span>pro neue Person</span></div>
-        <div class="kachel monatlich"><small>Jeden Monat</small><b>{p2}</b><span>Lohn hier · {p3} pro Person</span></div>`,
+  "belegschaftreg.einmalig-jeden-monat-lohn": `<div class="kachel monatlich"><small>Jeden Monat</small><b>+ {p1}</b><span>Lohn · {p2}</span></div>`,
+  "belegschaftreg.einmalig-chf-zurueck-ins": `<div class="kachel monatlich"><small>Jeden Monat</small><b>− {p2}</b><span>Lohn · {p1} zurück ins Team, dort ohne Aufgabe je {p3}</span></div>`,
+  "belegschaftreg.einmalig-pro-neue-person": `<div class="kachel monatlich"><small>Jeden Monat</small><b>{p1}</b><span>Lohn hier · {p2} pro Person</span></div>`,
   "belegschaftreg.ziel": `<span class="besetzung-ziel {p1}" style="--z:{p2}"><i></i><b>{p3}Ziel {p4}</b></span>`,
   "belegschaftreg.im-verkauf": "im Verkauf",
   "belegschaftreg.frei-im-team": `{p1} frei im Team`,
   "belegschaftreg.mehr-neu-einstellen": "Mehr = neu einstellen",
-  "belegschaftreg.zu-wenig-geld-zum": "Zu wenig Geld zum Einstellen",
+  "belegschaftreg.zu-wenig-geld-zum": "Kasse im Minus: niemand neu",
   "belegschaftreg.danach-jeden-monat-lohn": `<div class="notiz monatskosten"><b>Danach jeden Monat Lohn:</b> je nach Land {p1} pro Person,
       im Verkauf {p2}. Wer keine Aufgabe hat, kostet {p3}.</div>`,
   "belegschaftreg.von-personen": `{p1} von {p2} Personen`,
   "belegschaftreg.ziel-2": "Ziel ",
-  "belegschaftreg.eingestellt-einmalig-danach-lohn": `<b>{p1} {p2}</b> eingestellt · einmalig {p3}, danach Lohn jeden Monat.`,
+  "belegschaftreg.eingestellt-einmalig-danach-lohn": `<b>{p1} {p2}</b> eingestellt · ab jetzt Lohn jeden Monat.`,
 
   /* ---------- einfuehrung.js ---------- */
   "einfuehrung.raffinerie": "Raffinerie",
@@ -819,7 +816,7 @@ const TEXTE_DE = Object.freeze({
   "einfuehrung.dein-personal-in-der": ">Dein Personal in der Einführung</h3>",
   "einfuehrung.eingestellt-wird-an-der": `<div class="einfuehrung-bedarf">
         <b>Eingestellt wird an der Station</b>
-        <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was einmalig und was jeden Monat kostet.</small>
+        <small>Öffne eine Rohstoffquelle, Raffinerie oder Fabrik und schieb dort den Regler. Fehlende Leute werden dabei eingestellt – du siehst, was das jeden Monat an Lohn kostet.</small>
         <div class="bedarf-liste">{p1}</div>
       </div>`,
   "einfuehrung.erst-nach-der-einfuehrung": "Erst nach der Einführung",
@@ -1098,7 +1095,7 @@ const TEXTE_DE = Object.freeze({
   "kern.betriebskosten-2": "Betriebskosten −15 %",
   "kern.personalplanung": "Personalplanung",
   "kern.lohnsumme": "Lohnsumme −6 %",
-  "kern.verkaufserloese": "Verkaufserlöse +20 %",
+  "kern.verkaufserloese": "Verkaufserlöse +20 %, Betriebskosten −50 %",
   "kern.standard-balancing": "Standard-Balancing",
   "kern.verkaufserloese-2": "Verkaufserlöse −30 %",
   "kern.punkte": "Punkte",
@@ -1466,14 +1463,16 @@ const TEXTE_DE = Object.freeze({
   "kern.rohstoffquelle-eroeffnet-jetzt-personal": `Rohstoffquelle <b>{p1}</b> eröffnet. Jetzt Personal zuweisen.`,
   "kern.lohnstufe-in-auf-erhoeht": `Lohnstufe in <b>{p1}</b> auf «{p2}» erhöht.`,
   "kern.fabrik-fuer-in-fertig": `Fabrik für <b>{p1}</b> in {p2} – fertig in {p3} Tagen.`,
-  "kern.leute-angestellt-fuer": `<b>{p1} Leute</b> angestellt für {p2}.`,
+  "kern.leute-angestellt-fuer": `<b>{p1} Leute</b> angestellt. Sie kosten ab jetzt Lohn jeden Monat.`,
+  "kern.anstellen-kostet-nur-lohn": "Anstellen kostet nichts extra – nur den Lohn jeden Monat.",
+  "kern.zu-wenig-geld-anstellen": "Kasse im Minus – zuerst Geld verdienen",
   "kern.selber-verkauft-stueck-fuer": `Selber verkauft: <b>{p1} Stück</b> für {p2}.`,
   "kern.auf-stufe-ausgebaut-die": `<b>{p1}</b> auf Stufe {p2} ausgebaut – die Ausbringung ist jetzt <b>doppelt</b> so hoch.`,
   "kern.verbesserung-finanziert": `Verbesserung finanziert: <b>{p1}</b> · {p2}`,
   "kern.leute": " Leute",
   "kern.im-tutorial-genuegen": "Im Tutorial genügen ",
   "kern.stelle": "STELLE ",
-  "kern.personen-ein": " PERSONEN EIN · ",
+  "kern.personen-ein": " PERSONEN EIN",
   "kern.neu-ware-verkauft-sich": "Neu: Ware verkauft sich nicht mehr von allein. Du hast ein kleines Verkaufsteam bekommen – im Markt kannst du es vergrössern."
 });
 

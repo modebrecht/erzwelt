@@ -190,12 +190,12 @@ await checkpoint('kupfer-auf');
 // 2: staff copper with the slider: the missing people are hired right there.
 if (!await page.locator('#blatt.auf .besetzung-ziel').count()) throw new Error('Slider goal marker missing');
 if (await page.locator('#blatt.auf .besetzung-regler').getAttribute('max') !== '15') throw new Error('Copper slider not capped at the introduction need');
-if (!/Einmalig/i.test(await page.locator('#blatt.auf .besetzung-kosten').innerText())) throw new Error('One-time / monthly cost tiles missing');
+if (!/Jeden Monat/i.test(await page.locator('#blatt.auf .besetzung-kosten').innerText()) || /Einmalig/i.test(await page.locator('#blatt.auf .besetzung-kosten').innerText())) throw new Error('Monthly cost tile missing or one-time cost still shown');
 const cashBeforeHire = (await state()).kasse;
 await setSlider('#blatt.auf', 15);
 await waitTutorial('alu-auf');
 const hired = await state();
-if (hired.workers !== 15 || hired.free !== 0 || cashBeforeHire - hired.kasse !== 15 * 1800) throw new Error(`Inline hiring wrong: ${JSON.stringify(hired)}`);
+if (hired.workers !== 15 || hired.free !== 0 || cashBeforeHire !== hired.kasse) throw new Error(`Inline hiring wrong: ${JSON.stringify(hired)}`);
 await checkpoint('kupfer-crew');
 
 // The team page does not hire during the introduction (close the open sheet first).
