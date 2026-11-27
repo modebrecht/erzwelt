@@ -4031,10 +4031,18 @@ function hinweiseSetzen(){
 
 /* ---------- Hauptzeichnung ---------- */
 /* Ist gerade irgendein Fenster offen? Dann treten die Meldungen zurück. */
+/* Ist ein Fenster offen (Blatt, Seite, Wissensfeld, Einstellungen), steht die Zeit.
+   Beim Schliessen läuft sie im vorherigen Tempo weiter. So kommen keine Meldungen
+   herein und nichts wird neu gezeichnet, während man liest oder tippt. */
+const fensterOffen = () => !!offenesBlatt || aktiveSeite !== "karte" || !$("#lupe").hidden || !$("#einst").hidden;
 function fensterKlasse(){
-  document.body.classList.toggle("fensterauf",
-    !!offenesBlatt || aktiveSeite !== "karte" || !$("#lupe").hidden || !$("#einst").hidden || !$("#schleier").hidden);
+  const offen = fensterOffen();
+  document.body.classList.toggle("fensterauf", offen || !$("#schleier").hidden);
+  if (typeof S === "undefined" || !S || !spielAktivFuerPause()) return;
+  if (offen && wissenTempoVorher === null) wissenPauseStarten();
+  else if (!offen && wissenTempoVorher !== null) wissenPauseBeenden();
 }
+const spielAktivFuerPause = () => typeof spielAktiv === "undefined" || spielAktiv;
 function zeichnen(){
   fensterKlasse();
   $("#h-kasse").textContent = kurz(S.kasse);
@@ -4218,8 +4226,7 @@ function seiteFuellen(name){
 function seiteWechseln(name){
   const warWissen = aktiveSeite === "wissen";
   aktiveSeite = name; blattZu(); seitenStand = "";
-  if (name === "wissen" && !warWissen) wissenPauseStarten();
-  else if (warWissen && name !== "wissen") wissenPauseBeenden();
+  // Pause bei offenen Fenstern: fensterKlasse() (über zeichnen)
   seite.hidden = name === "karte";
   if (!seite.hidden){ seiteFuellen(name); seite.scrollTop = 0; einzug(seite); }
   zeichnen();
@@ -4317,7 +4324,7 @@ function lupeFuellen(segId){
 
   const loehne = seg.id === "leute" ? textVon("kern.monatsloehne-im-vergleich-spielmodell", {p1:(Object.keys(LAND).sort((a,b)=>LAND[a].lohn-LAND[b].lohn).map(l =>
       `<tr><td><span class="flz">${flagge(l)}<span>${LAND[l].name}</span></span></td>
-        <td class="n">${LAND[l].lohn.toLocaleString("de-CH")}</td></tr>`).join(""))}) : "";
+        <td class="n">${chf(LAND[l].lohn)}</td></tr>`).join(""))}) : "";
 
   $("#lupeinhalt").innerHTML = textVon("kern.zum-merken", {p1:(seg.farbe), p2:(seg.farbe), p3:(IK[seg.ikon]||IK.wissen), p4:(seg.titel), p5:(seg.kurz), p6:(seg.text.map(t=>`<p>${t}</p>`).join("")), p7:(materialTabelle), p8:(loehne), p9:(rezepte), p10:(formeln), p11:(seg.fakten.map((f,i)=>`<div class="fakt"><span class="nr">${i+1}</span><span>${f}</span></div>`).join("")), p12:(erforscht), p13:(angebot)});
   einzug($("#lupeinhalt"));
@@ -4444,7 +4451,7 @@ document.addEventListener("click", e => {
   const tm = e.target.closest("[data-tempo]");
   if (tm){
     const neu=+tm.dataset.tempo;
-    if (aktiveSeite === "wissen" || offeneLupe){ wissenTempoVorher=neu; tempoSetzen(0); }
+    if (fensterOffen()){ wissenTempoVorher=neu; tempoSetzen(0); }
     else tempoSetzen(neu);
     return;
   }

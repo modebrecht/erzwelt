@@ -396,7 +396,7 @@ const TEXTE_DE = Object.freeze({
   "tutorialenhanc.fertigung": "Fertigung",
   "tutorialenhanc.verkauf": "Verkauf",
   "tutorialenhanc.noch-entstehen-keine-ladekabel": `Noch entstehen keine Ladekabel. Es fehlt {p1}. Prüfe Rohstoffquellen und Raffinerie.`,
-  "tutorialenhanc.die-fabrik-kann-produzieren": "Die Fabrik kann produzieren. Lass die Zeit laufen, bis mindestens ein Ladekabel im Lager liegt; verkaufe es danach im Markt.",
+  "tutorialenhanc.die-fabrik-kann-produzieren": "Die Fabrik kann produzieren. Schliesse das Fenster und lass die Zeit laufen, bis Ware im Lager liegt. Verkaufe sie danach im Markt.",
   "tutorialenhanc.tutorial-abgeschlossen": "Tutorial abgeschlossen",
   "tutorialenhanc.schritt-abgeschlossen": "Schritt abgeschlossen",
   "tutorialenhanc.rohstoffquelle-raffinerie-fabrik-verkauf": "Rohstoffquelle → Raffinerie → Fabrik → Verkauf → Geld",
@@ -808,7 +808,7 @@ const TEXTE_DE = Object.freeze({
   "einfuehrung.tippe-auf-den-fabrikstandort": `Tippe auf den Fabrikstandort {p1} und baue die Fabrik für Ladekabel.`,
   "einfuehrung.material-fabrik-produkt": "Material → Fabrik → Produkt",
   "einfuehrung.personal-in-die-fabrik": "Personal in die Fabrik",
-  "einfuehrung.die-fabrik-wird-gebaut": `Die Fabrik wird gebaut. Noch {p1} {p2} – lass die Zeit laufen.`,
+  "einfuehrung.die-fabrik-wird-gebaut": `Die Fabrik wird gebaut. Noch {p1} {p2}. Schliesse das Fenster, dann läuft die Zeit.`,
   "einfuehrung.die-fabrik-ist-fertig": `Die Fabrik ist fertig. Öffne {p1} und schieb den Regler auf 5 Personen.`,
   "einfuehrung.personal-material-ladekabel": "Personal + Material → Ladekabel",
   "einfuehrung.ladekabel-selbst-verkaufen": "Ladekabel selbst verkaufen",
@@ -1428,7 +1428,7 @@ const TEXTE_DE = Object.freeze({
   "kern.was-in-einem-geraet-2": `<div class="karte"><h3>Was in einem Gerät steckt</h3>
     <div class="notiz blau"><b>Vereinfachte Rezepte:</b> stark vereinfachte Materialanteile, keine Stücklisten realer Geräte.</div>{p1}</div>`,
   "kern.monatsloehne-im-vergleich-spielmodell": `<div class="karte"><h3>Monatslöhne im Vergleich</h3>
-    <table>{p1}</table>
+    <table><tr><th>Land</th><th class="n">Üblicher Lohn pro Person und Monat</th></tr>{p1}</table>
     <div class="notiz"><b>Spielmodell:</b> Diese Lohnwerte sind vereinfachte Spielwerte und keine aktuelle Statistik.</div></div>`,
   "kern.zum-merken": `
     <div class="titelzeile" style="padding-right:52px">
