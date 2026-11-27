@@ -146,7 +146,7 @@ const TEXTE_DE = Object.freeze({
   "forschung.preisVonBis": "{jetzt} → {danach}",
   "forschung.forscherWaehlen": "Wer forscht?",
   "forschung.forscher.junior": "Junior",
-  "forschung.forscher.spezialist": "Spezialistin",
+  "forschung.forscher.spezialist": "Spezialist",
   "forschung.forscher.experte": "Experte",
   "forschung.forscherZeile": "{lohn} pro Monat · {tage} Tage",
   "forschung.forscherProjekt": "Lohn fürs Projekt: {lohn}",

@@ -10,7 +10,7 @@
      Produkts, zusätzlich zu Lager, Dollar, Verbesserungen und Schwierigkeit.
    - Drei Forscher zur Wahl, je Projekt genau einer:
        Junior      CHF 2'850 pro Monat, 30 Spieltage
-       Spezialistin CHF 4'500 pro Monat, 25 Spieltage
+       Spezialist   CHF 4'500 pro Monat, 25 Spieltage
        Experte     CHF 6'500 pro Monat, 20 Spieltage
    - Projektgebühr einmal beim Start, gemessen am Umsatz einer vollen Fabrik
      dieses Produkts (Preis × Stück pro Tag, höchstens die Grundnachfrage):
@@ -148,15 +148,16 @@
   /* ---------- Ansicht im Wissen-Reiter ---------- */
   const wahl = {reiter:"wissen", produkt:null, forscher:"junior"};
 
-  /* Personen-Silhouetten für die Forscherwahl (eigene Zeichnung, 48 × 48):
-     Junior mit Kapuzenpulli, Spezialistin mit Bob und Blazer,
-     Experte mit Laborkittel, grauem Bart und Brille. */
-  const SILHOUETTE = {
-      "junior": "<path d=\"M3.2 48.5C3.5 40.4 6.8 34.4 12.4 32.5l7.4-3.4 4.2 2.6 4.2-2.6 7.4 3.4c5.6 1.9 8.9 7.9 9.2 16z\"/><path d=\"M15.6 32.4c2.2-1.9 5-2.9 8.4-2.9s6.2 1 8.4 2.9\" fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"1.3\" stroke-linecap=\"round\"/><path d=\"M21.4 34.6v5.6M26.6 34.6v5.6\" stroke=\"#fffaf0\" stroke-width=\"1.1\" stroke-linecap=\"round\"/><path d=\"M20 20.5h8v10.3L24 33l-4-2.2z\"/><ellipse cx=\"16.8\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"31.2\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"24\" cy=\"16\" rx=\"7.1\" ry=\"7.9\"/><path d=\"M16.4 15.8c-1-5.8 2.2-10.4 7.6-10.4 5.6 0 8.6 4.4 7.6 10.4-.6-1.9-1.5-3.2-2.7-4-1.2 1.1-2.9 1.6-4.6 1.2-1.4.9-3.2 1.2-5 .7-1.3.4-2.3 1-2.9 2.1z\"/><path d=\"M18.6 7.4c1.2-1.4 2.8-2.2 4.6-2.4-.6.8-.9 1.6-.8 2.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/>",
-      "spezialist": "<path d=\"M14.9 17.6c-.4-7.4 3.6-11.8 9.1-11.8s9.5 4.4 9.1 11.8l.9 8.8c-1.8 1.3-3.9 2-6.1 2.1v-7.1h-7.8v7.1c-2.2-.1-4.3-.8-6.1-2.1z\"/><path d=\"M3.2 48.5C3.5 40.4 6.8 34.4 12.4 32.5l7.4-3.4 4.2 2.6 4.2-2.6 7.4 3.4c5.6 1.9 8.9 7.9 9.2 16z\"/><path d=\"M18.4 31.4l5.6 7.4 5.6-7.4\" fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/><circle cx=\"24\" cy=\"42.6\" r=\"1.1\" fill=\"#fffaf0\"/><path d=\"M20 20.5h8v10.3L24 33l-4-2.2z\"/><ellipse cx=\"24\" cy=\"16\" rx=\"7.1\" ry=\"7.9\"/><path d=\"M16.9 15.6c.4-5.2 3.2-8.4 7.4-8.4 3.2 0 5.7 1.8 6.8 4.8-2.7-.3-5.8-1.4-8-3.2-1.5 3.5-3.6 5.5-6.2 6.8z\"/>",
-      "experte": "<path fill=\"#fffaf0\" stroke=\"currentColor\" stroke-width=\"1.4\" d=\"M4.1 48.8C4.4 40.9 7.6 35.1 13 33.2l7-3.2 4 2.6 4-2.6 7 3.2c5.4 1.9 8.6 7.7 8.9 15.6z\"/><path d=\"M20.2 31.4L24 41.4l3.8-10-3.8 2.2z\"/><path d=\"M17.6 31.6l4.8 11M30.4 31.6l-4.8 11\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><path d=\"M32.6 40.2h5.2\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><path d=\"M34.8 36.8v3.2\" stroke=\"#c2562a\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M20 20.5h8v10.3L24 33l-4-2.2z\"/><ellipse cx=\"16.8\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"31.2\" cy=\"17\" rx=\"1.4\" ry=\"2.2\"/><ellipse cx=\"24\" cy=\"16\" rx=\"7.1\" ry=\"7.9\"/><path fill=\"#b3ada4\" d=\"M16.6 16.8c-.9-4.4.3-7.4 2.6-8.6-.1 2 .4 3.6 1.4 4.8-1.8.8-3.2 2-4 3.8zM31.4 16.8c.9-4.4-.3-7.4-2.6-8.6.1 2-.4 3.6-1.4 4.8 1.8.8 3.2 2 4 3.8z\"/><path fill=\"#b3ada4\" d=\"M18.4 19.8c.5 4.8 2.8 7.4 5.6 7.4s5.1-2.6 5.6-7.4c-1.5 1.3-3.4 1.9-5.6 1.9s-4.1-.6-5.6-1.9z\"/><g fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"1.3\"><rect x=\"18.2\" y=\"14.4\" width=\"4.7\" height=\"3.5\" rx=\"1.5\"/><rect x=\"25.1\" y=\"14.4\" width=\"4.7\" height=\"3.5\" rx=\"1.5\"/><path d=\"M22.9 15.7h2.2\"/></g>"
+  /* Symbole für die Forscherwahl im Stil der Spiel-Ikonen (24 × 24, Linie 1.8,
+     leichte Füllung). Formen nach Lucide (ISC-Lizenz, siehe SOURCES.md):
+     Junior = Doktorhut, Spezialist = Laborkolben, Experte = Mikroskop. */
+  const LINIE = 'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  const SYMBOL = {
+    junior:{farbe:"#2f86c0", svg:`<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" fill="currentColor" fill-opacity=".2" ${LINIE}/><path d="M22 10v6" ${LINIE}/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" ${LINIE}/>`},
+    spezialist:{farbe:"#7b5cc4", svg:`<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" ${LINIE}/><path d="M6.453 15h11.094l1.85 3.4A2 2 0 0 1 18 22H6a2 2 0 0 1-1.4-3.4z" fill="currentColor" fill-opacity=".25"/><path d="M6.453 15h11.094" ${LINIE}/><path d="M8.5 2h7" ${LINIE}/>`},
+    experte:{farbe:"#1f9d72", svg:`<path d="M6 18h8" ${LINIE}/><path d="M3 22h18" ${LINIE}/><path d="M14 22a7 7 0 1 0 0-14h-1" ${LINIE}/><path d="M9 14h2" ${LINIE}/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" fill="currentColor" fill-opacity=".2" ${LINIE}/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" ${LINIE}/>`}
   };
-  const silhouette = id => `<svg class="pe-person" viewBox="0 0 48 48" aria-hidden="true" focusable="false">${SILHOUETTE[id]}</svg>`;
+  const silhouette = id => `<span class="pe-person" style="background:${SYMBOL[id].farbe}1f;color:${SYMBOL[id].farbe}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">${SYMBOL[id].svg}</svg></span>`;
   const t = (k, w) => textVon("forschung." + k, w);
   const prozent = s => Math.round((PREISFAKTOR[s] - 1) * 100);
 
@@ -294,8 +295,8 @@
     .pe-forscher{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 10px;text-align:left;border:2px solid var(--linie);
       background:#fff;border-radius:12px;padding:8px;min-height:44px;color:var(--tinte);cursor:pointer}
     .pe-forscher-text{display:grid;gap:2px;min-width:0}
-    .pe-person{width:52px;height:52px;flex:none;border-radius:50%;background:#efe5d0;color:#5b4a36;fill:currentColor;overflow:hidden}
-    .pe-forscher.gewaehlt .pe-person{background:#f8dfa0}
+    .pe-person{width:48px;height:48px;flex:none;border-radius:14px;display:grid;place-items:center}
+    .pe-person svg{width:28px;height:28px}
     @media (min-width:421px){.pe-forscher{grid-template-columns:1fr;justify-items:start}}
     .pe-forscher small{font-size:var(--f0);color:var(--grau);font-weight:700}
     .pe-forscher.gewaehlt{border-color:var(--gold);background:#fff8e6}

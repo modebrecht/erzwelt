@@ -102,3 +102,12 @@ Folgende Dinge sind **bewusst keine Realwelt-Aussagen**, sondern Spielregeln:
 - Transportwege auf der Karte.
 
 Bei Unterrichtsfragen zu aktuellen Produktionsanteilen oder Marktanteilen sollte immer eine aktuelle Quelle verwendet werden. Für Erzwelt gilt dafür primär der USGS-Quellenstand 2026.
+
+## Symbole von Dritten
+
+- Forscherwahl in der Produktentwicklung (`produktentwicklung.js`): Formen der Symbole
+  «graduation-cap», «flask-conical» und «microscope» nach [Lucide](https://lucide.dev),
+  ISC-Lizenz: Copyright (c) 2026 Lucide Icons and Contributors. Permission to use, copy,
+  modify, and/or distribute this software for any purpose with or without fee is hereby
+  granted, provided that the above copyright notice and this permission notice appear in all
+  copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES.
