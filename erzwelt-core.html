@@ -4347,7 +4347,7 @@ function einstFuellen(){
              0, 2, 1, OPT.anim, ANIM_NAME[OPT.anim])), p4:(Object.entries(LIEFERANZEIGEN).map(([art, label]) =>
           `<option value="${art}"${OPT.lieferanzeige === art ? " selected" : ""}>${label}</option>`).join("")), p5:(regler("meldungsdauer", "Meldungsdauer", "Lesezeit für kurze und lange Meldungen.",
              50, 200, 25, OPT.meldungsdauer, meldungsdauerAnzeige())), p6:(regler("lernfeedbackdauer", "Dauer für Schrittfeedback", "Lesezeit für «Schritt abgeschlossen» und «Tutorial abgeschlossen».",
-             50, 200, 25, OPT.lernfeedbackdauer, meldungsdauerAnzeige(OPT.lernfeedbackdauer))), p7:(regler("meldungstakt", "Tempo bei Meldungen", "Bei Folgen dauert ab dem zweiten Meldungstag in Serie jeder Meldungstag doppelt so lange.",
+             50, 200, 25, OPT.lernfeedbackdauer, meldungsdauerAnzeige(OPT.lernfeedbackdauer))), p7:(regler("meldungstakt", "Tempo bei Meldungen", "Bei Meldungen läuft die Zeit halb so schnell, damit du sie lesen kannst. «Bei vielen Meldungen»: erst ab dem zweiten Tag mit Meldung in Folge.",
              0, 2, 1, OPT.meldungstakt, MELDUNGSTAKT_NAME[OPT.meldungstakt])), p8:(SPEICHER.echt
         ? "Dein Fortschritt wird automatisch in diesem Speicherplatz gesichert."
         : "Der Browserspeicher ist nicht verfügbar. Sichere deinen Spielstand als Datei.")});

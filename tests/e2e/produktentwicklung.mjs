@@ -80,7 +80,7 @@ let pe = await PE();
 assert.equal(pe.stufen.board, 2, 'nach 60 Tagen Tier 2');
 assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.05);
 let log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
-assert.match(log, /Forschung abgeschlossen!.*Mainboard V1.*Tier 2.*weiter mit Tier 3/);
+assert.match(log, /Forschung abgeschlossen!.*Mainboard V1.*Stufe 2.*weiter mit Stufe 3/);
 // automatisch weiter am nächsten Tier
 await tagesKosten(5);
 pe = await PE();
@@ -137,14 +137,14 @@ assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor
 await page.evaluate(() => { let n = 0; while (S.produktForschung.stufen.board < 5 && n < 400){ tagVor(); n++; } });
 assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.2);
 log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
-assert.match(log, /Tier 5.*höchste Tier/);
+assert.match(log, /Stufe 5.*höchste Stufe/);
 assert.equal(await page.evaluate(() => S.log.filter(e => /Forschung abgeschlossen!/.test(e.text)).length), 4, 'je Tier genau eine Meldung');
 const leer = await tagesKosten(3);
 assert.ok(leer.every(x => Math.abs(x - 8000 / 30) < 0.01), 'Lohn läuft weiter, solange angestellt');
 
 // Ansicht auf 360 px: Kündigen-Knopf und Hinweis sichtbar
 await wissenForschung();
-assert.match(await page.locator('.pe-bereich').textContent(), /höchste Tier/);
+assert.match(await page.locator('.pe-bereich').textContent(), /höchste Stufe/);
 const box = await page.locator('[data-pe-kuendigen]').boundingBox();
 assert.ok(box && box.width <= 360 && box.height >= 44);
 

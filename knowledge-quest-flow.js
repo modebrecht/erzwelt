@@ -114,7 +114,9 @@
   function minenZiel(id, steuerung){
     return id ? {type:"map", target:{kind:"mine", id}, oeffnen:true, steuerung} : null;
   }
-  function feldFrei(segId){ return !!flowState().fields[segId]; }
+  // Die Felder der ersten Quest (Lieferkette, Raffination, Fabrik) sind nach dem Tutorial offen.
+  const BASIS_FELDER=["kette","chemie","fabrik"];
+  function feldFrei(segId){ return !!flowState().fields[segId]||(BASIS_FELDER.includes(segId)&&!tutorialLaeuft()); }
   function aufgabeText(def){
     const q=flowState();
     return typeof def?.aufgabe==="function"?def.aufgabe(q):(def?.aufgabe||"");
