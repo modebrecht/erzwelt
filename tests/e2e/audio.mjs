@@ -22,15 +22,14 @@ await page.locator('#spielmenue-audio').click();
 await page.locator('.audio-bereich').waitFor();
 assert.equal(await page.locator('[data-musik-wahl="1"]').getAttribute('aria-checked'), 'true', 'Musik 1 vorausgewählt');
 assert.equal(await page.locator('#r-musik').inputValue(), '0', 'Musik ist zu Beginn aus');
-await page.locator('[data-musik-wahl="2"]').click();
-await page.locator('[data-musik-wahl="1"]').click();
 await page.waitForTimeout(300);
 assert.deepEqual(requests, [], 'ohne Musik wird keine Audiodatei geladen');
 
-// Einschalten lädt Musik 1
-await page.locator('#r-musik').fill('1');
+// Antippen einer Musik schaltet die Musik ein und lädt Musik 1
 await page.locator('[data-musik-wahl="1"]').click();
 await page.waitForFunction(() => window.__erzweltAudio.zustand().laeuft);
+assert.equal(await page.locator('#r-musik').inputValue(), '1', 'Schalter steht nach Musikwahl auf an');
+assert.equal((await opt()).musik, 1, 'Musik an wird gespeichert');
 await anfragen(1);
 assert.equal(dateien().length, 1);
 assert.match(dateien()[0], /^musik-1-[0-9a-f]{8}\.ogg$/);

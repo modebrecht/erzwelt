@@ -201,16 +201,20 @@
     const knopf = e.target.closest?.("[data-musik-wahl]");
     if (!knopf) return;
     const nr = +knopf.dataset.musikWahl;
-    if (nr === OPT.musikWahl && (!OPT.musik || (player && !player.paused))) return;
+    if (nr === OPT.musikWahl && OPT.musik && player && !player.paused) return;
     OPT.musikWahl = nr;
-    speichern();
     for (const b of document.querySelectorAll("[data-musik-wahl]")){
       const gewaehlt = +b.dataset.musikWahl === nr;
       b.classList.toggle("still", !gewaehlt);
       b.setAttribute("aria-checked", String(gewaehlt));
     }
-    // Läuft Musik, beginnt die neue Fassung von vorne; sonst wird nichts geladen.
-    if (OPT.musik) starten();
+    // Wer eine Musik antippt, will sie hören: Musik einschalten (Schalter mitziehen).
+    if (!OPT.musik){
+      const r = document.getElementById("r-musik");
+      if (r) r.value = "1";
+      wertSetzen("musik", 1, anAus(1));
+    } else speichern();
+    starten();
     bereitMachen();
   });
 

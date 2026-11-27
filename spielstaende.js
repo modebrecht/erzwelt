@@ -33,7 +33,7 @@
   stil.textContent = `
     #spielmenue {position:fixed;inset:0;z-index:150;overflow:auto;overscroll-behavior:contain;
       background:radial-gradient(130% 120% at 50% 0%,#165676,#0b3648 44%,#082a39 100%);color:#fff}
-    #spielmenue[hidden],.sm-dialogaktionen [hidden] {display:none}
+    #spielmenue[hidden],.sm-dialogaktionen [hidden],[data-spielstand][hidden] {display:none!important}
     #spiel.spielmenue-offen {visibility:hidden}
     .spielmenue-innen {width:min(100%,610px);min-height:100%;margin:auto;display:flex;flex-direction:column;
       justify-content:safe center;padding:calc(20px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right))
