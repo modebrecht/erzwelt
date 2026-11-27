@@ -609,6 +609,8 @@ const TEXTE_DE = Object.freeze({
   "logikfixes.nochmals-tage-mit-derselben": `Nochmals {p1} Tage mit derselben Firma`,
   "logikfixes.speicherplatz-und-schwierigkeit-waehlen": "Speicherplatz und Schwierigkeit wählen",
   "logikfixes.etappe-tage": `Etappe {p1} · {p2} Tage`,
+  "logikfixes.laufend-ziel-ruf-ziel": `Laufendes Geschäft dieser Etappe: {p1} (Ziel {p2}) · Ruf: {p3} (Ziel {p4}).<br>`,
+  "logikfixes.laufend-etappe": "Laufendes Geschäft (zählt fürs Ziel)",
   "logikfixes.etappengewinn-ziel-ruf-ziel": `Etappengewinn: {p1} (Ziel {p2}) · Ruf: {p3} (Ziel {p4}).<br>`,
   "logikfixes.schwierigkeit": `Schwierigkeit: {p1} <b>{p2}</b> · {p3}.<br><br>`,
   "logikfixes.du-hast-geld-verdient": "Du hast Geld verdient <b>und</b> den Ruf gehalten. Weiter geht es mit der nächsten Etappe, gleich lang wie diese.",
@@ -635,6 +637,10 @@ const TEXTE_DE = Object.freeze({
       <div class="zeile" style="margin-top:8px"><span>Davon Investitionen</span><b>{p1}</b></div>
       <div class="zeile"><span>Laufendes Geschäft</span><b style="color:{p2}">{p3}</b></div>
       <div class="ort">Investitionen: Standorte, Ausbau, Leute, Verbesserungen. Sie lohnen sich erst über Verkäufe.</div>`,
+  "logikfixes.investiert-zaehlt-nicht": `nur laufendes Geschäft</div>
+      <div class="zeile" style="margin-top:8px"><span>Investiert (zählt nicht fürs Ziel)</span><b>{p2}</b></div>
+      <div class="zeile"><span>Gesamt mit Investitionen</span><b>{p3}</b></div>
+      <div class="ort">Auf «Einfach» zählt nur, was dein Geschäft jeden Monat einbringt. Bauen und Ausbauen bremsen dich beim Ziel nicht.</div>`,
   "logikfixes.der-transparenzbericht-gilt-fuer": `Der Transparenzbericht gilt für alle deine Rohstoffquellen.`,
   "logikfixes.nachweis-holen-quelle-oeffnen": `Nachweis holen: Quelle öffnen → <b>«Herkunft prüfen lassen»</b> ({p1}). Oder im Reiter Wissen den <b>Transparenzbericht</b> finanzieren: gilt für alle.`,
   "logikfixes.das-lieferkettengesetz-verlangt-fuer": `{p1}
@@ -809,7 +815,7 @@ const TEXTE_DE = Object.freeze({
   "einfuehrung.tippe-unten-auf-markt": "Tippe unten auf «Markt» und dann auf «Selbst verkaufen».",
   "einfuehrung.produkt-verkauf-geld": "Produkt → Verkauf → Geld",
   "einfuehrung.verkaufsteam-einsetzen": "Verkaufsteam einsetzen",
-  "einfuehrung.im-markt-beim-verkaufsteam": `Im Markt beim Verkaufsteam: Schieb den Regler auf {p1} Personen. Jede verkauft {p2} Kabel pro Tag – zusammen mehr, als die Fabrik herstellt.`,
+  "einfuehrung.im-markt-beim-verkaufsteam": `Im Markt beim Verkaufsteam: Schieb den Regler auf {p1} Personen. Jede verkauft {p2} Packs pro Tag – zusammen mehr, als die Fabrik herstellt.`,
   "einfuehrung.das-verkaufsteam-verkauft-jeden": "Das Verkaufsteam verkauft jeden Tag – du musst nicht mehr selbst.",
   "einfuehrung.hier-noch-nicht-in": `Hier noch nicht. In der Einführung ist jetzt <b>{p1}</b> dran.`,
   "einfuehrung.hier-noch-nicht-folge": "Hier noch nicht. Folge Schritt für Schritt der Aufgabe – danach sind alle Orte offen.",
@@ -989,8 +995,8 @@ const TEXTE_DE = Object.freeze({
   "kern.pori": "Pori",
   "kern.in-pori-wird-kupfer": "In Pori wird Kupfer mit elektrischem Strom gereinigt. Das hochreine Kupfer eignet sich zum Beispiel für Kabel.",
   "kern.pawlodar": "Pawlodar",
-  "kern.ladekabel": "Ladekabel",
-  "kern.ein-ladekabel-ist-fast": "Ein Ladekabel ist fast nur Kupfer – dazu Aluminium für den Stecker und Zinn zum Löten. Das einfachste Gerät in deinem Katalog.",
+  "kern.ladekabel": "Ladekabel 10er-Pack",
+  "kern.ein-ladekabel-ist-fast": "Verkauft wird im Pack zu 10 Stück. Ein Ladekabel ist fast nur Kupfer – dazu Aluminium für den Stecker und Zinn zum Löten. Das einfachste Gerät in deinem Katalog.",
   "kern.der-motor-treibt-das": "Der Motor treibt das E-Bike an. In diesem Motortyp steckt Kupfer in den Spulen, Aluminium im Gehäuse und Neodym aus der Gruppe der Seltenen Erden in den Permanentmagneten.",
   "kern.velocity-smartphone": "Velocity Smartphone",
   "kern.in-einem-smartphone-stecken": "In einem Smartphone stecken über 60 verschiedene Elemente. Fast keines davon wird recycelt.",

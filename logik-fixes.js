@@ -55,6 +55,12 @@
     return Math.max(0, investitionswert() - S.investStartWert);
   }
 
+  /* Was fürs Etappenziel zählt. Einfach: nur das laufende Geschäft
+     (Investitionen in Standorte, Ausbau und Verbesserungen zählen nicht als Verlust).
+     Mittel/Schwer: Etappengewinn mit Investitionen. */
+  const ohneInvestitionen = () => S && S.schwierigkeit === "einfach";
+  const zielWert = () => etappenGewinn() + (ohneInvestitionen() ? etappenInvestitionen() : 0);
+
   const originalEtappeWeiter = etappeWeiter;
   etappeWeiter = function(...args){
     S.investStartWert = investitionswert();
@@ -64,7 +70,7 @@
   rundeBeenden = function(grund){
     if (S.ende) return;
     const vorherTempo = tempo > 0 ? tempo : 1;
-    const gewinn = etappenGewinn();
+    const gewinn = zielWert();
     const ziel = zielGewinn();
     const geschafft = grund !== "insolvenz" && gewinn >= ziel && S.ruf >= ZIEL_RUF;
     const mittelUnlock = geschafft && S.schwierigkeit === "mittel" && !META.mittelGeschafft;
@@ -105,7 +111,7 @@
     dialogZeigen({
       art:textVon("logikfixes.etappe-tage", {p1:(S.etappe), p2:(ZIEL_TAGE)}),
       titel: geschafft ? textVon("slot.zielErreicht") : textVon("abschlusszerti.etappenziel-verfehlt"),
-      text: textVon("logikfixes.etappengewinn-ziel-ruf-ziel", {p1:(chf(gewinn)), p2:(chf(ziel)), p3:(Math.round(S.ruf)), p4:(ZIEL_RUF)})
+      text: textVon(ohneInvestitionen() ? "logikfixes.laufend-ziel-ruf-ziel" : "logikfixes.etappengewinn-ziel-ruf-ziel", {p1:(chf(gewinn)), p2:(chf(ziel)), p3:(Math.round(S.ruf)), p4:(ZIEL_RUF)})
           + textVon("logikfixes.schwierigkeit", {p1:(schwierigkeitInfo().icon), p2:(schwierigkeitInfo().name), p3:(verkaufsEffektText())})
           + (geschafft
               ? textVon("logikfixes.du-hast-geld-verdient")
@@ -173,10 +179,15 @@
     const gewinn = etappenGewinn(), ziel = zielGewinn();
     const invest = etappenInvestitionen();
     html = html.replace(/(<div class="leiste"><i style="width:)[\d.]+(%;background:var\(--gold\)"><\/i><\/div>)/,
-      `$1${klemm(gewinn / ziel * 100, 0, 100)}$2`);
+      `$1${klemm(zielWert() / ziel * 100, 0, 100)}$2`);
+    // Einfach: oben steht, was fürs Ziel zählt (laufendes Geschäft der Etappe)
+    if (ohneInvestitionen()) html = html.replace(/<span>Etappengewinn<\/span><b>[^<]*<\/b>/,
+      `<span>${textVon("logikfixes.laufend-etappe")}</span><b>${chf(zielWert())}</b>`);
     html = html.replace(textVon("logikfixes.ziel-gesamtgewinn", {p1:(chf(ZIEL_GEWINN))}), textVon("logikfixes.ziel-gesamtgewinn", {p1:(chf(ziel))}));
     html = html.replace(/(Gesamtgewinn seit Start [^<]*<\/div>)/,
-      textVon("logikfixes.davon-investitionen-laufendes-geschaeft", {p1:(chf(-invest)), p2:(gewinn + invest >= 0 ? "var(--gruen)" : "var(--alarm)"), p3:(chf(gewinn + invest))}));
+      ohneInvestitionen()
+        ? textVon("logikfixes.investiert-zaehlt-nicht", {p1:(chf(ziel)), p2:(chf(-invest)), p3:(chf(gewinn))})
+        : textVon("logikfixes.davon-investitionen-laufendes-geschaeft", {p1:(chf(-invest)), p2:(gewinn + invest >= 0 ? "var(--gruen)" : "var(--alarm)"), p3:(chf(gewinn + invest))}));
 
     const n = offeneMinen().length, g = geprueft(), perk = nachweisDurchPerk();
     const hilfe = perk
@@ -236,6 +247,6 @@
   style.textContent = `.nachweiskarte.offen{border:2px solid #e6b450}.nachweiskarte.sicher{border:2px solid #75aa93}`;
   document.head.appendChild(style);
 
-  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN, abschlussZeigen};
+  window.__erzweltLogikFixes = {version:1, ziele:ZIEL_NACH_STUFE, zielGewinn, zielWert, investitionswert, etappenInvestitionen, NACHWEIS_KOSTEN, abschlussZeigen};
   seitenStand = ""; blattStand = "";
 })();

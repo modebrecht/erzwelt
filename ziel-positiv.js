@@ -29,7 +29,7 @@
   function prognose(laufend){
     const api = window.__erzweltLogikFixes;
     const ziel = api && typeof api.zielGewinn === "function" ? api.zielGewinn() : ZIEL_GEWINN;
-    const gewinn = etappenGewinn();
+    const gewinn = api && typeof api.zielWert === "function" ? api.zielWert() : etappenGewinn();
     const fehlt = ziel - gewinn;
     const restMonate = Math.max(0, Math.floor((etappenEnde() - S.tag + 1) / 30));
     if (fehlt <= 0) return textVon("zielpositiv.gewinnziel-erreicht-fuer-die", {p1:(ZIEL_RUF)});
