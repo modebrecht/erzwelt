@@ -9,9 +9,9 @@
      oder Experte), kündigst ihr, stellst jemand anderen ein oder lässt die
      Stelle offen. Lohn = Monatslohn / 30 pro Spieltag, solange jemand
      angestellt ist – auch wenn gerade nichts zu erforschen ist.
-       Junior        CHF 2'850 pro Monat, 30 Spieltage pro Tier
-       Spezialistin  CHF 4'500 pro Monat, 25 Spieltage pro Tier
-       Experte       CHF 6'500 pro Monat, 20 Spieltage pro Tier
+       Junior        CHF 8'000 pro Monat, 90 Spieltage pro Tier
+       Spezialistin  CHF 12'000 pro Monat, 75 Spieltage pro Tier
+       Experte       CHF 18'000 pro Monat, 60 Spieltage pro Tier
    - Forschungsziel: ein Produkt. Ist ein Tier fertig, kommt eine Meldung,
      und die Forschung geht automatisch am nächsten Tier desselben Produkts
      weiter (bis Tier 3). Das Ziel lässt sich jederzeit wechseln; der
@@ -35,9 +35,9 @@
 (function(){
   const VERSION = 2;
   const FORSCHER = {
-    junior:     {lohn:2850, tage:30},
-    spezialist: {lohn:4500, tage:25},
-    experte:    {lohn:6500, tage:20}
+    junior:     {lohn:8000,  tage:90},
+    spezialist: {lohn:12000, tage:75},
+    experte:    {lohn:18000, tage:60}
   };
   const PREISFAKTOR = {1:1, 2:1.05, 3:1.10};
   const MAX_STUFE = 3;

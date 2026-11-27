@@ -68,16 +68,16 @@ assert.equal(await page.locator('[data-pe-einstellen]').count(), 3);
 assert.equal(await page.locator('[data-pe-ziel="kabel"]').getAttribute('aria-disabled'), 'true', 'ohne Fabrik kein Ziel');
 assert.deepEqual(await tagesKosten(3), [0, 0, 0], 'ohne Person kein Lohn');
 
-// Ziel Mainboard, Experte anstellen (CHF 6'500 pro Monat, 20 Tage pro Tier)
+// Ziel Mainboard, Experte anstellen (CHF 18'000 pro Monat, 60 Tage pro Tier)
 await wissenForschung();
 await page.locator('[data-pe-ziel="board"]').click();
 await page.locator('[data-pe-einstellen="experte"]').click();
 assert.equal((await PE()).forscher, 'experte');
-const lohn = 6500 / 30;
-const kosten20 = await tagesKosten(20);
-assert.ok(kosten20.every(x => Math.abs(x - lohn) < 0.01), 'Lohn jeden Tag: ' + kosten20.join(', '));
+const lohn = 18000 / 30;
+const kosten60 = await tagesKosten(60);
+assert.ok(kosten60.every(x => Math.abs(x - lohn) < 0.01), 'Lohn jeden Tag: ' + kosten60.join(', '));
 let pe = await PE();
-assert.equal(pe.stufen.board, 2, 'nach 20 Tagen Tier 2');
+assert.equal(pe.stufen.board, 2, 'nach 60 Tagen Tier 2');
 assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.05);
 let log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
 assert.match(log, /Forschung abgeschlossen!.*Mainboard V1.*Tier 2.*weiter mit Tier 3/);
@@ -85,19 +85,19 @@ assert.match(log, /Forschung abgeschlossen!.*Mainboard V1.*Tier 2.*weiter mit Ti
 await tagesKosten(5);
 pe = await PE();
 assert.equal(pe.ziel, 'board');
-assert.ok(Math.abs(pe.fortschritt.board - 5 / 20) < 1e-9, 'Tier 3 läuft automatisch: ' + pe.fortschritt.board);
+assert.ok(Math.abs(pe.fortschritt.board - 5 / 60) < 1e-9, 'Tier 3 läuft automatisch: ' + pe.fortschritt.board);
 
 // Kündigen: kein Lohn, kein Fortschritt; Fortschritt bleibt
 await wissenForschung();
 await page.locator('[data-pe-kuendigen]').click();
 assert.deepEqual(await tagesKosten(4), [0, 0, 0, 0]);
-assert.ok(Math.abs((await PE()).fortschritt.board - 0.25) < 1e-9);
+assert.ok(Math.abs((await PE()).fortschritt.board - 5 / 60) < 1e-9);
 
-// Junior übernimmt: Anteil bleibt, Junior braucht 30 Tage pro Tier
+// Junior übernimmt: Anteil bleibt, Junior braucht 90 Tage pro Tier
 await wissenForschung();
 await page.locator('[data-pe-einstellen="junior"]').click();
 await tagesKosten(10);
-assert.ok(Math.abs((await PE()).fortschritt.board - (0.25 + 10 / 30)) < 1e-9);
+assert.ok(Math.abs((await PE()).fortschritt.board - (5 / 60 + 10 / 90)) < 1e-9);
 
 // Speichern, neu laden, weiter
 await page.evaluate(() => speichern(true));
@@ -129,16 +129,16 @@ for (const [name, aendern] of [
 // Tier 3 fertig: Meldung «höchstes Tier», Lohn läuft weiter, ohne Fortschritt
 const rest = await page.evaluate(() => {
   let n = 0;
-  while (S.produktForschung.stufen.board < 3 && n < 40){ tagVor(); n++; }
+  while (S.produktForschung.stufen.board < 3 && n < 120){ tagVor(); n++; }
   return n;
 });
-assert.equal(rest, 13, 'Junior: 30 Tage pro Tier, 0.25 + 10/30 schon geschafft → noch 12.5, also 13 Tage');
+assert.equal(rest, 73, 'Junior: 90 Tage pro Tier, 5/60 + 10/90 geschafft → noch 72.5, also 73 Tage');
 assert.equal(await page.evaluate(() => window.__erzweltProduktentwicklung.faktor('board')), 1.1);
 log = await page.evaluate(() => S.log.map(e => e.text).join(' | '));
 assert.match(log, /Tier 3.*höchste Tier/);
 assert.equal((log.match(/Forschung abgeschlossen!/g) || []).length, 2, 'je Tier genau eine Meldung');
 const leer = await tagesKosten(3);
-assert.ok(leer.every(x => Math.abs(x - 2850 / 30) < 0.01), 'Lohn läuft weiter, solange angestellt');
+assert.ok(leer.every(x => Math.abs(x - 8000 / 30) < 0.01), 'Lohn läuft weiter, solange angestellt');
 
 // Ansicht auf 360 px: Kündigen-Knopf und Hinweis sichtbar
 await wissenForschung();
