@@ -751,21 +751,26 @@ const MINEN = [
    info:textVon("kern.muruntau-ist-ein-grosser")}
 ];
 
-/* Raffinerie-Standorte: Erz wird zu Material. */
+/* Raffinerie-Standorte: Erz wird zu Material.
+   Kapazität so bemessen, dass die Raffination zum Engpass werden kann (wie in der
+   Wirklichkeit, siehe Wissen «Chemie & Raffination»): Die Tutorial-Kette passt in
+   eine Raffinerie mit 5 Leuten; mit einem zweiten Produkt braucht es mehr Personal,
+   Ausbau oder eine zweite Raffinerie. Dann wirken auch Containerstau und die
+   Verbesserungen «Ladungsplanung»/«Eigene Reederei». */
 const RAFF_ORTE = [
-  {id:"r_china",  land:"china",       ort:textVon("kern.guangdong"), bau:180000, kapazitaet:2400, plaetze:20,
+  {id:"r_china",  land:"china",       ort:textVon("kern.guangdong"), bau:180000, kapazitaet:1200, plaetze:20,
    info:textVon("kern.china-verarbeitet-fast-der")},
-  {id:"r_malay",  land:"malaysia",    ort:textVon("kern.kuantan"),   bau:220000, kapazitaet:1700, plaetze:16,
+  {id:"r_malay",  land:"malaysia",    ort:textVon("kern.kuantan"),   bau:220000, kapazitaet:850, plaetze:16,
    info:textVon("kern.malaysia-ist-zweitgroesster-standort")},
-  {id:"r_chile",  land:"chile",       ort:textVon("kern.antofagasta"),bau:250000, kapazitaet:1500, plaetze:16,
+  {id:"r_chile",  land:"chile",       ort:textVon("kern.antofagasta"),bau:250000, kapazitaet:750, plaetze:16,
    info:"Nahe an den Minen zu raffinieren spart Transport, kostet aber mehr Lohn."},
-  {id:"r_de",     land:"deutschland", ort:textVon("kern.freiberg"),  bau:420000, kapazitaet:1400, plaetze:14,
+  {id:"r_de",     land:"deutschland", ort:textVon("kern.freiberg"),  bau:420000, kapazitaet:700, plaetze:14,
    info:textVon("kern.europa-baut-raffinerien-auf")},
-  {id:"r_usa",    land:"usa",         ort:textVon("kern.texas"),     bau:440000, kapazitaet:1500, plaetze:14,
+  {id:"r_usa",    land:"usa",         ort:textVon("kern.texas"),     bau:440000, kapazitaet:750, plaetze:14,
    info:textVon("kern.die-usa-foerdern-eigene")},
-  {id:"r_pori",   land:"finnland",    ort:textVon("kern.pori"),      bau:390000, kapazitaet:1450, plaetze:13,
+  {id:"r_pori",   land:"finnland",    ort:textVon("kern.pori"),      bau:390000, kapazitaet:725, plaetze:13,
    info:textVon("kern.in-pori-wird-kupfer")},
-  {id:"r_pawlodar",land:"kasachstan", ort:textVon("kern.pawlodar"),  bau:260000, kapazitaet:1600, plaetze:18,
+  {id:"r_pawlodar",land:"kasachstan", ort:textVon("kern.pawlodar"),  bau:260000, kapazitaet:800, plaetze:18,
    info:"Die Raffinerie in Pawlodar gewinnt aus Bauxit Aluminiumoxid. Daraus entsteht in einem weiteren Schritt Aluminium."}
 ];
 
