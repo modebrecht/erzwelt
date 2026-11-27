@@ -13,12 +13,19 @@
    Tausenden Bäumen). Wellen: wenige Kämme auf offener See, die langsam kommen
    und gehen.
 
+   Leistung: In der Übersicht stehen die Bäume als ein fertiges Bild (kurz nach
+   dem Start erzeugt), erst beim Hineinzoomen als Pfade, und dann nur die
+   sichtbaren Zellen. Bodenfarben und Küstensaum sind kleine, vergrösserte Bilder
+   statt SVG-Weichzeichner. Gebietsränder kommen aus einer weichen Maske statt aus
+   vielen Punkt-im-Umriss-Tests.
+
    Einstellungen (OPT, gespeichert):
      landschaft  0 aus · 1 leicht (Standard) · 2 voll
      wellen      0 aus · 1 an (Standard); bei Animationen «Aus» stehen sie still
    ============================================================ */
 (function(){
   const NS = "http://www.w3.org/2000/svg";
+  const start = performance.now();
   const svg = document.querySelector("#welt svg.weltkarte");
   const land = svg?.querySelector("path.land:not(.kleine-inseln)");
   if (!svg || !land) return;
@@ -28,13 +35,15 @@
   const r1 = v => Math.round(v * 10) / 10;
 
   /* ---------- Landmaske: einmal auf ein Canvas gezeichnet, schnell abfragbar ---------- */
-  const MS = 2, mb = KARTE_B * MS, mh = KARTE_H * MS;
-  let maske = null;
+  // Eine Einheit pro Pixel genügt (Bäume halten ohnehin Abstand zur Küste).
+  const MS = 1, mb = KARTE_B * MS, mh = KARTE_H * MS;
+  let maske = null, landPfade = [];
   try {
+    landPfade = [land, inseln].filter(Boolean).map(p => [p, new Path2D(p.getAttribute("d"))]);
     const c = document.createElement("canvas"); c.width = mb; c.height = mh;
     const g = c.getContext("2d", {willReadFrequently:true});
     g.scale(MS, MS); g.fillStyle = "#000";
-    for (const p of [land, inseln]) if (p) g.fill(new Path2D(p.getAttribute("d")), "evenodd");
+    for (const [, pfad] of landPfade) g.fill(pfad, "evenodd");
     maske = g.getImageData(0, 0, mb, mh).data;
   } catch (e){ maske = null; }
   const istLand = (x, y) => {
@@ -147,19 +156,35 @@
     }
     return drin;
   }
-  // Anteil der Nachbarpunkte im Umriss: dünnt die Ränder aus
-  function randAnteil(u, x, y, d){
-    let n = 0;
-    for (let w = 0; w < 6; w++) if (innen(u, x + Math.cos(w * 1.047) * d, y + Math.sin(w * 1.047) * d)) n++;
-    return n / 6;
+  // Weiche Gebietsmaske: klein gezeichnet und vergrössert; der Wert (0–1) sagt,
+  // wie tief ein Punkt im Gebiet liegt – damit dünnen die Ränder aus.
+  function weicheMaske(art, grob){
+    const fein = .5, fb = Math.ceil(KARTE_B * fein), fh = Math.ceil(KARTE_H * fein);
+    try {
+      const k = document.createElement("canvas");
+      k.width = Math.ceil(KARTE_B * grob); k.height = Math.ceil(KARTE_H * grob);
+      const g = k.getContext("2d"); g.scale(grob, grob); g.fillStyle = "#000";
+      for (const u of umrisse[art]) g.fill(new Path2D("M" + u.map(p => p.map(r1).join(",")).join("L") + "Z"));
+      const f = document.createElement("canvas"); f.width = fb; f.height = fh;
+      const fg = f.getContext("2d", {willReadFrequently:true}); fg.imageSmoothingEnabled = true; fg.imageSmoothingQuality = "high";
+      fg.drawImage(k, 0, 0, fb, fh);
+      const daten = fg.getImageData(0, 0, fb, fh).data;
+      return (x, y) => {
+        const ix = Math.round(x * fein), iy = Math.round(y * fein);
+        return ix >= 0 && iy >= 0 && ix < fb && iy < fh ? daten[(iy * fb + ix) * 4 + 3] / 255 : 0;
+      };
+    } catch (e){ return () => .8; }
   }
 
   /* ---------- Zeichen als Pfadstücke; gleiche Farben landen in einem Pfad ---------- */
-  // Jede Zeile (Band) hat eigene Pfade, damit vordere Bäume hintere überdecken.
-  const BAND = 5;
-  const baender = [new Map(), new Map()];   // [leicht, voll] → Band → Farbe → Pfad
+  // Jede Zeile (Band) hat eigene Pfade, damit vordere Bäume hintere überdecken;
+  // jede Zeile ist zusätzlich in Zellen geteilt, damit beim Hineinzoomen nur die
+  // sichtbaren Pfade gezeichnet werden.
+  const BAND = 5, ZELLE = 125;
+  const baender = [new Map(), new Map()];   // [leicht, voll] → Band·Zelle → Farbe → Pfad
+  let aktX = 0;
   function setze(stufe, y, farbe, d){
-    const b = Math.floor(y / BAND), m = baender[stufe];
+    const b = Math.floor(y / BAND) * 100 + Math.floor(aktX / ZELLE), m = baender[stufe];
     if (!m.has(b)) m.set(b, new Map());
     const f = m.get(b);
     f.set(farbe, (f.get(farbe) || "") + d);
@@ -229,6 +254,7 @@
   let anzahl = 0;
   Object.entries(VERTEILUNG).forEach(([art, v], nr) => {
     const rnd = zufall(4049 + nr * 977);
+    const tiefe = weicheMaske(art, art === "wueste" || art === "savanne" ? .07 : .125);
     for (const u of umrisse[art]){
       const xs = u.map(p => p[0]), ys = u.map(p => p[1]);
       const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -236,13 +262,13 @@
         const versatz = (Math.round(gy / v.abstand) % 2) * v.abstand / 2;
         for (let gx = x0 + versatz; gx <= x1; gx += v.abstand){
           const x = gx + (rnd() - .5) * v.abstand * .8, y = gy + (rnd() - .5) * v.abstand * .7;
-          if (!innen(u, x, y)) continue;
-          const rand = randAnteil(u, x, y, art === "wueste" || art === "savanne" ? 12 : 7);
+          if (!imLand(x, y, 1.6) || !innen(u, x, y)) continue;
+          const rand = tiefe(x, y);
           const dichte = (art === "regenwald" ? .55 : .35) + rand * .65 - (1 - rauschen(x, y)) * (art === "regenwald" ? .15 : .45);
           if (rnd() > dichte) continue;
-          if (!imLand(x, y, 1.6)) continue;
           const h = v.groesse[0] + rnd() * (v.groesse[1] - v.groesse[0]);
           const st = rnd() < v.leicht ? 0 : 1;
+          aktX = x;
           const lat = 78 - y / KARTE_H * 138, lon = x / KARTE_B * 360 - 180;
           if (art === "taiga"){
             const schnee = lat > 60 + rnd() * 6 || (lon > 4 && lon < 20 && lat > 58 + rnd() * 6);
@@ -275,6 +301,7 @@
         const x = ax + (bx - ax) * s / len + nx * quer, y = ay + (by - ay) * s / len + ny * quer;
         if (!imLand(x, y, 1)) continue;
         const h = (hoch ? 6.5 : 4.5) + rnd() * 3 - Math.abs(quer) * .25;
+        aktX = x;
         ZEICHNEN.berg(rnd() < .7 ? 0 : 1, x, y, h, rnd, hoch && Math.abs(quer) < 3);
         anzahl++;
       }
@@ -290,11 +317,22 @@
   const clip = el("clipPath", {id:"landschaft-clip"});
   clip.append(el("use", {href:"#" + land.id}));
   if (inseln) clip.append(el("use", {href:"#" + inseln.id}));
-  const weich = el("filter", {id:"landschaft-weich", x:"-5%", y:"-5%", width:"110%", height:"110%"});
-  weich.append(el("feGaussianBlur", {stdDeviation:"3.5"}));
-  const kuestenWeich = el("filter", {id:"landschaft-kueste", x:"-5%", y:"-5%", width:"110%", height:"110%"});
-  kuestenWeich.append(el("feGaussianBlur", {stdDeviation:"2.2"}));
-  defs.append(clip, weich, kuestenWeich);
+  defs.append(clip);
+
+  /* Weiche Flächen als kleines Bild statt SVG-Weichzeichner: klein zeichnen,
+     dann vergrössern – das Vergrössern macht die Ränder weich. Ein Bild kostet
+     beim Verschieben und Zoomen fast nichts, ein Weichzeichner sehr viel. */
+  function weichesBild(zeichnen, grob, fein){
+    const k = document.createElement("canvas");
+    k.width = Math.ceil(KARTE_B * grob); k.height = Math.ceil(KARTE_H * grob);
+    const g = k.getContext("2d"); g.scale(grob, grob); zeichnen(g);
+    const f = document.createElement("canvas");
+    f.width = Math.ceil(KARTE_B * fein); f.height = Math.ceil(KARTE_H * fein);
+    const fg = f.getContext("2d"); fg.imageSmoothingEnabled = true; fg.imageSmoothingQuality = "high";
+    fg.drawImage(k, 0, 0, f.width, f.height);
+    return el("image", {href:f.toDataURL("image/png"), x:"0", y:"0", width:String(KARTE_B), height:String(KARTE_H), preserveAspectRatio:"none"});
+  }
+  const pfadVon = liste => "M" + liste.map(([lon, lat]) => punkt(lon, lat).map(r1).join(",")).join("L");
 
   // Bodenfarbe pro Gebiet, weich auslaufend
   const BODEN = {
@@ -304,20 +342,26 @@
   const DECKKRAFT = {tundra:.55, taiga:.55, laubwald:.5, regenwald:.75, savanne:.55, wueste:.8, eis:.95};
   const ebene = el("g", {class:"karten-landschaft", "aria-hidden":"true"});
   const flaechen = el("g", {class:"landschaft-flaechen", "clip-path":"url(#landschaft-clip)"});
-  const boden = el("g", {filter:"url(#landschaft-weich)"});
-  for (const art of ["tundra", "savanne", "wueste", "laubwald", "taiga", "regenwald", "eis"]){
-    for (const u of umrisse[art]){
-      boden.append(el("path", {d:"M" + u.map(p => p.map(r1).join(",")).join("L") + "Z", fill:BODEN[art], "fill-opacity":DECKKRAFT[art]}));
-    }
+  // Bodenfarbe und Küstensaum entstehen kurz nach dem Start (siehe spaeter())
+  function bodenBauen(){
+   try {
+    const boden = weichesBild(g => {
+      for (const art of ["tundra", "savanne", "wueste", "laubwald", "taiga", "regenwald", "eis"]){
+        g.fillStyle = BODEN[art]; g.globalAlpha = DECKKRAFT[art];
+        for (const u of umrisse[art]) g.fill(new Path2D("M" + u.map(p => p.map(r1).join(",")).join("L") + "Z"));
+      }
+      // Schnee über dem hohen Norden der Wälder
+      g.fillStyle = "#eef3f4"; g.globalAlpha = .6;
+      g.fill(new Path2D(pfadVon([[-170,66],[-120,69],[-95,63],[-75,61],[-60,60],[-60,70],[-170,72]]) + "Z"));
+      g.globalAlpha = .55;
+      g.fill(new Path2D(pfadVon([[10,66],[30,68],[60,64],[100,64],[140,63],[180,63],[180,72],[100,74],[40,71],[14,70]]) + "Z"));
+      g.strokeStyle = "#b59c74"; g.globalAlpha = .45; g.lineWidth = 9; g.lineCap = g.lineJoin = "round";
+      for (const {lauf} of GEBIRGE) g.stroke(new Path2D(pfadVon(lauf)));
+    }, .125, .5);
+    boden.setAttribute("class", "landschaft-boden");
+    flaechen.prepend(boden);
+   } catch (e){ /* ohne Bodenfarbe */ }
   }
-  // Schnee über dem hohen Norden der Wälder
-  boden.append(el("path", {d:"M" + [[-170,66],[-120,69],[-95,63],[-75,61],[-60,60],[-60,70],[-170,72]].map(([a, b]) => punkt(a, b).map(r1).join(",")).join("L") + "Z", fill:"#eef3f4", "fill-opacity":".6"}));
-  boden.append(el("path", {d:"M" + [[10,66],[30,68],[60,64],[100,64],[140,63],[180,63],[180,72],[100,74],[40,71],[14,70]].map(([a, b]) => punkt(a, b).map(r1).join(",")).join("L") + "Z", fill:"#eef3f4", "fill-opacity":".55"}));
-  for (const {lauf} of GEBIRGE){
-    boden.append(el("path", {d:"M" + lauf.map(([lon, lat]) => punkt(lon, lat).map(r1).join(",")).join("L"),
-      fill:"none", stroke:"#b59c74", "stroke-opacity":".45", "stroke-width":"9", "stroke-linecap":"round", "stroke-linejoin":"round"}));
-  }
-  flaechen.append(boden);
 
   /* Grosse Flüsse: weich gerundete Linien von der Quelle zur Mündung */
   const FLUESSE = [
@@ -352,25 +396,42 @@
       fill:"none", stroke:"#5f9ec4", "stroke-width":"1.3", "stroke-linecap":"round", "stroke-linejoin":"round", opacity:".9"}));
   }
 
-  // Zeichen: pro Band die Pfade in Zeichenreihenfolge
-  function zeichenGruppe(m, klasse){
+  // Zeichen: pro Band und Zelle die Pfade in Zeichenreihenfolge
+  const ordnung = baender.map(m => [...m.keys()].sort((a, b) => a - b).flatMap(k => [...m.get(k)]));
+  function zeichenGruppe(liste, klasse){
     const g = el("g", {class:klasse});
-    [...m.keys()].sort((a, b) => a - b).forEach(b => {
-      for (const [farbe, d] of m.get(b)) g.append(el("path", {d, fill:farbe}));
-    });
+    for (const [farbe, d] of liste) g.append(el("path", {d, fill:farbe}));
     return g;
   }
-  const leicht = zeichenGruppe(baender[0], "landschaft-zeichen");
-  const voll = zeichenGruppe(baender[1], "landschaft-zeichen landschaft-voll");
-  ebene.append(flaechen, fluesse, leicht, voll);
+  // Die Pfade entstehen erst, wenn sie gebraucht werden (Hineinzoomen)
+  const leicht = el("g", {class:"landschaft-zeichen"});
+  const voll = el("g", {class:"landschaft-zeichen landschaft-voll"});
+  let vektorFertig = false;
+  function vektorBauen(){
+    if (vektorFertig) return;
+    vektorFertig = true;
+    leicht.replaceWith(zeichenGruppe(ordnung[0], "landschaft-zeichen"));
+    voll.replaceWith(zeichenGruppe(ordnung[1], "landschaft-zeichen landschaft-voll"));
+  }
+  // Für die Übersicht: dieselben Zeichen als ein Bild (wird nach dem Start erzeugt)
+  const bild = el("image", {class:"landschaft-bild", x:"0", y:"0", width:String(KARTE_B), height:String(KARTE_H), preserveAspectRatio:"none"});
+  ebene.append(flaechen, fluesse, bild, leicht, voll);
 
   // Flaches Wasser an den Küsten: heller Saum unter dem Land
-  const kueste = el("g", {class:"landschaft-kueste", filter:"url(#landschaft-kueste)", "aria-hidden":"true"});
-  for (const p of [land, inseln]) if (p) kueste.append(el("path", {d:p.getAttribute("d"), "fill-rule":"evenodd", fill:"none",
-    stroke:"#8fd0e8", "stroke-opacity":".35", "stroke-width":p === land ? "7" : "4", "stroke-linejoin":"round"}));
+  function kuesteBauen(){
+   try {
+    const kueste = weichesBild(g => {
+      g.strokeStyle = "#8fd0e8"; g.globalAlpha = .4; g.lineJoin = "round";
+      for (const [p, pfad] of landPfade){ g.lineWidth = p === land ? 8 : 5; g.stroke(pfad); }
+    }, .25, .5);
+    kueste.setAttribute("class", "landschaft-kueste");
+    kueste.setAttribute("aria-hidden", "true");
+    land.before(kueste);
+   } catch (e){ /* ohne Küstensaum */ }
+  }
 
   svg.insertBefore(defs, svg.firstChild);
-  land.before(kueste);
+  setTimeout(() => { bodenBauen(); kuesteBauen(); }, 30);
   (inseln || land).after(ebene);
 
   /* ---------- Wellen: wenige Wellenkämme auf offener See, die kommen und gehen ---------- */
@@ -379,7 +440,7 @@
   wellen.setAttribute("aria-hidden", "true");
   const kamm = (x, y, w) => `M${r1(x - w)},${r1(y)}q${r1(w)},${r1(-w * .42)} ${r1(w * 2)},0q${r1(-w)},${r1(-w * .2)} ${r1(-w * 2)},0z`;
   const wrnd = zufall(777);
-  const gruppen = ["", "", ""];
+  const gruppen = ["", ""];
   let kaemme = 0;
   for (let gy = 18; gy < KARTE_H - 10; gy += 34){
     for (let gx = 12 + (gy / 34 % 2) * 24; gx < KARTE_B - 10; gx += 48){
@@ -388,7 +449,7 @@
       const w = 4 + wrnd() * 3;
       let d = kamm(x, y, w);
       if (wrnd() < .6) d += kamm(x + w * .9, y + 3.2, w * .7);
-      gruppen[kaemme++ % 3] += d;
+      gruppen[kaemme++ % 2] += d;
     }
   }
   wellen.innerHTML = gruppen.map((d, i) =>
@@ -401,25 +462,70 @@
     .karten-landschaft,.landschaft-kueste{pointer-events:none}
     .karten-wellen{position:absolute;top:0;left:0;width:${KARTE_B}px;height:${KARTE_H}px;pointer-events:none}
     .karten-wellen .welle{position:absolute;inset:0;opacity:.16;will-change:opacity,transform;animation:karten-welle 12s ease-in-out infinite}
-    .karten-wellen .welle-1{animation-delay:-4s}
-    .karten-wellen .welle-2{animation-delay:-8s}
+    .karten-wellen .welle-1{animation-delay:-6s}
     #welt > svg.weltkarte{position:relative}
     @keyframes karten-welle{0%,100%{opacity:0;transform:translate(-1.5px,.6px)}45%{opacity:.32;transform:translate(1.5px,-.6px)}60%{opacity:.32}}
     body[data-anim="0"] .karten-wellen .welle{animation:none}
     @media (prefers-reduced-motion: reduce){.karten-wellen .welle{animation:none}}
     body[data-landschaft="0"] .karten-landschaft,body[data-landschaft="0"] .landschaft-kueste{display:none}
     body[data-landschaft="1"] .landschaft-voll{display:none}
+    .karten-landschaft:not(.nah) .landschaft-zeichen,.karten-landschaft.nah .landschaft-bild{display:none}
     body[data-wellen="0"] .karten-wellen{display:none}`;
   document.head.append(stil);
+
+  /* ---------- Übersicht als Bild, beim Hineinzoomen scharfe Zeichen ----------
+     Tausende Bäume als Pfade kosten bei jedem Zoomschritt viel Zeichenzeit. In der
+     Übersicht steht deshalb ein fertiges Bild; erst ab Z_NAH (wo das Bild unscharf
+     würde) die Pfade, von denen dann nur die sichtbaren Zellen gezeichnet werden. */
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const SCHAERFE = dpr >= 1.5 ? 3 : 2;
+  const Z_NAH = Math.max(1.6, SCHAERFE / dpr * 1.2);
+  let bildMs = 0, bildStufe = -1, bildBereit = false, bildFehler = false, bildUrl = null, nah = null;
+  function zoomPruefen(){
+    const z = typeof ansicht === "object" && ansicht ? ansicht.z : 1;
+    const n = bildFehler || z >= Z_NAH;
+    if (n !== nah){ nah = n; if (n) vektorBauen(); ebene.classList.toggle("nah", n); }
+  }
+  function bildErzeugen(stufe){
+    if (stufe === bildStufe) return;
+    bildStufe = stufe; bildBereit = false;
+    if (!stufe) return;
+    if (typeof Path2D !== "function"){ bildFehler = true; zoomPruefen(); return; }
+    setTimeout(() => {
+      if (bildStufe !== stufe) return;
+      try {
+        const c = document.createElement("canvas");
+        c.width = KARTE_B * SCHAERFE; c.height = KARTE_H * SCHAERFE;
+        const g = c.getContext("2d"); g.scale(SCHAERFE, SCHAERFE);
+        for (let st = 0; st < stufe; st++) for (const [farbe, d] of ordnung[st]){ g.fillStyle = farbe; g.fill(new Path2D(d)); }
+        c.toBlob(blob => {
+          if (bildStufe !== stufe || !blob) return;
+          const url = URL.createObjectURL(blob), probe = new Image();
+          probe.src = url;
+          (probe.decode ? probe.decode() : Promise.resolve()).then(() => {
+            if (bildStufe !== stufe){ URL.revokeObjectURL(url); return; }
+            bild.setAttribute("href", url);
+            if (bildUrl) URL.revokeObjectURL(bildUrl);
+            bildUrl = url; bildBereit = true; bildMs = Math.round(performance.now() - start); zoomPruefen();
+          }, () => { URL.revokeObjectURL(url); bildFehler = true; zoomPruefen(); });
+        }, "image/png");
+      } catch (e){ bildFehler = true; zoomPruefen(); }
+    }, 60);
+  }
+  const weltEl = document.getElementById("welt");
+  if (weltEl) new MutationObserver(zoomPruefen).observe(weltEl, {attributes:true, attributeFilter:["style"]});
 
   /* ---------- Einstellungen ---------- */
   const STUFEN = () => [textVon("landschaft.aus"), textVon("landschaft.leicht"), textVon("landschaft.voll")];
   const wert = (k, std, max) => Number.isInteger(OPT[k]) && OPT[k] >= 0 && OPT[k] <= max ? OPT[k] : std;
   function anwenden(){
-    document.body.dataset.landschaft = String(wert("landschaft", 1, 2));
+    const stufe = wert("landschaft", 1, 2);
+    document.body.dataset.landschaft = String(stufe);
+    bildErzeugen(stufe);
     document.body.dataset.wellen = String(wert("wellen", 1, 1));
   }
   anwenden();
+  zoomPruefen();
 
   /* Nach einstFuellen: Regler «Landschaft» und «Meereswellen» (module/meldungen.js) */
   (window.__erzweltMeldungenTeile ||= {}).landschaft = function(){
@@ -442,5 +548,6 @@
     if (typeof optSpeichern === "function") optSpeichern();
   });
 
-  window.__erzweltKartenLandschaft = {version:2, zeichen:anzahl, kaemme, pfade:leicht.childElementCount + voll.childElementCount, anwenden};
+  window.__erzweltKartenLandschaft = {version:3, zeichen:anzahl, kaemme, pfade:ordnung[0].length + ordnung[1].length, anwenden,
+    ms:Math.round(performance.now() - start), zustand:() => ({bildMs, bildBereit, bildFehler, nah, vektorFertig, schaerfe:SCHAERFE, zNah:Z_NAH})};
 })();
